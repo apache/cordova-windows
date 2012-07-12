@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang='en'>
+    <head>
+        <title>Notification</title>
+        <script src='cordova.win7.js'></script>
+    </head>
+    <body>
+        <p>Tap on the Launch PopUp button below to open the modal window.</p>
+        <br />
+        <input type="button" id="popUpBtn" value="Launch PopUp" />
+        <script  type="text/javascript">
+            document.addEventListener('deviceready', function () {
+                initApp();
+            }, false);
+
+            function initApp() {
+                document.getElementById("popUpBtn").addEventListener("click", function () {
+                    showPopUpMessage();
+                }, false);
+            }
+            
+            // Show the modal window
+            function showPopUpMessage() {
+                function alertDismissed(button) {
+                    console.log("Alert dismissed: " + button);
+                }
+
+                navigator.notification.beep(1);
+                navigator.notification.confirm(
+                    'Hello from JavaScript through Cordova!',
+                    alertDismissed,
+                    'Test Alert',
+                    'Done, Yes, No'
+                );
+            }
+        </script>
+    </body>
+</html>
