@@ -30,8 +30,9 @@
   <script type="text/javascript" src="../tests/contacts.tests.js"></script>
   <script type="text/javascript" src="../tests/camera.tests.js"></script>
   <script type="text/javascript" src="../tests/device.tests.js"></script>
-  <script type="text/javascript" src="../tests/file.tests.js"></script>
+ <!-- <script type="text/javascript" src="../tests/file.tests.js"></script>
   <script type="text/javascript" src="../tests/filetransfer.tests.js"></script>
+     -->
   <script type="text/javascript" src="../tests/geolocation.tests.js"></script>
   <script type="text/javascript" src="../tests/media.tests.js"></script>
   <script type="text/javascript" src="../tests/network.tests.js"></script>
@@ -47,6 +48,19 @@
           var onError = function(e) {
               console.log('[ERROR] Problem setting up root filesystem for test running! Error to follow.');
               console.log(JSON.stringify(e));
+
+              var jasmineEnv = jasmine.getEnv();
+              jasmineEnv.updateInterval = 1000;
+
+              var htmlReporter = new jasmine.HtmlReporter();
+
+              jasmineEnv.addReporter(htmlReporter);
+
+              jasmineEnv.specFilter = function (spec) {
+                  return htmlReporter.specFilter(spec);
+              };
+
+              jasmineEnv.execute();
           };
 
           window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,

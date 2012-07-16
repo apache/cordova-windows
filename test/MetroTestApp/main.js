@@ -1,8 +1,8 @@
-var deviceInfo = function() {
-    document.getElementById("platform").innerHTML = device.platform;
-    document.getElementById("version").innerHTML = device.version;
-    document.getElementById("uuid").innerHTML = device.uuid;
-    document.getElementById("name").innerHTML = device.name;
+var deviceInfo = function(bob) {
+    document.getElementById("platform").innerHTML = navigator.device.platform;
+    document.getElementById("version").innerHTML = navigator.device.version;
+    document.getElementById("uuid").innerHTML = navigator.device.uuid;
+    document.getElementById("name").innerHTML = navigator.device.name;
     document.getElementById("width").innerHTML = screen.width;
     document.getElementById("height").innerHTML = screen.height;
     document.getElementById("colorDepth").innerHTML = screen.colorDepth;

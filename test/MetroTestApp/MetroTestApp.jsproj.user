@@ -3,7 +3,7 @@
   <PropertyGroup>
     <ReferenceCachePath>C:\Users\Jesse\AppData\Local\Temp\MetroTestApp_refcache</ReferenceCachePath>
     <AutoRefresh>true</AutoRefresh>
-    <ShowAllFiles>true</ShowAllFiles>
+    <ShowAllFiles>false</ShowAllFiles>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DebuggerFlavor>AppHostLocalDebugger</DebuggerFlavor>
