@@ -133,16 +133,22 @@ var date = (new Date(p.timestamp));
         </table>
     </div>
     <h2>Action</h2>
-    <h3>Use Built-in WebView navigator.geolocation</h3>
-    <a href="javascript:" class="btn large" onclick="getLocation(navigator.geolocation);">Get Location</a>
-    <a href="javascript:" class="btn large" onclick="watchLocation(navigator.geolocation);">Start Watching Location</a>
-    <a href="javascript:" class="btn large" onclick="stopLocation(navigator.geolocation);">Stop Watching Location</a>
-    <a href="javascript:" class="btn large" onclick="getLocation(navigator.geolocation, {maximumAge:30000});">Get Location Up to 30 Seconds Old</a>
-    <h3>USe Cordova Geolocation Plugin</h3>
-    <a href="javascript:" class="btn large" onclick="getLocation(cordova.require('cordova/plugin/geolocation'));">Get Location</a>
-    <a href="javascript:" class="btn large" onclick="watchLocation(cordova.require('cordova/plugin/geolocation'));">Start Watching Location</a>
-    <a href="javascript:" class="btn large" onclick="stopLocation(cordova.require('cordova/plugin/geolocation')));">Stop Watching Location</a>
-    <a href="javascript:" class="btn large" onclick="getLocation(cordova.require('cordova/plugin/geolocation'), {maximumAge:30000});">Get Location Up to 30 Seconds Old</a>
-    <h2>&nbsp</h2><a href="javascript:" class="backBtn" onclick="backHome();">Back</a>    
+    <div>
+        <h3>Use Built-in WebView navigator.geolocation</h3>
+        <span class="btn large" onclick="getLocation(navigator.geolocation);">Get Location</span>
+        <span class="btn large" onclick="watchLocation(navigator.geolocation);">Start Watching Location</span>
+        <span class="btn large" onclick="stopLocation(navigator.geolocation);">Stop Watching Location</span>
+        <span class="btn large" onclick="getLocation(navigator.geolocation, {maximumAge:30000});">Get Location Up to 30 Seconds Old</span>
+    </div>
+    <div>
+        <h3>Use Cordova Geolocation Plugin</h3>
+        <span class="btn large" onclick="getLocation(cordova.require('cordova/plugin/geolocation'));">Get Location</span>
+        <span class="btn large" onclick="watchLocation(cordova.require('cordova/plugin/geolocation'));">Start Watching Location</span>
+        <span class="btn large" onclick="stopLocation(cordova.require('cordova/plugin/geolocation'));">Stop Watching Location</span>
+        <span class="btn large" onclick="getLocation(cordova.require('cordova/plugin/geolocation'), {maximumAge:30000});">Get Location Up to 30 Seconds Old</span>
+    </div>
+
+
+    <h2>&nbsp;</h2><a class="backBtn" onclick="backHome();">Back</a>    
   </body>
 </html>      
