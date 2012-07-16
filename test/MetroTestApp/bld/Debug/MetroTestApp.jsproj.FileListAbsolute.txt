@@ -1,0 +1,13 @@
+C:\Repos\cordova\win8metro\test\MetroTestApp\bin\Debug\resources.pri
+C:\Repos\cordova\win8metro\test\MetroTestApp\bin\Debug\AppxManifest.xml
+C:\Repos\cordova\win8metro\test\MetroTestApp\bin\Debug\MetroTestApp.build.appxrecipe
+C:\Repos\cordova\win8metro\test\MetroTestApp\bld\Debug\priconfig.xml.intermediate
+C:\Repos\cordova\win8metro\test\MetroTestApp\bld\Debug\layout.resfiles.intermediate
+C:\Repos\cordova\win8metro\test\MetroTestApp\bld\Debug\resources.resfiles.intermediate
+C:\Repos\cordova\win8metro\test\MetroTestApp\bld\Debug\pri.resfiles.intermediate
+C:\Repos\cordova\win8metro\test\MetroTestApp\bld\Debug\priconfig.xml
+C:\Repos\cordova\win8metro\test\MetroTestApp\bld\Debug\layout.resfiles
+C:\Repos\cordova\win8metro\test\MetroTestApp\bld\Debug\resources.resfiles
+C:\Repos\cordova\win8metro\test\MetroTestApp\bld\Debug\pri.resfiles
+C:\Repos\cordova\win8metro\test\MetroTestApp\bld\Debug\LanguageQualifiers.txt
+C:\Repos\cordova\win8metro\test\MetroTestApp\bld\Debug\ProjectArchitectures.txt
