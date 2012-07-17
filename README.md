@@ -1,2 +1,2 @@
-cordova-windows-metro
+cordova-windows-8-metro
 =================
