@@ -1,6 +1,46 @@
-# Build Folders (you can keep bin if you'd like, to store dlls and pdbs)
-bin
+# Shamelessly stolen from http://gist.github.com/114476
+# .gitignore for .NET projects
+# Thanks to Derick Bailey
+# http://www.lostechies.com/blogs/derickbailey/archive/2009/05/18/a-net-c-developer-s-gitignore-file.aspx
+# Additional Thanks to
+# - Alexey Abramov
+ 
+# Standard VS.NET and ReSharper Foo
 obj
+bin
+Bin
+*.csproj.user
+*.suo
+*.cache
+Thumbs.db
 
-# mstest test results
-TestResults
+ 
+# Other useful stuff
+*.bak
+*.cache
+*.log
+*.swp
+*.user
+_compareTemp
+_notes
+aspnet_client
+httpd.parse.errors
+ 
+# Office Temp Files
+~$*
+ 
+# If you have a deploy folder
+# deploy
+# deploy/*
+ 
+# Exclude ALL DLLs? (
+# *.dll
+
+*.DS_Store
+
+
+CordovaSourceDictionary.xml
+
+
+
+ 
