@@ -1,0 +1,254 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|AnyCPU">
+      <Configuration>Debug</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|ARM">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x86">
+      <Configuration>Debug</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|AnyCPU">
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM">
+      <Configuration>Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x86">
+      <Configuration>Release</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>804ef151-5467-497e-8253-fa11af004dd2</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).Default.props" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).props" />
+  <PropertyGroup>
+    <TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
+    <TargetPlatformVersion>8.0</TargetPlatformVersion>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <PackageCertificateKeyFile>Cordova-Metro_TemporaryKey.pfx</PackageCertificateKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <AppxManifest Include="lib\SQLite\SQLite3JS\package.appxmanifest">
+      <SubType>Designer</SubType>
+    </AppxManifest>
+    <AppxManifest Include="package.appxmanifest">
+      <SubType>Designer</SubType>
+    </AppxManifest>
+    <Content Include="default.html" />
+    <Content Include="images\logo.png" />
+    <Content Include="images\smalllogo.png" />
+    <Content Include="images\splashscreen.png" />
+    <Content Include="images\storelogo.png" />
+    <Content Include="js\default.js" />
+    <Content Include="css\default.css" />
+    <Content Include="lib\Jscex\.git\config" />
+    <Content Include="lib\Jscex\.git\description" />
+    <Content Include="lib\Jscex\.git\HEAD" />
+    <Content Include="lib\Jscex\.git\hooks\applypatch-msg.sample" />
+    <Content Include="lib\Jscex\.git\hooks\commit-msg.sample" />
+    <Content Include="lib\Jscex\.git\hooks\post-commit.sample" />
+    <Content Include="lib\Jscex\.git\hooks\post-receive.sample" />
+    <Content Include="lib\Jscex\.git\hooks\post-update.sample" />
+    <Content Include="lib\Jscex\.git\hooks\pre-applypatch.sample" />
+    <Content Include="lib\Jscex\.git\hooks\pre-commit.sample" />
+    <Content Include="lib\Jscex\.git\hooks\pre-rebase.sample" />
+    <Content Include="lib\Jscex\.git\hooks\prepare-commit-msg.sample" />
+    <Content Include="lib\Jscex\.git\hooks\update.sample" />
+    <Content Include="lib\Jscex\.git\index" />
+    <Content Include="lib\Jscex\.git\info\exclude" />
+    <Content Include="lib\Jscex\.git\logs\HEAD" />
+    <Content Include="lib\Jscex\.git\logs\refs\heads\master" />
+    <Content Include="lib\Jscex\.git\objects\pack\pack-ee094d6316cf6fb63af8129fd8d936d1d5d8ca89.idx" />
+    <Content Include="lib\Jscex\.git\objects\pack\pack-ee094d6316cf6fb63af8129fd8d936d1d5d8ca89.pack" />
+    <Content Include="lib\Jscex\.git\packed-refs" />
+    <Content Include="lib\Jscex\.git\refs\heads\master" />
+    <Content Include="lib\Jscex\.git\refs\remotes\origin\HEAD" />
+    <Content Include="lib\Jscex\bin\dev\jscex-0.6.5.js" />
+    <Content Include="lib\Jscex\bin\dev\jscex-async-0.6.5.js" />
+    <Content Include="lib\Jscex\bin\dev\jscex-async-powerpack-0.6.5.js" />
+    <Content Include="lib\Jscex\bin\dev\jscex-builderbase-0.6.5.js" />
+    <Content Include="lib\Jscex\bin\dev\jscex-jit-0.6.6.js" />
+    <Content Include="lib\Jscex\bin\dev\jscex-parser-0.6.5.js" />
+    <Content Include="lib\Jscex\bin\dev\jscex-promise-0.6.5.js" />
+    <Content Include="lib\Jscex\bin\npm\jscex-async-powerpack\jscex-async-powerpack.js" />
+    <Content Include="lib\Jscex\bin\npm\jscex-async-powerpack\package.json" />
+    <Content Include="lib\Jscex\bin\npm\jscex-async\jscex-async.js" />
+    <Content Include="lib\Jscex\bin\npm\jscex-async\package.json" />
+    <Content Include="lib\Jscex\bin\npm\jscex-builderbase\jscex-builderbase.js" />
+    <Content Include="lib\Jscex\bin\npm\jscex-builderbase\package.json" />
+    <Content Include="lib\Jscex\bin\npm\jscex-jit\jscex-jit.js" />
+    <Content Include="lib\Jscex\bin\npm\jscex-jit\package.json" />
+    <Content Include="lib\Jscex\bin\npm\jscex-parser\jscex-parser.js" />
+    <Content Include="lib\Jscex\bin\npm\jscex-parser\package.json" />
+    <Content Include="lib\Jscex\bin\npm\jscex-promise\jscex-promise.js" />
+    <Content Include="lib\Jscex\bin\npm\jscex-promise\package.json" />
+    <Content Include="lib\Jscex\bin\npm\jscexc\lib\narcissus-parser.js" />
+    <Content Include="lib\Jscex\bin\npm\jscexc\package.json" />
+    <Content Include="lib\Jscex\bin\npm\jscexc\src\jscexc.js" />
+    <Content Include="lib\Jscex\bin\npm\jscex\jscex.js" />
+    <Content Include="lib\Jscex\bin\npm\jscex\package.json" />
+    <Content Include="lib\Jscex\bin\prod\jscex-0.6.5.min.js" />
+    <Content Include="lib\Jscex\bin\prod\jscex-async-0.6.5.min.js" />
+    <Content Include="lib\Jscex\bin\prod\jscex-async-powerpack-0.6.5.min.js" />
+    <Content Include="lib\Jscex\bin\prod\jscex-builderbase-0.6.5.min.js" />
+    <Content Include="lib\Jscex\bin\prod\jscex-promise-0.6.5.min.js" />
+    <Content Include="lib\Jscex\lib\chai.js" />
+    <Content Include="lib\Jscex\lib\jquery-1.7.2.js" />
+    <Content Include="lib\Jscex\lib\mocha\mocha.css" />
+    <Content Include="lib\Jscex\lib\mocha\mocha.js" />
+    <Content Include="lib\Jscex\lib\narcissus-parser.js" />
+    <Content Include="lib\Jscex\lib\require.js" />
+    <Content Include="lib\Jscex\lib\script-loader.js" />
+    <Content Include="lib\Jscex\lib\utils.js" />
+    <Content Include="lib\Jscex\README.md" />
+    <Content Include="lib\Jscex\samples\async\agent.html" />
+    <Content Include="lib\Jscex\samples\async\bullet.html" />
+    <Content Include="lib\Jscex\samples\async\clock.html" />
+    <Content Include="lib\Jscex\samples\async\comments.html" />
+    <Content Include="lib\Jscex\samples\async\copy-dir.js" />
+    <Content Include="lib\Jscex\samples\async\express-server.js" />
+    <Content Include="lib\Jscex\samples\async\hanoi.html" />
+    <Content Include="lib\Jscex\samples\async\include.html" />
+    <Content Include="lib\Jscex\samples\async\jquery-bindings.js" />
+    <Content Include="lib\Jscex\samples\async\modal-dialog.html" />
+    <Content Include="lib\Jscex\samples\async\move.html" />
+    <Content Include="lib\Jscex\samples\async\my.js" />
+    <Content Include="lib\Jscex\samples\async\node-server.js" />
+    <Content Include="lib\Jscex\samples\async\quick-start.html" />
+    <Content Include="lib\Jscex\samples\async\quick-start.js" />
+    <Content Include="lib\Jscex\samples\async\sorting-animations.html" />
+    <Content Include="lib\Jscex\samples\async\weibo.html" />
+    <Content Include="lib\Jscex\samples\async\worker.html" />
+    <Content Include="lib\Jscex\samples\async\worker.js" />
+    <Content Include="lib\Jscex\samples\importing\oye\oye.html" />
+    <Content Include="lib\Jscex\samples\importing\oye\oye.js" />
+    <Content Include="lib\Jscex\samples\importing\requirejs\index.html" />
+    <Content Include="lib\Jscex\samples\importing\requirejs\scripts\jscex-all.js" />
+    <Content Include="lib\Jscex\samples\importing\requirejs\scripts\main.js" />
+    <Content Include="lib\Jscex\samples\importing\sea\sea-debug.js" />
+    <Content Include="lib\Jscex\samples\importing\sea\sea.html" />
+    <Content Include="lib\Jscex\samples\promise\jquery-animation.html" />
+    <Content Include="lib\Jscex\samples\seq\fib.html" />
+    <Content Include="lib\Jscex\scripts\build-dev.js" />
+    <Content Include="lib\Jscex\scripts\build-npm.js" />
+    <Content Include="lib\Jscex\scripts\build-prod.js" />
+    <Content Include="lib\Jscex\src\incubations\jscex-async-agent.js" />
+    <Content Include="lib\Jscex\src\incubations\jscex-async-include.js" />
+    <Content Include="lib\Jscex\src\incubations\jscex.async.xhr.js" />
+    <Content Include="lib\Jscex\src\incubations\jscex.seq.js" />
+    <Content Include="lib\Jscex\src\incubations\jscex.seq.powerpack.js" />
+    <Content Include="lib\Jscex\src\jscex-async-powerpack.js" />
+    <Content Include="lib\Jscex\src\jscex-async.js" />
+    <Content Include="lib\Jscex\src\jscex-builderbase.js" />
+    <Content Include="lib\Jscex\src\jscex-jit.js" />
+    <Content Include="lib\Jscex\src\jscex-parser.js" />
+    <Content Include="lib\Jscex\src\jscex-promise.js" />
+    <Content Include="lib\Jscex\src\jscex.js" />
+    <Content Include="lib\Jscex\src\jscexc.js" />
+    <Content Include="lib\Jscex\tests\async\try.js" />
+    <Content Include="lib\Jscex\tests\jscex-async-powerpack\runner.html" />
+    <Content Include="lib\Jscex\tests\jscex-async-powerpack\runner.js" />
+    <Content Include="lib\Jscex\tests\jscex-async-powerpack\tests.js" />
+    <Content Include="lib\Jscex\tests\jscexc.tests.js" />
+    <Content Include="lib\Jscex\tests\jscex\env\amd.html" />
+    <Content Include="lib\Jscex\tests\jscex\env\browser.html" />
+    <Content Include="lib\Jscex\tests\jscex\env\cjs.js" />
+    <Content Include="lib\Jscex\tests\jscex\runner.html" />
+    <Content Include="lib\Jscex\tests\jscex\runner.js" />
+    <Content Include="lib\Jscex\tests\jscex\tests.js" />
+    <Content Include="lib\Jscex\tools\generator.html" />
+    <Content Include="lib\Jscex\tools\parser.html" />
+    <Content Include="lib\Jscex\tools\README.md" />
+    <Content Include="lib\SQLite\.git\config" />
+    <Content Include="lib\SQLite\.git\description" />
+    <Content Include="lib\SQLite\.git\HEAD" />
+    <Content Include="lib\SQLite\.git\hooks\applypatch-msg.sample" />
+    <Content Include="lib\SQLite\.git\hooks\commit-msg.sample" />
+    <Content Include="lib\SQLite\.git\hooks\post-commit.sample" />
+    <Content Include="lib\SQLite\.git\hooks\post-receive.sample" />
+    <Content Include="lib\SQLite\.git\hooks\post-update.sample" />
+    <Content Include="lib\SQLite\.git\hooks\pre-applypatch.sample" />
+    <Content Include="lib\SQLite\.git\hooks\pre-commit.sample" />
+    <Content Include="lib\SQLite\.git\hooks\pre-rebase.sample" />
+    <Content Include="lib\SQLite\.git\hooks\prepare-commit-msg.sample" />
+    <Content Include="lib\SQLite\.git\hooks\update.sample" />
+    <Content Include="lib\SQLite\.git\index" />
+    <Content Include="lib\SQLite\.git\info\exclude" />
+    <Content Include="lib\SQLite\.git\logs\HEAD" />
+    <Content Include="lib\SQLite\.git\logs\refs\heads\master" />
+    <Content Include="lib\SQLite\.git\objects\pack\pack-84a0f4195af4a5fcda4f93dd5490278b4fdd2ae0.idx" />
+    <Content Include="lib\SQLite\.git\objects\pack\pack-84a0f4195af4a5fcda4f93dd5490278b4fdd2ae0.pack" />
+    <Content Include="lib\SQLite\.git\packed-refs" />
+    <Content Include="lib\SQLite\.git\refs\heads\master" />
+    <Content Include="lib\SQLite\.git\refs\remotes\origin\HEAD" />
+    <Content Include="lib\SQLite\LICENSE" />
+    <Content Include="lib\SQLite\README.md" />
+    <Content Include="lib\SQLite\SQLite3-WinRT.sln" />
+    <Content Include="lib\SQLite\SQLite3JS\default.html" />
+    <Content Include="lib\SQLite\SQLite3JS\images\logo.png" />
+    <Content Include="lib\SQLite\SQLite3JS\images\smalllogo.png" />
+    <Content Include="lib\SQLite\SQLite3JS\images\splashscreen.png" />
+    <Content Include="lib\SQLite\SQLite3JS\images\storelogo.png" />
+    <Content Include="lib\SQLite\SQLite3JS\images\widelogo.png" />
+    <Content Include="lib\SQLite\SQLite3JS\js\SQLite3.js" />
+    <Content Include="lib\SQLite\SQLite3JS\lib\jasmine-1.1.0\jasmine-html.js" />
+    <Content Include="lib\SQLite\SQLite3JS\lib\jasmine-1.1.0\jasmine.css" />
+    <Content Include="lib\SQLite\SQLite3JS\lib\jasmine-1.1.0\jasmine.js" />
+    <Content Include="lib\SQLite\SQLite3JS\lib\jasmine-1.1.0\MIT.LICENSE" />
+    <Content Include="lib\SQLite\SQLite3JS\lib\jslint\jslint.js" />
+    <Content Include="lib\SQLite\SQLite3JS\spec\SQLite3Spec.js" />
+    <Content Include="lib\SQLite\SQLite3JS\SQLite3JS.jsproj" />
+    <Content Include="lib\SQLite\SQLite3JS\SQLite3JS_TemporaryKey.pfx" />
+    <Content Include="lib\SQLite\SQLite3\Common.cpp" />
+    <Content Include="lib\SQLite\SQLite3\Common.h" />
+    <Content Include="lib\SQLite\SQLite3\Constants.cpp" />
+    <Content Include="lib\SQLite\SQLite3\Constants.h" />
+    <Content Include="lib\SQLite\SQLite3\Database.cpp" />
+    <Content Include="lib\SQLite\SQLite3\Database.h" />
+    <Content Include="lib\SQLite\SQLite3\sqlite3.c" />
+    <Content Include="lib\SQLite\SQLite3\sqlite3.h" />
+    <Content Include="lib\SQLite\SQLite3\SQLite3.vcxproj" />
+    <Content Include="lib\SQLite\SQLite3\SQLite3.vcxproj.filters" />
+    <Content Include="lib\SQLite\SQLite3\Statement.cpp" />
+    <Content Include="lib\SQLite\SQLite3\Statement.h" />
+    <None Include="Cordova-Metro_TemporaryKey.pfx" />
+  </ItemGroup>
+  <ItemGroup>
+    <SDKReference Include="Microsoft.WinJS.1.0.RC, Version=1.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="lib\Jscex\.git\branches\" />
+    <Folder Include="lib\Jscex\.git\objects\info\" />
+    <Folder Include="lib\Jscex\.git\refs\tags\" />
+    <Folder Include="lib\SQLite\.git\branches\" />
+    <Folder Include="lib\SQLite\.git\objects\info\" />
+    <Folder Include="lib\SQLite\.git\refs\tags\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

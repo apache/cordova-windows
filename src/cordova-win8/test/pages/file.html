@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cordova: File API Specs</title>
+
+  <meta name="viewport" content="width=device-width, height=device-height, user-scalable=yes, initial-scale=1.0;" />
+  <!-- Load jasmine -->
+  <link href="../jasmine.css" rel="stylesheet"/>
+  <script type="text/javascript" src="../jasmine.js"></script>
+  <script type="text/javascript" src="../html/HtmlReporterHelpers.js"></script>
+  <script type="text/javascript" src="../html/HtmlReporter.js"></script>
+  <script type="text/javascript" src="../html/ReporterView.js"></script>
+  <script type="text/javascript" src="../html/SpecView.js"></script>
+  <script type="text/javascript" src="../html/SuiteView.js"></script>
+  <script type="text/javascript" src="../html/TrivialReporter.js"></script>
+
+  <!-- WinJS references -->
+  <link href="//Microsoft.WinJS.0.6/css/ui-light.css" rel="stylesheet" type="text/css" />
+  <script type="text/javascript" src="//Microsoft.WinJS.0.6/js/base.js"></script>
+  <script type="text/javascript" src="//Microsoft.WinJS.0.6/js/ui.js"></script>
+
+  <script type="text/javascript" src="../js/file.js"></script>
+  <script type="text/javascript" src="../js/cordova-core.js"></script>
+
+
+  <!-- Source -->
+  <script type="text/javascript" src="../cordova.js"></script>
+
+  <!-- Load Test Runner -->
+  <script type="text/javascript" src="../test-runner.js"></script>
+
+  <!-- Tests -->
+  <script type="text/javascript" src="../tests/file.tests.js"></script>
+
+  <script type="text/javascript">
+      var root, temp_root, persistent_root;
+      
+      //document.addEventListener('deviceready', function () {
+      function deviceReady() {
+          // one-time retrieval of the root file system entry
+
+          var onError = function (e) {
+              console.log('================================');
+              console.log(arguments);
+              console.log('[ERROR] Problem setting up root filesystem for test running! Error to follow.');
+              console.log(JSON.stringify(e));
+          };
+          var onS = function (fileSystem) {
+              console.log('File API test Init: Setting PERSISTENT FS.');
+
+              console.log('================================');
+              console.log(arguments);
+              root = fileSystem.root; // set in file.tests.js
+              persistent_root = root;
+
+              // Once root is set up, fire off tests
+              var jasmineEnv = jasmine.getEnv();
+              jasmineEnv.updateInterval = 1000;
+
+              var htmlReporter = new jasmine.HtmlReporter();
+
+              jasmineEnv.addReporter(htmlReporter);
+
+              jasmineEnv.specFilter = function (spec) {
+                  return htmlReporter.specFilter(spec);
+              };
+
+              jasmineEnv.execute();
+          }
+          window.webkitRequestFileSystem(0, 1024*1024,onS,
+              onError);
+         /* window.webkitRequestFileSystem(LocalFileSystem.TEMPORARY, 0,
+              function (fileSystem) {
+                  console.log('File API test Init: Setting TEMPORARY FS.');
+                  temp_root = fileSystem.root; // set in file.tests.js
+              }, onError);*/
+      }
+      //}, false);
+  </script>
+</head>
+
+<body>
+    <button id="fileRun" onclick="deviceReady()" >FileRun</button>
+  <a href="javascript:" class="backBtn" onclick="backHome();">Back</a>
+</body>
+</html>

@@ -1,0 +1,350 @@
+<VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
+  <TemplateData>
+    <Name>Cordova-Metro</Name>
+    <Description>&lt;No description available&gt;</Description>
+    <ProjectType>JavaScript</ProjectType>
+    <ProjectSubType>
+    </ProjectSubType>
+    <SortOrder>1000</SortOrder>
+    <CreateNewFolder>true</CreateNewFolder>
+    <DefaultName>Cordova-Metro</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+    <LocationField>Enabled</LocationField>
+    <EnableLocationBrowseButton>true</EnableLocationBrowseButton>
+    <Icon>__TemplateIcon.ico</Icon>
+  </TemplateData>
+  <TemplateContent>
+    <Project TargetFileName="Cordova-Metro.jsproj" File="Cordova-Metro.jsproj" ReplaceParameters="true">
+      <Folder Name="css" TargetFolderName="css">
+        <ProjectItem ReplaceParameters="true" TargetFileName="default.css">default.css</ProjectItem>
+      </Folder>
+      <Folder Name="images" TargetFolderName="images">
+        <ProjectItem ReplaceParameters="false" TargetFileName="logo.png">logo.png</ProjectItem>
+        <ProjectItem ReplaceParameters="false" TargetFileName="smalllogo.png">smalllogo.png</ProjectItem>
+        <ProjectItem ReplaceParameters="false" TargetFileName="splashscreen.png">splashscreen.png</ProjectItem>
+        <ProjectItem ReplaceParameters="false" TargetFileName="storelogo.png">storelogo.png</ProjectItem>
+      </Folder>
+      <Folder Name="js" TargetFolderName="js">
+        <ProjectItem ReplaceParameters="true" TargetFileName="default.js">default.js</ProjectItem>
+      </Folder>
+      <Folder Name="lib" TargetFolderName="lib">
+        <Folder Name="Jscex" TargetFolderName="Jscex">
+          <Folder Name=".git" TargetFolderName=".git">
+            <Folder Name="branches" TargetFolderName="branches" />
+            <Folder Name="hooks" TargetFolderName="hooks">
+              <ProjectItem ReplaceParameters="false" TargetFileName="applypatch-msg.sample">applypatch-msg.sample</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="commit-msg.sample">commit-msg.sample</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="post-commit.sample">post-commit.sample</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="post-receive.sample">post-receive.sample</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="post-update.sample">post-update.sample</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="pre-applypatch.sample">pre-applypatch.sample</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="pre-commit.sample">pre-commit.sample</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="prepare-commit-msg.sample">prepare-commit-msg.sample</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="pre-rebase.sample">pre-rebase.sample</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="update.sample">update.sample</ProjectItem>
+            </Folder>
+            <Folder Name="info" TargetFolderName="info">
+              <ProjectItem ReplaceParameters="false" TargetFileName="exclude">exclude</ProjectItem>
+            </Folder>
+            <Folder Name="logs" TargetFolderName="logs">
+              <Folder Name="refs" TargetFolderName="refs">
+                <Folder Name="heads" TargetFolderName="heads">
+                  <ProjectItem ReplaceParameters="false" TargetFileName="master">master</ProjectItem>
+                </Folder>
+              </Folder>
+              <ProjectItem ReplaceParameters="false" TargetFileName="HEAD">HEAD</ProjectItem>
+            </Folder>
+            <Folder Name="objects" TargetFolderName="objects">
+              <Folder Name="info" TargetFolderName="info" />
+              <Folder Name="pack" TargetFolderName="pack">
+                <ProjectItem ReplaceParameters="false" TargetFileName="pack-ee094d6316cf6fb63af8129fd8d936d1d5d8ca89.idx">pack-ee094d6316cf6fb63af8129fd8d936d1d5d8ca89.idx</ProjectItem>
+                <ProjectItem ReplaceParameters="false" TargetFileName="pack-ee094d6316cf6fb63af8129fd8d936d1d5d8ca89.pack">pack-ee094d6316cf6fb63af8129fd8d936d1d5d8ca89.pack</ProjectItem>
+              </Folder>
+            </Folder>
+            <Folder Name="refs" TargetFolderName="refs">
+              <Folder Name="heads" TargetFolderName="heads">
+                <ProjectItem ReplaceParameters="false" TargetFileName="master">master</ProjectItem>
+              </Folder>
+              <Folder Name="remotes" TargetFolderName="remotes">
+                <Folder Name="origin" TargetFolderName="origin">
+                  <ProjectItem ReplaceParameters="false" TargetFileName="HEAD">HEAD</ProjectItem>
+                </Folder>
+              </Folder>
+              <Folder Name="tags" TargetFolderName="tags" />
+            </Folder>
+            <ProjectItem ReplaceParameters="false" TargetFileName="config">config</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="description">description</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="HEAD">HEAD</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="index">index</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="packed-refs">packed-refs</ProjectItem>
+          </Folder>
+          <Folder Name="bin" TargetFolderName="bin">
+            <Folder Name="dev" TargetFolderName="dev">
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex-0.6.5.js">jscex-0.6.5.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex-async-0.6.5.js">jscex-async-0.6.5.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex-async-powerpack-0.6.5.js">jscex-async-powerpack-0.6.5.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex-builderbase-0.6.5.js">jscex-builderbase-0.6.5.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex-jit-0.6.6.js">jscex-jit-0.6.6.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex-parser-0.6.5.js">jscex-parser-0.6.5.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex-promise-0.6.5.js">jscex-promise-0.6.5.js</ProjectItem>
+            </Folder>
+            <Folder Name="npm" TargetFolderName="npm">
+              <Folder Name="jscex" TargetFolderName="jscex">
+                <ProjectItem ReplaceParameters="true" TargetFileName="jscex.js">jscex.js</ProjectItem>
+                <ProjectItem ReplaceParameters="false" TargetFileName="package.json">package.json</ProjectItem>
+              </Folder>
+              <Folder Name="jscex-async" TargetFolderName="jscex-async">
+                <ProjectItem ReplaceParameters="true" TargetFileName="jscex-async.js">jscex-async.js</ProjectItem>
+                <ProjectItem ReplaceParameters="false" TargetFileName="package.json">package.json</ProjectItem>
+              </Folder>
+              <Folder Name="jscex-async-powerpack" TargetFolderName="jscex-async-powerpack">
+                <ProjectItem ReplaceParameters="true" TargetFileName="jscex-async-powerpack.js">jscex-async-powerpack.js</ProjectItem>
+                <ProjectItem ReplaceParameters="false" TargetFileName="package.json">package.json</ProjectItem>
+              </Folder>
+              <Folder Name="jscex-builderbase" TargetFolderName="jscex-builderbase">
+                <ProjectItem ReplaceParameters="true" TargetFileName="jscex-builderbase.js">jscex-builderbase.js</ProjectItem>
+                <ProjectItem ReplaceParameters="false" TargetFileName="package.json">package.json</ProjectItem>
+              </Folder>
+              <Folder Name="jscexc" TargetFolderName="jscexc">
+                <Folder Name="lib" TargetFolderName="lib">
+                  <ProjectItem ReplaceParameters="true" TargetFileName="narcissus-parser.js">narcissus-parser.js</ProjectItem>
+                </Folder>
+                <Folder Name="src" TargetFolderName="src">
+                  <ProjectItem ReplaceParameters="true" TargetFileName="jscexc.js">jscexc.js</ProjectItem>
+                </Folder>
+                <ProjectItem ReplaceParameters="false" TargetFileName="package.json">package.json</ProjectItem>
+              </Folder>
+              <Folder Name="jscex-jit" TargetFolderName="jscex-jit">
+                <ProjectItem ReplaceParameters="true" TargetFileName="jscex-jit.js">jscex-jit.js</ProjectItem>
+                <ProjectItem ReplaceParameters="false" TargetFileName="package.json">package.json</ProjectItem>
+              </Folder>
+              <Folder Name="jscex-parser" TargetFolderName="jscex-parser">
+                <ProjectItem ReplaceParameters="true" TargetFileName="jscex-parser.js">jscex-parser.js</ProjectItem>
+                <ProjectItem ReplaceParameters="false" TargetFileName="package.json">package.json</ProjectItem>
+              </Folder>
+              <Folder Name="jscex-promise" TargetFolderName="jscex-promise">
+                <ProjectItem ReplaceParameters="true" TargetFileName="jscex-promise.js">jscex-promise.js</ProjectItem>
+                <ProjectItem ReplaceParameters="false" TargetFileName="package.json">package.json</ProjectItem>
+              </Folder>
+            </Folder>
+            <Folder Name="prod" TargetFolderName="prod">
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex-0.6.5.min.js">jscex-0.6.5.min.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex-async-0.6.5.min.js">jscex-async-0.6.5.min.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex-async-powerpack-0.6.5.min.js">jscex-async-powerpack-0.6.5.min.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex-builderbase-0.6.5.min.js">jscex-builderbase-0.6.5.min.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex-promise-0.6.5.min.js">jscex-promise-0.6.5.min.js</ProjectItem>
+            </Folder>
+          </Folder>
+          <Folder Name="lib" TargetFolderName="lib">
+            <Folder Name="mocha" TargetFolderName="mocha">
+              <ProjectItem ReplaceParameters="true" TargetFileName="mocha.css">mocha.css</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="mocha.js">mocha.js</ProjectItem>
+            </Folder>
+            <ProjectItem ReplaceParameters="true" TargetFileName="chai.js">chai.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="jquery-1.7.2.js">jquery-1.7.2.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="narcissus-parser.js">narcissus-parser.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="require.js">require.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="script-loader.js">script-loader.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="utils.js">utils.js</ProjectItem>
+          </Folder>
+          <Folder Name="samples" TargetFolderName="samples">
+            <Folder Name="async" TargetFolderName="async">
+              <ProjectItem ReplaceParameters="true" TargetFileName="agent.html">agent.html</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="bullet.html">bullet.html</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="clock.html">clock.html</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="comments.html">comments.html</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="copy-dir.js">copy-dir.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="express-server.js">express-server.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="hanoi.html">hanoi.html</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="include.html">include.html</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="jquery-bindings.js">jquery-bindings.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="modal-dialog.html">modal-dialog.html</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="move.html">move.html</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="my.js">my.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="node-server.js">node-server.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="quick-start.html">quick-start.html</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="quick-start.js">quick-start.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="sorting-animations.html">sorting-animations.html</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="weibo.html">weibo.html</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="worker.html">worker.html</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="worker.js">worker.js</ProjectItem>
+            </Folder>
+            <Folder Name="importing" TargetFolderName="importing">
+              <Folder Name="oye" TargetFolderName="oye">
+                <ProjectItem ReplaceParameters="true" TargetFileName="oye.html">oye.html</ProjectItem>
+                <ProjectItem ReplaceParameters="true" TargetFileName="oye.js">oye.js</ProjectItem>
+              </Folder>
+              <Folder Name="requirejs" TargetFolderName="requirejs">
+                <Folder Name="scripts" TargetFolderName="scripts">
+                  <ProjectItem ReplaceParameters="true" TargetFileName="jscex-all.js">jscex-all.js</ProjectItem>
+                  <ProjectItem ReplaceParameters="true" TargetFileName="main.js">main.js</ProjectItem>
+                </Folder>
+                <ProjectItem ReplaceParameters="true" TargetFileName="index.html">index.html</ProjectItem>
+              </Folder>
+              <Folder Name="sea" TargetFolderName="sea">
+                <ProjectItem ReplaceParameters="true" TargetFileName="sea.html">sea.html</ProjectItem>
+                <ProjectItem ReplaceParameters="true" TargetFileName="sea-debug.js">sea-debug.js</ProjectItem>
+              </Folder>
+            </Folder>
+            <Folder Name="promise" TargetFolderName="promise">
+              <ProjectItem ReplaceParameters="true" TargetFileName="jquery-animation.html">jquery-animation.html</ProjectItem>
+            </Folder>
+            <Folder Name="seq" TargetFolderName="seq">
+              <ProjectItem ReplaceParameters="true" TargetFileName="fib.html">fib.html</ProjectItem>
+            </Folder>
+          </Folder>
+          <Folder Name="scripts" TargetFolderName="scripts">
+            <ProjectItem ReplaceParameters="true" TargetFileName="build-dev.js">build-dev.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="build-npm.js">build-npm.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="build-prod.js">build-prod.js</ProjectItem>
+          </Folder>
+          <Folder Name="src" TargetFolderName="src">
+            <Folder Name="incubations" TargetFolderName="incubations">
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex.async.xhr.js">jscex.async.xhr.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex.seq.js">jscex.seq.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex.seq.powerpack.js">jscex.seq.powerpack.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex-async-agent.js">jscex-async-agent.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex-async-include.js">jscex-async-include.js</ProjectItem>
+            </Folder>
+            <ProjectItem ReplaceParameters="true" TargetFileName="jscex.js">jscex.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="jscex-async.js">jscex-async.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="jscex-async-powerpack.js">jscex-async-powerpack.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="jscex-builderbase.js">jscex-builderbase.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="jscexc.js">jscexc.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="jscex-jit.js">jscex-jit.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="jscex-parser.js">jscex-parser.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="jscex-promise.js">jscex-promise.js</ProjectItem>
+          </Folder>
+          <Folder Name="tests" TargetFolderName="tests">
+            <Folder Name="async" TargetFolderName="async">
+              <ProjectItem ReplaceParameters="true" TargetFileName="try.js">try.js</ProjectItem>
+            </Folder>
+            <Folder Name="jscex" TargetFolderName="jscex">
+              <Folder Name="env" TargetFolderName="env">
+                <ProjectItem ReplaceParameters="true" TargetFileName="amd.html">amd.html</ProjectItem>
+                <ProjectItem ReplaceParameters="true" TargetFileName="browser.html">browser.html</ProjectItem>
+                <ProjectItem ReplaceParameters="true" TargetFileName="cjs.js">cjs.js</ProjectItem>
+              </Folder>
+              <ProjectItem ReplaceParameters="true" TargetFileName="runner.html">runner.html</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="runner.js">runner.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="tests.js">tests.js</ProjectItem>
+            </Folder>
+            <Folder Name="jscex-async-powerpack" TargetFolderName="jscex-async-powerpack">
+              <ProjectItem ReplaceParameters="true" TargetFileName="runner.html">runner.html</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="runner.js">runner.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="tests.js">tests.js</ProjectItem>
+            </Folder>
+            <ProjectItem ReplaceParameters="true" TargetFileName="jscexc.tests.js">jscexc.tests.js</ProjectItem>
+          </Folder>
+          <Folder Name="tools" TargetFolderName="tools">
+            <ProjectItem ReplaceParameters="true" TargetFileName="generator.html">generator.html</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="parser.html">parser.html</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="README.md">README.md</ProjectItem>
+          </Folder>
+          <ProjectItem ReplaceParameters="false" TargetFileName="README.md">README.md</ProjectItem>
+        </Folder>
+        <Folder Name="SQLite" TargetFolderName="SQLite">
+          <Folder Name=".git" TargetFolderName=".git">
+            <Folder Name="branches" TargetFolderName="branches" />
+            <Folder Name="hooks" TargetFolderName="hooks">
+              <ProjectItem ReplaceParameters="false" TargetFileName="applypatch-msg.sample">applypatch-msg.sample</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="commit-msg.sample">commit-msg.sample</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="post-commit.sample">post-commit.sample</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="post-receive.sample">post-receive.sample</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="post-update.sample">post-update.sample</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="pre-applypatch.sample">pre-applypatch.sample</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="pre-commit.sample">pre-commit.sample</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="prepare-commit-msg.sample">prepare-commit-msg.sample</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="pre-rebase.sample">pre-rebase.sample</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="update.sample">update.sample</ProjectItem>
+            </Folder>
+            <Folder Name="info" TargetFolderName="info">
+              <ProjectItem ReplaceParameters="false" TargetFileName="exclude">exclude</ProjectItem>
+            </Folder>
+            <Folder Name="logs" TargetFolderName="logs">
+              <Folder Name="refs" TargetFolderName="refs">
+                <Folder Name="heads" TargetFolderName="heads">
+                  <ProjectItem ReplaceParameters="false" TargetFileName="master">master</ProjectItem>
+                </Folder>
+              </Folder>
+              <ProjectItem ReplaceParameters="false" TargetFileName="HEAD">HEAD</ProjectItem>
+            </Folder>
+            <Folder Name="objects" TargetFolderName="objects">
+              <Folder Name="info" TargetFolderName="info" />
+              <Folder Name="pack" TargetFolderName="pack">
+                <ProjectItem ReplaceParameters="false" TargetFileName="pack-84a0f4195af4a5fcda4f93dd5490278b4fdd2ae0.idx">pack-84a0f4195af4a5fcda4f93dd5490278b4fdd2ae0.idx</ProjectItem>
+                <ProjectItem ReplaceParameters="false" TargetFileName="pack-84a0f4195af4a5fcda4f93dd5490278b4fdd2ae0.pack">pack-84a0f4195af4a5fcda4f93dd5490278b4fdd2ae0.pack</ProjectItem>
+              </Folder>
+            </Folder>
+            <Folder Name="refs" TargetFolderName="refs">
+              <Folder Name="heads" TargetFolderName="heads">
+                <ProjectItem ReplaceParameters="false" TargetFileName="master">master</ProjectItem>
+              </Folder>
+              <Folder Name="remotes" TargetFolderName="remotes">
+                <Folder Name="origin" TargetFolderName="origin">
+                  <ProjectItem ReplaceParameters="false" TargetFileName="HEAD">HEAD</ProjectItem>
+                </Folder>
+              </Folder>
+              <Folder Name="tags" TargetFolderName="tags" />
+            </Folder>
+            <ProjectItem ReplaceParameters="false" TargetFileName="config">config</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="description">description</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="HEAD">HEAD</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="index">index</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="packed-refs">packed-refs</ProjectItem>
+          </Folder>
+          <Folder Name="SQLite3" TargetFolderName="SQLite3">
+            <ProjectItem ReplaceParameters="true" TargetFileName="Common.cpp">Common.cpp</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="Common.h">Common.h</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="Constants.cpp">Constants.cpp</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="Constants.h">Constants.h</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="Database.cpp">Database.cpp</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="Database.h">Database.h</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="sqlite3.c">sqlite3.c</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="sqlite3.h">sqlite3.h</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="SQLite3.vcxproj">SQLite3.vcxproj</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="SQLite3.vcxproj.filters">SQLite3.vcxproj.filters</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="Statement.cpp">Statement.cpp</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="Statement.h">Statement.h</ProjectItem>
+          </Folder>
+          <Folder Name="SQLite3JS" TargetFolderName="SQLite3JS">
+            <Folder Name="images" TargetFolderName="images">
+              <ProjectItem ReplaceParameters="false" TargetFileName="logo.png">logo.png</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="smalllogo.png">smalllogo.png</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="splashscreen.png">splashscreen.png</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="storelogo.png">storelogo.png</ProjectItem>
+              <ProjectItem ReplaceParameters="false" TargetFileName="widelogo.png">widelogo.png</ProjectItem>
+            </Folder>
+            <Folder Name="js" TargetFolderName="js">
+              <ProjectItem ReplaceParameters="true" TargetFileName="SQLite3.js">SQLite3.js</ProjectItem>
+            </Folder>
+            <Folder Name="lib" TargetFolderName="lib">
+              <Folder Name="jasmine-1.1.0" TargetFolderName="jasmine-1.1.0">
+                <ProjectItem ReplaceParameters="true" TargetFileName="jasmine.css">jasmine.css</ProjectItem>
+                <ProjectItem ReplaceParameters="true" TargetFileName="jasmine.js">jasmine.js</ProjectItem>
+                <ProjectItem ReplaceParameters="true" TargetFileName="jasmine-html.js">jasmine-html.js</ProjectItem>
+                <ProjectItem ReplaceParameters="false" TargetFileName="MIT.LICENSE">MIT.LICENSE</ProjectItem>
+              </Folder>
+              <Folder Name="jslint" TargetFolderName="jslint">
+                <ProjectItem ReplaceParameters="true" TargetFileName="jslint.js">jslint.js</ProjectItem>
+              </Folder>
+            </Folder>
+            <Folder Name="spec" TargetFolderName="spec">
+              <ProjectItem ReplaceParameters="true" TargetFileName="SQLite3Spec.js">SQLite3Spec.js</ProjectItem>
+            </Folder>
+            <ProjectItem ReplaceParameters="true" TargetFileName="default.html">default.html</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="package.appxmanifest">package.appxmanifest</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="SQLite3JS.jsproj">SQLite3JS.jsproj</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="SQLite3JS_TemporaryKey.pfx">SQLite3JS_TemporaryKey.pfx</ProjectItem>
+          </Folder>
+          <ProjectItem ReplaceParameters="false" TargetFileName="LICENSE">LICENSE</ProjectItem>
+          <ProjectItem ReplaceParameters="false" TargetFileName="README.md">README.md</ProjectItem>
+          <ProjectItem ReplaceParameters="true" TargetFileName="SQLite3-WinRT.sln">SQLite3-WinRT.sln</ProjectItem>
+        </Folder>
+      </Folder>
+      <ProjectItem ReplaceParameters="false" TargetFileName="Cordova-Metro_TemporaryKey.pfx">Cordova-Metro_TemporaryKey.pfx</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="default.html">default.html</ProjectItem>
+      <ProjectItem ReplaceParameters="false" TargetFileName="package.appxmanifest">package.appxmanifest</ProjectItem>
+    </Project>
+  </TemplateContent>
+</VSTemplate>

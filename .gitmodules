@@ -1,0 +1,12 @@
+[submodule "framework/Cordova-Metro/lib/SQLite"]
+	path = framework/Cordova-Metro/lib/SQLite
+	url = git://github.com/doo/SQLite3-WinRT.git
+[submodule "framework/Cordova-Metro/lib/Jscex"]
+	path = framework/Cordova-Metro/lib/Jscex
+	url = git://github.com/JeffreyZhao/jscex.git
+[submodule "src/cordova-win8/lib/Jscex"]
+	path = src/cordova-win8/lib/Jscex
+	url = git://github.com/JeffreyZhao/jscex.git
+[submodule "src/cordova-win8/lib/SQLite"]
+	path = src/cordova-win8/lib/SQLite
+	url = git://github.com/doo/SQLite3-WinRT.git
