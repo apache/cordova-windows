@@ -2,8 +2,10 @@
 
 #include "sqlite3.h"
 
-namespace SQLite3 {
-  public ref class Datatype sealed {
+namespace SQLite3
+{
+  public ref class Datatype sealed
+  {
   public:
     static property int Integer { int get() { return SQLITE_INTEGER; } }
     static property int Float { int get() { return SQLITE_FLOAT; } }
@@ -12,7 +14,8 @@ namespace SQLite3 {
     static property int Null { int get() { return SQLITE_NULL; } }
   };
 
-  public ref class ResultCode sealed {
+  public ref class ResultCode sealed
+  {
   public:
     static property int Ok { int get() { return SQLITE_OK; } }
     static property int Error { int get() { return SQLITE_ERROR; } }
