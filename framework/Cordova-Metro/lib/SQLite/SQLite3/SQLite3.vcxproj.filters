@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resources">
+      <UniqueIdentifier>47b40cc3-504e-41a2-a86b-f67ec8c7a8a6</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Constants.cpp" />
+    <ClCompile Include="Database.cpp" />
+    <ClCompile Include="sqlite3.c" />
+    <ClCompile Include="Statement.cpp" />
+    <ClCompile Include="Common.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Constants.h" />
+    <ClInclude Include="Database.h" />
+    <ClInclude Include="sqlite3.h" />
+    <ClInclude Include="Statement.h" />
+    <ClInclude Include="Common.h" />
+  </ItemGroup>
+</Project>

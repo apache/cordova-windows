@@ -4,14 +4,7 @@
 The project supports Cordova on Win8, and uses WinLib4JS for most implementation (others with SQLite3, Jscex and so on).
 
 ## Getting Started
----
 
-### Install NodeJS and Git, Init Project
- - Download the node-vxxx-x86.msi from http://nodejs.org/ and install. 
- - Confirm that the path of node and npm has been writen into System environment PATH.
- - Download and install git for Windows http://msysgit.github.com/.
- - Update submodules: `git submodule init` and  `git submodule update`
- - Run the `tool\scripts\init.bat`.
  
 ### For Cordova API developer 
  - `Want to develop Cordova API`
@@ -43,7 +36,7 @@ The project supports Cordova on Win8, and uses WinLib4JS for most implementation
  - [Jscex](https://github.com/JeffreyZhao/jscex)
  - [SQLite](https://github.com/doo/SQLite3-WinRT)
 
+
 ## Further Reading
----
 
 - [http://wiki.phonegap.com](http://wiki.phonegap.com)
