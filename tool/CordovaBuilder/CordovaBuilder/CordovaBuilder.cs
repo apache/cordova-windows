@@ -183,7 +183,7 @@ namespace tooling
             }
             string currentResult = String.Join("\\", currentResults) + "\\src\\cordova-win8\\js";
             string[] fileNames = Directory.GetFiles(currentResult, "*.js");
-            string root = String.Join("\\", currentResults) + "\\framework\\Cordova-MetroApp";
+            string root = String.Join("\\", currentResults) + "\\framework\\Cordova-Metro";
 
             if (userChosenType == 0)
             {
@@ -211,11 +211,11 @@ namespace tooling
         {
             if (userChosenType == 0)
             {
-                string deleteFile = root + "\\js\\default.js";
+                /*string deleteFile = root + "\\js\\default.js";
                 if (File.Exists(deleteFile))
                 {
                     File.Delete(deleteFile);
-                }
+                }*/
             }
             else if (userChosenType == 1)
             {
@@ -269,11 +269,11 @@ namespace tooling
             // Merge the JS files.
             string[] currentResults = mergeJsFiles(path, userChosenType);
 
-            string root = String.Join("\\", currentResults) + "\\framework\\Cordova-MetroApp";
+            string root = String.Join("\\", currentResults) + "\\framework\\Cordova-Metro";
             
             // Modify the default.html.
             ModifyFile("\\default.html", userChosenType, root, 1000, "js/default.js", "js/cordova.js");
-            ModifyFile("\\Cordova-MetroApp.jsproj", userChosenType, root, 3000, "default.js", "cordova.js");
+            ModifyFile("\\Cordova-Metro.jsproj", userChosenType, root, 3000, "default.js", "cordova.js");
 
             // Clean the project.
             cleanProject(userChosenType, currentResults, root);
