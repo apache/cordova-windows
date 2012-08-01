@@ -57,10 +57,6 @@
     <Content Include="images\storelogo.png" />
     <Content Include="js\default.js" />
     <Content Include="css\default.css" />
-    <Content Include="lib\Jscex\src\incubations\jscex-async-agent.js" />
-    <Content Include="lib\Jscex\src\incubations\jscex.async.xhr.js" />
-    <Content Include="lib\Jscex\src\incubations\jscex.seq.js" />
-    <Content Include="lib\Jscex\src\incubations\jscex.seq.powerpack.js" />
     <Content Include="lib\Jscex\src\jscex-async-powerpack.js" />
     <Content Include="lib\Jscex\src\jscex-async.js" />
     <Content Include="lib\Jscex\src\jscex-builderbase.js" />
