@@ -28,6 +28,7 @@ The project supports Cordova on Win8, and uses WinLib4JS for most implementation
  - A Visual Studio template named **Cordova-Metro.zip** will be generated. Move it to the directory of your VS Template **(DO NOT UNZIP)**. 
     e.g.:`C:\Users\xxxx\Documents\Visual Studio 2012\Templates\ProjectTemplates`
  - Open the VS, `FILE` -> `New` -> `Project...`, input the template name 'Cordova-Metro' in the search textField. Select the template and modify items about your new proj at the bottom of the pop-up window.
+      ![Screenshot](http://i.imgur.com/DvkAN.png)
  - Click the button `OK`. Then `Add` -> `Existing project...` select the `SQLite3.vcxproj` in the `lib\SQLite\SQLite3`. Build it.
  - Then Add `Reference...` -> select the SQLite3.
  - Build and Run the project Cordova-Metro.  
