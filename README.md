@@ -20,7 +20,7 @@ The project supports Cordova on Win8, and uses WinLib4JS for most implementation
 	     CordovaBuilder bin\Release -c:1.
 	~~~
 
- - Zip named CordovaStarter.zip will be generated.  
+ - A ZIP file named *CordovaStarter.zip* will be generated.  
  
 ### For Metro App developer
  - **Who want to develop Metro App by using Cordova API**
@@ -28,17 +28,36 @@ The project supports Cordova on Win8, and uses WinLib4JS for most implementation
  - A Visual Studio template named **Cordova-Metro.zip** will be generated. Move it to the directory of your VS Template **(DO NOT UNZIP)**. 
     e.g.:`C:\Users\xxxx\Documents\Visual Studio 2012\Templates\ProjectTemplates`
  - Open the VS, `FILE` -> `New` -> `Project...`, input the template name 'Cordova-Metro' in the search textField. Select the template and modify items about your new proj at the bottom of the pop-up window.
-      ![Screenshot](http://i.imgur.com/DvkAN.png)
+<img src="http://i.imgur.com/DvkAN.png" width="80%"/>
  - Click the button `OK`. Then `Add` -> `Existing project...` select the `SQLite3.vcxproj` in the `lib\SQLite\SQLite3`. Build it.
  - Then Add `Reference...` -> select the SQLite3.
  - Build and Run the project Cordova-Metro. 
  
-### How to Run the Testcase 
-  - Open the src.sln with VS.
-  - Build or Rebuild the proj.
-  - Modify the default.html (in the `test` folder, choose the testcase you want to run).
-  - Start the project.
+### How to Run the Tests 
+  - Open the `src\src.sln` with Visual Studio.
+  - Build or re-build the project.
+  - Modify the `default.html` under `test` folder, choose the test case you want to run, and comment out any other tests.
+ 
+```html
+<!-- Tests -->
+<!--
+<script type="text/javascript" src="tests/file.tests.js"></script>
+<script type="text/javascript" src="tests/filetransfer.tests.js"></script>
+<script type="text/javascript" src="tests/storage.tests.js"></script>
+<script type="text/javascript" src="tests/geolocation.tests.js"></script>
+<script type="text/javascript" src="tests/camera.tests.js"></script>
+<script type="text/javascript" src="tests/capture.tests.js"></script>
+<script type="text/javascript" src="tests/accelerometer.tests.js"></script>
+-->
+<script type="text/javascript" src="tests/compass.tests.js"></script>
+<!--
+<script type="text/javascript" src="tests/network.tests.js"></script>
+<script type="text/javascript" src="tests/media.tests.js"></script>
+-->
+```
 
+  - Now run the project, and you will get a result page as below.
+<img src="http://i.imgur.com/OgTUP.png" />
 
 ### Reference
  - [SQLite3 WinRT Component](https://github.com/doo/SQLite3-WinRT)
