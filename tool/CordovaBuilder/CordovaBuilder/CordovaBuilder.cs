@@ -120,7 +120,17 @@ namespace tooling
                 if (!appPathExist && appPaths[appPaths.Length - 4].Equals("CordovaBuilder"))
                 {
                     results[results.Length - 1] = appPath;
-                    string result = String.Join(";", results);
+                    
+                    List<string> final = new List<string>();
+                    for (int i = 0; i < results.Length; i++) 
+                    {
+                        if (!"".Equals(results[i]) && results[i] != null) 
+                        {
+                            final.Add(results[i]);
+                        }
+                        
+                    }
+                    string result = String.Join(";", final);
 
                     Environment.SetEnvironmentVariable("Path", result, EnvironmentVariableTarget.Machine);
                 }
