@@ -1,4 +1,4 @@
-# Cordova-Win8
+# Apache Cordova for Windows 8 Metro
 ===
 
 The project supports Cordova on Win8, and uses WinLib4JS for most implementation (others with SQLite3, Jscex and so on).
@@ -7,7 +7,7 @@ The project supports Cordova on Win8, and uses WinLib4JS for most implementation
 
  
 ### For Cordova API developer 
- - `Want to develop Cordova API`
+ - *Who want to develop Cordova API*
  - You could use the project in src\ directly.
  - If you want to export the project with zip package, open the project in `\tool\CordovaBuilder` with Visual Studio (`Administrator`) , build and run it, then open you command prompt(`Administrator`), type the command according to the guide:
 
@@ -23,7 +23,7 @@ The project supports Cordova on Win8, and uses WinLib4JS for most implementation
  - Zip named CordovaStarter.zip will be generated.  
  
 ### For Metro App developer
- - `Want to develop Metro App by using Cordova API`
+ - *Who want to develop Metro App by using Cordova API*
  - Do the same steps as above. -c:Type should be 0. 
  - A Visual Studio template named Cordova-Metro.zip will be generated. Move it to the directory of your VS Template (unzip it if necessary). 
     e.g.:`C:\Users\xxxx\Documents\Visual Studio 2012\Templates\ProjectTemplates`
@@ -32,10 +32,10 @@ The project supports Cordova on Win8, and uses WinLib4JS for most implementation
  - Build and Run the project Cordova-Metro.  
     
 ### Reference
- - [Jscex](https://github.com/JeffreyZhao/jscex)
- - [SQLite](https://github.com/doo/SQLite3-WinRT)
+ - [SQLite3 WinRT Component](https://github.com/doo/SQLite3-WinRT)
+ - [Jscex: Asynchronous flow control in JavaScript, with JavaScript](https://github.com/JeffreyZhao/jscex)
 
 
 ## Further Reading
-
+- [http://docs.phonegap.com](http://docs.phonegap.com)
 - [http://wiki.phonegap.com](http://wiki.phonegap.com)
