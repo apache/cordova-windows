@@ -109,7 +109,9 @@ namespace tooling
                 {
                     appPathExist = true;
                 }
-                results[i] = tempArr[i];
+                if (!tempArr[i].Contains("CordovaBuilder")) {
+                    results[i] = tempArr[i];
+                }
             }
 
             string[] appPaths = appPath.Split('\\');
