@@ -7,8 +7,8 @@ The project supports Cordova on Win8, and uses WinLib4JS for most implementation
 
  
 ### For Cordova API developer 
- - *Who want to develop Cordova API*
- - You could use the project in src\ directly.
+ - **Who want to develop Cordova API**
+ - You could use the project in `src` folder directly.
  - If you want to export the project with zip package, open the project in `\tool\CordovaBuilder` with Visual Studio (`Administrator`) , build and run it, then open you command prompt(`Administrator`), type the command according to the guide:
 
 	~~~ 
@@ -23,11 +23,11 @@ The project supports Cordova on Win8, and uses WinLib4JS for most implementation
  - Zip named CordovaStarter.zip will be generated.  
  
 ### For Metro App developer
- - *Who want to develop Metro App by using Cordova API*
+ - **Who want to develop Metro App by using Cordova API**
  - Do the same steps as above. -c:Type should be 0. 
- - A Visual Studio template named Cordova-Metro.zip will be generated. Move it to the directory of your VS Template (unzip it if necessary). 
+ - A Visual Studio template named **Cordova-Metro.zip** will be generated. Move it to the directory of your VS Template **(DO NOT UNZIP)**. 
     e.g.:`C:\Users\xxxx\Documents\Visual Studio 2012\Templates\ProjectTemplates`
- - Open the template with VS. Then `Add` -> `Existing project...` select the SQLite3.vcxproj in the lib\SQLite\SQLite3. Build it.
+ - Open the template with VS. Then `Add` -> `Existing project...` select the `SQLite3.vcxproj` in the `lib\SQLite\SQLite3`. Build it.
  - Then Add `Reference...` -> select the SQLite3.
  - Build and Run the project Cordova-Metro.  
     
