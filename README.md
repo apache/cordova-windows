@@ -31,8 +31,15 @@ The project supports Cordova on Win8, and uses WinLib4JS for most implementation
       ![Screenshot](http://i.imgur.com/DvkAN.png)
  - Click the button `OK`. Then `Add` -> `Existing project...` select the `SQLite3.vcxproj` in the `lib\SQLite\SQLite3`. Build it.
  - Then Add `Reference...` -> select the SQLite3.
- - Build and Run the project Cordova-Metro.  
-    
+ - Build and Run the project Cordova-Metro. 
+ 
+### How to Run the Testcase 
+  - Open the src.sln with VS.
+  - Build or Rebuild the proj.
+  - Modify the default.html (in the `test` folder, choose the testcase you want to run).
+  - Start the project.
+
+
 ### Reference
  - [SQLite3 WinRT Component](https://github.com/doo/SQLite3-WinRT)
  - [Jscex: Asynchronous flow control in JavaScript, with JavaScript](https://github.com/JeffreyZhao/jscex)
