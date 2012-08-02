@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
   <title>cordova_win8</title>
@@ -21,7 +21,7 @@
 
   <!-- cordova_win8 references -->
     <link href="css/default.css" rel="stylesheet" />
-    
+
 
   <!-- Jscex references -->
 
@@ -30,9 +30,9 @@
   <script src="../lib/Jscex/src/jscex-parser.js"></script>
   <script src="../lib/Jscex/src/jscex-async.js"></script>
   <script src="../lib/Jscex/src/jscex-jit.js"></script>
-  
+
   <script src="../lib/Jscex/src/jscex-promise.js"></script>
-  
+
 
   <script type="text/javascript" src="../js/file.js"></script>
   <script type="text/javascript" src="../js/filetransfer.js"></script>
@@ -44,8 +44,9 @@
   <script type="text/javascript" src="../js/compass.js"></script>
   <script type="text/javascript" src="../js/media.js"></script>
   <script type="text/javascript" src="../js/network.js"></script>
+  <script type="text/javascript" src="../js/device.js"></script>
 
-  
+
 
   <!-- Load Test Runner -->
   <script type="text/javascript" src="test-runner.js"></script>
@@ -60,8 +61,9 @@
   <script type="text/javascript" src="tests/accelerometer.tests.js"></script>
   <script type="text/javascript" src="tests/compass.tests.js"></script>
   <script type="text/javascript" src="tests/network.tests.js"></script>
-  <script type="text/javascript" src="tests/media.tests.js"></script>-->
-  
+  <script type="text/javascript" src="tests/media.tests.js"></script>
+  <script type="text/javascript" src="tests/device.tests.js"></script>-->
+
   <script type="text/javascript">
       //var root, temp_root, persistent_root;
 
@@ -79,7 +81,7 @@
               console.log('File API test Init: Setting PERSISTENT FS.');
 
               console.log('================================');
-              
+
               root = fileSystem.root; // set in file.tests.js
               console.log(root);
               persistent_root = root;
@@ -105,7 +107,7 @@
                   console.log('File API test Init: Setting TEMPORARY FS.');
                   temp_root = fileSystem.root; // set in file.tests.js
               }, onError);
-              
+
           /*var jasmineEnv = jasmine.getEnv();
           jasmineEnv.updateInterval = 1000;
 
@@ -118,11 +120,11 @@
           };
 
           jasmineEnv.execute();*/
-          
+
           /*var cameraCaptureUI = new Windows.Media.Capture.CameraCaptureUI();
           cameraCaptureUI.videoSettings.allowTrimming = true;
           cameraCaptureUI.videoSettings.format = Windows.Media.Capture.CameraCaptureUIVideoFormat.mp4;
-          
+
           cameraCaptureUI.captureFileAsync(Windows.Media.Capture.CameraCaptureUIMode.video).then(function (file) {
               console.log("oriPath=" + file.path);
               file.moveAsync(Windows.Storage.KnownFolders.videosLibrary, "cameraCaptureVedio.mp4", Windows.Storage.NameCollisionOption.generateUniqueName).then(function () {
