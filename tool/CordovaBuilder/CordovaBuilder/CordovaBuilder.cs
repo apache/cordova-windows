@@ -145,7 +145,7 @@ namespace tooling
 
             if (userChosenType == 0)
             {
-                basePath = String.Join("\\", currentResults) + "\\framework";
+                basePath = String.Join("\\", currentResults) + "\\framework\\Cordova-Metro";
                 baseName = "\\Cordova-Metro.zip";
             }
             else if (userChosenType == 1)
