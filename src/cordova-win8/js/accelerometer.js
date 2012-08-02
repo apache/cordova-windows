@@ -1,4 +1,4 @@
-﻿var utils = {
+var utils = {
      clone: function (obj) {
         if (!obj) {
             return obj;
@@ -125,7 +125,7 @@ function accelerometerOptions(options) {
  * This class provides access to device acceleration data.
  * @constructor
  */
-function accelerometer() { }
+function Accelerometer() { }
 
 
 /**
@@ -134,7 +134,7 @@ function accelerometer() { }
  * @param {Function} accelerometerSuccess	The Function to call when the acceleration data is available
  * @param {Function} accelerometerError		The function to call when there is an error getting the acceleration data
  */
-accelerometer.prototype.getCurrentAcceleration = function (accelerometerSuccess, accelerometerError) {
+Accelerometer.prototype.getCurrentAcceleration = function (accelerometerSuccess, accelerometerError) {
     var win = function (a) {
         accelerometerSuccess(new Acceleration(a.accelerationX,
 											  a.accelerationY,
@@ -168,12 +168,12 @@ accelerometer.prototype.getCurrentAcceleration = function (accelerometerSuccess,
  * @return String							The watch id that must be passed to #clearWatch to stop watching.
  */
 
-accelerometer.prototype.watchAcceleration = function (accelerometerSuccess, accelerometerError, options) {
+Accelerometer.prototype.watchAcceleration = function (accelerometerSuccess, accelerometerError, options) {
     options = accelerometerOptions(options);
 
     var id = createUUID();
     accelerometerTimers[id] = window.setInterval(function () {
-        accelerometer.getCurrentAcceleration(accelerometerSuccess, accelerometerError);
+        Accelerometer.getCurrentAcceleration(accelerometerSuccess, accelerometerError);
     }, options.frequency);
 
     return id;
@@ -185,17 +185,17 @@ accelerometer.prototype.watchAcceleration = function (accelerometerSuccess, acce
  * @param {String} id		The ID of the watch returned from #watchAcceleration
  */
 
-accelerometer.prototype.clearWatch = function (watchId) {
+Accelerometer.prototype.clearWatch = function (watchId) {
     if (watchId && accelerationTimers[watchId] !== undefined) {
         window.clearInterval(accelerationTimers[watchId]);
         delete accelerationTimers[id];
     }
 };
 
-if (typeof navigator.accelerometer == "undefined") {
-    // Win RT support the object accelerometer , and is Read-Only , So for test , must to change the methods of Object
-    // navigator.accelerometer.getCurrentAcceleration = new accelerometer().getCurrentAcceleration;
-    // navigator.accelerometer.clearWatch = new accelerometer().clearWatch;
-    // navigator.accelerometer.watchAcceleration = new accelerometer().watchAcceleration;
-    navigator.accelerometer = new accelerometer();
+if (typeof navigator.Accelerometer == "undefined") {
+    // Win RT support the object Accelerometer , and is Read-Only , So for test , must to change the methods of Object
+    // navigator.Accelerometer.getCurrentAcceleration = new Accelerometer().getCurrentAcceleration;
+    // navigator.Accelerometer.clearWatch = new Accelerometer().clearWatch;
+    // navigator.Accelerometer.watchAcceleration = new Accelerometer().watchAcceleration;
+    navigator.Accelerometer = new Accelerometer();
 }
