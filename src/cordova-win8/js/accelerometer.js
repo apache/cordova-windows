@@ -1,4 +1,85 @@
-﻿/**
+﻿var utils = {
+     clone: function (obj) {
+        if (!obj) {
+            return obj;
+        }
+
+        var retVal, i;
+
+        if (obj instanceof Array) {
+            retVal = [];
+            for (i = 0; i < obj.length; ++i) {
+                retVal.push(_self.clone(obj[i]));
+            }
+            return retVal;
+        }
+
+        if (obj instanceof Function) {
+            return obj;
+        }
+
+        if (!(obj instanceof Object)) {
+            return obj;
+        }
+
+        if (obj instanceof Date) {
+            return obj;
+        }
+
+        retVal = {};
+        for (i in obj) {
+            if (!(i in retVal) || retVal[i] != obj[i]) {
+                retVal[i] = _self.clone(obj[i]);
+            }
+        }
+        return retVal;
+    },
+
+    close: function (context, func, params) {
+        if (typeof params === 'undefined') {
+            return function () {
+                return func.apply(context, arguments);
+            };
+        } else {
+            return function () {
+                return func.apply(context, params);
+            };
+        }
+    },
+
+    /**
+         * Extends a child object from a parent object using classical inheritance
+         * pattern.
+         */
+    extend: (function () {
+        var F = function () { };
+        return function (Child, Parent) {
+
+            F.prototype = Parent.prototype;
+            Child.prototype = new F();
+            Child.__super__ = Parent.prototype;
+            Child.prototype.constructor = Child;
+        };
+    }()),
+
+    /**
+         * Alerts a message in any available way: alert or console.log.
+         */
+    alert: function (msg) {
+        if (alert) {
+            alert(msg);
+        } else if (console && console.log) {
+            console.log(msg);
+        }
+    }
+};
+
+Jscex.Promise.create = function (init) {
+    return new WinJS.Promise(init);
+}
+
+
+/**
  * This contains device acceleration information.
  * @param {Object} x
  * @param {Object} y
