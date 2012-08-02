@@ -61,6 +61,7 @@
     <Content Include="js\file.js" />
     <Content Include="js\filetransfer.js" />
     <Content Include="js\geolocation.js" />
+    <Content Include="js\notification.js" />
     <Content Include="js\storage.js" />
     <Content Include="js\media.js" />
     <Content Include="js\network.js" />
