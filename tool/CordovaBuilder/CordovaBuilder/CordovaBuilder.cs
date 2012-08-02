@@ -207,9 +207,20 @@ namespace tooling
                 {
                     stream = new FileStream(fileNames[i], FileMode.Open);
                     BinaryReader reader = new BinaryReader(stream);
+                    int length = (int)stream.Length;
+                    byte[] threeBytes = reader.ReadBytes(3);
+                    //int ch = reader.PeekChar();
+                    if (threeBytes[0] == 0xef && threeBytes[1] == 0xbb && threeBytes[2] == 0xbf)
+                    {
+                        length -= 3;
+                    }
+                    else
+                    {
+                        binaryWriter.Write(threeBytes);
+                    }
 
-                    binaryWriter.Write(reader.ReadBytes((int)stream.Length));
-                    binaryWriter.Write("\n");
+                    binaryWriter.Write(reader.ReadBytes(length));
+                    //binaryWriter.Write("\n");
                     reader.Close();
                     stream.Close();
                 }
