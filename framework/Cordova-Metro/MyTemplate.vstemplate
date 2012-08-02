@@ -49,30 +49,6 @@
         </Folder>
         <Folder Name="SQLite" TargetFolderName="SQLite">
           <Folder Name="SQLite3" TargetFolderName="SQLite3">
-            <Folder Name="Debug" TargetFolderName="Debug">
-              <ProjectItem ReplaceParameters="false" TargetFileName="cl.command.1.tlog">cl.command.1.tlog</ProjectItem>
-              <ProjectItem ReplaceParameters="false" TargetFileName="CL.read.1.tlog">CL.read.1.tlog</ProjectItem>
-              <ProjectItem ReplaceParameters="false" TargetFileName="CL.write.1.tlog">CL.write.1.tlog</ProjectItem>
-              <ProjectItem ReplaceParameters="true" TargetFileName="LanguageQualifiers.txt">LanguageQualifiers.txt</ProjectItem>
-              <ProjectItem ReplaceParameters="false" TargetFileName="LanguageQualifiers.txt.intermediate">LanguageQualifiers.txt.intermediate</ProjectItem>
-              <ProjectItem ReplaceParameters="false" TargetFileName="layout.resfiles">layout.resfiles</ProjectItem>
-              <ProjectItem ReplaceParameters="false" TargetFileName="layout.resfiles.intermediate">layout.resfiles.intermediate</ProjectItem>
-              <ProjectItem ReplaceParameters="false" TargetFileName="link.command.1.tlog">link.command.1.tlog</ProjectItem>
-              <ProjectItem ReplaceParameters="false" TargetFileName="link.read.1.tlog">link.read.1.tlog</ProjectItem>
-              <ProjectItem ReplaceParameters="false" TargetFileName="link.write.1.tlog">link.write.1.tlog</ProjectItem>
-              <ProjectItem ReplaceParameters="false" TargetFileName="pri.resfiles">pri.resfiles</ProjectItem>
-              <ProjectItem ReplaceParameters="false" TargetFileName="pri.resfiles.intermediate">pri.resfiles.intermediate</ProjectItem>
-              <ProjectItem ReplaceParameters="true" TargetFileName="priconfig.xml">priconfig.xml</ProjectItem>
-              <ProjectItem ReplaceParameters="false" TargetFileName="priconfig.xml.intermediate">priconfig.xml.intermediate</ProjectItem>
-              <ProjectItem ReplaceParameters="false" TargetFileName="resources.resfiles">resources.resfiles</ProjectItem>
-              <ProjectItem ReplaceParameters="false" TargetFileName="resources.resfiles.intermediate">resources.resfiles.intermediate</ProjectItem>
-              <ProjectItem ReplaceParameters="false" TargetFileName="SQLite3.lastbuildstate">SQLite3.lastbuildstate</ProjectItem>
-              <ProjectItem ReplaceParameters="false" TargetFileName="SQLite3.log">SQLite3.log</ProjectItem>
-              <ProjectItem ReplaceParameters="false" TargetFileName="SQLite3.read.1.tlog">SQLite3.read.1.tlog</ProjectItem>
-              <ProjectItem ReplaceParameters="false" TargetFileName="SQLite3.vcxprojResolveAssemblyReference.cache">SQLite3.vcxprojResolveAssemblyReference.cache</ProjectItem>
-              <ProjectItem ReplaceParameters="false" TargetFileName="SQLite3.write.1.tlog">SQLite3.write.1.tlog</ProjectItem>
-              <ProjectItem ReplaceParameters="false" TargetFileName="vc110.pdb">vc110.pdb</ProjectItem>
-            </Folder>
             <ProjectItem ReplaceParameters="true" TargetFileName="Common.cpp">Common.cpp</ProjectItem>
             <ProjectItem ReplaceParameters="true" TargetFileName="Common.h">Common.h</ProjectItem>
             <ProjectItem ReplaceParameters="true" TargetFileName="Constants.cpp">Constants.cpp</ProjectItem>
