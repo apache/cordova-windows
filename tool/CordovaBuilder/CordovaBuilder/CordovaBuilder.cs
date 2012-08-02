@@ -285,9 +285,8 @@ namespace tooling
             
             // Modify the default.html.
             ModifyFile("\\default.html", userChosenType, root, 1000, "js/default.js", "js/cordova.js");
-            ModifyFile("\\Cordova-Metro.jsproj", userChosenType, root, 3000, "default.js", "cordova.js");
-
-            // Clean the project.
+            
+			// Clean the project.
             cleanProject(userChosenType, currentResults, root);
 
             // Create zip.

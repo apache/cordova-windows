@@ -32,10 +32,10 @@
     <ProjectConfiguration Include="Release|x86">
       <Configuration>Release</Configuration>
       <Platform>x86</Platform>
-    </ProjectConfiguration>  
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>b1208e92-c26c-45ae-8c3a-e924a69492fd</ProjectGuid>
+    <ProjectGuid>a2bef493-a029-424e-b455-47c772af0d0e</ProjectGuid>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).Default.props" />
@@ -55,8 +55,13 @@
     <Content Include="images\smalllogo.png" />
     <Content Include="images\splashscreen.png" />
     <Content Include="images\storelogo.png" />
-    <Content Include="js\default.js" />
+    <Content Include="js\cordova.js" />
     <Content Include="css\default.css" />
+    <Content Include="lib\Jscex\src\incubations\jscex-async-agent.js" />
+    <Content Include="lib\Jscex\src\incubations\jscex-async-include.js" />
+    <Content Include="lib\Jscex\src\incubations\jscex.async.xhr.js" />
+    <Content Include="lib\Jscex\src\incubations\jscex.seq.js" />
+    <Content Include="lib\Jscex\src\incubations\jscex.seq.powerpack.js" />
     <Content Include="lib\Jscex\src\jscex-async-powerpack.js" />
     <Content Include="lib\Jscex\src\jscex-async.js" />
     <Content Include="lib\Jscex\src\jscex-builderbase.js" />
@@ -71,6 +76,33 @@
     <Content Include="lib\SQLite\SQLite3\Constants.h" />
     <Content Include="lib\SQLite\SQLite3\Database.cpp" />
     <Content Include="lib\SQLite\SQLite3\Database.h" />
+    <Content Include="lib\SQLite\SQLite3\Debug\cl.command.1.tlog" />
+    <Content Include="lib\SQLite\SQLite3\Debug\CL.read.1.tlog" />
+    <Content Include="lib\SQLite\SQLite3\Debug\CL.write.1.tlog" />
+    <Content Include="lib\SQLite\SQLite3\Debug\Constants.obj" />
+    <Content Include="lib\SQLite\SQLite3\Debug\Database.obj" />
+    <Content Include="lib\SQLite\SQLite3\Debug\LanguageQualifiers.txt" />
+    <Content Include="lib\SQLite\SQLite3\Debug\LanguageQualifiers.txt.intermediate" />
+    <Content Include="lib\SQLite\SQLite3\Debug\layout.resfiles" />
+    <Content Include="lib\SQLite\SQLite3\Debug\layout.resfiles.intermediate" />
+    <Content Include="lib\SQLite\SQLite3\Debug\link.command.1.tlog" />
+    <Content Include="lib\SQLite\SQLite3\Debug\link.read.1.tlog" />
+    <Content Include="lib\SQLite\SQLite3\Debug\link.write.1.tlog" />
+    <Content Include="lib\SQLite\SQLite3\Debug\pri.resfiles" />
+    <Content Include="lib\SQLite\SQLite3\Debug\pri.resfiles.intermediate" />
+    <Content Include="lib\SQLite\SQLite3\Debug\priconfig.xml" />
+    <Content Include="lib\SQLite\SQLite3\Debug\priconfig.xml.intermediate" />
+    <Content Include="lib\SQLite\SQLite3\Debug\resources.resfiles" />
+    <Content Include="lib\SQLite\SQLite3\Debug\resources.resfiles.intermediate" />
+    <Content Include="lib\SQLite\SQLite3\Debug\SQLite3.lastbuildstate" />
+    <Content Include="lib\SQLite\SQLite3\Debug\SQLite3.log" />
+    <Content Include="lib\SQLite\SQLite3\Debug\sqlite3.obj" />
+    <Content Include="lib\SQLite\SQLite3\Debug\SQLite3.read.1.tlog" />
+    <Content Include="lib\SQLite\SQLite3\Debug\SQLite3.vcxprojResolveAssemblyReference.cache" />
+    <Content Include="lib\SQLite\SQLite3\Debug\SQLite3.write.1.tlog" />
+    <Content Include="lib\SQLite\SQLite3\Debug\Statement.obj" />
+    <Content Include="lib\SQLite\SQLite3\Debug\vc110.idb" />
+    <Content Include="lib\SQLite\SQLite3\Debug\vc110.pdb" />
     <Content Include="lib\SQLite\SQLite3\sqlite3.c" />
     <Content Include="lib\SQLite\SQLite3\sqlite3.h" />
     <Content Include="lib\SQLite\SQLite3\SQLite3.vcxproj" />
