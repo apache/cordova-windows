@@ -1,21 +1,26 @@
-﻿function Connection() {
+function Connection() {
+    // Accesses Windows.Networking get the internetConnection Profile.
     this.type = function () {
         var ret;
         var profile = Windows.Networking.Connectivity.NetworkingInformation.getInternetConnectionProfile();
         if (profile) {
+			// IANA Interface type represents the type of connection to the computer.
+			// Values can be found at http://www.iana.org/assignments/ianaiftype-mib/ianaiftype-mib
+			// Code should be updated to represent more values from the above link
             ret = profile.networkAdapter.ianaInterfaceType;
             switch (ret) {
-                case 6:
+                case 6:		// 6 represents wired ethernet
                     ret = Connection.ETHERNET;
                     break;
-                case 71:
+                case 71:	// 71 represents 802.11 wireless connection
                     ret = Connection.WIFI;
                     break;
-                default:
+                default:	// Other values may exist
                     ret = Connection.UNKNOWN;
                     break;
             };
         } else {
+			// If no profile is generated, no connection exists
             ret = Connection.NONE;
         };
         return ret;
