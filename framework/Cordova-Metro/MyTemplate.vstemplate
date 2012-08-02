@@ -25,7 +25,7 @@
         <ProjectItem ReplaceParameters="false" TargetFileName="storelogo.png">storelogo.png</ProjectItem>
       </Folder>
       <Folder Name="js" TargetFolderName="js">
-        <ProjectItem ReplaceParameters="true" TargetFileName="default.js">default.js</ProjectItem>
+        <ProjectItem ReplaceParameters="true" TargetFileName="cordova.js">cordova.js</ProjectItem>
       </Folder>
       <Folder Name="lib" TargetFolderName="lib">
         <Folder Name="Jscex" TargetFolderName="Jscex">
