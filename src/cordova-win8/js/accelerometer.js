@@ -192,10 +192,10 @@ Accelerometer.prototype.clearWatch = function (watchId) {
     }
 };
 
-if (typeof navigator.Accelerometer == "undefined") {
+if (typeof navigator.accelerometer == "undefined") {
     // Win RT support the object Accelerometer , and is Read-Only , So for test , must to change the methods of Object
     // navigator.Accelerometer.getCurrentAcceleration = new Accelerometer().getCurrentAcceleration;
     // navigator.Accelerometer.clearWatch = new Accelerometer().clearWatch;
     // navigator.Accelerometer.watchAcceleration = new Accelerometer().watchAcceleration;
-    navigator.Accelerometer = new Accelerometer();
+    navigator.accelerometer = new Accelerometer();
 }
