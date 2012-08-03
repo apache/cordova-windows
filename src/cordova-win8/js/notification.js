@@ -1,4 +1,4 @@
-﻿/**
+/**
  * This class provides access to the notification code.
  */
 function Notification() { };
@@ -11,6 +11,11 @@ Notification.prototype.alert = function (message, alertCallback, title, buttonNa
     md.commands.append(new Windows.UI.Popups.UICommand(buttonName));
     md.showAsync().then(alertCallback);
 };
+
+function alert(message) {
+    navigator.notification.alert(message, function () { });
+};
+
 Notification.prototype.confirm = function (message, confirmCallback, title, buttonLabels) {
     title = title || "Confirm";
     buttonLabels = buttonLabels || "OK,Cancel";
