@@ -188,8 +188,8 @@ Accelerometer.prototype.watchAcceleration = function (accelerometerSuccess, acce
 
 Accelerometer.prototype.clearWatch = function (watchId) {
     if (watchId && accelerometerTimers[watchId] !== undefined) {
-        window.clearInterval(accelerationTimers[watchId]);
-        delete accelerationTimers[id];
+        window.clearInterval(accelerometerTimers[watchId]);
+        delete accelerometerTimers[id];
     }
 };
 
