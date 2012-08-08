@@ -1,4 +1,4 @@
-﻿/**
+/**
  * This class contains compass information.
  * @param {Object} magnHead		Magnetic heading
  * @param {Object} trueHead		True heading
@@ -50,6 +50,7 @@ function compassOptions(options) {
             opt.frequency = options.frequency;
         }
     }
+    return opt;
 };
 
 /**
