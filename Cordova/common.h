@@ -18,3 +18,19 @@
 // under the License.
 
 #define CORDOVA_REG_KEY	L"Software\\Intel\\Cordova"
+
+#define ASSERT(x) if (!(x)) __debugbreak()
+
+struct _TextBuf;
+typedef struct _TextBuf *TextBuf;
+
+TextBuf text_buf_new(void);
+
+BOOL text_buf_append(TextBuf buf, const wchar_t *text);
+BOOL text_buf_append_len(TextBuf buf, const wchar_t *text, size_t text_len);
+
+wchar_t *text_buf_get(const TextBuf buf);
+size_t text_buf_get_len(const TextBuf buf);
+
+void text_buf_reset(TextBuf buf);
+void text_buf_free(TextBuf buf);

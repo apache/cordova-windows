@@ -12,7 +12,7 @@
             }
             function got_photo(media_array) {
                 var photo = document.getElementById('photo');
-                photo.src = media_array[0].fullPath + '?' + new Date().getTime();   // Force refresh
+                photo.src = media_array[0].fullPath;
             }
             function get_video() {
                 navigator.device.capture.captureVideo(got_video);

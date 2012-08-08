@@ -33,10 +33,19 @@
 #include "common.h"
 
 #define CORDOVA_MACHINE_ID		L"MachineID"
+#define CORDOVA_VERSION			L"2.0.0"
+#define CORDOVA_VERSION_LEN		5
 
 // A valid UUID string should look like this: f7b38bf1-2ece-4e2a-94a6-e791863f0109
 
 #define UUID_BUF_LEN_IN_BYTES (sizeof(wchar_t) * UUID_BUF_LEN)
+
+static wchar_t uuid[UUID_BUF_LEN];
+
+wchar_t *get_device_uuid(void)
+{
+	return uuid;
+}
 
 int acquire_unique_id(wchar_t buf[UUID_BUF_LEN])
 {
@@ -102,14 +111,11 @@ int acquire_unique_id(wchar_t buf[UUID_BUF_LEN])
 static HRESULT get_device_info(BSTR callback_id)
 {
 	// Set initial Cordova global variables and fire up deviceready event
-	static wchar_t buf[100 + UUID_BUF_LEN + COMPUTER_NAME_BUF_LEN];
-	wchar_t uuid[UUID_BUF_LEN];
+	static wchar_t buf[100 + UUID_BUF_LEN + COMPUTER_NAME_BUF_LEN + CORDOVA_VERSION_LEN];
 	wchar_t computer_name[COMPUTER_NAME_BUF_LEN];
 	DWORD len = COMPUTER_NAME_BUF_LEN;
 	OSVERSIONINFOEX osver;
 	wchar_t* platform = L"Windows";
-
-	acquire_unique_id(uuid);
 
 	computer_name[0] = L'\0';
 	GetComputerName(computer_name, &len);
@@ -117,8 +123,8 @@ static HRESULT get_device_info(BSTR callback_id)
 	osver.dwOSVersionInfoSize = sizeof(osver);
 	GetVersionEx((LPOSVERSIONINFO)&osver);
 
-	wsprintf(buf, L"{uuid:'%s',name:'%s',platform:'%s',version:'%d.%d'}",
-				uuid, computer_name, platform, osver.dwMajorVersion, osver.dwMinorVersion);
+	wsprintf(buf, L"{uuid:'%s',name:'%s',platform:'%s',version:'%d.%d',cordova:'%s'}",
+				uuid, computer_name, platform, osver.dwMajorVersion, osver.dwMinorVersion, CORDOVA_VERSION);
 
 	cordova_success_callback(callback_id, FALSE, buf);
 
@@ -133,4 +139,9 @@ HRESULT device_exec(BSTR callback_id, BSTR action, BSTR args, VARIANT *result)
 	return DISP_E_MEMBERNOTFOUND;
 }
 
-DEFINE_CORDOVA_MODULE(Device, L"Device", device_exec, NULL)
+static void device_module_init(void)
+{
+	acquire_unique_id(uuid);
+}
+
+DEFINE_CORDOVA_MODULE(Device, L"Device", device_exec, device_module_init, NULL)

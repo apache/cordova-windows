@@ -1,4 +1,4 @@
-// File generated at :: Tue Jul 10 2012 15:55:54 GMT+0200 (CEST)
+// File generated at :: Fri Aug 03 2012 11:28:36 GMT+0200 (CEST)
 
 /*
  Licensed to the Apache Software Foundation (ASF) under one
@@ -287,17 +287,6 @@ var cordova = {
             }
         }
     },
-    // TODO: remove in 2.0.
-    addPlugin: function(name, obj) {
-        console.log("[DEPRECATION NOTICE] window.addPlugin and window.plugins will be removed in version 2.0.");
-        if (!window.plugins[name]) {
-            window.plugins[name] = obj;
-        }
-        else {
-            console.log("Error: Plugin "+name+" already exists.");
-        }
-    },
-
     addConstructor: function(func) {
         channel.onCordovaReady.subscribeOnce(function() {
             try {
@@ -313,51 +302,6 @@ var cordova = {
 channel.onPause = cordova.addDocumentEventHandler('pause');
 channel.onResume = cordova.addDocumentEventHandler('resume');
 channel.onDeviceReady = cordova.addDocumentEventHandler('deviceready');
-
-// Adds deprecation warnings to functions of an object (but only logs a message once)
-function deprecateFunctions(obj, objLabel) {
-    var newObj = {};
-    var logHash = {};
-    for (var i in obj) {
-        if (obj.hasOwnProperty(i)) {
-            if (typeof obj[i] == 'function') {
-                newObj[i] = (function(prop){
-                    var oldFunk = obj[prop];
-                    var funkId = objLabel + '_' + prop;
-                    return function() {
-                        if (!logHash[funkId]) {
-                            console.log('[DEPRECATION NOTICE] The "' + objLabel + '" global will be removed in version 2.0, please use lowercase "cordova".');
-                            logHash[funkId] = true;
-                        }
-                        oldFunk.apply(obj, arguments);
-                    };
-                })(i);
-            } else {
-                newObj[i] = (function(prop) { return obj[prop]; })(i);
-            }
-        }
-    }
-    return newObj;
-}
-
-/**
- * Legacy variable for plugin support
- * TODO: remove in 2.0.
- */
-if (!window.PhoneGap) {
-    window.PhoneGap = deprecateFunctions(cordova, 'PhoneGap');
-}
-if (!window.Cordova) {
-    window.Cordova = deprecateFunctions(cordova, 'Cordova');
-}
-
-/**
- * Plugins object
- * TODO: remove in 2.0.
- */
-if (!window.plugins) {
-    window.plugins = {};
-}
 
 module.exports = cordova;
 
@@ -711,7 +655,6 @@ channel.create('onDestroy');
 
 // Channels that must fire before "deviceready" is fired.
 channel.waitForInitialization('onCordovaReady');
-channel.waitForInitialization('onCordovaInfoReady');
 channel.waitForInitialization('onCordovaConnectionReady');
 
 module.exports = channel;
@@ -845,6 +788,9 @@ module.exports = {
         },
         Coordinates: {
             path: 'cordova/plugin/Coordinates'
+        },
+        device: {
+            path: 'cordova/plugin/device'
         },
         DirectoryEntry: {
             path: 'cordova/plugin/DirectoryEntry'
@@ -1000,15 +946,56 @@ var device = require('cordova/plugin/win7/device');
 module.exports = {
     id: device.platform,
     initialize: function () {
-        var storage = require('cordova/plugin/win7/storage');
+        var channel = require("cordova/channel"),
+            storage = require('cordova/plugin/win7/storage');
+
+        // Inject a lsitener for the backbutton, and tell native to override the flag (true/false) when we have 1 or more, or 0, listeners
+        var backButtonChannel = cordova.addDocumentEventHandler('backbutton', {
+            onSubscribe: function () {
+                if (this.numHandlers === 1) {
+                    exec(null, null, "Platform", "backButtonEventOn", []);
+                }
+            },
+            onUnsubscribe: function () {
+                if (this.numHandlers === 0) {
+                    exec(null, null, "Platform", "backButtonEventOff", []);
+                }
+            }
+        });
+
+        channel.onDestroy.subscribe(function () {
+            // Remove session storage database 
+            storage.removeDatabase(device.uuid);
+        });
 
         if (typeof window.openDatabase == 'undefined') {
             window.openDatabase = storage.openDatabase;
         }
+
+        if (typeof window.localStorage == 'undefined' || window.localStorage === null) {
+            Object.defineProperty(window, "localStorage", {
+                writable: false,
+                configurable: false,
+                value: new storage.WinStorage('CordovaLocalStorage')
+            });
+        }
+
+        channel.join(function () {
+            if (typeof window.sessionStorage == 'undefined' || window.sessionStorage === null) {
+                Object.defineProperty(window, "sessionStorage", {
+                    writable: false,
+                    configurable: false,
+                    value: new storage.WinStorage(device.uuid) // uuid is actually unique for application
+                });
+            }
+        }, [channel.onCordovaInfoReady]);
     },
     objects: {
         device: {
             path: 'cordova/plugin/win7/device'
+        },
+        SQLError: {
+            path: 'cordova/plugin/win7/SQLError'
         }
     }
 };
@@ -1135,7 +1122,10 @@ cameraExport.getPicture = function(successCallback, errorCallback, options) {
         popoverOptions = options.popoverOptions;
     }
 
-    exec(successCallback, errorCallback, "Camera", "takePicture", [quality, destinationType, sourceType, targetWidth, targetHeight, encodingType, mediaType, allowEdit, correctOrientation, saveToPhotoAlbum, popoverOptions]);
+    var args = [quality, destinationType, sourceType, targetWidth, targetHeight, encodingType,
+                mediaType, allowEdit, correctOrientation, saveToPhotoAlbum, popoverOptions];
+
+    exec(successCallback, errorCallback, "Camera", "takePicture", args);
 };
 
 cameraExport.cleanup = function(successCallback, errorCallback) {
@@ -1724,7 +1714,7 @@ var utils = require('cordova/utils'),
  * {boolean} isDirectory always true (readonly)
  * {DOMString} name of the directory, excluding the path leading to it (readonly)
  * {DOMString} fullPath the absolute full path to the directory (readonly)
- * {FileSystem} filesystem on which the directory resides (readonly)
+ * TODO: implement this!!! {FileSystem} filesystem on which the directory resides (readonly)
  */
 var DirectoryEntry = function(name, fullPath) {
      DirectoryEntry.__super__.constructor.apply(this, [false, true, name, fullPath]);
@@ -2449,13 +2439,12 @@ var DirectoryEntry = require('cordova/plugin/DirectoryEntry');
 var FileSystem = function(name, root) {
     this.name = name || null;
     if (root) {
-        console.log('root.name ' + name);
-        console.log('root.root ' + root);
         this.root = new DirectoryEntry(root.name, root.fullPath);
     }
 };
 
 module.exports = FileSystem;
+
 });
 
 // file: lib/common/plugin/FileTransfer.js
@@ -2488,10 +2477,12 @@ FileTransfer.prototype.upload = function(filePath, server, successCallback, erro
     var mimeType = null;
     var params = null;
     var chunkedMode = true;
+    var headers = null;
     if (options) {
         fileKey = options.fileKey;
         fileName = options.fileName;
         mimeType = options.mimeType;
+        headers = options.headers;
         if (options.chunkedMode !== null || typeof options.chunkedMode != "undefined") {
             chunkedMode = options.chunkedMode;
         }
@@ -2508,7 +2499,7 @@ FileTransfer.prototype.upload = function(filePath, server, successCallback, erro
         errorCallback(error);
     };
 
-    exec(successCallback, fail, 'FileTransfer', 'upload', [filePath, server, fileKey, fileName, mimeType, params, trustAllHosts, chunkedMode]);
+    exec(successCallback, fail, 'FileTransfer', 'upload', [filePath, server, fileKey, fileName, mimeType, params, trustAllHosts, chunkedMode, headers]);
 };
 
 /**
@@ -2578,15 +2569,19 @@ define("cordova/plugin/FileUploadOptions", function(require, exports, module) {
  * @param fileName {String}  Filename to be used by the server. Defaults to image.jpg.
  * @param mimeType {String}  Mimetype of the uploaded file. Defaults to image/jpeg.
  * @param params {Object}    Object with key: value params to send to the server.
+ * @param headers {Object}   Keys are header names, values are header values. Multiple
+ *                           headers of the same name are not supported.
  */
-var FileUploadOptions = function(fileKey, fileName, mimeType, params) {
+var FileUploadOptions = function(fileKey, fileName, mimeType, params, headers) {
     this.fileKey = fileKey || null;
     this.fileName = fileName || null;
     this.mimeType = mimeType || null;
     this.params = params || null;
+    this.headers = headers || null;
 };
 
 module.exports = FileUploadOptions;
+
 });
 
 // file: lib/common/plugin/FileUploadResult.js
@@ -3371,12 +3366,12 @@ var accelerometer = {
 
         var p;
         var win = function(a) {
-            successCallback(a);
             removeListeners(p);
+            successCallback(a);
         };
         var fail = function(e) {
-            errorCallback(e);
             removeListeners(p);
+            errorCallback(e);
         };
 
         p = createCallbackPair(win, fail);
@@ -3408,8 +3403,8 @@ var accelerometer = {
         var id = utils.createUUID();
 
         var p = createCallbackPair(function(){}, function(e) {
-            errorCallback(e);
             removeListeners(p);
+            errorCallback(e);
         });
         listeners.push(p);
 
@@ -3424,7 +3419,10 @@ var accelerometer = {
 
         if (running) {
             // If we're already running then immediately invoke the success callback
-            successCallback(accel);
+            // but only if we have retreived a value, sample code does not check for null ...
+            if(accel) {
+                successCallback(accel);
+            }
         } else {
             start();
         }
@@ -3955,6 +3953,74 @@ var contacts = {
 };
 
 module.exports = contacts;
+
+});
+
+// file: lib/common/plugin/device.js
+define("cordova/plugin/device", function(require, exports, module) {
+var channel = require('cordova/channel'),
+    utils = require('cordova/utils'),
+    exec = require('cordova/exec');
+
+// Tell cordova channel to wait on the CordovaInfoReady event
+channel.waitForInitialization('onCordovaInfoReady');
+
+/**
+ * This represents the mobile device, and provides properties for inspecting the model, version, UUID of the
+ * phone, etc.
+ * @constructor
+ */
+function Device() {
+    this.available = false;
+    this.platform = null;
+    this.version = null;
+    this.name = null;
+    this.uuid = null;
+    this.cordova = null;
+
+    var me = this;
+
+    channel.onCordovaReady.subscribeOnce(function() {
+        me.getInfo(function(info) {
+            me.available = true;
+            me.platform = info.platform;
+            me.version = info.version;
+            me.name = info.name;
+            me.uuid = info.uuid;
+            me.cordova = info.cordova;
+            channel.onCordovaInfoReady.fire();
+        },function(e) {
+            me.available = false;
+            utils.alert("[ERROR] Error initializing Cordova: " + e);
+        });
+    });
+}
+
+/**
+ * Get device info
+ *
+ * @param {Function} successCallback The function to call when the heading data is available
+ * @param {Function} errorCallback The function to call when there is an error getting the heading data. (OPTIONAL)
+ */
+Device.prototype.getInfo = function(successCallback, errorCallback) {
+
+    // successCallback required
+    if (typeof successCallback !== "function") {
+        console.log("Device Error: successCallback is not a function");
+        return;
+    }
+
+    // errorCallback optional
+    if (errorCallback && (typeof errorCallback !== "function")) {
+        console.log("Device Error: errorCallback is not a function");
+        return;
+    }
+
+    // Get info
+    exec(successCallback, errorCallback, "Device", "getDeviceInfo", []);
+};
+
+module.exports = new Device();
 
 });
 
@@ -4620,6 +4686,23 @@ var splashscreen = {
 module.exports = splashscreen;
 });
 
+// file: lib/win7/plugin/win7/SQLError.js
+define("cordova/plugin/win7/SQLError", function(require, exports, module) {
+var SQLError = function () {
+};
+
+SQLError.UNKNOWN_ERR = 0;
+SQLError.DATABASE_ERR = 1;
+SQLError.VERSION_ERR = 2;
+SQLError.TOO_LARGE_ERR = 3;
+SQLError.QUOTA_ERR = 4;
+SQLError.SYNTAX_ERR = 5;
+SQLError.CONSTRAINT_ERR = 6;
+SQLError.TIMEOUT_ERR = 7;
+
+module.exports = SQLError;
+});
+
 // file: lib/win7/plugin/win7/device.js
 define("cordova/plugin/win7/device", function(require, exports, module) {
 var channel = require('cordova/channel'),
@@ -4683,7 +4766,8 @@ module.exports = {
 
 // file: lib/win7/plugin/win7/storage.js
 define("cordova/plugin/win7/storage", function(require, exports, module) {
-var utils = require('cordova/utils'),
+var channel = require("cordova/channel"),
+    utils = require('cordova/utils'),
     exec = require('cordova/exec');
 
 var queryQueue = {};
@@ -4701,7 +4785,9 @@ var Result = function () {
     this.rows = new Rows();
 };
 
-function completeQuery(id, data) {
+function completeQuery(result) {
+    var id = result.id;
+    var data = result.data;
     var query = queryQueue[id];
     if (query) {
         try {
@@ -4735,7 +4821,9 @@ function completeQuery(id, data) {
     }
 }
 
-function failQuery(reason, id) {
+function failQuery(result) {
+    var id = result.id;
+    var reason = result.reason;
     var query = queryQueue[id];
     if (query) {
         try {
@@ -4883,11 +4971,100 @@ Database.prototype.transaction = function (process, errorCallback, successCallba
     }
 };
 
-module.exports = {
-    openDatabase: function (name, version, display_name, size) {
-        var dbId = exec(null, null, "Storage", "openDatabase", [name, version, display_name, size]);
-        return new Database(dbId);
+var WinStorage = function (dbName) {
+    channel.waitForInitialization("winStorage" + dbName);
+
+    try {
+
+        this.db = openDatabase(dbName, '1.0', dbName, 2621440);
+        var storage = {};
+        this.length = 0;
+        function setLength(length) {
+            this.length = length;
+        }
+        this.db.transaction(
+        function (transaction) {
+            var i;
+            transaction.executeSql('CREATE TABLE IF NOT EXISTS storage (id NVARCHAR(40) PRIMARY KEY, body NVARCHAR(255))');
+            transaction.executeSql('SELECT * FROM storage', [], function (tx, result) {
+                for (var i = 0; i < result.rows.length; i++) {
+                    storage[result.rows.item(i).id] = result.rows.item(i).body;
+                }
+                setLength(result.rows.length);
+                channel.initializationComplete("winStorage" + dbName);
+            });
+
+        },
+        function (err) {
+            utils.alert(err.message);
+        }
+      );
+        this.setItem = function (key, val) {
+            if (typeof (storage[key]) == 'undefined') {
+                this.length++;
+            }
+            storage[key] = val;
+            this.db.transaction(
+          function (transaction) {
+              transaction.executeSql('CREATE TABLE IF NOT EXISTS storage (id NVARCHAR(40) PRIMARY KEY, body NVARCHAR(255))');
+              transaction.executeSql('REPLACE INTO storage (id, body) values(?,?)', [key, val]);
+          }
+        );
+        };
+        this.getItem = function (key) {
+            return (typeof (storage[key]) == 'undefined') ? null : storage[key];
+        };
+        this.removeItem = function (key) {
+            delete storage[key];
+            this.length--;
+            this.db.transaction(
+          function (transaction) {
+              transaction.executeSql('CREATE TABLE IF NOT EXISTS storage (id NVARCHAR(40) PRIMARY KEY, body NVARCHAR(255))');
+              transaction.executeSql('DELETE FROM storage where id=?', [key]);
+          }
+        );
+        };
+        this.clear = function () {
+            storage = {};
+            this.length = 0;
+            this.db.transaction(
+          function (transaction) {
+              transaction.executeSql('CREATE TABLE IF NOT EXISTS storage (id NVARCHAR(40) PRIMARY KEY, body NVARCHAR(255))');
+              transaction.executeSql('DELETE FROM storage', []);
+          }
+        );
+        };
+        this.key = function (index) {
+            var i = 0;
+            for (var j in storage) {
+                if (i == index) {
+                    return j;
+                } else {
+                    i++;
+                }
+            }
+            return null;
+        };
+
+    } catch (e) {
+        utils.alert("Database error " + e + ".");
+        return;
     }
+};
+
+function openDatabase(name, version, display_name, size) {
+    var dbId = exec(null, null, "Storage", "openDatabase", [name, version, display_name, size]);
+    return new Database(dbId);
+}
+
+function removeDatabase(name) {
+    exec(null, null, "Storage", "removeDatabase", [name]);
+}
+
+module.exports = {
+    openDatabase: openDatabase,
+    removeDatabase: removeDatabase,
+    WinStorage: WinStorage
 };
 });
 

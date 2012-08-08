@@ -34,6 +34,7 @@
 #include "resource.h"
 #include <wchar.h>
 #include "common.h"
+#include "mp4patch.h"
 
 #pragma comment(lib, "mfuuid.lib")      // Media Foundation UUIDs
 #pragma comment(lib, "mfplat.lib")	// MF attributes
@@ -87,11 +88,13 @@ HANDLE session_control_thread;
 
 #define MAX_FILE_NAME_LEN	255	// NUL not included
 
-#define PHOTO_OUTPUT_FILE		L"photo.jpg"
-#define VIDEO_OUTPUT_FILE		L"movie.mp4"
-
 wchar_t temp_directory_win[MAX_FILE_NAME_LEN + 1];	//	C:\Temp syntax
 wchar_t temp_directory_url[MAX_FILE_NAME_LEN + 8];	//	file://C:/Temp syntax
+wchar_t last_recorded_file_name_full[MAX_FILE_NAME_LEN+1];	// Full path
+wchar_t last_recorded_file_name[MAX_FILE_NAME_LEN+1];		// Name only
+
+LONGLONG start_time;	// Markers used to compute the duration of the last recording
+LONGLONG stop_time;
 
 // Note: the MPEG 4 sink is limited to 4 GB
 
@@ -758,7 +761,6 @@ HRESULT add_file_output_nodes (IMFTopology* topology_if, IMFTopologyNode** video
 	IMFTopologyNode* a_node_if = 0;
 	IMFByteStream* byte_stream_if = 0;
 
-	// MFCreateTempFile
 	hr = MFCreateFile(MF_ACCESSMODE_READWRITE, MF_OPENMODE_DELETE_IF_EXIST, MF_FILEFLAGS_NONE, file_name, &byte_stream_if);
 
 	hr = MFCreateMPEG4MediaSink(byte_stream_if, h264_config_if, aac_config_if, &media_sink_if);
@@ -1219,6 +1221,7 @@ IMFTopology* build_topology (int topo_type)
 	// The topology will then be associated to a media session, and destroyed when the session completes
 	HRESULT hr;
 	IMFTopology* topology_if = 0;
+	SYSTEMTIME t;
 
 	hr = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
 		
@@ -1240,14 +1243,11 @@ IMFTopology* build_topology (int topo_type)
 			break;
 
 		case VIDEO_CAPTURE_TOPO:
-			{
-				wchar_t fname[MAX_FILE_NAME_LEN+1];
-
-				swprintf(fname, MAX_FILE_NAME_LEN, L"%s%s", temp_directory_win, VIDEO_OUTPUT_FILE);
-				fname[MAX_FILE_NAME_LEN] = 0; // Our temp directories are not supposed to be this long...
-		
-				prepare_video_capture(topology_if, fname);
-			}
+			GetLocalTime(&t);
+			swprintf(last_recorded_file_name, MAX_FILE_NAME_LEN, L"%0d%02d%02d-%02d%02d%02d.mp4", t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond);
+			swprintf(last_recorded_file_name_full, MAX_FILE_NAME_LEN, L"%s%s", temp_directory_win, last_recorded_file_name);
+			last_recorded_file_name_full[MAX_FILE_NAME_LEN] = 0;
+			prepare_video_capture(topology_if, last_recorded_file_name_full);
 			break;
 		
 		case AUDIO_CAPTURE_TOPO:
@@ -1268,8 +1268,6 @@ unsigned int __stdcall session_control_proc(void* param)
 	HRESULT hr;
     PROPVARIANT var;
 	BOOL done = FALSE;
-	LONGLONG start_time = 0;
-	LONGLONG stop_time = 0;
 	IMFTopology* topology_if = (IMFTopology*) param;
 
 	CoInitialize(0);
@@ -1498,6 +1496,8 @@ void end_active_session (void)
 void stop_video_capture (void)
 {
 	end_active_session();
+
+	fix_mp4_duration(last_recorded_file_name_full, stop_time - start_time);
 }
 
 void stop_video_framing (void)
@@ -2177,18 +2177,20 @@ HRESULT STDMETHODCALLTYPE SGSC_OnShutdown(IMFSampleGrabberSinkCallback2 * This)
 
 HRESULT STDMETHODCALLTYPE  SGSC_OnProcessSampleEx (IMFSampleGrabberSinkCallback2 * This, REFGUID guidMajorMediaType, DWORD dwSampleFlags,
     LONGLONG llSampleTime, LONGLONG llSampleDuration, const BYTE *pSampleBuffer, DWORD dwSampleSize, IMFAttributes *pAttributes)
-{	
+{
 	if (grab_first_available_frame)
 	{
-		wchar_t fname[MAX_FILE_NAME_LEN+1];
+		SYSTEMTIME t;
 
-		swprintf(fname, MAX_FILE_NAME_LEN, L"%s%s", temp_directory_win, PHOTO_OUTPUT_FILE);	
-		fname[MAX_FILE_NAME_LEN] = 0;
+		GetLocalTime(&t);
+		swprintf(last_recorded_file_name, MAX_FILE_NAME_LEN, L"%d%02d%02d-%02d%02d%02d.jpg", t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond);
+		swprintf(last_recorded_file_name_full, MAX_FILE_NAME_LEN, L"%s%s", temp_directory_win, last_recorded_file_name);
+		last_recorded_file_name_full[MAX_FILE_NAME_LEN] = 0;
 
 		if (mjpeg_mode)
 		{
 			// Direct JPEG frames
-			HANDLE h = CreateFile(fname, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
+			HANDLE h = CreateFile(last_recorded_file_name_full, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
 			DWORD written = 0;
 			WriteFile(h, pSampleBuffer, dwSampleSize, &written, 0);
 			CloseHandle(h);
@@ -2199,7 +2201,7 @@ HRESULT STDMETHODCALLTYPE  SGSC_OnProcessSampleEx (IMFSampleGrabberSinkCallback2
 			DWORD width = frame_size >> 32;
 			DWORD height = (DWORD) frame_size;
 
-			save_bitmap_as_jpeg(width, height, (unsigned char*) pSampleBuffer, dwSampleSize, fname, scan_len);
+			save_bitmap_as_jpeg(width, height, (unsigned char*) pSampleBuffer, dwSampleSize, last_recorded_file_name_full, scan_len);
 		}
 	
 		// Lower flag and don't try capturing another photo until it gets raised again
@@ -2263,14 +2265,10 @@ BSTR last_callback_id;
 
 void notify_capture_result (void)
 {
-	wchar_t filename[10 + MAX_FILE_NAME_LEN + 1];
 	wchar_t reply[30 + MAX_FILE_NAME_LEN + 1];
 
-	// Form suitable file name
-	swprintf(filename, sizeof(filename)/sizeof(filename[0]), L"%s%s", temp_directory_url, current_action_code == ACTION_PHOTO_CAPTURE ? PHOTO_OUTPUT_FILE : VIDEO_OUTPUT_FILE);
-	
 	// Send back our reply to the JS side
-	swprintf(reply, sizeof(reply)/sizeof(reply[0]), L"[{fullPath: '%s'}]", filename);
+	swprintf(reply, sizeof(reply)/sizeof(reply[0]), L"[{fullPath: '%s%s'}]", temp_directory_url, last_recorded_file_name);
 	
 	cordova_success_callback(last_callback_id, FALSE, reply);
 
@@ -2318,8 +2316,8 @@ HRESULT capture_exec(BSTR callback_id, BSTR action, BSTR args, VARIANT *result)
 	return DISP_E_MEMBERNOTFOUND;
 }
 
-DEFINE_CORDOVA_MODULE(Camera, L"Camera", camera_exec, NULL)
-DEFINE_CORDOVA_MODULE(Capture, L"Capture", capture_exec, NULL)
+DEFINE_CORDOVA_MODULE(Camera, L"Camera", camera_exec, NULL, NULL)
+DEFINE_CORDOVA_MODULE(Capture, L"Capture", capture_exec, NULL, NULL)
 
 
 // @@@ need to handle device lost events - MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK

@@ -237,11 +237,11 @@ HRESULT accel_exec(BSTR callback_id, BSTR action, BSTR args, VARIANT *result)
 	if (!wcscmp(action, L"stop"))
 	{
 		stop_acquisition();
-		cordova_success_callback(callback_id, FALSE, NULL);
+		cordova_success_callback(callback_id, FALSE, NULL_MESSAGE);
 		return S_OK;
 	}
 
 	return DISP_E_MEMBERNOTFOUND;
 }
 
-DEFINE_CORDOVA_MODULE(Accelerometer, L"Accelerometer", accel_exec, NULL)
+DEFINE_CORDOVA_MODULE(Accelerometer, L"Accelerometer", accel_exec, NULL, NULL)

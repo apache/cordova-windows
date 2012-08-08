@@ -24,6 +24,7 @@
 #include <wchar.h>
 
 #include "notification.h"
+#include "json.h"
 
 extern HWND	hWnd;
 
@@ -198,108 +199,71 @@ static HRESULT show_dialog(BSTR callback_id, BSTR args)
 	wchar_t buf[10];
 	int ret_code;
 	wchar_t* message = 0;
-	int message_len = 0;
+	wchar_t* buttons = 0;
 	wchar_t* title = 0;
-	int title_len = 0;
 	int num_buttons = 0;
 	wchar_t* btn_text[MAX_BUTTONS];
 	int btn_text_len[MAX_BUTTONS];
-	wchar_t separator;
+	unsigned int cursor = 0;
 
-	wchar_t* cursor = args;
+	JsonArray array;
+	JsonItem item;
 
-	// args should be like "["message", "title", "button1, button2"]"
+	// args should be like "["message","title","button1,button2"]"
 
-	// Search for first quote
-	while (*cursor && *cursor != L'\'' && *cursor != L'"')
-		cursor++;
-
-	// Record whether it's a single or double quote
-	separator = *cursor;
-
-	if (!separator)
+	// Validate array contents
+	if (!json_parse_and_validate_args(args, &array, JSON_VALUE_STRING,
+									JSON_VALUE_STRING,
+									JSON_VALUE_STRING,
+									JSON_VALUE_INVALID)) {
+		json_free_args(array);
 		return -1;
+	}
 
-	// Mark beginning of message
-	cursor++;
-	message = cursor;
+	// message
+	item = json_array_get_first(array);
+	message = json_get_string_value(item);
 
-	// Search for next quote
-	while (*cursor && *cursor != separator)
-		cursor++;
+	// title
+	item = json_array_get_next(item);
+	title = json_get_string_value(item);
 
-	if (*cursor != separator)
-		return -1;
-
-	// Found it ; record message len
-	message_len = cursor - message;
-
-	// Move past second quote
-	cursor++;
-
-	// Done with message, now look for title
-
-	while (*cursor && *cursor != L'\'' && *cursor != L'"')
-		cursor++;
-
-	separator = *cursor;
-
-	if (!separator)
-		return -1;
-
-	cursor++;
-	title = cursor;
-
-	while (*cursor && *cursor != separator)
-		cursor++;
-
-	if (*cursor != separator)
-		return -1;
-
-	title_len = cursor - title;
-
-	cursor++;
-
-	// Done with title, switch to buttons
-	
-	// Locate next quote
-	while (*cursor && *cursor != L'\'' && *cursor != L'"')
-		cursor++;
-
-	if (!*cursor)
+	// buttons
+	item = json_array_get_next(item);
+	buttons = json_get_string_value(item);
+	if (*buttons == 0)
 		goto button_done; // No button ; consider that a valid use case
-
-	cursor++;
 
 button_parsing:
 
-	// Skip spaces
-	while (*cursor && *cursor == L' ')
+	btn_text[num_buttons] = buttons + cursor;
+	btn_text_len[num_buttons] = 0;
+
+	// Search for separator
+	while (cursor < wcslen(buttons) && *(buttons + cursor) != L',') {
 		cursor++;
-
-	if (*cursor)
-	{
-		btn_text[num_buttons] = cursor;
-
-		cursor++;
-
-		// Search for end marker
-		while (*cursor && *cursor != L',' && *cursor != L'"')
-			cursor++;
-
-		btn_text_len[num_buttons] = cursor - btn_text[num_buttons];
-
-		num_buttons++;
-
-		cursor++;
-	
-		if (*cursor != 0 && *cursor != L'"' && *cursor != L'\'' && *cursor != L']' && num_buttons < MAX_BUTTONS)
-			goto button_parsing;
+		btn_text_len[num_buttons]++;
 	}
+
+	num_buttons++;
+
+	cursor++;
+	
+	if (cursor < wcslen(buttons) && num_buttons < MAX_BUTTONS)
+		goto button_parsing;
 
 button_done:
 
-	ret_code = DisplayMessage(title, title_len, message, message_len, btn_text, btn_text_len, num_buttons);
+	json_free_args(array);
+
+	ret_code = DisplayMessage(title, wcslen(title), message, wcslen(message), btn_text, btn_text_len, num_buttons);
+
+	if (message)
+		free(message);
+	if (title)
+		free(title);
+	if (buttons)
+		free(buttons);
 
 	wsprintf(buf, L"%d", ret_code);
 
@@ -340,4 +304,4 @@ HRESULT notification_exec(BSTR callback_id, BSTR action, BSTR args, VARIANT *res
 	return DISP_E_MEMBERNOTFOUND;
 }
 
-DEFINE_CORDOVA_MODULE(Notification, L"Notification", notification_exec, NULL)
+DEFINE_CORDOVA_MODULE(Notification, L"Notification", notification_exec, NULL, NULL)

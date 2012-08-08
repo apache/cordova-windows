@@ -8,6 +8,14 @@
     <ClCompile Include="network.c" />
     <ClCompile Include="shell.c" />
     <ClCompile Include="notification.c" />
+    <ClCompile Include="storage.c" />
+    <ClCompile Include="json.c" />
+    <ClCompile Include="lib\sqlite\sqlite3.c" />
+    <ClCompile Include="platform.c" />
+    <ClCompile Include="file.c" />
+    <ClCompile Include="common.c" />
+    <ClCompile Include="filetransfer.c" />
+    <ClCompile Include="mp4patch.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accel.h" />
@@ -19,6 +27,12 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="shell.h" />
     <ClInclude Include="notification.h" />
+    <ClInclude Include="storage.h" />
+    <ClInclude Include="json.h" />
+    <ClInclude Include="platform.h" />
+    <ClInclude Include="file.h" />
+    <ClInclude Include="filetransfer.h" />
+    <ClInclude Include="mp4patch.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -36,6 +50,9 @@
     </None>
     <None Include="lib\js\platform.js">
       <Filter>javascript</Filter>
+    </None>
+    <None Include="www\acceleration.html">
+      <Filter>html</Filter>
     </None>
     <None Include="www\index.html">
       <Filter>html</Filter>
@@ -63,6 +80,18 @@
     </None>
     <None Include="lib\js\plugin\win7\jsHandler.js">
       <Filter>javascript</Filter>
+    </None>
+    <None Include="lib\js\plugin\win7\storage.js">
+      <Filter>javascript</Filter>
+    </None>
+    <None Include="www\storage.html">
+      <Filter>html</Filter>
+    </None>
+    <None Include="lib\js\plugin\win7\SQLError.js">
+      <Filter>javascript</Filter>
+    </None>
+    <None Include="www\file.html">
+      <Filter>html</Filter>
     </None>
     <None Include="www\notification.html">
       <Filter>html</Filter>

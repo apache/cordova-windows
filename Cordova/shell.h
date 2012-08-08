@@ -23,6 +23,8 @@
 #include <WTypes.h>
 #include <OaIdl.h>
 
+#define NULL_MESSAGE L"null"
+
 typedef enum {
 	CB_NO_RESULT = 0,
 	CB_OK = 1,
@@ -38,10 +40,12 @@ typedef enum {
 
 typedef HRESULT (*module_exec_func) (BSTR callback_id, BSTR action, BSTR args, VARIANT *result);
 typedef void (*module_close_func) (void);
+typedef void (*module_init_func) (void);
 
 struct _CordovaModule {
 	BSTR module_id;
 	module_exec_func exec;
+	module_init_func init;
 	module_close_func close;
 	struct _CordovaModule *next;
 };
@@ -49,9 +53,9 @@ typedef struct _CordovaModule CordovaModule;
 
 #define CORDOVA_MODULE(name) &Cordova##name
 #define DECLARE_CORDOVA_MODULE(name) extern CordovaModule Cordova##name;
-#define DEFINE_CORDOVA_MODULE(name, id, exec_func, close_func) CordovaModule Cordova##name = { id, exec_func, close_func, NULL };
+#define DEFINE_CORDOVA_MODULE(name, id, exec_func, init_func, close_func) CordovaModule Cordova##name = { id, exec_func, init_func, close_func, NULL };
 
-void cordova_success_callback(BSTR callback_id, BOOL keep_callback, wchar_t *message);
-void cordova_fail_callback(BSTR callback_id, BOOL keep_callback, CallbackStatus status, wchar_t *message);
+void cordova_success_callback(BSTR callback_id, BOOL keep_callback, const wchar_t *message);
+void cordova_fail_callback(BSTR callback_id, BOOL keep_callback, CallbackStatus status, const wchar_t *message);
 
 #endif

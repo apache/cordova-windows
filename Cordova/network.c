@@ -105,4 +105,4 @@ HRESULT network_exec(BSTR callback_id, BSTR action, BSTR args, VARIANT *result)
 	return DISP_E_MEMBERNOTFOUND;
 }
 
-DEFINE_CORDOVA_MODULE(Network, L"NetworkStatus", network_exec, NULL)
+DEFINE_CORDOVA_MODULE(Network, L"NetworkStatus", network_exec, NULL, NULL)

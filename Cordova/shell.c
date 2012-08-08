@@ -30,19 +30,27 @@
 #include <ipifcons.h>	// Network types
 
 #include "shell.h"
+#include "common.h"
 #include "device.h"
 #include "accel.h"
 #include "capture.h"
 #include "network.h"
 #include "notification.h"
+#include "storage.h"
+#include "platform.h"
+#include "file.h"
+#include "filetransfer.h"
 
 #include <commctrl.h>					// Let's initialize the common controls library
 #pragma comment(lib, "comctl32.lib")	// so they can be used with the process
 
 //-------------------------------------------------------------------------------------------------
 
+typedef enum {
+	WM_EXEC_JS_SCRIPT = (WM_USER + 1)
+} UserMessages;
+
 #define NOT_IMPLEMENTED __debugbreak(); OutputDebugStringA(__FUNCTION__); return 0;
-#define ASSERT(x) if (!(x)) __debugbreak()
 
 IWebBrowser2*			browser_web_if;			// IWebBrowser2 interface to the browser control
 IOleObject*				browser_ole_if;			// IOleObject interface to the browser control, required to pass various OLE related parameters
@@ -54,6 +62,7 @@ IOleInPlaceFrame*		browser_ipf;
 IDispatch*				browser_dsp;			// Browser event dispatcher
 IDocHostUIHandler*		browser_dui;
 IDispatch*				browser_ext;
+IOleCommandTarget*		browser_oct;
 
 DWORD					browser_dsp_cookie;		// Dispatcher connection id, as returned by the connection point Advise call
 
@@ -67,6 +76,7 @@ static struct IOleInPlaceFrame	inplfr;
 static struct IDispatch			disp;
 static struct IDocHostUIHandler	duih;
 static struct IDispatch			ext;
+static struct IOleCommandTarget oct;
 
 int clsi_ref_count;
 int inplsi_ref_count;
@@ -75,6 +85,7 @@ int disp_ref_count;
 int inplfr_ref_count;
 int duih_ref_count;
 int ext_ref_count;
+int oct_ref_count;
 
 const	wchar_t gate_name[]= L"CordovaExec";
 #define DISPID_GATE	8086
@@ -101,28 +112,19 @@ void invoke_js_routine (wchar_t* wcs);
 
 int current_state;	// Rough operating state : not ready / ready / temporarily paused
 
+int skip_title_update = 1;	// Title update skip counter, used to avoid initial "index.html"
+
+
 //-------------------------------------------------------------------------------------------------
 
 static CordovaModule *module_list = NULL;
 
-wchar_t *next_string(wchar_t *str, wchar_t delim)
-{
-	wchar_t *start;
-	wchar_t *end;
-
-	start = wcschr(str, delim);
-	if (start != NULL) {
-		end = wcschr(start + 1, delim);
-		if (end != NULL)
-			*(++end) = 0;
-	}
-
-	return start;
-}
-
 static void register_cordova_module(CordovaModule *module)
 {
 	CordovaModule *item = module_list;
+
+	if (module->init != NULL)
+		module->init();
 
 	if (!item) {
 		module_list = module;
@@ -148,6 +150,10 @@ static void register_cordova_modules()
 	register_cordova_module(CORDOVA_MODULE(Accelerometer));
 	register_cordova_module(CORDOVA_MODULE(Network));
 	register_cordova_module(CORDOVA_MODULE(Notification));
+	register_cordova_module(CORDOVA_MODULE(Storage));
+	register_cordova_module(CORDOVA_MODULE(Platform));
+	register_cordova_module(CORDOVA_MODULE(File));
+	register_cordova_module(CORDOVA_MODULE(FileTransfer));
 }
 
 static void close_cordova_modules()
@@ -158,6 +164,10 @@ static void close_cordova_modules()
 	close_cordova_module(CORDOVA_MODULE(Accelerometer));
 	close_cordova_module(CORDOVA_MODULE(Network));
 	close_cordova_module(CORDOVA_MODULE(Notification));
+	close_cordova_module(CORDOVA_MODULE(Storage));
+	close_cordova_module(CORDOVA_MODULE(Platform));
+	close_cordova_module(CORDOVA_MODULE(File));
+	close_cordova_module(CORDOVA_MODULE(FileTransfer));
 }
 
 static CordovaModule *find_cordova_module(BSTR module_id)
@@ -189,14 +199,12 @@ static wchar_t *error_string_from_code(CallbackStatus code)
 	}
 }
 
-void cordova_success_callback(BSTR callback_id, BOOL keep_callback, wchar_t *message)
+void cordova_success_callback(BSTR callback_id, BOOL keep_callback, const wchar_t *message)
 {
 	wchar_t *status_str = (message == NULL) ? error_string_from_code(CB_NO_RESULT) : error_string_from_code(CB_OK);
 	wchar_t *result = L"window.cordova.callbackSuccess('%s',{status:%s,keepCallback:%s,message:%s});";
 	wchar_t *buf;
 	
-	if (message == NULL)
-		message = L"null";
 	buf = (wchar_t *) malloc(sizeof(wchar_t) * (1 + wcslen(result) + wcslen(callback_id) + wcslen(status_str) + wcslen(L"false") + wcslen(message)));
 
 	wsprintf(buf, result, callback_id, status_str, keep_callback?L"true":L"false", message);
@@ -205,13 +213,12 @@ void cordova_success_callback(BSTR callback_id, BOOL keep_callback, wchar_t *mes
 	free(buf);
 }
 
-void cordova_fail_callback(BSTR callback_id, BOOL keep_callback, CallbackStatus status, wchar_t *message)
+void cordova_fail_callback(BSTR callback_id, BOOL keep_callback, CallbackStatus status, const wchar_t *message)
 {
 	wchar_t *status_str = error_string_from_code(status);
 	wchar_t *result = L"window.cordova.callbackError('%s',{status:%s,keepCallback:%s,message:%s});";
 	wchar_t *buf;
 	
-	// message must not be NULL
 	buf = (wchar_t *) malloc(sizeof(wchar_t) * (1 + wcslen(result) + wcslen(callback_id) + wcslen(status_str) + wcslen(L"false") + wcslen(message)));
 
 	wsprintf(buf, result, callback_id, status_str, keep_callback?L"true":L"false", message);
@@ -464,7 +471,13 @@ HRESULT STDMETHODCALLTYPE DUIH_QueryInterface(IDocHostUIHandler * This, REFIID r
 		return NOERROR;
 	}
 
-	// We get asked for IOleCommandTarget too..
+	// We're using IOleCommandTarget to intercept javascript error dialogs
+	if (IsEqualIID(riid,&IID_IOleCommandTarget))
+	{
+		*ppvObject = browser_oct;
+		browser_oct->lpVtbl->AddRef(browser_oct);
+		return NOERROR;
+	}
 
 	*ppvObject = 0;
 	return E_NOINTERFACE;
@@ -601,6 +614,73 @@ static IDocHostUIHandlerVtbl duih_vtable =
 
 //-------------------------------------------------------------------------------------------------
 
+HRESULT STDMETHODCALLTYPE OCT_QueryInterface (IOleCommandTarget* This, REFIID riid, void **ppvObject)
+{
+	if (IsEqualIID(riid,&IID_IUnknown) || IsEqualIID(riid,&IID_IOleCommandTarget))
+	{
+		*ppvObject = browser_oct;
+		browser_oct->lpVtbl->AddRef(browser_oct);
+		return NOERROR;
+	}
+
+	*ppvObject = 0;
+	return E_NOINTERFACE;
+}
+
+ULONG STDMETHODCALLTYPE OCT_AddRef (IOleCommandTarget* This)
+{
+	oct_ref_count++;
+
+	return oct_ref_count;
+}
+
+ULONG STDMETHODCALLTYPE OCT_Release (IOleCommandTarget* This)
+{
+	oct_ref_count--;
+
+	ASSERT(oct_ref_count >= 0);
+
+	return oct_ref_count;
+}
+
+HRESULT STDMETHODCALLTYPE OCT_QueryStatus (IOleCommandTarget* This,const GUID* pguidCmdGroup, ULONG cCmds, OLECMD prgCmds[  ], OLECMDTEXT* pCmdText)
+{
+	return E_NOTIMPL;
+}
+
+HRESULT STDMETHODCALLTYPE OCT_Exec (IOleCommandTarget* This, const GUID *pguidCmdGroup, DWORD nCmdID, DWORD nCmdexecopt, VARIANT* pvaIn, VARIANT* pvaOut)
+{
+	if (pguidCmdGroup && IsEqualGUID(pguidCmdGroup, &CGID_DocHostCommandHandler))
+		switch (nCmdID)
+		{
+			case OLECMDID_SHOWMESSAGE:
+				 return OLECMDERR_E_NOTSUPPORTED;
+
+			case OLECMDID_SHOWSCRIPTERROR:
+				// The JavaScript engine reported an error: stop running scripts on the page
+				pvaOut->vt = VT_BOOL;
+				pvaOut->boolVal = VARIANT_FALSE;
+				return S_OK;
+
+			default:
+				 return OLECMDERR_E_NOTSUPPORTED;
+         }
+
+	 return OLECMDERR_E_UNKNOWNGROUP;
+}
+
+// IOleCommandTarget vtable
+static IOleCommandTargetVtbl oct_vtable =
+{
+	OCT_QueryInterface,
+	OCT_AddRef,
+	OCT_Release,
+	OCT_QueryStatus,
+	OCT_Exec
+};
+
+//-------------------------------------------------------------------------------------------------
+
 HRESULT STDMETHODCALLTYPE ClSi_QueryInterface(IOleClientSite * This, REFIID riid, void **ppvObject)
 {
 	if (IsEqualIID(riid,&IID_IUnknown) || IsEqualIID(riid,&IID_IOleClientSite)) 
@@ -714,19 +794,9 @@ static IOleClientSiteVtbl clsi_vtable =
 void invoke_js_routine (wchar_t* wcs)
 {
 	BSTR wcs_as_bstr;
-	HRESULT hr;
-	VARIANT v;
 
-	if (html_window2_if)
-	{
-		VariantInit(&v);
-
-		wcs_as_bstr = SysAllocString(wcs);
-			
-		hr = html_window2_if->lpVtbl->execScript(html_window2_if, wcs_as_bstr, javascript, &v);
-
-		SysFreeString(wcs_as_bstr);
-	}
+	wcs_as_bstr = SysAllocString(wcs);
+	PostMessage(hWnd, WM_EXEC_JS_SCRIPT, 0, (LPARAM) wcs_as_bstr);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -902,17 +972,30 @@ HRESULT STDMETHODCALLTYPE Disp_Invoke(IDispatch * This, DISPID dispIdMember, REF
 				document_html2_if->lpVtbl->get_parentWindow(document_html2_if, &html_window2_if);
 
 				// Set initial Cordova state and release application
-				register_cordova_modules();
 				set_native_ready();
 				current_state = STATE_NATIVE_READY;
 			}
 			break;
 
 		case DISPID_TITLECHANGE:
+			if (skip_title_update)
+			{
+				skip_title_update--;
+				break;
+			}
+
 			// Update window caption
 			title = pDispParams->rgvarg[0].bstrVal;
 			SetWindowText(hWnd, title);
 			break;
+
+		case DISPID_NAVIGATEERROR:
+			{
+				// Silently dismiss navigation errors for now
+				VARIANT_BOOL * cancel = pDispParams->rgvarg[0].pboolVal;
+				*cancel = VARIANT_TRUE;
+			}
+			return S_OK;
 
 		default:
 			;
@@ -955,6 +1038,18 @@ static IDispatchVtbl ext_vtable =
 
 //-------------------------------------------------------------------------------------------------
 
+static void call_js_script(BSTR wcs_as_bstr)
+{
+	VARIANT v;
+
+	if (html_window2_if)
+	{
+		VariantInit(&v);
+		html_window2_if->lpVtbl->execScript(html_window2_if, wcs_as_bstr, javascript, &v);
+		SysFreeString(wcs_as_bstr);
+	}
+}
+
 LRESULT CALLBACK CordovaShellWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	// WindowProc for the main host application window
@@ -964,6 +1059,8 @@ LRESULT CALLBACK CordovaShellWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 		case WM_CLOSE:
 			current_state = STATE_ENDING;	// The window will get deactivated before being destroyed
 											// Do not bother sending "pause" event
+											// But send the "destroy" event
+			call_js_script(SysAllocString(L"cordova.require('cordova/channel').onDestroy.fire();"));
 			break;
 	
 		case WM_DESTROY: 
@@ -988,6 +1085,10 @@ LRESULT CALLBACK CordovaShellWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 		case WM_USER:
 			// New accelerometer sample available ; propagate to the JS side
 			propagate_sample();
+			return 0;
+
+		case WM_EXEC_JS_SCRIPT:
+			call_js_script((BSTR) lParam);
 			return 0;
 
 		case WM_PARENTNOTIFY:
@@ -1061,6 +1162,10 @@ void create_browser_object (void)
 	browser_dui = &duih;
 	browser_dui->lpVtbl = &duih_vtable;
 	
+	// Initialize OLE command target object
+	browser_oct = &oct;
+	browser_oct->lpVtbl = &oct_vtable;
+
 	CoCreateInstance(&CLSID_WebBrowser, NULL, CLSCTX_INPROC_SERVER,  &IID_IWebBrowser2, (void**)&browser_web_if);
 
 	if (browser_web_if)
@@ -1208,6 +1313,7 @@ void early_init (void)
 		ExitProcess(61);
 	}
 
+	// IE 9 or newer required
 	if (get_ie_version() < 9)
 	{
 		MessageBox(GetForegroundWindow(), L"This program requires Internet Explorer 9 or newer", L"Missing Prerequisites", MB_OK);
@@ -1216,6 +1322,7 @@ void early_init (void)
 
 	// Form full path for our base URL file ; better do this early, as the current directory can be changed later
 	GetFullPathName(BASE_URL, _MAX_PATH, full_path, 0);	// Possible failure if the base directory has a very long name
+
 
 	// A little BSTR object that we'll need to invoke js routines
 	javascript = SysAllocString(L"javascript");
@@ -1261,6 +1368,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		};
 
 	early_init();
+	register_cordova_modules();
 
 	RegisterClassEx(&wc);
 
@@ -1298,4 +1406,5 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 // http://msdn.microsoft.com/en-us/ie/aa740471 for IE9 headers & libs
 // $(ProgramFiles)\Microsoft SDKs\Internet Explorer\v9\include
 // http://msdn.microsoft.com/en-us/library/ie/bb508516%28v=vs.85%29.aspx for MSHTML usage notes
+// http://support.microsoft.com/kb/261003/en-us for error handling
 
