@@ -30,9 +30,14 @@ The project supports Cordova on Win8, and uses WinLib4JS for most implementation
  - Open the VS, `FILE` -> `New` -> `Project...`, input the template name 'Cordova-Metro' in the search textField. Select the template and modify items about your new proj at the bottom of the pop-up window.
 <img src="http://i.imgur.com/DvkAN.png" width="80%"/>
  - Click the button `OK`. Then `Add` -> `Existing project...` select the `SQLite3.vcxproj` in the `lib\SQLite\SQLite3`. Build it.
- - Select the Cordova project in the Solution Explorer, then `Project` -> 'Add Reference...` -> select the SQLite3.
+ - Select the Cordova project in the Solution Explorer, then `Project` -> `Add Reference...` -> select the SQLite3.
  - Build and Run the project Cordova-Metro. If running takes a long time, simply stop the running, then rerun (known issue).
- 
+
+### Run the Sample App
+  - Open the `samples\TestAppCordova\TestApp.Cordova.sln` with visual studio.
+  - Build and run.
+  - Play around with accelerometer, geolocation, and compass.
+
 ### How to Run the Tests 
   - Open the `src\src.sln` with Visual Studio.
   - Build or re-build the project.
