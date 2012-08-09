@@ -3,30 +3,12 @@ var Metadata = function (time) {
 };
 
 var FileSystemPersistentRoot = (function () {
-    //var filePath = Windows.Storage.ApplicationData.current.localFolder.path;
-    var filePath = "";
-    do {
-        Windows.Storage.KnownFolders.documentsLibrary.createFolderAsync("per", Windows.Storage.CreationCollisionOption.openIfExists).done(function (storageFolder) {
-            filePath = storageFolder.path;
-        });
-    }
-    while (filePath == "");
-    filePath = filePath;
-    //console.log(filePath);
+    var filePath = Windows.Storage.ApplicationData.current.localFolder.path;
     return filePath;
 }());
 
 var FileSystemTemproraryRoot = (function () {
-    //var filePath = Windows.Storage.ApplicationData.current.temporaryFolder.path;
-    var filePath = "";
-    do {
-        Windows.Storage.KnownFolders.documentsLibrary.createFolderAsync("tem", Windows.Storage.CreationCollisionOption.openIfExists).done(function (storageFolder) {
-            filePath = storageFolder.path;
-        });
-    }
-    while (filePath == "");
-    filePath = filePath;
-    //console.log(filePath);
+    var filePath = Windows.Storage.ApplicationData.current.temporaryFolder.path;
     return filePath;
 }());
 
@@ -76,53 +58,54 @@ function resolveLocalFileSystemURI (uri, successCallback, errorCallback) {
     };
 
     var path = uri;
-    path = String(path).split(" ").join("\ ");
+    path = path.split(" ").join("\ ");
 
     // support for file name with parameters
-    if (String(path).match(new RegExp(/\?/g))) {
+    if (/\?/g.test(path)) {
         path = String(path).split("\?")[0];
     };
 
     // support for encodeURI
-    if (String(path).match(new RegExp(/\%5/g))) {
+    if (/\%5/g.test(path)) {
         path = decodeURI(path);
     };
     
     // support for special path start with file:/// 
-    if (String(path).substr(0, 8) == "file:///") {
+    if (path.substr(0, 8) == "file:///") {
         path = FileSystemPersistentRoot + "\\" + String(path).substr(8).split("/").join("\\");
-        Windows.Storage.StorageFile.getFileFromPathAsync(path).then(function (storageFile) {
-
-            success(new FileEntry(storageFile.name, storageFile.path));
-        }, function () {
-            Windows.Storage.StorageFolder.getFolderFromPathAsync(path).then(function (storageFolder) {
-
-                success(new DirectoryEntry(storageFolder.name, storageFolder.path));
-            }, function () {
-                fail(FileError.NOT_FOUND_ERR);
-            })
-        })
+        Windows.Storage.StorageFile.getFileFromPathAsync(path).then(
+            function (storageFile) {
+                success(new FileEntry(storageFile.name, storageFile.path));
+            },
+            function () {
+                Windows.Storage.StorageFolder.getFolderFromPathAsync(path).then(
+                    function (storageFolder) {
+                        success(new DirectoryEntry(storageFolder.name, storageFolder.path));
+                    },
+                    function () {
+                        fail(FileError.NOT_FOUND_ERR);
+                    }
+                )
+            }
+        )
     } else {
-        
-        Windows.Storage.StorageFile.getFileFromPathAsync(path).then(function (storageFile) {
-
-            success(new FileEntry(storageFile.name, storageFile.path));
-        }, function () {
-            Windows.Storage.StorageFolder.getFolderFromPathAsync(path).then(function (storageFolder) {
-
-                success(new DirectoryEntry(storageFolder.name, storageFolder.path));
-            }, function () {
-                fail(FileError.ENCODING_ERR);
-            })
-        })
-
+        Windows.Storage.StorageFile.getFileFromPathAsync(path).then(
+            function (storageFile) {
+                success(new FileEntry(storageFile.name, storageFile.path));
+            },
+            function () {
+                Windows.Storage.StorageFolder.getFolderFromPathAsync(path).then(
+                    function (storageFolder) {
+                        success(new DirectoryEntry(storageFolder.name, storageFolder.path));
+                    },
+                    function () {
+                        fail(FileError.ENCODING_ERR);
+                    }
+                )
+            }
+        )
     }
-    
-    
 };
-
-
-
 
 function requestFileSystem(type, size, successCallback, errorCallback) {
     var fail = function (code) {
@@ -133,59 +116,48 @@ function requestFileSystem(type, size, successCallback, errorCallback) {
 
     if (type < 0 || type > 3) {
         fail(FileError.SYNTAX_ERR);
-    } else {
-        // if successful, return a FileSystem object
-        var success = function (file_system) {
-            if (file_system) {
-                if (typeof successCallback === 'function') {
-                    // grab the name and root from the file system object
-                    var result = new FileSystem(file_system.name, file_system.root);
-                    successCallback(result);
-                }
-            }
-            else {
-                // no FileSystem object returned
-                fail(FileError.NOT_FOUND_ERR);
-            }
-        };
-        var filePath = "";
-        var result = null;
-        var name = ""
-        switch (type) {
-            case LocalFileSystem.TEMPORARY:
-                try {
-                    filePath = FileSystemTemproraryRoot;
-                   
-                    name = "temporary";
-                } catch (e) {
-                }
-                break;
-            case LocalFileSystem.PERSISTENT:
-                try {
-                    filePath = FileSystemPersistentRoot;
-                    name = "persistent";
-
-                } catch (e) { }
-               
-                break;
-        }
-
-        if (size > 10000000000) {
-            fail(FileError.QUOTA_EXCEEDED_ERR);
-            return;
-        }
-        try {
-            
-            var fileSystem = new FileSystem(name, new DirectoryEntry(name, filePath));
-            result = fileSystem;
-            success(result);
-        } catch (e) {
-
-        }
-
+        return;
     }
 
+    // if successful, return a FileSystem object
+    var success = function (file_system) {
+        if (file_system) {
+            if (typeof successCallback === 'function') {
+                // grab the name and root from the file system object
+                var result = new FileSystem(file_system.name, file_system.root);
+                successCallback(result);
+            }
+        }
+        else {
+            // no FileSystem object returned
+            fail(FileError.NOT_FOUND_ERR);
+        }
+    };
 
+    var filePath = "";
+    var result = null;
+    var fsTypeName = "";
+
+    switch (type) {
+        case LocalFileSystem.TEMPORARY:
+            filePath = FileSystemTemproraryRoot;
+            fsTypeName = "temporary";
+            break;
+        case LocalFileSystem.PERSISTENT:
+            filePath = FileSystemPersistentRoot;
+            fsTypeName = "persistent";
+            break;
+    }
+
+    var MAX_SIZE = 10000000000;
+    if (size > MAX_SIZE) {
+        fail(FileError.QUOTA_EXCEEDED_ERR);
+        return;
+    }
+
+    var fileSystem = new FileSystem(fsTypeName, new DirectoryEntry(fsTypeName, filePath));
+    result = fileSystem;
+    success(result);
 }
 
 
@@ -275,26 +247,39 @@ Entry.prototype.getMetadata = function (successCallback, errorCallback) {
     };
 
     if (this.isFile) {
-        Windows.Storage.StorageFile.getFileFromPathAsync(this.fullPath).done(function (storageFile) {
-            storageFile.getBasicPropertiesAsync().then(function (basicProperties) {
-                success(basicProperties.dateModified);
-            }, function () {
+        Windows.Storage.StorageFile.getFileFromPathAsync(this.fullPath).done(
+            function (storageFile) {
+                storageFile.getBasicPropertiesAsync().then(
+                    function (basicProperties) {
+                        success(basicProperties.dateModified);
+                    },
+                    function () {
+                        fail(FileError.NOT_READABLE_ERR);
+                    }
+                )
+            },
+            function () {
                 fail(FileError.NOT_READABLE_ERR);
-            })
-        }, function () {
-            fail(FileError.NOT_READABLE_ERR);
-        })
+            }
+        )
     }
+
     if (this.isDirectory) {
-        Windows.Storage.StorageFolder.getFolderFromPathAsync(this.fullPath).done(function (storageFolder) {
-            storageFolder.getBasicPropertiesAsync().then(function (basicProperties) {
-                success(basicProperties.dateModified);
-            }, function () {
-                fail(FileError.NOT_FOUND_ERR);
-            });
-        }, function () {
-            fail(FileError.NOT_READABLE_ERR);
-        })
+        Windows.Storage.StorageFolder.getFolderFromPathAsync(this.fullPath).done(
+            function (storageFolder) {
+                storageFolder.getBasicPropertiesAsync().then(
+                    function (basicProperties) {
+                        success(basicProperties.dateModified);
+                    },
+                    function () {
+                        fail(FileError.NOT_FOUND_ERR);
+                    }
+                );
+            },
+            function () {
+                fail(FileError.NOT_READABLE_ERR);
+            }
+        )
     }
    
 };
@@ -351,7 +336,7 @@ Entry.prototype.moveTo = function (parent, newName, successCallback, errorCallba
         };
     
     //name can't be invalid
-    if (String(name).match(new RegExp(/\?|\\|\*|\||\"|<|>|\:|\//g))) {
+    if (/\?|\\|\*|\||\"|<|>|\:|\//g.test(name)) {
         fail(FileError.ENCODING_ERR);
         return;
     };
@@ -503,7 +488,7 @@ Entry.prototype.copyTo = function (parent, newName, successCallback, errorCallba
             }
         };
     //name can't be invalid
-    if (String(name).match(new RegExp(/\?|\\|\*|\||\"|<|>|\:|\//g))) {
+    if (/\?|\\|\*|\||\"|<|>|\:|\//g.test(name)) {
         fail(FileError.ENCODING_ERR);
         return;
     };
@@ -642,9 +627,8 @@ Entry.prototype.remove = function (successCallback, errorCallback) {
                 storageFolder = $await(Windows.Storage.StorageFolder.getFolderFromPathAsync(fullPath));
                 
                 //FileSystem root can't be removed!
-                //todo: root could be changed
-                var storageFolderPer = $await(Windows.Storage.KnownFolders.documentsLibrary.createFolderAsync("per", Windows.Storage.CreationCollisionOption.openIfExists));//Windows.Storage.ApplicationData.current.localFolder;
-                var storageFolderTem = $await(Windows.Storage.KnownFolders.documentsLibrary.createFolderAsync("tem", Windows.Storage.CreationCollisionOption.openIfExists));//Windows.Storage.ApplicationData.current.temporaryFolder;
+                var storageFolderPer = Windows.Storage.ApplicationData.current.localFolder;
+                var storageFolderTem = Windows.Storage.ApplicationData.current.temporaryFolder;
                 if (fullPath == storageFolderPer.path || fullPath == storageFolderTem.path) {
                     fail(FileError.NO_MODIFICATION_ALLOWED_ERR);
                     return;
@@ -694,9 +678,8 @@ Entry.prototype.getParent = function (successCallback, errorCallback) {
    
     var fullPath = this.fullPath;
     var getParentFinish = eval(Jscex.compile("promise", function () {
-            //todo: root could be changed 
-        var storageFolderPer = $await(Windows.Storage.KnownFolders.documentsLibrary.createFolderAsync("per", Windows.Storage.CreationCollisionOption.openIfExists));//Windows.Storage.ApplicationData.current.localFolder;
-        var storageFolderTem = $await(Windows.Storage.KnownFolders.documentsLibrary.createFolderAsync("tem", Windows.Storage.CreationCollisionOption.openIfExists));//Windows.Storage.ApplicationData.current.temporaryFolder;
+        var storageFolderPer = Windows.Storage.ApplicationData.current.localFolder;
+        var storageFolderTem = Windows.Storage.ApplicationData.current.temporaryFolder;
             
             if (fullPath == FileSystemPersistentRoot) {
                 win(new DirectoryEntry(storageFolderPer.name, storageFolderPer.path));
@@ -770,7 +753,6 @@ FileEntry.prototype.file = function (successCallback, errorCallback) {
         storageFile.getBasicPropertiesAsync().then(function (basicProperties) {
             win(new File(storageFile.name, storageFile.path, storageFile.fileType, basicProperties.dateModified, basicProperties.size));
         }, function () {
-
             fail(FileError.NOT_READABLE_ERR);
         })
     }, function () { fail(FileError.NOT_FOUND_ERR) })
@@ -844,7 +826,7 @@ DirectoryEntry.prototype.getDirectory = function (path, options, successCallback
             })
         }
         else if (flag.create == false) {
-            if (String(path).match(new RegExp(/\?|\\|\*|\||\"|<|>|\:|\//g))) {
+            if (/\?|\\|\*|\||\"|<|>|\:|\//g.test(path)) {
                 fail(FileError.ENCODING_ERR);
                 return;
             };
@@ -904,10 +886,8 @@ DirectoryEntry.prototype.removeRecursively = function (successCallback, errorCal
     var fullPath = this.fullPath;
 
     var removeCompleteCode = Jscex.compile('promise', function (path) {
-        
-        //todo: root could be changed
-        var storageFolderPer = $await(Windows.Storage.KnownFolders.documentsLibrary.createFolderAsync("per", Windows.Storage.CreationCollisionOption.openIfExists));//Windows.Storage.ApplicationData.current.localFolder;
-        var storageFolderTem = $await(Windows.Storage.KnownFolders.documentsLibrary.createFolderAsync("tem", Windows.Storage.CreationCollisionOption.openIfExists));//Windows.Storage.ApplicationData.current.temporaryFolder;
+        var storageFolderPer = Windows.Storage.ApplicationData.current.localFolder;
+        var storageFolderTem = Windows.Storage.ApplicationData.current.temporaryFolder;
             
         if (path == storageFolderPer.path || path == storageFolderTem.path) {
             fail(FileError.NO_MODIFICATION_ALLOWED_ERR);
@@ -983,7 +963,7 @@ DirectoryEntry.prototype.getFile = function (path, options, successCallback, err
             })
         }
         else if (flag.create == false) {
-            if (String(path).match(new RegExp(/\?|\\|\*|\||\"|<|>|\:|\//g))) {
+            if (/\?|\\|\*|\||\"|<|>|\:|\//g.test(path)) {
                 fail(FileError.ENCODING_ERR);
                 return;
             };
@@ -1254,21 +1234,6 @@ FileReader.prototype.readAsDataURL = function (file) {
     };
 
     Windows.Storage.StorageFile.getFileFromPathAsync(this.fileName).then(function (storageFile) {
-        /*storageFile.openAsync(Windows.Storage.FileAccessMode.read).then(function (readStream) {
-            var dataReader = new Windows.Storage.Streams.DataReader(readStream);
-            dataReader.loadAsync(readStream.size).done(function (numBytesLoaded) {
-                var fileContent = dataReader.readString(numBytesLoaded);
-                dataReader.close();
-                var buffer = Windows.Security.Cryptography.CryptographicBuffer.decodeFromBase64String(fileContent);
-                var strBase64 = Windows.Security.Cryptography.CryptographicBuffer.encodeToBase64String(buffer);
-                var mediaType = storageFile.contentType;
-                var result = "data:" + mediaType + ";base64," + strBase64;
-                console.log(result);
-                win(result);
-                              
-            });
-
-        });*/
         Windows.Storage.FileIO.readBufferAsync(storageFile).done(function (buffer) {
             var strBase64 = Windows.Security.Cryptography.CryptographicBuffer.encodeToBase64String(buffer);
             //the method encodeToBase64String will add "77u/" as a prefix, so we should remove it
