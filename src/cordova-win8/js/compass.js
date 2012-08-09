@@ -57,7 +57,7 @@ function compassOptions(options) {
  * This class provides access to device compass data.
  * @constructor
  */
-function compass() { }
+function Compass() { }
 
 
 /**
@@ -67,7 +67,7 @@ function compass() { }
  * @param {Function} errorCallback		The function to call when there is an error getting the compass data.
  * @param {CompassOptions} options		The option for getting compass data.
  */
-compass.prototype.getCurrentHeading = function (successCallback, errorCallback, options) {
+Compass.prototype.getCurrentHeading = function (successCallback, errorCallback, options) {
 
     // options = compassOptions(options);		This is not needed as options are not used.
     var win = function (c) {
@@ -101,12 +101,13 @@ compass.prototype.getCurrentHeading = function (successCallback, errorCallback, 
  * @param {compassOptions} options	    The options for getting the compass heading (OPTIONAL)
  * @return String						The watch id that must be passed to #clearWatch
  */
-compass.prototype.watchHeading = function (successCallback, errorCallback, options) {
+Compass.prototype.watchHeading = function (successCallback, errorCallback, options) {
+	var thisComp = this;
     options = compassOptions(options);
 
     var id = createUUID();
     compassTimers[id] = window.setInterval(function () {
-        compass.getCurrentHeading(successCallback, errorCallback, options);
+        thisComp.getCurrentHeading(successCallback, errorCallback, options);
     }, options.frequency);
 
     return id;
@@ -118,7 +119,7 @@ compass.prototype.watchHeading = function (successCallback, errorCallback, optio
  * @param {String} id   The ID of the watch returned from #watchHeading
  */
 
-compass.prototype.clearWatch = function (id) {
+Compass.prototype.clearWatch = function (id) {
     if (id && compassTimers[id] !== undefined) {
         window.clearInterval(compassTimers[id]);
         delete compassTimers[id];
@@ -130,6 +131,6 @@ if (typeof navigator.compass == "undefined") {
     //navigator.compass.getCurrentHeading = new compass().getCurrentHeading;
     //navigator.compass.clearWatch = new compass().clearWatch;
     //navigator.compass.watchPosition = new compass().watchHeading; */
-    navigator.compass = new compass();
+    navigator.compass = new Compass();
 
 }
