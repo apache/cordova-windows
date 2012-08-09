@@ -102,9 +102,13 @@ Compass.prototype.getCurrentHeading = function (successCallback, errorCallback, 
  * @return String						The watch id that must be passed to #clearWatch
  */
 Compass.prototype.watchHeading = function (successCallback, errorCallback, options) {
-	var thisComp = this;
     options = compassOptions(options);
+    var minimumReportInterval = this.minimumReportInterval;
+	if (options.frequency < minimumReportInterval) {
+		options.frequency < minimumReportInterval;
+	}
 
+	var thisComp = this;
     var id = createUUID();
     compassTimers[id] = window.setInterval(function () {
         thisComp.getCurrentHeading(successCallback, errorCallback, options);

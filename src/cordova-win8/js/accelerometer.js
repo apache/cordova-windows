@@ -170,9 +170,13 @@ Accelerometer.prototype.getCurrentAcceleration = function (accelerometerSuccess,
  */
 
 Accelerometer.prototype.watchAcceleration = function (accelerometerSuccess, accelerometerError, options) {
-    var thisAcc = this;
     options = accelerometerOptions(options);
+    var minimumReportInterval = this.minimumReportInterval;
+    if (options.frequency < minimumReportInterval) {
+		options.frequency < minimumReportInterval;
+	}
 
+	var thisAcc = this;
     var id = createUUID();
     accelerometerTimers[id] = window.setInterval(function () {
         thisAcc.getCurrentAcceleration(accelerometerSuccess, accelerometerError);
