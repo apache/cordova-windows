@@ -93,7 +93,7 @@ function geolocationOptions(options) {
  * This class provides access to device GPS data.
  * @constructor
  */
-function geolocation() { }
+function Geolocation() { }
 
 
 /**
@@ -103,8 +103,7 @@ function geolocation() { }
    * @param {Function} errorCallback      The function to call when there is an error getting the heading position. (OPTIONAL)
    * @param {PositionOptions} options     The options for getting the position data. (OPTIONAL)
    */
-geolocation.prototype.getCurrentPosition = function (successCallback, errorCallback, options) {
-    
+Geolocation.prototype.getCurrentPosition = function (successCallback, errorCallback, options) {
     options = geolocationOptions(options);
     var win = function (p) {
         successCallback(new Position(
@@ -130,7 +129,7 @@ geolocation.prototype.getCurrentPosition = function (successCallback, errorCallb
         e.code = PositionError.POSITION_UNAVAILABLE;
         fail(e);
     }
-
+    
     var geolocator = new Windows.Devices.Geolocation.Geolocator();
     if (options.enableHighAccuracy) {
         geolocator.desiredAccuracy = Windows.Devices.Geolocation.PositionAccuracy.high;
@@ -207,14 +206,13 @@ geolocation.prototype.getCurrentPosition = function (successCallback, errorCallb
      * @param {PositionOptions} options     The options for getting the location data such as frequency. (OPTIONAL)
      * @return String                       The watch id that must be passed to #clearWatch to stop watching.
      */
-geolocation.prototype.watchPosition = function (successCallback, errorCallback, options) {
+Geolocation.prototype.watchPosition = function (successCallback, errorCallback, options) {
     options = geolocationOptions(options);
 
     var id = createUUID();
-    geolocationTimers[id] = window.setInterval(function () {
-        geolocation.getCurrentPosition(successCallback, errorCallback, options);
-    }, options.timeout);
-
+    geolocationTimers[id] = new Windows.Devices.Geolocation.Geolocator().getGeopositionAsync(options.maximumAge, options.timeout).done(function () {
+        new Geolocation().getCurrentPosition(successCallback, errorCallback, options);
+    })
     return id;
 }
 
@@ -224,9 +222,9 @@ geolocation.prototype.watchPosition = function (successCallback, errorCallback, 
      *
      * @param {String} id       The ID of the watch returned from #watchPosition
      */    
-geolocation.prototype.clearWatch = function (id) {
+Geolocation.prototype.clearWatch = function (id) {
     if (id && geolocationTimers[id] !== undefined) {
-        window.clearInterval(geolocationTimers[id]);
+        //window.clearInterval(geolocationTimers[id]);
         delete geolocationTimers[id];
     }
 }
@@ -234,10 +232,11 @@ geolocation.prototype.clearWatch = function (id) {
   
 if (typeof navigator.geolocation == "undefined") {
     // Win RT support the object geolocation , and is Read-Only , So for test , must to change the methods of Object
-    /*navigator.geolocation.getCurrentPosition = new geolocation().getCurrentPosition;
-    navigator.geolocation.clearWatch = new geolocation().clearWatch;
-    navigator.geolocation.watchPosition = new geolocation().watchPosition;*/
-    navigator.geolocation = new geolocation();
+    var _geo = new Geolocation();
+    navigator.geolocation.getCurrentPosition = _geo.getCurrentPosition;
+    navigator.geolocation.clearWatch = _geo.clearWatch;
+    navigator.geolocation.watchPosition = _geo.watchPosition;
+    
 }
 
 
