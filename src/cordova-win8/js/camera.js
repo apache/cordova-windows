@@ -194,7 +194,20 @@ Camera.prototype.getPicture = function (successCallback, errorCallback, options)
                         ctx.drawImage(this, 0, 0, imageWidth, imageHeight);
                                             
                         // The resized file ready for upload
-                        var finalFile = canvas.toDataURL(fileType);
+                        var _blob = canvas.msToBlob();
+                        var _stream = _blob.msRandomAccessStream();
+                        Windows.Storage.StorageFolder.getFolderFromPathAsync(packageId.path).done(function (storageFolder) {
+                            storageFolder.createFileAsync(tempPhotoFileName, Windows.Storage.CreationCollisionOption.generateUniqueName).done(function (file) {
+                                file.openAsync(Windows.Storage.FileAccessMode.readWrite).done( function (fileStream) {
+                                    Windows.Storage.Streams.RandomAccessStream.copyAndCloseAsync(_stream, fileStream).done(function () {
+                                        successCallback(file.name);
+                                    }, function () { errorCallback("Resize picture error."); })
+                                }, function () { errorCallback("Resize picture error."); })
+                            }, function () { errorCallback("Resize picture error."); })
+                        })
+                        
+
+                        /*var finalFile = canvas.toDataURL(fileType);
                         Windows.Storage.StorageFolder.getFolderFromPathAsync(packageId.path).done(function (storageFolder) {
                             storageFolder.createFileAsync(tempPhotoFileName, Windows.Storage.CreationCollisionOption.generateUniqueName).done(function (file) {
                                 var arr = finalFile.split(",");
@@ -207,7 +220,7 @@ Camera.prototype.getPicture = function (successCallback, errorCallback, options)
                                 }, function () { errorCallback("Resize picture error.");})
                             }, function () { errorCallback("Resize picture error."); })
                                                 
-                        }, function () { errorCallback("Resize picture error."); })
+                        }, function () { errorCallback("Resize picture error."); })*/
                     }
                 }
 
