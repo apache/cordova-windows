@@ -170,11 +170,12 @@ Accelerometer.prototype.getCurrentAcceleration = function (accelerometerSuccess,
  */
 
 Accelerometer.prototype.watchAcceleration = function (accelerometerSuccess, accelerometerError, options) {
+    var thisAcc = this;
     options = accelerometerOptions(options);
 
     var id = createUUID();
     accelerometerTimers[id] = window.setInterval(function () {
-        Accelerometer.getCurrentAcceleration(accelerometerSuccess, accelerometerError);
+        thisAcc.getCurrentAcceleration(accelerometerSuccess, accelerometerError);
     }, options.frequency);
 
     return id;
@@ -196,7 +197,7 @@ Accelerometer.prototype.clearWatch = function (watchId) {
 if (typeof navigator.accelerometer == "undefined") {
     // Win RT support the object Accelerometer , and is Read-Only , So for test , must to change the methods of Object
     navigator.accelerometer = new Accelerometer();
-    navigator.accelerometer.getCurrentAcceleration = new Accelerometer().getCurrentAcceleration;
-    navigator.accelerometer.clearWatch = new Accelerometer().clearWatch;
-    navigator.accelerometer.watchAcceleration = new Accelerometer().watchAcceleration;
+    //navigator.accelerometer.getCurrentAcceleration = new Accelerometer().getCurrentAcceleration;
+    //navigator.accelerometer.clearWatch = new Accelerometer().clearWatch;
+    //navigator.accelerometer.watchAcceleration = new Accelerometer().watchAcceleration;
 }
