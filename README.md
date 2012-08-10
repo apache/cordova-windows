@@ -34,7 +34,7 @@
  - Build and Run the project Cordova-Metro. If running takes a long time, simply stop the running, then rerun (known issue).
 
 ### Run the Sample App
-  - Open the `samples\TestAppCordova\TestApp.Cordova.sln` with visual studio.
+  - Open the `samples\TestAppCordova\TestAppCordova.sln` with visual studio.
   - Build and run.
   - Play around with accelerometer, geolocation, and compass.
 
@@ -46,18 +46,23 @@
 ```html
 <!-- Tests -->
 <!--
-<script type="text/javascript" src="tests/file.tests.js"></script>
-<script type="text/javascript" src="tests/filetransfer.tests.js"></script>
-<script type="text/javascript" src="tests/storage.tests.js"></script>
-<script type="text/javascript" src="tests/geolocation.tests.js"></script>
+<script type="text/javascript" src="tests/accelerometer.tests.js"></script>
+<script type="text/javascript" src="tests/battery.tests.js"></script>
 <script type="text/javascript" src="tests/camera.tests.js"></script>
 <script type="text/javascript" src="tests/capture.tests.js"></script>
-<script type="text/javascript" src="tests/accelerometer.tests.js"></script>
 -->
 <script type="text/javascript" src="tests/compass.tests.js"></script>
-<!--
-<script type="text/javascript" src="tests/network.tests.js"></script>
+>!--
+<script type="text/javascript" src="tests/contacts.tests.js"></script>
+<script type="text/javascript" src="tests/device.tests.js"></script>
+<script type="text/javascript" src="tests/file.tests.js"></script>
+<script type="text/javascript" src="tests/filetransfer.tests.js"></script>
+<script type="text/javascript" src="tests/geolocation.tests.js"></script>
 <script type="text/javascript" src="tests/media.tests.js"></script>
+<script type="text/javascript" src="tests/network.tests.js"></script>
+<script type="text/javascript" src="tests/notification.tests.js"></script>
+<script type="text/javascript" src="tests/platform.tests.js"></script>
+<script type="text/javascript" src="tests/storage.tests.js"></script>
 -->
 ```
 
