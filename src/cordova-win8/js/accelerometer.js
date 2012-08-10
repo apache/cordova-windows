@@ -106,7 +106,7 @@ function Acceleration(x, y, z, timestamp) {
     this.timestamp = timestamp || new Date().getTime();
 };
 
-var accelerometerTimers = {};	// list of timers in use
+var accelerometerTimers = {};	// dictionary of timers in use
 
 // Returns default param, overrides if provided with value
 function accelerometerOptions(options) {
@@ -188,13 +188,13 @@ Accelerometer.prototype.watchAcceleration = function (accelerometerSuccess, acce
 /**
  * Stop watching the acceleration referenced by the watchId param.
  *
- * @param {String} id		The ID of the watch returned from #watchAcceleration
+ * @param {String} watchId		The ID of the watch returned from #watchAcceleration
  */
 
 Accelerometer.prototype.clearWatch = function (watchId) {
-    if (watchId && accelerometerTimers[watchId] !== undefined) {
+    if ((watchId !== undefined)&&(accelerometerTimers[watchId] !== undefined)) {
         window.clearInterval(accelerometerTimers[watchId]);
-        delete accelerometerTimers[id];
+        delete accelerometerTimers[watchId];
     }
 };
 
