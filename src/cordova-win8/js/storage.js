@@ -444,3 +444,10 @@ SQLResultSetList.prototype.item = function (row) {
 function SQLResultSet () {
     this.rows = new SQLResultSetList();
 };
+
+////
+/**
+ * Event fired to signify code is fully loaded
+ */
+
+fireEvent("deviceready", document, "HTMLEvents");

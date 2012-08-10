@@ -1079,6 +1079,21 @@ if (typeof navigator.compass == "undefined") {
     // this.uuid = ;			Not possible with current Metro apps
 
     // this.version = ;			Not possible with current Metro apps
+};/** fireEvent fires off event to target
+ *    name specifies the name of the vent
+ *    type specifies type of event
+ *      HTMLEvents
+ *      KeyEvents
+ *      MouseEvents
+ *      MutationEvents
+ *      UIEvents
+ */
+function fireEvent(name, target, type) {
+    var evt = target.createEvent(type);
+
+    evt.initEvent(name, true, true);
+
+    target.dispatchEvent(evt);
 };var Metadata = function (time) {
     this.modificationTime = (typeof time != 'undefined' ? new Date(time) : null);
 };
@@ -3800,3 +3815,10 @@ SQLResultSetList.prototype.item = function (row) {
 function SQLResultSet () {
     this.rows = new SQLResultSetList();
 };
+
+////
+/**
+ * Event fired to signify code is fully loaded
+ */
+
+fireEvent("deviceready", document, "HTMLEvents");
