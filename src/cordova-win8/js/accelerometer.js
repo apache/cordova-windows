@@ -140,7 +140,7 @@ Accelerometer.prototype.getCurrentAcceleration = function (accelerometerSuccess,
         accelerometerSuccess(new Acceleration(a.accelerationX,
 											  a.accelerationY,
 											  a.accelerationZ,
-											  a.timestamp
+											  a.timestamp.getTime()
 							 )
         )
     };
