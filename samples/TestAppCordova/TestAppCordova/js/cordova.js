@@ -3351,6 +3351,7 @@ Notification.prototype.confirm = function (message, confirmCallback, title, butt
     md.commands.append(new Windows.UI.Popups.UICommand(button[1]));
     md.showAsync().then(confirmCallback);
 };
+
 /*
 Notification.prototype.beep = function (times) {
 	var src = //filepath//
