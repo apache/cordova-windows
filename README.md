@@ -1,7 +1,7 @@
 # Apache Cordova for Windows 8 Metro
 ===
-[https://github.com/01org/cordova-win8/wiki](https://github.com/01org/cordova-win8/wiki)
-The project supports Cordova on Win8, and uses WinLib4JS for most implementation (others with SQLite3, Jscex and so on).
+- [https://github.com/01org/cordova-win8/wiki](https://github.com/01org/cordova-win8/wiki)
+- The project supports Cordova on Win8, and uses WinLib4JS for most implementation (others with SQLite3, Jscex and so on).
 
 ## Getting Started
 
