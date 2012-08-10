@@ -3351,6 +3351,25 @@ Notification.prototype.confirm = function (message, confirmCallback, title, butt
     md.commands.append(new Windows.UI.Popups.UICommand(button[1]));
     md.showAsync().then(confirmCallback);
 };
+/*
+Notification.prototype.beep = function (times) {
+	var src = //filepath//
+	var playTime = 500; // ms
+	var quietTime = 1000; // ms
+	var media = new Media(src, function(){});
+	var hit = 1;
+	var intervalId = window.setInterval( function () {
+		media.play();
+		sleep(playTime);
+		media.stop();
+		media.seekTo(0);
+		if (hit < times) {
+			hit++;
+		} else {
+			window.clearInterval(intervalId);
+		}
+	}, playTime + quietTime);
+} */
 
 if (typeof navigator.notification == "undefined") {
     navigator.notification = new Notification;
