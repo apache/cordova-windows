@@ -1050,13 +1050,13 @@ Compass.prototype.watchHeading = function (successCallback, errorCallback, optio
 /**
  * Clears the specified heading watch.
  *
- * @param {String} id   The ID of the watch returned from #watchHeading
+ * @param {String} watchId   The ID of the watch returned from #watchHeading
  */
 
-Compass.prototype.clearWatch = function (id) {
-    if (id && compassTimers[id] !== undefined) {
-        window.clearInterval(compassTimers[id]);
-        delete compassTimers[id];
+Compass.prototype.clearWatch = function (watchId) {
+    if ((watchId !== undefined) && (compassTimers[watchId] !== undefined)) {
+        window.clearInterval(compassTimers[watchId]);
+        delete compassTimers[watchId];
     }
 }
 
