@@ -61,39 +61,31 @@ FileTransfer.prototype.upload = function (filePath, server, successCallback, err
     if (String(filePath).substr(0, 8) == "file:///") {
         filePath = FileSystemPersistentRoot + String(filePath).substr(8).split("/").join("\\");
     }
-    //var upload = null;
-    var start = eval(Jscex.compile('promise', function () {
-        var storageFile = "";
-        try{
-            storageFile = $await(Windows.Storage.StorageFile.getFileFromPathAsync(filePath));
-        }catch (e) {
-            error(FileTransferError.FILE_NOT_FOUND_ERR);
-        }
-        var stream = $await(storageFile.openAsync(Windows.Storage.FileAccessMode.read));
-        var blob = MSApp.createBlobFromRandomAccessStream(storageFile.contentType, stream);
-        var formData = new FormData();
-        formData.append("source\";filename=\"" + storageFile.name + "\"", blob);
-        WinJS.xhr({ type: "POST", url: server, data: formData }).then(function (response) {
-            var code = response.status;
-            storageFile.getBasicPropertiesAsync().done(function (basicProperties) {
+    
+    Windows.Storage.StorageFile.getFileFromPathAsync(filePath).then(function (storageFile) {
+        storageFile.openAsync(Windows.Storage.FileAccessMode.read).then(function (stream) {
+            var blob = MSApp.createBlobFromRandomAccessStream(storageFile.contentType, stream);
+            var formData = new FormData();
+            formData.append("source\";filename=\"" + storageFile.name + "\"", blob);
+            WinJS.xhr({ type: "POST", url: server, data: formData }).then(function (response) {
+                var code = response.status;
+                storageFile.getBasicPropertiesAsync().done(function (basicProperties) {
 
-                Windows.Storage.FileIO.readBufferAsync(storageFile).done(function (buffer) {
-                    var dataReader = Windows.Storage.Streams.DataReader.fromBuffer(buffer);
-                    var fileContent = dataReader.readString(buffer.length);
-                    dataReader.close();
-                    win(new FileUploadResult(basicProperties.size, code, fileContent));
+                    Windows.Storage.FileIO.readBufferAsync(storageFile).done(function (buffer) {
+                        var dataReader = Windows.Storage.Streams.DataReader.fromBuffer(buffer);
+                        var fileContent = dataReader.readString(buffer.length);
+                        dataReader.close();
+                        win(new FileUploadResult(basicProperties.size, code, fileContent));
+
+                    })
 
                 })
-
+            }, function () {
+                error(FileTransferError.INVALID_URL_ERR);
             })
-        }, function () {
-            error(FileTransferError.INVALID_URL_ERR);
         })
         
-    }));
-    start();
-
-    
+    },function(){error(FileTransferError.FILE_NOT_FOUND_ERR);})
 };
 
 /**
@@ -139,20 +131,20 @@ FileTransfer.prototype.download = function (source, target, successCallback, err
 
     var download = null;
   
-    var start = eval(Jscex.compile('promise', function () {
-        var storageFolder = $await(Windows.Storage.StorageFolder.getFolderFromPathAsync(path));
-        var storageFile = $await(storageFolder.createFileAsync(fileName, Windows.Storage.CreationCollisionOption.generateUniqueName));
-        var uri = Windows.Foundation.Uri(source);
-        var downloader = new Windows.Networking.BackgroundTransfer.BackgroundDownloader();
-        download = downloader.createDownload(uri, storageFile);
-        download.startAsync().then(function () {
-            win(new FileEntry(storageFile.name, storageFile.path));
-        }, function () {
-            error(FileTransferError.INVALID_URL_ERR);
-        });
-    }));
-    start();
- };
+    
+    Windows.Storage.StorageFolder.getFolderFromPathAsync(path).then(function (storageFolder) {
+        storageFolder.createFileAsync(fileName, Windows.Storage.CreationCollisionOption.generateUniqueName).then(function (storageFile) {
+            var uri = Windows.Foundation.Uri(source);
+            var downloader = new Windows.Networking.BackgroundTransfer.BackgroundDownloader();
+            download = downloader.createDownload(uri, storageFile);
+            download.startAsync().then(function () {
+                win(new FileEntry(storageFile.name, storageFile.path));
+            }, function () {
+                error(FileTransferError.INVALID_URL_ERR);
+            });
+        })
+    })
+};
 
 /**
  * Options to customize the HTTP request used to upload files.
