@@ -1,0 +1,72 @@
+<VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
+  <TemplateData>
+    <Name>Cordova-Metro</Name>
+    <Description>&lt;No description available&gt;</Description>
+    <ProjectType>JavaScript</ProjectType>
+    <ProjectSubType>
+    </ProjectSubType>
+    <SortOrder>1000</SortOrder>
+    <CreateNewFolder>true</CreateNewFolder>
+    <DefaultName>Cordova-Metro</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+    <LocationField>Enabled</LocationField>
+    <EnableLocationBrowseButton>true</EnableLocationBrowseButton>
+    <Icon>__TemplateIcon.ico</Icon>
+  </TemplateData>
+  <TemplateContent>
+    <Project TargetFileName="Cordova-Metro.jsproj" File="Cordova-Metro.jsproj" ReplaceParameters="true">
+      <Folder Name="css" TargetFolderName="css">
+        <ProjectItem ReplaceParameters="true" TargetFileName="default.css">default.css</ProjectItem>
+      </Folder>
+      <Folder Name="images" TargetFolderName="images">
+        <ProjectItem ReplaceParameters="false" TargetFileName="logo.png">logo.png</ProjectItem>
+        <ProjectItem ReplaceParameters="false" TargetFileName="smalllogo.png">smalllogo.png</ProjectItem>
+        <ProjectItem ReplaceParameters="false" TargetFileName="splashscreen.png">splashscreen.png</ProjectItem>
+        <ProjectItem ReplaceParameters="false" TargetFileName="storelogo.png">storelogo.png</ProjectItem>
+      </Folder>
+      <Folder Name="js" TargetFolderName="js">
+        <ProjectItem ReplaceParameters="true" TargetFileName="cordova.js">cordova.js</ProjectItem>
+      </Folder>
+      <Folder Name="lib" TargetFolderName="lib">
+        <Folder Name="Jscex" TargetFolderName="Jscex">
+          <Folder Name="src" TargetFolderName="src">
+            <Folder Name="incubations" TargetFolderName="incubations">
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex.async.xhr.js">jscex.async.xhr.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex.seq.js">jscex.seq.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex.seq.powerpack.js">jscex.seq.powerpack.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex-async-agent.js">jscex-async-agent.js</ProjectItem>
+              <ProjectItem ReplaceParameters="true" TargetFileName="jscex-async-include.js">jscex-async-include.js</ProjectItem>
+            </Folder>
+            <ProjectItem ReplaceParameters="true" TargetFileName="jscex.js">jscex.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="jscex-async.js">jscex-async.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="jscex-async-powerpack.js">jscex-async-powerpack.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="jscex-builderbase.js">jscex-builderbase.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="jscexc.js">jscexc.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="jscex-jit.js">jscex-jit.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="jscex-parser.js">jscex-parser.js</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="jscex-promise.js">jscex-promise.js</ProjectItem>
+          </Folder>
+        </Folder>
+        <Folder Name="SQLite" TargetFolderName="SQLite">
+          <Folder Name="SQLite3" TargetFolderName="SQLite3">
+            <ProjectItem ReplaceParameters="true" TargetFileName="Common.cpp">Common.cpp</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="Common.h">Common.h</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="Constants.cpp">Constants.cpp</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="Constants.h">Constants.h</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="Database.cpp">Database.cpp</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="Database.h">Database.h</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="sqlite3.c">sqlite3.c</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="sqlite3.h">sqlite3.h</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="SQLite3.vcxproj">SQLite3.vcxproj</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="SQLite3.vcxproj.filters">SQLite3.vcxproj.filters</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="Statement.cpp">Statement.cpp</ProjectItem>
+            <ProjectItem ReplaceParameters="true" TargetFileName="Statement.h">Statement.h</ProjectItem>
+          </Folder>
+        </Folder>
+      </Folder>
+      <ProjectItem ReplaceParameters="false" TargetFileName="Cordova-Metro_TemporaryKey.pfx">Cordova-Metro_TemporaryKey.pfx</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="default.html">default.html</ProjectItem>
+      <ProjectItem ReplaceParameters="false" TargetFileName="package.appxmanifest">package.appxmanifest</ProjectItem>
+    </Project>
+  </TemplateContent>
+</VSTemplate>

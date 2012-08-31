@@ -1,0 +1,31 @@
+﻿html {
+    padding: 20px;
+}
+
+#container {
+    width: 100%;
+}
+
+.devices {
+    width: 50%;
+}
+
+.info {
+    width: 100%;
+}
+
+.info > table {
+    width: 400px;
+}
+          
+@media screen and (-ms-view-state: fullscreen-landscape) {
+}
+
+@media screen and (-ms-view-state: filled) {
+}
+
+@media screen and (-ms-view-state: snapped) {
+}
+
+@media screen and (-ms-view-state: fullscreen-portrait) {
+}
