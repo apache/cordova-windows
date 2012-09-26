@@ -86,7 +86,6 @@
     <None Include="www\compass.html">
       <Filter>html</Filter>
     </None>
-    <None Include="www\notification.html" />
     <None Include="www\accel_game.css">
       <Filter>html</Filter>
     </None>
@@ -94,6 +93,9 @@
       <Filter>html</Filter>
     </None>
     <None Include="www\accel_game.js">
+      <Filter>html</Filter>
+    </None>
+    <None Include="www\notification.html">
       <Filter>html</Filter>
     </None>
   </ItemGroup>

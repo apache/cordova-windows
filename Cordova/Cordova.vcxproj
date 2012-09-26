@@ -133,7 +133,9 @@
     <None Include="lib\js\plugin\win7\storage.js" />
     <None Include="toolbar.bmp" />
     <None Include="www\accel_game.css" />
-    <None Include="www\accel_game.html" />
+    <None Include="www\accel_game.html">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="www\accel_game.js" />
     <None Include="www\capture.html" />
     <None Include="www\compass.html" />
@@ -145,7 +147,9 @@
     <None Include="www\file.html" />
     <None Include="www\index.html" />
     <None Include="www\network.html" />
-    <None Include="www\notify.html" />
+    <None Include="www\notification.html">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="www\storage.html" />
   </ItemGroup>
   <ItemGroup>
