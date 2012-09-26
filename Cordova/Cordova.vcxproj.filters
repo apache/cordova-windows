@@ -16,6 +16,7 @@
     <ClCompile Include="common.c" />
     <ClCompile Include="filetransfer.c" />
     <ClCompile Include="mp4patch.c" />
+    <ClCompile Include="compass.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accel.h" />
@@ -33,6 +34,7 @@
     <ClInclude Include="file.h" />
     <ClInclude Include="filetransfer.h" />
     <ClInclude Include="mp4patch.h" />
+    <ClInclude Include="compass.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -78,6 +80,9 @@
     <None Include="www\events.html">
       <Filter>html</Filter>
     </None>
+    <None Include="www\notify.html">
+      <Filter>html</Filter>
+    </None>
     <None Include="lib\js\plugin\win7\jsHandler.js">
       <Filter>javascript</Filter>
     </None>
@@ -93,7 +98,7 @@
     <None Include="www\file.html">
       <Filter>html</Filter>
     </None>
-    <None Include="www\notification.html">
+    <None Include="www\compass.html">
       <Filter>html</Filter>
     </None>
   </ItemGroup>

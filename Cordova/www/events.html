@@ -7,9 +7,10 @@
 	<body>
         <div id='state'></div>
         <script>
-            document.addEventListener('deviceready', function () { document.getElementById('state').innerHTML = 'Ready!'; }, false);
-            document.addEventListener('pause', function () { document.getElementById('state').innerHTML = 'Paused!'; }, false);
-            document.addEventListener('resume', function () { document.getElementById('state').innerHTML = 'Resumed!'; }, false);
-		</script>
+          document.addEventListener('deviceready', function () { document.getElementById('state').innerHTML = 'Ready!'; }, false);
+          document.addEventListener('pause', function () { document.getElementById('state').innerHTML = 'Paused!'; }, false);
+          document.addEventListener('resume', function () { document.getElementById('state').innerHTML = 'Resumed!'; }, false);
+          document.addEventListener('backbutton', function () { document.getElementById('state').innerHTML = 'Back!'; }, false);
+        </script>
 	</body>
 </html>

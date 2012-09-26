@@ -151,10 +151,13 @@ void fix_mp4_duration (wchar_t* file_name, LONGLONG duration)
 
 			time_scale = READ_BE4(mvhd_addr + 4 + 4 + 1 + 3 + 4 + 4);
 			
-			time_ratio = (DWORD) (10000000L / time_scale);	// Duration is passed as a number of 100 ns units - there are 10 million ticks per sec
-			fixed_duration = (DWORD) (duration/time_ratio);
+			if (time_scale)
+			{
+					time_ratio = (DWORD) (10000000L / time_scale);	// Duration is passed as a number of 100 ns units - there are 10 million ticks per sec
+					fixed_duration = (DWORD) (duration/time_ratio);
 
-			WRITE_BE4(mvhd_addr + 4 + 4 + 1 + 3 + 4 + 4 + 4, fixed_duration);
+					WRITE_BE4(mvhd_addr + 4 + 4 + 1 + 3 + 4 + 4 + 4, fixed_duration);
+			}
 		}
 	}
 

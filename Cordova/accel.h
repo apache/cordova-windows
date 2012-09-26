@@ -17,7 +17,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-int setup_sensors(void);
-void propagate_sample(void);
+void propagate_accel_sample(void);
 
 DECLARE_CORDOVA_MODULE(Accelerometer)

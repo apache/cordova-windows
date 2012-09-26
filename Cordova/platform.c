@@ -22,19 +22,26 @@
 
 #include "platform.h"
 
-static BOOL override = FALSE;
+static BOOL event_on = TRUE;
 
-BOOL override_back_button(void)
+BOOL is_back_button_event_enabled(void)
 {
-	return override;
+	return event_on;
 }
 
 static HRESULT platform_exec(BSTR callback_id, BSTR action, BSTR args, VARIANT *result)
 {
 	if (!wcscmp(action, L"backButtonEventOn"))
-			override = TRUE;
+	{
+		event_on = TRUE;
+		return S_OK;
+	}
+
 	if (!wcscmp(action, L"backButtonEventOff"))
-		override = FALSE;
+	{
+		event_on = FALSE;
+		return S_OK;
+	}
 
 	return DISP_E_MEMBERNOTFOUND;
 }
