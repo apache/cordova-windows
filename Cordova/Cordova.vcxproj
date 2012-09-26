@@ -145,7 +145,7 @@
     <None Include="www\file.html" />
     <None Include="www\index.html" />
     <None Include="www\network.html" />
-    <None Include="www\notification.html" />
+    <None Include="www\notify.html" />
     <None Include="www\storage.html" />
   </ItemGroup>
   <ItemGroup>
