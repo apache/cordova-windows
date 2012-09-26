@@ -33,7 +33,7 @@
 #include "common.h"
 
 #define CORDOVA_MACHINE_ID		L"MachineID"
-#define CORDOVA_VERSION			L"2.0.0"
+#define CORDOVA_VERSION			L"2.1.0"
 #define CORDOVA_VERSION_LEN		5
 
 // A valid UUID string should look like this: f7b38bf1-2ece-4e2a-94a6-e791863f0109

@@ -36,6 +36,9 @@
 #include "common.h"
 #include "mp4patch.h"
 
+// Workaround for a declaration in the Windows 8 SDK that's mistakenly missing for non C++ files
+STDAPI MFCreateCollection(_Out_ IMFCollection **ppIMFCollection);
+
 #pragma comment(lib, "mfuuid.lib")      // Media Foundation UUIDs
 #pragma comment(lib, "mfplat.lib")	// MF attributes
 #pragma comment(lib, "mf.lib")	// MF topology, session, device enumeration and video renderer
@@ -65,7 +68,6 @@ IMFMediaType* mic_config_if;	// Audio capture device output configuration
 
 IMFMediaSource*	video_source_if;	// These need to be shutdown before being released, so keep keep pointers around
 IMFMediaSource*	audio_source_if;
-IMFMediaSource* av_source_if;
 IMFMediaSink* media_sink_if;
 IMFTransform* video_compr_transform_if;
 IMFTransform* audio_compr_transform_if;
@@ -93,8 +95,7 @@ wchar_t temp_directory_url[MAX_FILE_NAME_LEN + 8];	//	file://C:/Temp syntax
 wchar_t last_recorded_file_name_full[MAX_FILE_NAME_LEN+1];	// Full path
 wchar_t last_recorded_file_name[MAX_FILE_NAME_LEN+1];		// Name only
 
-LONGLONG start_time;	// Markers used to compute the duration of the last recording
-LONGLONG stop_time;
+LONGLONG start_time;	// Marker used to compute the duration of the last recording
 
 // Note: the MPEG 4 sink is limited to 4 GB
 
@@ -411,7 +412,10 @@ HRESULT add_frame_grabber_node (IMFTopology* topology_if, IMFMediaType* input_ty
 	hr = grabber_config_if->lpVtbl->SetGUID(grabber_config_if, &MF_MT_MAJOR_TYPE, &MFMediaType_Video);     
 
 	// If the cam is sending JPEG frames use that for the frame grabber node, otherwise request RGB 24 bpp representation
-	mjpeg_mode = IsEqualGUID(&input_format, &MFVideoFormat_MJPG);
+	mjpeg_mode = 0; // IsEqualGUID(&input_format, &MFVideoFormat_MJPG); disabled for now ; some webcams send JFIF frames,
+					// others AVI1 MJPEG frames (JPEG minus DHT segment) ; the missing Huffman table contents is fixed,
+					// so it can be added programatically, but for single-frame capture we don't really need to optimize,
+					// and using MJPEG rather than YUV or RGB modes may make the preview more costly
 		
 	if (mjpeg_mode)
 		hr = grabber_config_if->lpVtbl->SetGUID(grabber_config_if, &MF_MT_SUBTYPE, &MFVideoFormat_MJPG);
@@ -539,7 +543,7 @@ HRESULT configure_mft(IMFTransform* mft_if)
     if (attributes_if)
     {
         hr = attributes_if->lpVtbl->SetUINT32(attributes_if, &MF_TRANSFORM_ASYNC_UNLOCK, TRUE);
-     //   hr = attributes_if->lpVtbl->SetUINT32(attributes_if, &MF_LOW_LATENCY, TRUE);
+        hr = attributes_if->lpVtbl->SetUINT32(attributes_if, &MF_LOW_LATENCY, TRUE);
 	
 		RELEASE(attributes_if);
     }
@@ -830,7 +834,7 @@ HRESULT add_tee_node(IMFTopology* topology_if, IMFTopologyNode** tee_node_ifp)
 }
 
 
-HRESULT create_av_source (void)
+HRESULT create_av_source (IMFMediaSource** av_source_ifp)
 {
     // We may get video from a cam and audio from a separate mic - Handle them as two streams coming out of a single media source
 	HRESULT hr;
@@ -844,7 +848,7 @@ HRESULT create_av_source (void)
 	if (audio_source_if)
 		hr = collection_if->lpVtbl->AddElement(collection_if, (IUnknown*) audio_source_if);
 	
-	hr = MFCreateAggregateSource(collection_if, &av_source_if);
+	hr = MFCreateAggregateSource(collection_if, av_source_ifp);
 
 	RELEASE(collection_if);
 
@@ -1016,13 +1020,14 @@ void prepare_video_framing (IMFTopology* topology_if)
 	IMFPresentationDescriptor* av_pres_descr_if = 0;
 	IMFTopologyNode*	video_capture_node_if = 0;
 	IMFTopologyNode*	video_preview_node_if = 0;
+	IMFMediaSource*	av_source_if = 0;
 
 	// Select video input device
 	hr = select_video_capture_device(&video_source_if, preferred_video_capture_dev);
 
 	// Create combined AV source - a media session can only be associated to a single source
 	// Not required since we're not dealing with audio here though, but let's share code with the video case
-	hr = create_av_source();
+	hr = create_av_source(&av_source_if);
 
 	if (av_source_if)
 	{
@@ -1059,7 +1064,6 @@ void prepare_video_capture (IMFTopology* topology_if, wchar_t* file_name)
 	
 	HRESULT hr;
 	IMFPresentationDescriptor* av_pres_descr_if = 0;
-
 	IMFTopologyNode*	video_capture_node_if = 0;
 	IMFTopologyNode*	audio_capture_node_if = 0;
 	IMFTopologyNode*	video_preview_node_if = 0;
@@ -1067,16 +1071,16 @@ void prepare_video_capture (IMFTopology* topology_if, wchar_t* file_name)
 	IMFTopologyNode*	color_transform_node_if = 0;
 	IMFTopologyNode*	video_compression_node_if = 0;
 	IMFTopologyNode*	audio_compression_node_if = 0;
-
 	IMFTopologyNode*	video_output_node_if = 0;
 	IMFTopologyNode*	audio_output_node_if = 0;
+	IMFMediaSource*	av_source_if = 0;
 
 	// Select video and audio input devices
 	hr = select_video_capture_device(&video_source_if, preferred_video_capture_dev);
 	hr = select_audio_capture_device(&audio_source_if);
 
 	// Create combined AV source - a media session can only be associated to a single source
-	hr = create_av_source();
+	hr = create_av_source(&av_source_if);
 
 	if (av_source_if)
 	{
@@ -1161,18 +1165,19 @@ void prepare_video_capture (IMFTopology* topology_if, wchar_t* file_name)
 void prepare_photo_capture (IMFTopology* topology_if)
 {
 	HRESULT hr;
-	IMFPresentationDescriptor* av_pres_descr_if = 0;
+	IMFPresentationDescriptor*	av_pres_descr_if = 0;
 	IMFTopologyNode*	video_capture_node_if = 0;
 	IMFTopologyNode*	video_preview_node_if = 0;
 	IMFTopologyNode*	tee_node_if = 0;
 	IMFTopologyNode*	frame_grabber_if = 0;
+	IMFMediaSource*		av_source_if = 0;
 
 	// Select video input device
 	hr = select_video_capture_device(&video_source_if, preferred_video_capture_dev);
 
 	// Create combined AV source - a media session can only be associated to a single source
 	// Not required since we're not dealing with audio here though, but let's share code with the video case
-	hr = create_av_source();
+	hr = create_av_source(&av_source_if);
 
 	if (av_source_if)
 	{
@@ -1270,6 +1275,8 @@ unsigned int __stdcall session_control_proc(void* param)
 	BOOL done = FALSE;
 	IMFTopology* topology_if = (IMFTopology*) param;
 
+	set_thread_name(-1, "Media Session Control");
+
 	CoInitialize(0);
 	
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
@@ -1319,6 +1326,10 @@ unsigned int __stdcall session_control_proc(void* param)
 								PropVariantClear(&var);
 								break;
 
+							case MF_TOPOSTATUS_STARTED_SOURCE:
+								start_time = MFGetSystemTime();
+								break;
+
 							case MF_TOPOSTATUS_ENDED:
 								break;
 						}
@@ -1326,16 +1337,14 @@ unsigned int __stdcall session_control_proc(void* param)
 					break;
 
             case MESessionStarted:
-				start_time = MFGetSystemTime();
 				break;
 
-            case MESessionEnded:
+			case MESessionEnded:
                 // In the case of capture, another thread will call Stop
 				hr = media_session_if->lpVtbl->Stop(media_session_if);
                 break;
 
             case MESessionStopped:
-				stop_time = MFGetSystemTime();
 				// The MPEG 4 media sink is finalizable, and the session should invoke the finalization routines at this point
 				hr = media_session_if->lpVtbl->Close(media_session_if);
 				break;
@@ -1373,12 +1382,6 @@ the_end:
 	{
 		video_source_if->lpVtbl->Shutdown(video_source_if);
 		RELEASE_Z(video_source_if);
-	}
-
-	if (av_source_if)
-	{
-		av_source_if->lpVtbl->Shutdown(av_source_if);
-		RELEASE_Z(av_source_if);
 	}
 
 	if (color_transform_if)
@@ -1476,12 +1479,15 @@ void start_audio_playback (void)
 	start_session(AUDIO_PLAYBACK_TOPO);
 }
 
-void end_active_session (void)
+LONGLONG end_active_session (void)
 {
 	HRESULT hr;
-	
+	LONGLONG session_duration = 0;
+
 	if (media_session_if)
 	{
+		session_duration = MFGetSystemTime() - start_time;
+
 		hr = media_session_if->lpVtbl->Stop(media_session_if);
 	
 		// Wait until the session control thread exits
@@ -1491,13 +1497,15 @@ void end_active_session (void)
 	MFShutdown();
 
 	session_control_thread = 0;
+
+	return session_duration;
 }
 
 void stop_video_capture (void)
 {
-	end_active_session();
+	LONGLONG duration = end_active_session();
 
-	fix_mp4_duration(last_recorded_file_name_full, stop_time - start_time);
+	fix_mp4_duration(last_recorded_file_name_full, duration);
 }
 
 void stop_video_framing (void)

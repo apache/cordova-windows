@@ -16,6 +16,7 @@
     <ClCompile Include="common.c" />
     <ClCompile Include="filetransfer.c" />
     <ClCompile Include="mp4patch.c" />
+    <ClCompile Include="compass.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accel.h" />
@@ -33,6 +34,7 @@
     <ClInclude Include="file.h" />
     <ClInclude Include="filetransfer.h" />
     <ClInclude Include="mp4patch.h" />
+    <ClInclude Include="compass.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -51,9 +53,6 @@
     <None Include="lib\js\platform.js">
       <Filter>javascript</Filter>
     </None>
-    <None Include="www\acceleration.html">
-      <Filter>html</Filter>
-    </None>
     <None Include="www\index.html">
       <Filter>html</Filter>
     </None>
@@ -63,16 +62,7 @@
     <None Include="www\network.html">
       <Filter>html</Filter>
     </None>
-    <None Include="www\accel_game.html">
-      <Filter>html</Filter>
-    </None>
     <None Include="www\capture.html">
-      <Filter>html</Filter>
-    </None>
-    <None Include="www\accel_game.css">
-      <Filter>html</Filter>
-    </None>
-    <None Include="www\accel_game.js">
       <Filter>html</Filter>
     </None>
     <None Include="www\events.html">
@@ -93,7 +83,17 @@
     <None Include="www\file.html">
       <Filter>html</Filter>
     </None>
-    <None Include="www\notification.html">
+    <None Include="www\compass.html">
+      <Filter>html</Filter>
+    </None>
+    <None Include="www\notification.html" />
+    <None Include="www\accel_game.css">
+      <Filter>html</Filter>
+    </None>
+    <None Include="www\accel_game.html">
+      <Filter>html</Filter>
+    </None>
+    <None Include="www\accel_game.js">
       <Filter>html</Filter>
     </None>
   </ItemGroup>

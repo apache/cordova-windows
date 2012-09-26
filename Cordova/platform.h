@@ -19,4 +19,6 @@
 
 #include "shell.h"
 
+BOOL is_back_button_event_enabled (void);
+
 DECLARE_CORDOVA_MODULE(Platform)

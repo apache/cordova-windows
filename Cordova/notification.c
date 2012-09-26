@@ -36,10 +36,27 @@ extern HWND	hWnd;
 LRESULT CALLBACK NotificationDialogProc (HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	int btn_id;
-	
+	HWND hParent;
+	RECT parent_rect;
+	RECT dialog_rect;
+	RECT rc;
+
 	switch (uMsg)
 	{
 		case WM_INITDIALOG:
+
+			// Center the dialog within parent window
+			hParent = GetParent(hDlg);
+
+			GetWindowRect(hParent, &parent_rect);
+			GetWindowRect(hDlg, &dialog_rect);
+			rc = parent_rect;
+
+			OffsetRect(&dialog_rect, -dialog_rect.left, -dialog_rect.top);
+			OffsetRect(&rc, -rc.left, -rc.top);
+			OffsetRect(&rc, -dialog_rect.right, -dialog_rect.bottom);
+
+			SetWindowPos(hDlg, HWND_TOP, parent_rect.left + rc.right*1/2, parent_rect.top + rc.bottom*1/2, 0, 0, SWP_NOSIZE);
 			return TRUE;
 
 		case WM_COMMAND:

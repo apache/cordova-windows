@@ -29,6 +29,9 @@
 
 #include <ipifcons.h>	// Network types
 
+#include <commctrl.h>					// Let's initialize the common controls library
+#pragma comment(lib, "comctl32.lib")	// so they can be used with the process
+
 #include "shell.h"
 #include "common.h"
 #include "device.h"
@@ -40,15 +43,9 @@
 #include "platform.h"
 #include "file.h"
 #include "filetransfer.h"
-
-#include <commctrl.h>					// Let's initialize the common controls library
-#pragma comment(lib, "comctl32.lib")	// so they can be used with the process
+#include "compass.h"
 
 //-------------------------------------------------------------------------------------------------
-
-typedef enum {
-	WM_EXEC_JS_SCRIPT = (WM_USER + 1)
-} UserMessages;
 
 #define NOT_IMPLEMENTED __debugbreak(); OutputDebugStringA(__FUNCTION__); return 0;
 
@@ -114,6 +111,9 @@ int current_state;	// Rough operating state : not ready / ready / temporarily pa
 
 int skip_title_update = 1;	// Title update skip counter, used to avoid initial "index.html"
 
+// Browser window subclassing
+static WNDPROC initial_browser_wnd_proc;
+LRESULT CALLBACK BrowserWndProcWrapper(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 //-------------------------------------------------------------------------------------------------
 
@@ -154,6 +154,7 @@ static void register_cordova_modules()
 	register_cordova_module(CORDOVA_MODULE(Platform));
 	register_cordova_module(CORDOVA_MODULE(File));
 	register_cordova_module(CORDOVA_MODULE(FileTransfer));
+	register_cordova_module(CORDOVA_MODULE(Compass));
 }
 
 static void close_cordova_modules()
@@ -168,6 +169,7 @@ static void close_cordova_modules()
 	close_cordova_module(CORDOVA_MODULE(Platform));
 	close_cordova_module(CORDOVA_MODULE(File));
 	close_cordova_module(CORDOVA_MODULE(FileTransfer));
+	close_cordova_module(CORDOVA_MODULE(Compass));
 }
 
 static CordovaModule *find_cordova_module(BSTR module_id)
@@ -801,8 +803,38 @@ void invoke_js_routine (wchar_t* wcs)
 
 //-------------------------------------------------------------------------------------------------
 
+BOOL CALLBACK enum_proc(HWND window, LPARAM reply)
+{
+	static wchar_t wanted[] = L"Internet Explorer_Server";
+	char buf[sizeof(wanted)];
+
+	if (GetClassName(window, (wchar_t*) buf, sizeof(wanted)/sizeof(wanted[0]))
+		&& !memcmp(buf, wanted, sizeof(wanted)))
+	{
+		// Report success and stop enumeration
+		(*(HWND*) reply) = window;
+		return FALSE;
+	}
+	else
+		return TRUE;
+}
+
 void set_native_ready (void)
 {
+	// Find browser window and subclass its window proc so we can intercept back key presses...
+	HWND hBrowserWnd = 0;
+	WNDPROC browser_wnd_proc;
+
+	EnumChildWindows(hWnd, enum_proc, (LPARAM) &hBrowserWnd);
+
+	browser_wnd_proc = (WNDPROC) GetWindowLong(hBrowserWnd, GWL_WNDPROC);
+	if (browser_wnd_proc && browser_wnd_proc != BrowserWndProcWrapper)
+	{
+		initial_browser_wnd_proc = browser_wnd_proc;
+		SetWindowLong(hBrowserWnd, GWL_WNDPROC, (LONG) BrowserWndProcWrapper);
+		BringWindowToTop(hBrowserWnd);
+	}
+
 	// Fire onNativeReady event
 	invoke_js_routine(L"cordova.require('cordova/channel').onNativeReady.fire();");
 }
@@ -1050,12 +1082,27 @@ static void call_js_script(BSTR wcs_as_bstr)
 	}
 }
 
+
+void ProcessBackKeyStroke (void)
+{
+	// I there are listeners for back button down notifications
+	if (is_back_button_event_enabled())
+	{
+		call_js_script(SysAllocString(L"cordova.fireDocumentEvent('backbutton');"));
+	}
+}
+
 LRESULT CALLBACK CordovaShellWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	// WindowProc for the main host application window
 
 	switch (uMsg)
 	{
+		case WM_KEYDOWN:
+			if (wParam == VK_BACK)
+				ProcessBackKeyStroke();
+			break;
+
 		case WM_CLOSE:
 			current_state = STATE_ENDING;	// The window will get deactivated before being destroyed
 											// Do not bother sending "pause" event
@@ -1082,13 +1129,18 @@ LRESULT CALLBACK CordovaShellWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 			camera_notify_display_change();
 			return 0;
 
-		case WM_USER:
-			// New accelerometer sample available ; propagate to the JS side
-			propagate_sample();
-			return 0;
-
 		case WM_EXEC_JS_SCRIPT:
 			call_js_script((BSTR) lParam);
+			return 0;
+
+		case WM_USER_ACCEL:
+			// New accelerometer sample available ; propagate to the JS side
+			propagate_accel_sample();
+			return 0;
+
+		case WM_USER_COMPASS:
+			// New compass sample available ; propagate to the JS side
+			propagate_compass_sample();
 			return 0;
 
 		case WM_PARENTNOTIFY:
@@ -1125,6 +1177,16 @@ LRESULT CALLBACK CordovaShellWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 	}
 
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
+
+//-------------------------------------------------------------------------------------------------
+
+LRESULT CALLBACK BrowserWndProcWrapper(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	if (uMsg == WM_KEYDOWN && wParam == VK_BACK)
+		ProcessBackKeyStroke();
+
+	return initial_browser_wnd_proc(hWnd, uMsg, wParam, lParam);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1341,9 +1403,6 @@ void early_init (void)
 	ccex.dwSize = sizeof(INITCOMMONCONTROLSEX);
 	ccex.dwICC  = ICC_BAR_CLASSES;
 	InitCommonControlsEx(&ccex);
-
-	// Initialize and check available sensors
-	setup_sensors();
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1366,6 +1425,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		MAIN_WINDOW_CLASS,
 		0 // >>> small icon update
 		};
+
+	set_thread_name(-1, "Primary Thread");
 
 	early_init();
 	register_cordova_modules();

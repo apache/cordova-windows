@@ -20,12 +20,14 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -39,13 +41,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProgramFiles)\Microsoft SDKs\Internet Explorer\v9\include;$(DXSDK_DIR)include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include</IncludePath>
-    <LibraryPath>$(ProgramFiles)\Microsoft SDKs\Internet Explorer\v9\lib;$(DXSDK_DIR)lib\x86;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <IncludePath>$(ProgramFiles)\Microsoft SDKs\Internet Explorer\v9\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include\um;$(WindowsSdkDir)include\shared;$(FrameworkSDKDir)\include</IncludePath>
+    <LibraryPath>$(WindowsSdkDir)lib\win8\um\x86;$(ProgramFiles)\Microsoft SDKs\Internet Explorer\v9\lib;$(DXSDK_DIR)lib\x86;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProgramFiles)\Microsoft SDKs\Internet Explorer\v9\include;$(DXSDK_DIR)include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include</IncludePath>
-    <LibraryPath>$(ProgramFiles)\Microsoft SDKs\Internet Explorer\v9\lib;$(DXSDK_DIR)lib\x86;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <IncludePath>$(ProgramFiles)\Microsoft SDKs\Internet Explorer\v9\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include\um;$(WindowsSdkDir)include\shared;$(FrameworkSDKDir)\include</IncludePath>
+    <LibraryPath>$(WindowsSdkDir)lib\win8\um\x86;$(ProgramFiles)\Microsoft SDKs\Internet Explorer\v9\lib;$(DXSDK_DIR)lib\x86;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -90,6 +92,7 @@
     <ClCompile Include="accel.c" />
     <ClCompile Include="capture.c" />
     <ClCompile Include="common.c" />
+    <ClCompile Include="compass.c" />
     <ClCompile Include="device.c" />
     <ClCompile Include="file.c" />
     <ClCompile Include="filetransfer.c" />
@@ -107,6 +110,7 @@
     <ClInclude Include="accel.h" />
     <ClInclude Include="capture.h" />
     <ClInclude Include="common.h" />
+    <ClInclude Include="compass.h" />
     <ClInclude Include="device.h" />
     <ClInclude Include="file.h" />
     <ClInclude Include="filetransfer.h" />
@@ -128,14 +132,16 @@
     <None Include="lib\js\plugin\win7\SQLError.js" />
     <None Include="lib\js\plugin\win7\storage.js" />
     <None Include="toolbar.bmp" />
-    <None Include="www\acceleration.html" />
     <None Include="www\accel_game.css" />
     <None Include="www\accel_game.html" />
     <None Include="www\accel_game.js" />
     <None Include="www\capture.html" />
+    <None Include="www\compass.html" />
     <None Include="www\cordova.win7.js" />
     <None Include="www\device.html" />
-    <None Include="www\events.html" />
+    <None Include="www\events.html">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="www\file.html" />
     <None Include="www\index.html" />
     <None Include="www\network.html" />

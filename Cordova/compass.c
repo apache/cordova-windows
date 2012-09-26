@@ -33,30 +33,45 @@ extern HWND hWnd;	// Main window, used as a way to request routine calls from th
 
 ISensorManager*		sensor_manager_if;
 ISensorCollection*	sensor_collection_if;
-ISensor*			accelerometer_if;
+ISensor*			compass_if;
 
-int acceleration_sensor_count;
+int orientation_sensor_count;
 
 double last_x, last_y, last_z;
 double prev_x, prev_y, prev_z;
 
-HANDLE accel_thread;	// Data acquisition thread handle
+double last_h;
+double prev_h;
+
+
+// See http://dev.w3.org/geo/api/spec-source-orientation.html
+
+// Definitions missing from Windows 7 SDK...
+#define INITGUID
+#include <propkeydef.h>
+DEFINE_PROPERTYKEY(SENSOR_DATA_TYPE_MAGNETIC_HEADING_COMPENSATED_MAGNETIC_NORTH_DEGREES,    0X1637D8A2, 0X4248, 0X4275, 0X86, 0X5D, 0X55, 0X8D, 0XE8, 0X4A, 0XED, 0XFD, 11);
+DEFINE_PROPERTYKEY(SENSOR_DATA_TYPE_MAGNETIC_FIELD_STRENGTH_X_MILLIGAUSS,     0X1637D8A2, 0X4248, 0X4275, 0X86, 0X5D, 0X55, 0X8D, 0XE8, 0X4A, 0XED, 0XFD, 19);
+DEFINE_PROPERTYKEY(SENSOR_DATA_TYPE_MAGNETIC_FIELD_STRENGTH_Y_MILLIGAUSS,     0X1637D8A2, 0X4248, 0X4275, 0X86, 0X5D, 0X55, 0X8D, 0XE8, 0X4A, 0XED, 0XFD, 20);
+DEFINE_PROPERTYKEY(SENSOR_DATA_TYPE_MAGNETIC_FIELD_STRENGTH_Z_MILLIGAUSS,     0X1637D8A2, 0X4248, 0X4275, 0X86, 0X5D, 0X55, 0X8D, 0XE8, 0X4A, 0XED, 0XFD, 21);
+
+
+HANDLE compass_thread;	// Data acquisition thread handle
 BOOL stop_flag;			// Flag raised to indicate that the acquisition thread should exit
 
 BSTR new_sample_callback;
 
-void propagate_accel_sample (void)
+void propagate_compass_sample (void)
 {
 	if (new_sample_callback)
 	{
 		wchar_t buf[100];
-		swprintf(buf, sizeof(buf)/sizeof(buf[0]), L"{x:%f,y:%f,z:%f}", last_x, last_y, last_z);
+		swprintf(buf, sizeof(buf)/sizeof(buf[0]), L"{magneticHeading:%f}", last_h);
 
 		cordova_success_callback(new_sample_callback, TRUE, buf);
 	}
 }
 
-unsigned int __stdcall accel_thread_proc(void* param)
+unsigned int __stdcall compass_thread_proc(void* param)
 {
 	ISensorDataReport* data_report_if;
 	PROPVARIANT v;
@@ -65,7 +80,7 @@ unsigned int __stdcall accel_thread_proc(void* param)
 	HRESULT hr;
 	ULONG ulCount = 0;
 
-	set_thread_name(-1, "Accelerometer Sampling");
+	set_thread_name(-1, "Compass Sampling");
 
 	CoInitialize(0);
 
@@ -82,30 +97,31 @@ unsigned int __stdcall accel_thread_proc(void* param)
 		// Sensor API not available...
 		return -2;
 
-	// Get the list of available accelerometers
-	hr = sensor_manager_if->lpVtbl->GetSensorsByCategory(sensor_manager_if, &SENSOR_CATEGORY_MOTION, &sensor_collection_if);
+	// Get the list of available orientation sensors
+	hr = sensor_manager_if->lpVtbl->GetSensorsByCategory(sensor_manager_if, &SENSOR_CATEGORY_ORIENTATION, &sensor_collection_if);
   		
 	sensor_manager_if->lpVtbl->RequestPermissions(sensor_manager_if, GetForegroundWindow(), sensor_collection_if, TRUE);
 
 	if (SUCCEEDED(hr))
 	{
 		// Check sensor count
-		hr = sensor_collection_if->lpVtbl->GetCount(sensor_collection_if, &acceleration_sensor_count);
+		hr = sensor_collection_if->lpVtbl->GetCount(sensor_collection_if, &orientation_sensor_count);
 
 		if (SUCCEEDED(hr))
 		{
-			if (acceleration_sensor_count == 0)
+			if (orientation_sensor_count == 0)
 			{
-				// No accelerometer
+				// No orientation sensor
+			}
+			else
+			{
+				// Get the first available orientation sensor
+				hr = sensor_collection_if->lpVtbl->GetAt(sensor_collection_if, 0, &compass_if);
+
 			}
 		}
 	}
 
-	if (SUCCEEDED(hr))
-	{
-		// Get the first available accelerometer
-		hr = sensor_collection_if->lpVtbl->GetAt(sensor_collection_if, 0, &accelerometer_if);
-	}
 
 
 	if (SUCCEEDED(hr))
@@ -125,7 +141,7 @@ unsigned int __stdcall accel_thread_proc(void* param)
 		if (SUCCEEDED(hr))
 		{
 			// Set property
-			hr = accelerometer_if->lpVtbl->SetProperties(accelerometer_if, params_in, &params_out);
+			hr = compass_if->lpVtbl->SetProperties(compass_if, params_in, &params_out);
 		}
 
 		if (params_in)
@@ -141,7 +157,7 @@ unsigned int __stdcall accel_thread_proc(void* param)
 		prev_y = last_y;
 		prev_z = last_z;
 		
-		if (!accelerometer_if || !SUCCEEDED(accelerometer_if->lpVtbl->GetData(accelerometer_if, &data_report_if)))
+		if (!compass_if || !SUCCEEDED(compass_if->lpVtbl->GetData(compass_if, &data_report_if)))
 		{
 			last_x = .002 * (rand()%1000) -1;
 			last_y = .002 * (rand()%1000) -1;
@@ -150,7 +166,15 @@ unsigned int __stdcall accel_thread_proc(void* param)
 		else
 		{
 			PropVariantInit(&v);
-			data_report_if->lpVtbl->GetSensorValue(data_report_if, &SENSOR_DATA_TYPE_ACCELERATION_X_G, &v);
+			hr = data_report_if->lpVtbl->GetSensorValue(data_report_if, &SENSOR_DATA_TYPE_MAGNETIC_HEADING_COMPENSATED_MAGNETIC_NORTH_DEGREES, &v);
+			if (v.vt == VT_R4)
+				last_h = v.fltVal;
+			if (v.vt == VT_R8)
+				last_h = v.dblVal;
+			PropVariantClear(&v);
+
+			PropVariantInit(&v);
+			hr = data_report_if->lpVtbl->GetSensorValue(data_report_if, &SENSOR_DATA_TYPE_MAGNETIC_FIELD_STRENGTH_X_MILLIGAUSS, &v);
 			if (v.vt == VT_R4)
 				last_x = v.fltVal;
 			if (v.vt == VT_R8)
@@ -158,7 +182,7 @@ unsigned int __stdcall accel_thread_proc(void* param)
 			PropVariantClear(&v);
 
 			PropVariantInit(&v);
-			data_report_if->lpVtbl->GetSensorValue(data_report_if, &SENSOR_DATA_TYPE_ACCELERATION_Y_G, &v);
+			hr = data_report_if->lpVtbl->GetSensorValue(data_report_if, &SENSOR_DATA_TYPE_MAGNETIC_FIELD_STRENGTH_Y_MILLIGAUSS, &v);
 			if (v.vt == VT_R4)
 				last_y = v.fltVal;
 			if (v.vt == VT_R8)
@@ -166,7 +190,7 @@ unsigned int __stdcall accel_thread_proc(void* param)
 			PropVariantClear(&v);
 
 			PropVariantInit(&v);
-			data_report_if->lpVtbl->GetSensorValue(data_report_if, &SENSOR_DATA_TYPE_ACCELERATION_Z_G, &v);
+			hr = data_report_if->lpVtbl->GetSensorValue(data_report_if, &SENSOR_DATA_TYPE_MAGNETIC_FIELD_STRENGTH_Z_MILLIGAUSS, &v);
 			if (v.vt == VT_R4)
 				last_z = v.fltVal;
 			if (v.vt == VT_R8)
@@ -180,7 +204,7 @@ unsigned int __stdcall accel_thread_proc(void* param)
 		}
 
 		if (last_x != prev_x || last_y != prev_y || last_z != prev_z)
-			SendMessage(hWnd, WM_USER_ACCEL, 0, 0);	// Request the main thread to invoke a JS call for us ; will call propagate_accel_sample in response
+			SendMessage(hWnd, WM_USER_COMPASS, 0, 0);	// Request the main thread to invoke a JS call for us ; will call propagate_compass_sample in response
 
 		Sleep(10);
 	}
@@ -188,34 +212,34 @@ unsigned int __stdcall accel_thread_proc(void* param)
 	return 0;
 }
 
-int start_accel_acquisition (void)
+static int start_compass_acquisition (void)
 {
-	if (accel_thread)
+	if (compass_thread)
 		return -1;
 
 	// Return 0 x/y/z and 0 timestamp until samples start coming in
 	last_x = 0;
 	last_y = 0;
 	last_z = 0;
-	
+
 	stop_flag = FALSE;
 	
 	// Reading sensor values seem to block the calling thread ; do this in a dedicated thread
-	accel_thread = CreateThread(0, 0, accel_thread_proc, 0, 0, 0);
+	compass_thread = CreateThread(0, 0, compass_thread_proc, 0, 0, 0);
 	return 0;
 }
 
-int stop_accel_acquisition (void)
+int stop_compass_acquisition (void)
 {
-	if (accel_thread == 0)
+	if (compass_thread == 0)
 		return -1;
 
 	stop_flag = TRUE;
 		
 	// Wait until the acquisition thread exits
-	WaitForSingleObject(accel_thread, INFINITE);
+	WaitForSingleObject(compass_thread, INFINITE);
 		
-	accel_thread = 0;
+	compass_thread = 0;
 
 	if (new_sample_callback)
 	{
@@ -227,25 +251,27 @@ int stop_accel_acquisition (void)
 }
 
 
-HRESULT accel_exec(BSTR callback_id, BSTR action, BSTR args, VARIANT *result)
+HRESULT compass_exec(BSTR callback_id, BSTR action, BSTR args, VARIANT *result)
 {
-	if (!wcscmp(action, L"start"))
+	if (!wcscmp(action, L"getHeading"))
 	{
 		new_sample_callback = SysAllocString(callback_id);
 		last_x = last_y = last_z = 0;	
-		propagate_accel_sample();
-		start_accel_acquisition();
-		return S_OK;
-	}
-
-	if (!wcscmp(action, L"stop"))
-	{
-		stop_accel_acquisition();
-		cordova_success_callback(callback_id, FALSE, NULL_MESSAGE);
+		propagate_compass_sample();
+		start_compass_acquisition();
 		return S_OK;
 	}
 
 	return DISP_E_MEMBERNOTFOUND;
 }
 
-DEFINE_CORDOVA_MODULE(Accelerometer, L"Accelerometer", accel_exec, NULL, NULL)
+DEFINE_CORDOVA_MODULE(Compass, L"Compass", compass_exec, NULL, NULL)
+
+	/*
+	
+    magneticHeading: The heading in degrees from 0 - 359.99 at a single moment in time. (Number)
+    trueHeading: The heading relative to the geographic North Pole in degrees 0 - 359.99 at a single moment in time. A negative value indicates that the true heading could not be determined. (Number)
+    headingAccuracy: The deviation in degrees between the reported heading and the true heading. (Number)
+    timestamp: The time at which this heading was determined. (milliseconds)
+
+	*/
