@@ -1,6 +1,6 @@
 This is a draft implementation of a Cordova layer for Windows 7.
 
-This project can be built using Visual Studio 2010. Doing so creates a Win32
+This project can be built using Visual Studio 2012. Doing so creates a Win32
 program that hosts a IE-based web view and loads www/index.html inside it. The
 supplied cordova.win7.js file has partial support for Cordova events and API
 sets, and is able to interact with the hosting program (native side).
