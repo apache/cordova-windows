@@ -1,1 +1,0 @@
-C:\Repos\cordova\win8metro\test\MetroTestApp\MetroTestApp.jsproj;neutral
