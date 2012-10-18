@@ -82,11 +82,11 @@
     <Content Include="lib\SQLite\SQLite3\SQLite3.vcxproj.filters" />
     <Content Include="lib\SQLite\SQLite3\Statement.cpp" />
     <Content Include="lib\SQLite\SQLite3\Statement.h" />
-    <Content Include="music\200k.mp3" />
+    <Content Include="music\BlueZedEx.mp3" />
     <None Include="Cordova-Metro_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <SDKReference Include="Microsoft.WinJS.1.0.RC, Version=1.0" />
+    <SDKReference Include="Microsoft.WinJS.1.0, Version=1.0" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
