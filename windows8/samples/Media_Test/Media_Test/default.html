@@ -21,27 +21,39 @@
     <button id="btnPause" onclick="pause()" disabled="disabled">Pause</button>
     <button id="btnStop" onclick="stop()" disabled="disabled">Stop</button>
     <button id="btnPosition" onclick="position()" disabled="disabled">Position</button>
-    <p id="status"></p>
-    <p id="duration"></p>
-    <!--<p id="position"></p>-->
+    <div id="statusDiv">[Status]</div>
+    <div id="durationDiv">[Duration]</div>
+    <div id="positionDiv">[Position]</div>
+
     <script type="text/javascript">
 
-        function status(text) {
-            status.innerText = text;
+        var $ = function (sel) {
+            return document.querySelector(sel);
         };
+
+        var updateStatus = function (msg) {
+            console.log("Status::" + msg);
+            $("#statusDiv").innerHTML = msg;
+        };
+
 
         var media = null;
         var src = "/music/BlueZedEx.mp3";
         function start() {
             media = new Media(src,
-                null,
                 function () {
-                    status("Error loading media.");
+                    updateStatus("Success creating media");
                 },
-                function () { }
+                function () {
+                    updateStatus("Error loading media.");
+                },
+                function (res) {
+                    updateStatus("Media status callback :: " + res);
+                }
             );
-            //id('duration').innerHTML = 'Duration: ' + media.getDuration();
-            status("Media started.");
+            $("#durationDiv").innerHTML = 'Duration: ' + media.getDuration();
+            updateStatus("Media starting");
+
             btnStart.disabled = 'disabled';
             btnPlay.disabled = false;
             btnStop.disabled = false;
@@ -51,13 +63,13 @@
             media.play();
             btnPlay.disabled = 'disabled';
             btnPause.disabled = false;
-            status("Media playing.");
+            updateStatus("Media playing.");
         }
         function pause() {
             media.pause();
             btnPlay.disabled = false;
             btnPause.disabled = 'disabled';
-            status("Media paused.");
+            updateStatus("Media paused.");
         }
         function stop() {
             media.stop();
@@ -66,16 +78,17 @@
             btnStart.disabled = false;
             btnStop.disabled = 'disabled';
             btnPosition.disabled = 'disabled';
-            status("Media stopped.");
+            updateStatus( "Media stopped.");
         }
 
         function position() {
             media.getCurrentPosition(
-                function(p) {
-                    position.innerText = 'Position: ' + p;
+                function (p) {
+                    $("#positionDiv").innerHTML = "Position: " + p;
+                    
                 },
                 function(e) {
-                    status('Error getting position: '+e);
+                    updateStatus("Error getting position: " + e);
                 }
             )
         }
