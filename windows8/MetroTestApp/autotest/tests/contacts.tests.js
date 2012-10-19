@@ -42,7 +42,7 @@ describe("Contacts (navigator.contacts)", function () {
             runs(function () {
                 expect(fail).not.toHaveBeenCalled();
             });
-        });
+        }); 
 
         it("should throw an exception if success callback is empty", function() {
             var fail = function() {};
@@ -53,11 +53,11 @@ describe("Contacts (navigator.contacts)", function () {
             expect(function () {
                 navigator.contacts.find(["displayName", "name", "emails", "phoneNumbers"], null, fail, obj);
             }).toThrow();
-        });
+        }); 
 
         it("error callback should be called when no fields are specified", function() {
             var win = jasmine.createSpy(),
-                fail = jasmine.createSpy(function(result) {
+                fail = jasmine.createSpy(function(result) { 
                     expect(result).toBeDefined();
                     expect(result.code).toBe(ContactError.INVALID_ARGUMENT_ERROR);
                 }),
@@ -71,7 +71,7 @@ describe("Contacts (navigator.contacts)", function () {
 
             waitsFor(function () { return fail.wasCalled; }, Tests.TEST_TIMEOUT);
 
-            runs(function () {
+            runs(function () { 
                 expect(win).not.toHaveBeenCalled();
                 expect(fail).toHaveBeenCalled();
             });
@@ -93,7 +93,7 @@ describe("Contacts (navigator.contacts)", function () {
                             }
                         } catch(e) {
                             return false;
-                        }
+                        } 
                         return bFound;
                     }),
                     fail = jasmine.createSpy(),
@@ -149,7 +149,7 @@ describe("Contacts (navigator.contacts)", function () {
 
         it("should return a Contact object", function() {
             var bDay = new Date(1976, 7,4);
-            var obj = navigator.contacts.create({"displayName": "test name", "gender": "male", "note": "my note", "name": {"formatted": "Mr. Test Name"}, "emails": [{"value": "here@there.com"}, {"value": "there@here.com"}], "birthday": bDay});
+            var obj = navigator.contacts.create({"displayName": "test name", "gender": "male", "note": "my note", "name": {"formatted": "Mr. Test Name"}, "emails": [{"value": "here@there.com"}, {"value": "there@here.com"}], "birthday": bDay});		
 
             expect(obj).toBeDefined();
             expect(obj.displayName).toBe('test name');
@@ -165,7 +165,7 @@ describe("Contacts (navigator.contacts)", function () {
 
     describe("Contact object", function () {
         it("should be able to create instance", function() {
-            var contact = new Contact("a", "b", new ContactName("a", "b", "c", "d", "e", "f"), "c", [], [], [], [], [], "f", "i",
+            var contact = new Contact("a", "b", new ContactName("a", "b", "c", "d", "e", "f"), "c", [], [], [], [], [], "f", "i",  
                 [], [], []);
             expect(contact).toBeDefined();
             expect(contact.id).toBe("a");
@@ -182,7 +182,7 @@ describe("Contacts (navigator.contacts)", function () {
             expect(contact.photos).toBeDefined();
             expect(contact.categories).toBeDefined();
             expect(contact.urls).toBeDefined();
-        });
+        });	
 
         it("should be able to define a ContactName object", function() {
             var contactName = new ContactName("Dr. First Last Jr.", "Last", "First", "Middle", "Dr.", "Jr.");
@@ -193,7 +193,7 @@ describe("Contacts (navigator.contacts)", function () {
             expect(contactName.middleName).toBe("Middle");
             expect(contactName.honorificPrefix).toBe("Dr.");
             expect(contactName.honorificSuffix).toBe("Jr.");
-        });
+        });	
 
         it("should be able to define a ContactField object", function() {
             var contactField = new ContactField("home", "8005551212", true);
@@ -201,13 +201,13 @@ describe("Contacts (navigator.contacts)", function () {
             expect(contactField.type).toBe("home");
             expect(contactField.value).toBe("8005551212");
             expect(contactField.pref).toBe(true);
-        });
+        });	
 
         it("ContactField object should coerce type and value properties to strings", function() {
             var contactField = new ContactField(12345678, 12345678, true);
             expect(contactField.type).toBe("12345678");
             expect(contactField.value).toBe("12345678");
-        });
+        });	
 
         it("should be able to define a ContactAddress object", function() {
             var contactAddress = new ContactAddress(true, "home", "a","b","c","d","e","f");
@@ -220,7 +220,7 @@ describe("Contacts (navigator.contacts)", function () {
             expect(contactAddress.region).toBe("d");
             expect(contactAddress.postalCode).toBe("e");
             expect(contactAddress.country).toBe("f");
-        });
+        });	
 
         it("should be able to define a ContactOrganization object", function() {
             var contactOrg = new ContactOrganization(true, "home", "a","b","c","d","e","f","g");
@@ -230,14 +230,14 @@ describe("Contacts (navigator.contacts)", function () {
             expect(contactOrg.name).toBe("a");
             expect(contactOrg.department).toBe("b");
             expect(contactOrg.title).toBe("c");
-        });
+        });	
 
         it("should be able to define a ContactFindOptions object", function() {
             var contactFindOptions = new ContactFindOptions("a", true, "b");
             expect(contactFindOptions).toBeDefined();
             expect(contactFindOptions.filter).toBe("a");
             expect(contactFindOptions.multiple).toBe(true);
-        });
+        });	
 
         it("should contain a clone function", function() {
             var contact = new Contact();
@@ -253,9 +253,9 @@ describe("Contacts (navigator.contacts)", function () {
             contact.gender="male";
             contact.note="note to be cloned";
             contact.name = new ContactName("Mr. Test Name");
-
+            
             var clonedContact = contact.clone();
-
+            
             expect(contact.id).toBe(1);
             expect(clonedContact.id).toBe(null);
             expect(clonedContact.displayName).toBe(contact.displayName);
@@ -265,7 +265,7 @@ describe("Contacts (navigator.contacts)", function () {
             expect(clonedContact.name.formatted).toBe(contact.name.formatted);
             expect(clonedContact.connected).toBe(contact.connected);
         });
-
+        
         it("should contain a save function", function() {
             var contact = new Contact();
             expect(contact.save).toBeDefined();
@@ -282,7 +282,7 @@ describe("Contacts (navigator.contacts)", function () {
     describe('save method', function () {
         it("should be able to save a contact", function() {
             var bDay = new Date(1976, 6,4);
-            gContactObj = navigator.contacts.create({"gender": "male", "note": "my note", "name": {"familyName": "Delete", "givenName": "Test"}, "emails": [{"value": "here@there.com"}, {"value": "there@here.com"}], "birthday": bDay});
+            gContactObj = navigator.contacts.create({"gender": "male", "note": "my note", "name": {"familyName": "Delete", "givenName": "Test"}, "emails": [{"value": "here@there.com"}, {"value": "there@here.com"}], "birthday": bDay});	
 
             var saveSuccess = jasmine.createSpy().andCallFake(function(obj) {
                     expect(obj).toBeDefined();
@@ -316,15 +316,15 @@ describe("Contacts (navigator.contacts)", function () {
             var bDay = new Date(1975, 5,4);
             var noteText = "an UPDATED note";
 
-            var win = jasmine.createSpy().andCallFake(function(obj) {
+            var win = function(obj) {
                     expect(obj).toBeDefined();
                     expect(obj.id).toBe(gContactObj.id);
                     expect(obj.note).toBe(noteText);
                     expect(obj.birthday.toDateString()).toBe(bDay.toDateString());
                     expect(obj.emails.length).toBe(1);
                     expect(obj.emails[0].value).toBe('here@there.com');
-                    removeContact();         // Clean up contact object
-                }), fail = jasmine.createSpy().andCallFake(removeContact);
+                    removeContact();         // Clean up contact object 
+                }, fail = jasmine.createSpy().andCallFake(removeContact);
 
             runs(function () {
                 // remove an email

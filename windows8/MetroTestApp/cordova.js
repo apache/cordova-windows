@@ -1,8 +1,19 @@
-//var VERSION='';
-//var scripts = document.getElementsByTagName('script');
-//var cordovaPath = scripts[scripts.length - 1].src.replace('cordova.js', 'cordova.win8metro.js');
+(function () {
 
-//document.write('<script type="text/javascript" charset="utf-8" src="' + cordovaPath + '"></script>');
+    var VERSION = '2.2.0',
+        currentScript = "cordova.windows8.js";//'cordova-' + VERSION + '.js',
+        scripts = document.getElementsByTagName('script');
+
+    for (var n = 0; n < scripts.length; n++) {
+        if (scripts[n].src.indexOf('cordova.js') > -1) {
+            var cordovaPath = scripts[n].src.replace('cordova.js', currentScript);
+            var scriptElem = document.createElement("script");
+            scriptElem.src = cordovaPath;
+            document.head.appendChild(scriptElem);
+        }
+    }
+
+})();
 
 function backHome() {
 	if (window.device && device.platform && device.platform.toLowerCase() == 'android') {

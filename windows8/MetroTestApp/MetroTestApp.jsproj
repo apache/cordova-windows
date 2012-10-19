@@ -50,8 +50,8 @@
     <AppxManifest Include="package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <Content Include="..\..\..\js\pkg\cordova.win8metro.js">
-      <Link>cordova.win8metro.js</Link>
+    <Content Include="..\..\..\js\pkg\cordova.windows8.js">
+      <Link>cordova.windows8.js</Link>
     </Content>
     <Content Include="accelerometer\index.html" />
     <Content Include="audio\index.html" />
@@ -78,7 +78,6 @@
     <Content Include="autotest\pages\media.html" />
     <Content Include="autotest\pages\network.html" />
     <Content Include="autotest\pages\notification.html" />
-    <Content Include="autotest\pages\platform.html" />
     <Content Include="autotest\pages\storage.html" />
     <Content Include="autotest\test-runner.js" />
     <Content Include="autotest\tests\accelerometer.tests.js" />
@@ -94,7 +93,6 @@
     <Content Include="autotest\tests\media.tests.js" />
     <Content Include="autotest\tests\network.tests.js" />
     <Content Include="autotest\tests\notification.tests.js" />
-    <Content Include="autotest\tests\platform.tests.js" />
     <Content Include="autotest\tests\storage.tests.js" />
     <Content Include="battery\index.html" />
     <Content Include="camera\index.html" />
@@ -122,7 +120,7 @@
     <None Include="MetroTestApp_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <SDKReference Include="Microsoft.WinJS.1.0.RC, Version=1.0" />
+    <SDKReference Include="Microsoft.WinJS.1.0, Version=1.0" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

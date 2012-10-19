@@ -92,4 +92,171 @@ describe('Capture (navigator.device.capture)', function () {
             expect(fileData.size).toBeDefined();
         });
     });
+
+    describe('Test captureAudio function', function () {
+        it("should capture a audio when the function invoked (w/ duration).", function () {
+            var captureSuccess = jasmine.createSpy().andCallFake(function (mediaFiles) {
+                expect(mediaFiles[0].fullPath.substr(0, 3)).toBe("C:\\");
+                // TODO: Check the recording result by yourself.
+                //console.log(mediaFiles.fullPath);
+            })
+            var captureError = jasmine.createSpy().andCallFake(function (error) {
+                console.log("code:" + error.code);
+            })
+            runs(function () {
+                navigator.device.capture.captureAudio(captureSuccess , captureError , {duration:10});
+            });
+
+            waitsFor(function () { return captureSuccess.wasCalled; }, "captureSuccess callback never called", 30000);
+
+            runs(function () {
+                expect(captureSuccess).toHaveBeenCalled();
+                expect(captureError).not.toHaveBeenCalled();
+            })
+        });
+    });
+
+    describe('Test captureVideo function', function () {
+        it("should capture a video when the function invoked (w/ duration).", function () {
+            var captureSuccess = jasmine.createSpy().andCallFake(function (mediaFiles) {
+                expect(mediaFiles[0].fullPath.substr(0, 3)).toBe("C:\\");
+                // TODO: Check the video by yourself.
+                //console.log(mediaFiles.fullPath);
+            })
+            var captureError = jasmine.createSpy().andCallFake(function (error) {
+                console.log("code:" + error.code);
+            })
+            runs(function () {
+                navigator.device.capture.captureVideo(captureSuccess, captureError, { duration: 10 });
+            });
+
+            waitsFor(function () { return captureSuccess.wasCalled; }, "captureSuccess callback never called", 70000);
+
+            runs(function () {
+                expect(captureSuccess).toHaveBeenCalled();
+                expect(captureError).not.toHaveBeenCalled();
+            })
+        });
+    });
+
+    describe('Test captureImage function', function () {
+        it("should capture a image when the function invoked.", function () {
+            var captureSuccess = jasmine.createSpy().andCallFake(function (mediaFiles) {
+                expect(mediaFiles[0].fullPath.substr(0, 3)).toBe("C:\\");
+                // TODO: Check the video by yourself.
+                //console.log(mediaFiles.fullPath);
+            })
+            var captureError = jasmine.createSpy().andCallFake(function (error) {
+                console.log("code:" + error.code);
+            })
+            runs(function () {
+                navigator.device.capture.captureImage(captureSuccess, captureError);
+            });
+
+            waitsFor(function () { return captureSuccess.wasCalled; }, "captureSuccess callback never called", 70000);
+
+            runs(function () {
+                expect(captureSuccess).toHaveBeenCalled();
+                expect(captureError).not.toHaveBeenCalled();
+            })
+        });
+    });
+
+    describe('Test getFormatData function', function () {
+        it("should get format data about image.", function () {
+            var success = jasmine.createSpy().andCallFake(function (mediaFileData) {
+                console.dir(mediaFileData);
+                expect(mediaFileData.codecs).toBeDefined();
+                expect(mediaFileData.bitrate).toBe(0);
+                expect(mediaFileData.height).toBeDefined();
+                expect(mediaFileData.width).toBeDefined();
+                expect(mediaFileData.duration).toBe(0);
+            })
+            var fail = jasmine.createSpy().andCallFake(function (error) {})
+            var captureSuccess = jasmine.createSpy().andCallFake(function (mediaFiles) {
+                runs(function () {
+                    
+                    mediaFiles[0].getFormatData(success, fail);
+                });
+                waitsFor(function () { return success.wasCalled; }, "success callback never called", 7500);
+            })
+            var captureError = jasmine.createSpy().andCallFake(function (error) {
+                console.log("code:" + error.code);
+            })
+            runs(function () {
+                navigator.device.capture.captureImage(captureSuccess, captureError);
+            });
+
+            waitsFor(function () { return captureSuccess.wasCalled; }, "captureSuccess callback never called", 70000);
+
+            runs(function () {
+                expect(captureSuccess).toHaveBeenCalled();
+                expect(captureError).not.toHaveBeenCalled();
+            })
+        });
+
+        it("should get format data about video.", function () {
+            var success = jasmine.createSpy().andCallFake(function (mediaFileData) {
+                console.dir(mediaFileData);
+                expect(mediaFileData.codecs).toBeDefined();
+                expect(mediaFileData.bitrate).toBeDefined();
+                expect(mediaFileData.height).toBeDefined();
+                expect(mediaFileData.width).toBeDefined();
+                expect(mediaFileData.duration).toBeDefined();
+            })
+            var fail = jasmine.createSpy().andCallFake(function (error) { })
+            var captureSuccess = jasmine.createSpy().andCallFake(function (mediaFiles) {
+                runs(function () {
+
+                    mediaFiles[0].getFormatData(success, fail);
+                });
+                waitsFor(function () { return success.wasCalled; }, "success callback never called", 7500);
+            })
+            var captureError = jasmine.createSpy().andCallFake(function (error) {
+                console.log("code:" + error.code);
+            })
+            runs(function () {
+                navigator.device.capture.captureVideo(captureSuccess, captureError, { duration: 10 });
+            });
+
+            waitsFor(function () { return captureSuccess.wasCalled; }, "captureSuccess callback never called", 70000);
+
+            runs(function () {
+                expect(captureSuccess).toHaveBeenCalled();
+                expect(captureError).not.toHaveBeenCalled();
+            })
+        });
+
+        it("should get format data about audio.", function () {
+            var success = jasmine.createSpy().andCallFake(function (mediaFileData) {
+                console.dir(mediaFileData);
+                expect(mediaFileData.codecs).toBeDefined();
+                expect(mediaFileData.bitrate).toBeDefined();
+                expect(mediaFileData.height).toBe(0);
+                expect(mediaFileData.width).toBe(0);
+                expect(mediaFileData.duration).toBeDefined();
+            })
+            var fail = jasmine.createSpy().andCallFake(function (error) { })
+            var captureSuccess = jasmine.createSpy().andCallFake(function (mediaFiles) {
+                runs(function () {
+
+                    mediaFiles[0].getFormatData(success, fail);
+                });
+                waitsFor(function () { return success.wasCalled; }, "success callback never called", 7500);
+            })
+            var captureError = jasmine.createSpy().andCallFake(function (error) {
+                console.log("code:" + error.code);
+            })
+            runs(function () {
+                navigator.device.capture.captureAudio(captureSuccess, captureError, { duration: 10 });
+            });
+
+            waitsFor(function () { return captureSuccess.wasCalled; }, "captureSuccess callback never called", 70000);
+
+            runs(function () {
+                expect(captureSuccess).toHaveBeenCalled();
+                expect(captureError).not.toHaveBeenCalled();
+            })
+        });
+    });
 });

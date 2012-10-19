@@ -85,13 +85,6 @@ describe('Media', function () {
         media1.release();
     });
 
-    it("should contain a setVolume function", function() {
-        var media1 = new Media();
-        expect(media1.setVolume).toBeDefined();
-        expect(typeof media1.setVolume).toBe('function');
-        media1.release();
-    });
-
 	it("should return MediaError for bad filename", function() {
 		var badMedia = null,
             win = jasmine.createSpy(),

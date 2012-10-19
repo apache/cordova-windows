@@ -28,9 +28,12 @@
     </Application>
   </Applications>
   <Capabilities>
+    <Capability Name="videosLibrary" />
+    <Capability Name="musicLibrary" />
     <Capability Name="picturesLibrary" />
     <Capability Name="internetClient" />
     <DeviceCapability Name="location" />
     <DeviceCapability Name="webcam" />
+    <DeviceCapability Name="microphone" />
   </Capabilities>
 </Package>
