@@ -96,7 +96,7 @@ describe('Capture (navigator.device.capture)', function () {
     describe('Test captureAudio function', function () {
         it("should capture a audio when the function invoked (w/ duration).", function () {
             var captureSuccess = jasmine.createSpy().andCallFake(function (mediaFiles) {
-                expect(mediaFiles[0].fullPath.substr(0, 3)).toBe("C:\\");
+                expect(mediaFiles.fullPath.substr(0, 3)).toBe("C:\\");
                 // TODO: Check the recording result by yourself.
                 //console.log(mediaFiles.fullPath);
             })
@@ -119,7 +119,7 @@ describe('Capture (navigator.device.capture)', function () {
     describe('Test captureVideo function', function () {
         it("should capture a video when the function invoked (w/ duration).", function () {
             var captureSuccess = jasmine.createSpy().andCallFake(function (mediaFiles) {
-                expect(mediaFiles[0].fullPath.substr(0, 3)).toBe("C:\\");
+                expect(mediaFiles.fullPath.substr(0, 3)).toBe("C:\\");
                 // TODO: Check the video by yourself.
                 //console.log(mediaFiles.fullPath);
             })
@@ -142,7 +142,7 @@ describe('Capture (navigator.device.capture)', function () {
     describe('Test captureImage function', function () {
         it("should capture a image when the function invoked.", function () {
             var captureSuccess = jasmine.createSpy().andCallFake(function (mediaFiles) {
-                expect(mediaFiles[0].fullPath.substr(0, 3)).toBe("C:\\");
+                expect(mediaFiles.fullPath.substr(0, 3)).toBe("C:\\");
                 // TODO: Check the video by yourself.
                 //console.log(mediaFiles.fullPath);
             })
@@ -176,7 +176,7 @@ describe('Capture (navigator.device.capture)', function () {
             var captureSuccess = jasmine.createSpy().andCallFake(function (mediaFiles) {
                 runs(function () {
                     
-                    mediaFiles[0].getFormatData(success, fail);
+                    mediaFiles.getFormatData(success, fail);
                 });
                 waitsFor(function () { return success.wasCalled; }, "success callback never called", 7500);
             })
@@ -208,7 +208,7 @@ describe('Capture (navigator.device.capture)', function () {
             var captureSuccess = jasmine.createSpy().andCallFake(function (mediaFiles) {
                 runs(function () {
 
-                    mediaFiles[0].getFormatData(success, fail);
+                    mediaFiles.getFormatData(success, fail);
                 });
                 waitsFor(function () { return success.wasCalled; }, "success callback never called", 7500);
             })
@@ -240,7 +240,7 @@ describe('Capture (navigator.device.capture)', function () {
             var captureSuccess = jasmine.createSpy().andCallFake(function (mediaFiles) {
                 runs(function () {
 
-                    mediaFiles[0].getFormatData(success, fail);
+                    mediaFiles.getFormatData(success, fail);
                 });
                 waitsFor(function () { return success.wasCalled; }, "success callback never called", 7500);
             })
