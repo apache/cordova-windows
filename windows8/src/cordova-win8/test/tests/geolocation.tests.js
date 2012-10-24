@@ -19,7 +19,8 @@ describe('Geolocation (navigator.geolocation)', function () {
 	});
 
 	it("getCurrentPosition success callback should be called with a Position object", function() {
-		var win = jasmine.createSpy().andCallFake(function(a) {
+	    var win = jasmine.createSpy().andCallFake(function (a) {
+	        
                 expect(a.coords).not.toBe(null);
                 expect(a.timestamp).not.toBe(null);
             }),
@@ -80,10 +81,28 @@ describe('Geolocation (navigator.geolocation)', function () {
         });
     });
 
+    it("watchPosition should pass", function () {
+        var win = jasmine.createSpy(),
+            fail = jasmine.createSpy();
+
+        runs(function () {
+            navigator.geolocation.watchPosition(win, fail, {
+                maximumAge: 100000,
+                timeout: 100000
+            });
+        });
+
+        waitsFor(function () { return win.wasCalled; }, "win never called", Tests.TEST_TIMEOUT);
+
+        runs(function () {
+            expect(fail).not.toHaveBeenCalled();
+        });
+    });
+
     // TODO: Need to test error callback... how?
         // You could close your geolocation capability and expect the error code to be 3.(already tested in Win8 Implementation) 
 	// TODO: Need to test watchPosition success callback, test that makes sure clearPosition works (how to test that a timer is getting cleared?)
-    describe("Geolocation model", function () {
+    /*describe("Geolocation model", function () {
         it("should be able to define a Position object with coords and timestamp properties", function() {
             var pos = new Position({}, new Date());
             expect(pos).toBeDefined();
@@ -102,5 +121,5 @@ describe('Geolocation (navigator.geolocation)', function () {
             expect(coords.speed).toBeDefined();
             expect(coords.altitudeAccuracy).toBeDefined();
         });
-    });
+    });*/
 });

@@ -53,41 +53,7 @@
     <AppxManifest Include="package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <Content Include="js\accelerometer.js" />
-    <Content Include="js\camera.js" />
-    <Content Include="js\capture.js" />
-    <Content Include="js\compass.js" />
-    <Content Include="js\device.js" />
-    <Content Include="js\file.js" />
-    <Content Include="js\filetransfer.js" />
-    <Content Include="js\geolocation.js" />
-    <Content Include="js\notification.js" />
-    <Content Include="js\storage.js" />
-    <Content Include="js\media.js" />
-    <Content Include="js\network.js" />
-    <Content Include="lib\SQLite\SQLite3\Constants.cpp" />
-    <Content Include="lib\SQLite\SQLite3\Constants.h" />
-    <Content Include="lib\SQLite\SQLite3\Database.cpp" />
-    <Content Include="lib\SQLite\SQLite3\Database.h" />
-    <Content Include="lib\SQLite\SQLite3\sqlite3.c" />
-    <Content Include="lib\SQLite\SQLite3\sqlite3.h" />
-    <Content Include="lib\SQLite\SQLite3\SQLite3.vcxproj" />
-    <Content Include="lib\SQLite\SQLite3\SQLite3.vcxproj.filters" />
-    <Content Include="lib\SQLite\SQLite3\Statement.cpp" />
-    <Content Include="lib\SQLite\SQLite3\Statement.h" />
-    <Content Include="lib\Jscex\src\jscex-async.js" />
-    <Content Include="lib\Jscex\src\jscex.js" />
-    <Content Include="lib\Jscex\src\jscexc.js" />
-    <Content Include="lib\Jscex\src\jscex-async-powerpack.js" />
-    <Content Include="lib\Jscex\src\jscex-builderbase.js" />
-    <Content Include="lib\Jscex\src\jscex-jit.js" />
-    <Content Include="lib\Jscex\src\jscex-parser.js" />
-    <Content Include="lib\Jscex\src\jscex-promise.js" />
-    <Content Include="lib\Jscex\src\incubations\jscex.async.xhr.js" />
-    <Content Include="lib\Jscex\src\incubations\jscex.seq.js" />
-    <Content Include="lib\Jscex\src\incubations\jscex.seq.powerpack.js" />
-    <Content Include="lib\Jscex\src\incubations\jscex-async-agent.js" />
-    <Content Include="lib\Jscex\src\incubations\jscex-async-include.js" />
+    <Content Include="js\cordova.windows8.js" />
     <Content Include="test\cordova.js" />
     <Content Include="test\css\default.css" />
     <Content Include="test\default.html" />
@@ -110,7 +76,6 @@
     <Content Include="test\pages\capture.html" />
     <Content Include="test\pages\compass.html" />
     <Content Include="test\pages\contacts.html" />
-    <Content Include="test\pages\cordova-1.6.1.js" />
     <Content Include="test\pages\device.html" />
     <Content Include="test\pages\file.html" />
     <Content Include="test\pages\filetransfer.html" />
@@ -141,9 +106,6 @@
   </ItemGroup>
   <ItemGroup>
     <SDKReference Include="Microsoft.WinJS.1.0.RC, Version=1.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="lib\SQLite\SQLite3\SQLite3.vcxproj" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -160,7 +160,7 @@ describe('File API', function() {
             });
         });
 
-        /*describe('window.resolveLocalFileSystemURI', function() {
+        describe('window.resolveLocalFileSystemURI', function() {
             it("should be defined", function() {
                 expect(window.resolveLocalFileSystemURI).toBeDefined();
             });
@@ -169,7 +169,7 @@ describe('File API', function() {
                 win = jasmine.createSpy().andCallFake(function(fileEntry) {
                     expect(fileEntry).toBeDefined();
                     expect(fileEntry.name).toBe(fileName);
-                    
+                    console.log("success call back!");
                     // cleanup
                     deleteEntry(fileName);
                 }),
@@ -181,7 +181,7 @@ describe('File API', function() {
                 resolveCallback = jasmine.createSpy().andCallFake(function(entry) {
                     // lookup file system entry
                     runs(function () {
-                        
+                        console.log(entry.toURL());
                         window.resolveLocalFileSystemURI(entry.toURL(), win, fail);
                     });
 
@@ -194,7 +194,8 @@ describe('File API', function() {
                 });
 
                 // create a new file entry
-                runs(function() {
+                runs(function () {
+                    console.log("hrehrhehrheh");
                     createFile(fileName, resolveCallback, fail);
                 });
 
@@ -272,9 +273,9 @@ describe('File API', function() {
                 });
             });
         });
-    });*/
+    });
 
-    /*describe('Metadata interface', function() {
+    describe('Metadata interface', function() {
         it("should exist and have the right properties", function() {
             var metadata = new Metadata();
             expect(metadata).toBeDefined();
@@ -326,10 +327,10 @@ describe('File API', function() {
                 expect(win).toHaveBeenCalled();
             });
         });
-    });*/
+    });
 
     describe('DirectoryEntry', function() {
-        /*it("getFile: get Entry for file that does not exist", function () {
+        it("getFile: get Entry for file that does not exist", function () {
             var fileName = "de.no.file",
                 filePath = root.fullPath + '\\' + fileName,
                 fail = jasmine.createSpy().andCallFake(function(error) {
@@ -862,7 +863,7 @@ describe('File API', function() {
             });
 
             waitsFor(function() { return getFile.wasCalled; }, "getFile never called", Tests.TEST_TIMEOUT);
-        });*/
+        });
         it("DirectoryEntry.removeRecursively on directory", function() {
             var dirName = "de.removeRecursively.dir",
                 subDirName = "dir",
@@ -873,7 +874,8 @@ describe('File API', function() {
                     // delete directory
                     var deleteDirectory = jasmine.createSpy().andCallFake(function(directory) {
                         runs(function () {
-                            console.log("1======");
+
+                            console.log("1======"+ directory.fullPath);
                             entry.removeRecursively(remove, fail);
                         });
 
@@ -882,10 +884,24 @@ describe('File API', function() {
                     // create a sub-directory within directory
                     runs(function () {
                         console.log("2======");
-                        entry.getDirectory(subDirName, {create: true}, deleteDirectory, fail);
+                        
+                        entry.getDirectory('dir2', { create: true }, function (entry) {console.log(entry.fullPath) }, fail);
+                        entry.getDirectory(subDirName, { create: true }, addNewFolder, fail);
+
+                        
                     });
 
-                    waitsFor(function() { return deleteDirectory.wasCalled; }, "deleteDirectory never called", Tests.TEST_TIMEOUT);
+                    waitsFor(function () { return addNewFolder.wasCalled; }, "addNewFolder never called", Tests.TEST_TIMEOUT);
+
+                    var addNewFolder = jasmine.createSpy().andCallFake(function (entry) {
+                        runs(function () {
+                            console.log(entry.fullPath);
+                            entry.getDirectory(subDirName, { create: true }, deleteDirectory, fail);
+
+                        })
+                        waitsFor(function () { return deleteDirectory.wasCalled; }, "deleteDirectory never called", Tests.TEST_TIMEOUT);
+                        
+                    })
                 }),
                 remove = jasmine.createSpy().andCallFake(function() {
                     // it that removed directory no longer exists
@@ -915,7 +931,7 @@ describe('File API', function() {
 
             waitsFor(function() { return entryCallback.wasCalled; }, "entryCallback never called", Tests.TEST_TIMEOUT);
         });
-        /*it("createReader: create reader on existing directory", function() {
+        it("createReader: create reader on existing directory", function() {
             // create reader for root directory 
             var reader = root.createReader();
             expect(reader).toBeDefined();
@@ -939,10 +955,10 @@ describe('File API', function() {
                 expect(win).not.toHaveBeenCalled();
                 expect(remove).toHaveBeenCalled();
             });
-        });*/
+        });
     });
 
-    /*describe('DirectoryReader interface', function() {
+    describe('DirectoryReader interface', function() {
         describe("readEntries", function() {
             it("should read contents of existing directory", function() {
                 var reader,
@@ -2548,25 +2564,30 @@ describe('File API', function() {
                 entryCallback = function(entry) {
                     var moveDir = function(fileEntry) {
                         // move directory onto file
+                        console.log("here!");
                         entry.moveTo(root, file1, win, itMove);
                     };
                     // create file
+                    
                     root.getFile(file1, {create: true}, moveDir, fail);
                 },
                 itMove = function(error) {
                     expect(error).toBeDefined();
                     expect(error.code).toBe(FileError.INVALID_MODIFICATION_ERR);
+                    
                     // it that original directory exists
                     root.getDirectory(srcDir, {create:false}, itDirectoryExists, fail);
                 },
-                itDirectoryExists = function(dirEntry) {
+                itDirectoryExists = function (dirEntry) {
+                    
                     // returning confirms existence so just check fullPath entry
                     expect(dirEntry).toBeDefined();
                     expect(dirEntry.fullPath).toBe(dirPath);
                     // it that original file exists
                     root.getFile(file1, {create:false}, itFileExists, fail);
                 },
-                itFileExists = jasmine.createSpy().andCallFake(function(fileEntry) {
+                itFileExists = jasmine.createSpy().andCallFake(function (fileEntry) {
+                    console.log("file")
                     expect(fileEntry).toBeDefined();
                     expect(fileEntry.fullPath).toBe(filePath);
          
@@ -2926,7 +2947,7 @@ describe('File API', function() {
                 root.getFile(fileName, {create: true}, create_writer, fail);
             });
 
-            waitsFor(function() { return verifier.wasCalled; }, "verifier never called", Tests.TEST_TIMEOUT);
+            waitsFor(function () { return verifier.wasCalled; }, "verifier never called", Tests.TEST_TIMEOUT);
 
             runs(function() {
                 expect(fail).not.toHaveBeenCalled();
@@ -3455,6 +3476,6 @@ describe('File API', function() {
                 expect(verifier).toHaveBeenCalled();
                 expect(fail).not.toHaveBeenCalled();
             });
-        });*/
+        });
     });
 });

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
   <title>cordova_win8</title>
@@ -20,8 +20,8 @@
     <script src="//Microsoft.WinJS.1.0.RC/js/ui.js"></script>
 
   <!-- cordova_win8 references -->
-    <link href="css/default.css" rel="stylesheet" />
-
+    <link href="/test/css/default.css" rel="stylesheet" />
+    
 
   <!-- Jscex references -->
 
@@ -32,230 +32,83 @@
   <script src="../lib/Jscex/src/jscex-jit.js"></script>
 
   <script src="../lib/Jscex/src/jscex-promise.js"></script>
-
-
-  <script type="text/javascript" src="../js/accelerometer.js"></script>
-  <script type="text/javascript" src="../js/camera.js"></script>
-  <script type="text/javascript" src="../js/capture.js"></script>
-  <script type="text/javascript" src="../js/compass.js"></script>
-  <!--<script type="text/javascript" src="../js/contacts.js"></script>-->
-  <script type="text/javascript" src="../js/device.js"></script>
-  <script type="text/javascript" src="../js/events.js"></script>
-  <script type="text/javascript" src="../js/file.js"></script>
-  <script type="text/javascript" src="../js/filetransfer.js"></script>
-  <script type="text/javascript" src="../js/geolocation.js"></script>
-  <script type="text/javascript" src="../js/media.js"></script>
-  <script type="text/javascript" src="../js/network.js"></script>
-  <script type="text/javascript" src="../js/notification.js"></script>
-  <script type="text/javascript" src="../js/storage.js"></script>
-
-
+  
+  
+  <script type="text/javascript" src="../js/cordova.windows8.js"></script>
+  
   <!-- Load Test Runner -->
   <script type="text/javascript" src="test-runner.js"></script>
 
   <!-- Tests -->
-  <!--<script type="text/javascript" src="tests/accelerometer.tests.js"></script>
-  <script type="text/javascript" src="tests/battery.tests.js"></script>
-  <script type="text/javascript" src="tests/camera.tests.js"></script>
-  <script type="text/javascript" src="tests/capture.tests.js"></script>-->
-  <script type="text/javascript" src="tests/compass.tests.js"></script>
-  <!--<script type="text/javascript" src="tests/contacts.tests.js"></script>
-  <script type="text/javascript" src="tests/device.tests.js"></script>
-  <script type="text/javascript" src="tests/file.tests.js"></script>
+  <!--<script type="text/javascript" src="tests/file.tests.js"></script> 
   <script type="text/javascript" src="tests/filetransfer.tests.js"></script>
+  <script type="text/javascript" src="tests/storage.tests.js"></script>
   <script type="text/javascript" src="tests/geolocation.tests.js"></script>
-  <script type="text/javascript" src="tests/media.tests.js"></script>
+  <script type="text/javascript" src="tests/camera.tests.js"></script>-->
+  <!--<script type="text/javascript" src="tests/capture.tests.js"></script>
+  <script type="text/javascript" src="tests/accelerometer.tests.js"></script>
+  <script type="text/javascript" src="tests/compass.tests.js"></script>
   <script type="text/javascript" src="tests/network.tests.js"></script>
-  <script type="text/javascript" src="tests/notification.tests.js"></script>
-  <script type="text/javascript" src="tests/platform.tests.js"></script>
-  <script type="text/javascript" src="tests/storage.tests.js"></script>-->
-
+  <script type="text/javascript" src="tests/media.tests.js"></script>-->
+  <script type="text/javascript" src="tests/contacts.tests.js"></script>
+  
   <script type="text/javascript">
       //var root, temp_root, persistent_root;
 
-      //document.addEventListener('deviceready', function () {
-      function deviceReady() {
-          // one-time retrieval of the root file system entry
+      document.addEventListener('deviceready', function () {
+          //function deviceReady() {
+              // one-time retrieval of the root file system entry
 
-          var onError = function (e) {
-              console.log('================================');
-              console.log(arguments);
-              console.log('[ERROR] Problem setting up root filesystem for test running! Error to follow.');
-              console.log(JSON.stringify(e));
-          };
-          var onS = function (fileSystem) {
-              console.log('File API test Init: Setting PERSISTENT FS.');
-
-              console.log('================================');
-
-              root = fileSystem.root; // set in file.tests.js
-              console.log(root);
-              persistent_root = root;
-
-              // Once root is set up, fire off tests
-              var jasmineEnv = jasmine.getEnv();
-              jasmineEnv.updateInterval = 1000;
-
-              var htmlReporter = new jasmine.HtmlReporter();
-
-              jasmineEnv.addReporter(htmlReporter);
-
-              jasmineEnv.specFilter = function (spec) {
-                  return htmlReporter.specFilter(spec);
+              var onError = function (e) {
+                  console.log('================================');
+                  console.log(arguments);
+                  console.log('[ERROR] Problem setting up root filesystem for test running! Error to follow.');
+                  console.log(JSON.stringify(e));
               };
+              var onS = function (fileSystem) {
+                  console.log('File API test Init: Setting PERSISTENT FS.');
 
-              jasmineEnv.execute();
-          }
-          window.requestFileSystem(1, 1024 * 1024, onS,
-              onError);
-           window.requestFileSystem(LocalFileSystem.TEMPORARY, 0,
-              function (fileSystem) {
-                  console.log('File API test Init: Setting TEMPORARY FS.');
-                  temp_root = fileSystem.root; // set in file.tests.js
-              }, onError);
+                  console.log('================================');
 
-          /*var jasmineEnv = jasmine.getEnv();
-          jasmineEnv.updateInterval = 1000;
+                  root = fileSystem.root; // set in file.tests.js
+                  console.log(root);
+                  persistent_root = root;
 
-          var htmlReporter = new jasmine.HtmlReporter();
+                  // Once root is set up, fire off tests
+                  var jasmineEnv = jasmine.getEnv();
+                  jasmineEnv.updateInterval = 1000;
 
-          jasmineEnv.addReporter(htmlReporter);
+                  var htmlReporter = new jasmine.HtmlReporter();
 
-          jasmineEnv.specFilter = function (spec) {
-              return htmlReporter.specFilter(spec);
-          };
+                  jasmineEnv.addReporter(htmlReporter);
 
-          jasmineEnv.execute();*/
+                  jasmineEnv.specFilter = function (spec) {
+                      return htmlReporter.specFilter(spec);
+                  };
 
-          /*var cameraCaptureUI = new Windows.Media.Capture.CameraCaptureUI();
-          cameraCaptureUI.videoSettings.allowTrimming = true;
-          cameraCaptureUI.videoSettings.format = Windows.Media.Capture.CameraCaptureUIVideoFormat.mp4;
+                  jasmineEnv.execute();
+              }
+             
+              window.requestFileSystem(1, 1024 * 1024, onS,
+                  onError);
+              /*window.requestFileSystem(LocalFileSystem.TEMPORARY, 0,
+                 function (fileSystem) {
+                     console.log('File API test Init: Setting TEMPORARY FS.');
+                     temp_root = fileSystem.root; // set in file.tests.js
+                 }, onError);*/
 
-          cameraCaptureUI.captureFileAsync(Windows.Media.Capture.CameraCaptureUIMode.video).then(function (file) {
-              console.log("oriPath=" + file.path);
-              file.moveAsync(Windows.Storage.KnownFolders.videosLibrary, "cameraCaptureVedio.mp4", Windows.Storage.NameCollisionOption.generateUniqueName).then(function () {
-                  console.log("path=" + file.path);
-              })
-          }, function () { })
-          */
+          //}
 
 
-          // show option UI
-          /*var mediaCaputreSettings;
-          var initCaptureSettings = function () {
-              mediaCaputreSettings = null;
-              mediaCaputreSettings = new Windows.Media.Capture.MediaCaptureInitializationSettings();
-              mediaCaputreSettings.streamingCaptureMode = Windows.Media.Capture.StreamingCaptureMode.video;
-          }
-          initCaptureSettings();
-          var mediaCapture = new Windows.Media.Capture.MediaCapture();
-          mediaCapture.initializeAsync(mediaCaputreSettings).done(function () {
-              Windows.Media.Capture.CameraOptionsUI.show(mediaCapture);
-          })*/
-
-          // Camera Test
-          /*var username = Windows.System.UserProfile.UserInformation.displayName;
-          console.log(username);
-          var cameraCaptureUI = new Windows.Media.Capture.CameraCaptureUI();
-          cameraCaptureUI.captureFileAsync(Windows.Media.Capture.CameraCaptureUIMode.photo).then(function (picture) {
-              console.log(picture.path);
-          })
-          function onPhotoDataSuccess(imageData) {
-              var testImage = document.getElementById("testImage");
-              testImage.style.display = 'block';
-              testImage.src = "data:image/jpeg;base64," + imageData;
-          }
-          navigator.camera.getPicture(onPhotoDataSuccess, function (message) { console.log(message); }, { quality: 50, destinationType: navigator.camera.DestinationType.DATA_URL, saveToPhotoAlbum: true });
-          */
-      }
-      //}, false);
-
-
-
-
-
-      // Not open the camera , perhaps not meet the require of the API
-      /*
-        var fileName;
-        var photoProperties = new Windows.Media.MediaProperties.ImageEncodingProperties();
-        if (encodingType == Camera.EncodingType.PNG) {
-            photoProperties.subtype = "PNG";
-            fileName = "picture.png";
-        } else {
-            photoProperties.subtype = "JPEG";
-            fileName = "picture.jpg"
-        }
-        if (targetWidth > 0) {
-            photoProperties.width = targetWidth;
-            photoProperties.height = targetHeight;
-        } else {
-            photoProperties.width = 800;
-            photoProperties.height = 600;
-        }
-        var mediaCaputreSettings;
-        var initCaptureSettings = function () {
-            mediaCaputreSettings = null;
-            mediaCaputreSettings = new Windows.Media.Capture.MediaCaptureInitializationSettings();
-            mediaCaputreSettings.photoCaptureSource = Windows.Media.Capture.PhotoCaptureSource.photo;
-        }
-        initCaptureSettings();
-        var mediaCapture = new Windows.Media.Capture.MediaCapture();
-
-        if (saveToPhotoAlbum) {
-            Windows.Storage.StorageFolder.getFolderFromPathAsync(parentPath).then(function (storageFolder) {
-                storageFolder.createFileAsync(fileName, Windows.Storage.CreationCollisionOption.generateUniqueName).then(function (file) {
-                    mediaCapture.initializeAsync(mediaCaputreSettings).done(function () {
-
-                        mediaCapture.capturePhotoToStorageFileAsync(photoProperties, file).then(function (result) {
-                            if (destinationType == Camera.DestinationType.FILE_URI) {
-                                successCallback(file.path);
-                            } else {
-                                Windows.Storage.FileIO.readBufferAsync(file).done(function (buffer) {
-                                    var strBase64 = Windows.Security.Cryptography.CryptographicBuffer.encodeToBase64String(buffer);
-                                    successCallback(strBase64);
-                                })
-                            }
-                        }, function (e) {
-                            console.log(e);
-                            errorCallback("Fail to capture a photo.");
-                        });
-
-                    }, function () {
-                        errorCallback("Init camera failed.");
-                    })
-                }, function () {
-                    errorCallback("Fail to create file to save image.")
-                })
-
-            }, function () {
-
-                errorCallback("Fail to access a picture library.")
-            })
-
-        } else {
-            Windows.Storage.ApplicationData.current.temporaryFolder.createFileAsync(fileName, Windows.Storage.CreationCollisionOption.replaceExisting).then(function (file) {
-                mediaCapture.initializeAsync(mediaCaputreSettings).done(function () {
-                    mediaCapture.capturePhotoToStorageFileAsync(photoProperties, file).then(function (result) {
-                        if (destinationType == Camera.DestinationType.FILE_URI) {
-                            successCallback(file.path);
-                        } else {
-                            Windows.Storage.FileIO.readBufferAsync(file).done(function (buffer) {
-                                var strBase64 = Windows.Security.Cryptography.CryptographicBuffer.encodeToBase64String(buffer);
-                                successCallback(strBase64);
-                            })
-                        }
-                    }, function () { errorCallback("Fail to capture a photo."); });
-
-                })
-            }, function () { errorCallback("Fail to capture a photo."); });
-        }*/
-  </script>
+          
+      }, false);
+    </script>
 </head>
 
 <body>
-    <button id="testRun" onclick="deviceReady()" >TestRun</button>
+    <!--<button id="testRun" onclick="deviceReady()" >TestRun</button>-->
     <a href="javascript:" class="backBtn" >Back</a>
-    <!--<img style="display:block" id="testImage" src="" />-->
+    <img style="display:block" id="testImage" src="" />
 </body>
 </html>
 <!-- ms-appx://7aea3268-d58f-40ae-a6cd-f300c06b19ea-ykc6d9tcz5wry/picture003.jpg -->

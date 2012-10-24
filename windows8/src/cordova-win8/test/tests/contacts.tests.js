@@ -13,14 +13,14 @@ var removeContact = function(){
 };
 
 describe("Contacts (navigator.contacts)", function () {
-    it("should exist", function() {
+    /*it("should exist", function() {
         expect(navigator.contacts).toBeDefined();
     });
 
     it("should contain a find function", function() {
         expect(navigator.contacts.find).toBeDefined();
         expect(typeof navigator.contacts.find).toBe('function');
-    });
+    });*/
 
     describe("find method", function() {
         it("success callback should be called with an array", function() {
@@ -37,14 +37,14 @@ describe("Contacts (navigator.contacts)", function () {
                 navigator.contacts.find(["displayName", "name", "phoneNumbers", "emails"], win, fail, obj);
             });
 
-            waitsFor(function () { return win.wasCalled; }, "win never called", Tests.TEST_TIMEOUT);
+            waitsFor(function () { return win.wasCalled; }, "win never called", 30000);
 
             runs(function () {
                 expect(fail).not.toHaveBeenCalled();
             });
         }); 
 
-        it("should throw an exception if success callback is empty", function() {
+        /*it("should throw an exception if success callback is empty", function() {
             var fail = function() {};
             var obj = new ContactFindOptions();
             obj.filter="";
@@ -137,10 +137,10 @@ describe("Contacts (navigator.contacts)", function () {
 
                 waitsFor(function () { return test.wasCalled; }, "test not done", Tests.TEST_TIMEOUT);
             });
-        });
+        });*/
     });
 
-    describe('create method', function() {
+    /*describe('create method', function() {
 
         it("should exist", function() {
             expect(navigator.contacts.create).toBeDefined();
@@ -435,9 +435,9 @@ describe("Contacts (navigator.contacts)", function () {
 
             waitsFor(function () { return done; }, Tests.TEST_TIMEOUT);
         });
-    });
+    });*/
 
-    describe('ContactError interface', function () {
+    /*describe('ContactError interface', function () {
         it("ContactError constants should be defined", function() {
             expect(ContactError.UNKNOWN_ERROR).toBe(0);
             expect(ContactError.INVALID_ARGUMENT_ERROR).toBe(1);
@@ -447,5 +447,5 @@ describe("Contacts (navigator.contacts)", function () {
             expect(ContactError.NOT_SUPPORTED_ERROR).toBe(5);
             expect(ContactError.PERMISSION_DENIED_ERROR).toBe(20);
         });
-    });
+    });*/
 });

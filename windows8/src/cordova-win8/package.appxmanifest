@@ -57,6 +57,7 @@
             </SupportedFileTypes>
           </FileTypeAssociation>
         </Extension>
+        <Extension Category="windows.contactPicker" />
       </Extensions>
     </Application>
   </Applications>
