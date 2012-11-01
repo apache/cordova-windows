@@ -63,7 +63,7 @@ You can already build Windows 8 apps using the "HTML/JavaScript track" available
 	    <script src="//Microsoft.WinJS.1.0/js/ui.js"></script>
 
 	    <!-- Cordova -->
-	    <script src="/js/cordova.js"></script>
+	    <script src="/js/cordova-x.x.x.js"></script>
 
 	    <!-- CordovaWin8Foo references -->
 	    <link href="/css/default.css" rel="stylesheet" />

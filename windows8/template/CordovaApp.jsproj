@@ -53,13 +53,14 @@
     <AppxManifest Include="package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <Content Include="default.html" />
-    <Content Include="images\logo.png" />
-    <Content Include="images\smalllogo.png" />
-    <Content Include="images\splashscreen.png" />
-    <Content Include="images\storelogo.png" />
-    <Content Include="js\default.js" />
-    <Content Include="css\default.css" />
+    <Content Include="www\cordova-2.2.0.js" />
+    <Content Include="www\css\index.css" />
+    <Content Include="www\img\logo.png" />
+    <Content Include="www\img\smalllogo.png" />
+    <Content Include="www\img\splashscreen.png" />
+    <Content Include="www\img\storelogo.png" />
+    <Content Include="www\index.html" />
+    <Content Include="www\js\index.js" />
     <None Include="CordovaApp_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
