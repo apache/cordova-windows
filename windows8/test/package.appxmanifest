@@ -15,7 +15,7 @@
   </Resources>
   <Applications>
     <Application Id="App" StartPage="index.html">
-      <VisualElements DisplayName="CordovaTestApp" Logo="images\logo.png" SmallLogo="images\smalllogo.png" Description="CordovaTestApp includes mobile spec automated tests, and various manual test pages." ForegroundText="light" BackgroundColor="#999999">
+      <VisualElements DisplayName="CordovaTestApp" Logo="images\logo.png" SmallLogo="images\smalllogo.png" Description="CordovaTestApp includes mobile spec automated tests, and various manual test pages." ForegroundText="dark" BackgroundColor="#999999">
         <DefaultTile ShowName="allLogos" />
         <SplashScreen Image="images\splashscreen.png" BackgroundColor="#999999" />
         <InitialRotationPreference>
