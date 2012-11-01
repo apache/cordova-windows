@@ -50,42 +50,18 @@
     <AppxManifest Include="package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <Content Include="default.html" />
+    <Content Include="cordova-2.2.0.js" />
+    <Content Include="cordova.js" />
     <Content Include="images\logo.png" />
     <Content Include="images\smalllogo.png" />
     <Content Include="images\splashscreen.png" />
     <Content Include="images\storelogo.png" />
-    <Content Include="js\cordova.js" />
     <Content Include="css\default.css" />
-    <Content Include="lib\Jscex\src\incubations\jscex-async-agent.js" />
-    <Content Include="lib\Jscex\src\incubations\jscex-async-include.js" />
-    <Content Include="lib\Jscex\src\incubations\jscex.async.xhr.js" />
-    <Content Include="lib\Jscex\src\incubations\jscex.seq.js" />
-    <Content Include="lib\Jscex\src\incubations\jscex.seq.powerpack.js" />
-    <Content Include="lib\Jscex\src\jscex-async-powerpack.js" />
-    <Content Include="lib\Jscex\src\jscex-async.js" />
-    <Content Include="lib\Jscex\src\jscex-builderbase.js" />
-    <Content Include="lib\Jscex\src\jscex-jit.js" />
-    <Content Include="lib\Jscex\src\jscex-parser.js" />
-    <Content Include="lib\Jscex\src\jscex-promise.js" />
-    <Content Include="lib\Jscex\src\jscex.js" />
-    <Content Include="lib\Jscex\src\jscexc.js" />
-    <Content Include="lib\SQLite\SQLite3\Common.cpp" />
-    <Content Include="lib\SQLite\SQLite3\Common.h" />
-    <Content Include="lib\SQLite\SQLite3\Constants.cpp" />
-    <Content Include="lib\SQLite\SQLite3\Constants.h" />
-    <Content Include="lib\SQLite\SQLite3\Database.cpp" />
-    <Content Include="lib\SQLite\SQLite3\Database.h" />
-    <Content Include="lib\SQLite\SQLite3\sqlite3.c" />
-    <Content Include="lib\SQLite\SQLite3\sqlite3.h" />
-    <Content Include="lib\SQLite\SQLite3\SQLite3.vcxproj" />
-    <Content Include="lib\SQLite\SQLite3\SQLite3.vcxproj.filters" />
-    <Content Include="lib\SQLite\SQLite3\Statement.cpp" />
-    <Content Include="lib\SQLite\SQLite3\Statement.h" />
+    <Content Include="index.html" />
     <None Include="Cordova-Metro_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <SDKReference Include="Microsoft.WinJS.1.0.RC, Version=1.0" />
+    <SDKReference Include="Microsoft.WinJS.1.0, Version=1.0" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
