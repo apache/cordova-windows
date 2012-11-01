@@ -50,13 +50,14 @@
     <AppxManifest Include="package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <Content Include="default.html" />
+    <Content Include="cordova-2.2.0.js" />
+    <Content Include="cordova.js" />
     <Content Include="images\logo.png" />
     <Content Include="images\smalllogo.png" />
     <Content Include="images\splashscreen.png" />
     <Content Include="images\storelogo.png" />
     <Content Include="css\default.css" />
-    <Content Include="js\cordova.windows8.js" />
+    <Content Include="index.html" />
     <Content Include="music\BlueZedEx.mp3" />
     <None Include="Cordova-Metro_TemporaryKey.pfx" />
   </ItemGroup>
