@@ -50,9 +50,6 @@
     <AppxManifest Include="package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <Content Include="..\..\..\js\pkg\cordova.windows8.js">
-      <Link>cordova.windows8.js</Link>
-    </Content>
     <Content Include="accelerometer\index.html" />
     <Content Include="audio\index.html" />
     <Content Include="autotest\html\HtmlReporter.js" />
@@ -98,6 +95,7 @@
     <Content Include="camera\index.html" />
     <Content Include="compass\index.html" />
     <Content Include="contacts\index.html" />
+    <Content Include="cordova-2.2.0.js" />
     <Content Include="cordova.js" />
     <Content Include="default.html" />
     <Content Include="default.js" />

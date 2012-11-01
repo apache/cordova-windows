@@ -1,7 +1,7 @@
 (function () {
 
     var VERSION = '2.2.0',
-        currentScript = "cordova.windows8.js";//'cordova-' + VERSION + '.js',
+        currentScript = 'cordova-' + VERSION + '.js',
         scripts = document.getElementsByTagName('script');
 
     for (var n = 0; n < scripts.length; n++) {
