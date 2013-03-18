@@ -7281,6 +7281,10 @@ module.exports = {
                     case 6:
                         connectionType = Connection.ETHERNET;
                         break;
+                    case 243:
+                    case 244:
+                        connectionType = Connection.CELL_2G;
+                        break;
                     default:
                         connectionType = Connection.UNKNOWN;
                         break;
