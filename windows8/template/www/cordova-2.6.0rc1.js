@@ -1,8 +1,8 @@
 ﻿// Platform: windows8
 
-// commit 54660e97952c558518cad8c4eecc67cfa42b2993
+// commit 104709b2130a29e7ad8596d1a6cee1ed48138803
 
-// File generated at :: Tue Feb 26 2013 16:24:06 GMT-0800 (Pacific Standard Time)
+// File generated at :: Wed Mar 27 2013 23:48:22 GMT-0700 (Pacific Daylight Time)
 
 /*
  Licensed to the Apache Software Foundation (ASF) under one
@@ -725,7 +725,6 @@ channel.createSticky('onCordovaInfoReady');
 channel.createSticky('onCordovaConnectionReady');
 
 // Event to indicate that all automatically loaded JS plugins are loaded and ready.
-// This is used in conjunction with the automatic plugin JS loading CLI prototype.
 channel.createSticky('onPluginsReady');
 
 // Event to indicate that Cordova is ready
@@ -1064,9 +1063,10 @@ cameraExport.getPicture = function(successCallback, errorCallback, options) {
     var correctOrientation = !!options.correctOrientation;
     var saveToPhotoAlbum = !!options.saveToPhotoAlbum;
     var popoverOptions = getValue(options.popoverOptions, null);
+    var cameraDirection = getValue(options.cameraDirection, Camera.Direction.BACK);
 
     var args = [quality, destinationType, sourceType, targetWidth, targetHeight, encodingType,
-                mediaType, allowEdit, correctOrientation, saveToPhotoAlbum, popoverOptions];
+                mediaType, allowEdit, correctOrientation, saveToPhotoAlbum, popoverOptions, cameraDirection];
 
     exec(successCallback, errorCallback, "Camera", "takePicture", args);
     return new CameraPopoverHandle();
@@ -1109,6 +1109,10 @@ module.exports = {
       ARROW_LEFT : 4,
       ARROW_RIGHT : 8,
       ARROW_ANY : 15
+  },
+  Direction:{
+      BACK: 0,
+      FRONT: 1
   }
 };
 
@@ -2300,14 +2304,7 @@ FileReader.prototype.readAsText = function(file, encoding) {
     // Default encoding is UTF-8
     var enc = encoding ? encoding : "UTF-8";
     var me = this;
-    var execArgs = [this._fileName, enc];
-
-    // Maybe add slice parameters.
-    if (file.end < file.size) {
-        execArgs.push(file.start, file.end);
-    } else if (file.start > 0) {
-        execArgs.push(file.start);
-    }
+    var execArgs = [this._fileName, enc, file.start, file.end];
 
     // Read file
     exec(
@@ -2376,14 +2373,7 @@ FileReader.prototype.readAsDataURL = function(file) {
     }
 
     var me = this;
-    var execArgs = [this._fileName];
-
-    // Maybe add slice parameters.
-    if (file.end < file.size) {
-        execArgs.push(file.start, file.end);
-    } else if (file.start > 0) {
-        execArgs.push(file.start);
-    }
+    var execArgs = [this._fileName, file.start, file.end];
 
     // Read file
     exec(
@@ -2446,9 +2436,59 @@ FileReader.prototype.readAsBinaryString = function(file) {
     if (initRead(this, file)) {
         return this._realReader.readAsBinaryString(file);
     }
-    // TODO - Can't return binary data to browser.
-    console.log('method "readAsBinaryString" is not supported at this time.');
-    this.abort();
+
+    var me = this;
+    var execArgs = [this._fileName, file.start, file.end];
+
+    // Read file
+    exec(
+        // Success callback
+        function(r) {
+            // If DONE (cancelled), then don't do anything
+            if (me._readyState === FileReader.DONE) {
+                return;
+            }
+
+            // DONE state
+            me._readyState = FileReader.DONE;
+
+            me._result = r;
+
+            // If onload callback
+            if (typeof me.onload === "function") {
+                me.onload(new ProgressEvent("load", {target:me}));
+            }
+
+            // If onloadend callback
+            if (typeof me.onloadend === "function") {
+                me.onloadend(new ProgressEvent("loadend", {target:me}));
+            }
+        },
+        // Error callback
+        function(e) {
+            // If DONE (cancelled), then don't do anything
+            if (me._readyState === FileReader.DONE) {
+                return;
+            }
+
+            // DONE state
+            me._readyState = FileReader.DONE;
+
+            me._result = null;
+
+            // Save error
+            me._error = new FileError(e);
+
+            // If onerror callback
+            if (typeof me.onerror === "function") {
+                me.onerror(new ProgressEvent("error", {target:me}));
+            }
+
+            // If onloadend callback
+            if (typeof me.onloadend === "function") {
+                me.onloadend(new ProgressEvent("loadend", {target:me}));
+            }
+        }, "File", "readAsBinaryString", execArgs);
 };
 
 /**
@@ -2460,9 +2500,59 @@ FileReader.prototype.readAsArrayBuffer = function(file) {
     if (initRead(this, file)) {
         return this._realReader.readAsArrayBuffer(file);
     }
-    // TODO - Can't return binary data to browser.
-    console.log('This method is not supported at this time.');
-    this.abort();
+
+    var me = this;
+    var execArgs = [this._fileName, file.start, file.end];
+
+    // Read file
+    exec(
+        // Success callback
+        function(r) {
+            // If DONE (cancelled), then don't do anything
+            if (me._readyState === FileReader.DONE) {
+                return;
+            }
+
+            // DONE state
+            me._readyState = FileReader.DONE;
+
+            me._result = r;
+
+            // If onload callback
+            if (typeof me.onload === "function") {
+                me.onload(new ProgressEvent("load", {target:me}));
+            }
+
+            // If onloadend callback
+            if (typeof me.onloadend === "function") {
+                me.onloadend(new ProgressEvent("loadend", {target:me}));
+            }
+        },
+        // Error callback
+        function(e) {
+            // If DONE (cancelled), then don't do anything
+            if (me._readyState === FileReader.DONE) {
+                return;
+            }
+
+            // DONE state
+            me._readyState = FileReader.DONE;
+
+            me._result = null;
+
+            // Save error
+            me._error = new FileError(e);
+
+            // If onerror callback
+            if (typeof me.onerror === "function") {
+                me.onerror(new ProgressEvent("error", {target:me}));
+            }
+
+            // If onloadend callback
+            if (typeof me.onloadend === "function") {
+                me.onloadend(new ProgressEvent("loadend", {target:me}));
+            }
+        }, "File", "readAsArrayBuffer", execArgs);
 };
 
 module.exports = FileReader;
@@ -2508,6 +2598,38 @@ function newProgressEvent(result) {
     return pe;
 }
 
+function getBasicAuthHeader(urlString) {
+    var header =  null;
+
+    if (window.btoa) {
+        // parse the url using the Location object
+        var url = document.createElement('a');
+        url.href = urlString;
+
+        var credentials = null;
+        var protocol = url.protocol + "//";
+        var origin = protocol + url.host;
+
+        // check whether there are the username:password credentials in the url
+        if (url.href.indexOf(origin) != 0) { // credentials found
+            var atIndex = url.href.indexOf("@");
+            credentials = url.href.substring(protocol.length, atIndex);
+        }
+
+        if (credentials) {
+            var authHeader = "Authorization";
+            var authHeaderValue = "Basic " + window.btoa(credentials);
+
+            header = {
+                name : authHeader,
+                value : authHeaderValue
+            };
+        }
+    }
+
+    return header;
+}
+
 var idCounter = 0;
 
 /**
@@ -2538,6 +2660,18 @@ FileTransfer.prototype.upload = function(filePath, server, successCallback, erro
     var params = null;
     var chunkedMode = true;
     var headers = null;
+
+    var basicAuthHeader = getBasicAuthHeader(server);
+    if (basicAuthHeader) {
+        if (!options) {
+            options = new FileUploadOptions();
+        }
+        if (!options.headers) {
+            options.headers = {};
+        }
+        options.headers[basicAuthHeader.name] = basicAuthHeader.value;
+    }
+
     if (options) {
         fileKey = options.fileKey;
         fileName = options.fileName;
@@ -2579,10 +2713,28 @@ FileTransfer.prototype.upload = function(filePath, server, successCallback, erro
  * @param successCallback (Function}  Callback to be invoked when upload has completed
  * @param errorCallback {Function}    Callback to be invoked upon error
  * @param trustAllHosts {Boolean} Optional trust all hosts (e.g. for self-signed certs), defaults to false
+ * @param options {FileDownloadOptions} Optional parameters such as headers
  */
-FileTransfer.prototype.download = function(source, target, successCallback, errorCallback, trustAllHosts) {
+FileTransfer.prototype.download = function(source, target, successCallback, errorCallback, trustAllHosts, options) {
     argscheck.checkArgs('ssFF*', 'FileTransfer.download', arguments);
     var self = this;
+
+    var basicAuthHeader = getBasicAuthHeader(source);
+    if (basicAuthHeader) {
+        if (!options) {
+            options = {};
+        }
+        if (!options.headers) {
+            options.headers = {};
+        }
+        options.headers[basicAuthHeader.name] = basicAuthHeader.value;
+    }
+
+    var headers = null;
+    if (options) {
+        headers = options.headers || null;
+    }
+
     var win = function(result) {
         if (typeof result.lengthComputable != "undefined") {
             if (self.onprogress) {
@@ -2609,7 +2761,7 @@ FileTransfer.prototype.download = function(source, target, successCallback, erro
         errorCallback(error);
     };
 
-    exec(win, fail, 'FileTransfer', 'download', [source, target, trustAllHosts, this._id]);
+    exec(win, fail, 'FileTransfer', 'download', [source, target, trustAllHosts, this._id, headers]);
 };
 
 /**
@@ -3007,6 +3159,7 @@ function InAppBrowser() {
    this.channels = {
         'loadstart': channel.create('loadstart'),
         'loadstop' : channel.create('loadstop'),
+        'loaderror' : channel.create('loaderror'),
         'exit' : channel.create('exit')
    };
 }
@@ -3037,7 +3190,7 @@ module.exports = function(strUrl, strWindowName, strWindowFeatures) {
     var cb = function(eventname) {
        iab._eventHandler(eventname);
     };
-    exec(cb, null, "InAppBrowser", "open", [strUrl, strWindowName, strWindowFeatures]);
+    exec(cb, cb, "InAppBrowser", "open", [strUrl, strWindowName, strWindowFeatures]);
     return iab;
 };
 
@@ -5261,6 +5414,7 @@ modulemapper.defaults('cordova/plugin/Connection', 'Connection');
 define("cordova/plugin/notification", function(require, exports, module) {
 
 var exec = require('cordova/exec');
+var platform = require('cordova/platform');
 
 /**
  * Provides access to notifications on the device.
@@ -5289,12 +5443,50 @@ module.exports = {
      * @param {String} message              Message to print in the body of the alert
      * @param {Function} resultCallback     The callback that is called when user clicks on a button.
      * @param {String} title                Title of the alert dialog (default: Confirm)
-     * @param {String} buttonLabels         Comma separated list of the labels of the buttons (default: 'OK,Cancel')
+     * @param {Array} buttonLabels          Array of the labels of the buttons (default: ['OK', 'Cancel'])
      */
     confirm: function(message, resultCallback, title, buttonLabels) {
         var _title = (title || "Confirm");
-        var _buttonLabels = (buttonLabels || "OK,Cancel");
+        var _buttonLabels = (buttonLabels || ["OK", "Cancel"]);
+
+        // Strings are deprecated!
+        if (typeof _buttonLabels === 'string') {
+            console.log("Notification.confirm(string, function, string, string) is deprecated.  Use Notification.confirm(string, function, string, array).");
+        }
+
+        // Android and iOS take an array of button label names.
+        // Other platforms take a comma separated list.
+        // For compatibility, we convert to the desired type based on the platform.
+        if (platform.id == "android" || platform.id == "ios") {
+            if (typeof _buttonLabels === 'string') {
+                var buttonLabelString = _buttonLabels;
+                _buttonLabels = buttonLabelString.split(",");
+            }
+        } else {
+            if (Array.isArray(_buttonLabels)) {
+                var buttonLabelArray = _buttonLabels;
+                _buttonLabels = buttonLabelArray.toString();
+            }
+        }
         exec(resultCallback, null, "Notification", "confirm", [message, _title, _buttonLabels]);
+    },
+
+    /**
+     * Open a native prompt dialog, with a customizable title and button text.
+     * The following results are returned to the result callback:
+     *  buttonIndex     Index number of the button selected.
+     *  input1          The text entered in the prompt dialog box.
+     *
+     * @param {String} message              Dialog message to display (default: "Prompt message")
+     * @param {Function} resultCallback     The callback that is called when user clicks on a button.
+     * @param {String} title                Title of the dialog (default: "Prompt")
+     * @param {Array} buttonLabels          Array of strings for the button labels (default: ["OK","Cancel"])
+     */
+    prompt: function(message, resultCallback, title, buttonLabels) {
+        var _message = (message || "Prompt message");
+        var _title = (title || "Prompt");
+        var _buttonLabels = (buttonLabels || ["OK","Cancel"]);
+        exec(resultCallback, null, "Notification", "prompt", [_message, _title, _buttonLabels]);
     },
 
     /**
@@ -6092,7 +6284,7 @@ module.exports = {
         }
 
         setTimeout(function () {
-            win({ platform: "windows8", version: "8", name: name, uuid: deviceId, cordova: "2.5.0" });
+            win({ platform: "windows8", version: "8", name: name, uuid: deviceId, cordova: "2.6.0rc1" });
         }, 0);
     }
 
@@ -7746,15 +7938,6 @@ window.cordova = require('cordova');
     /**
      * Create all cordova objects once page has fully loaded and native side is ready.
      */
-    var joinEvents = [ channel.onDOMContentLoaded, channel.onNativeReady ];
-
-    // If this property is set to something truthy, join on onPluginsReady too.
-    // This property is set by the automatic JS installation prototype in cordova-cli,
-    // and will be removed when the prototype either becomes mainline or is dropped.
-    if (window.__onPluginsLoadedHack) {
-        joinEvents.push(channel.onPluginsReady);
-    }
-
     channel.join(function() {
         var builder = require('cordova/builder'),
             platform = require('cordova/platform');
@@ -7775,13 +7958,118 @@ window.cordova = require('cordova');
             require('cordova').fireDocumentEvent('deviceready');
         }, channel.deviceReadyChannelsArray);
 
-    }, joinEvents);
+    }, [ channel.onDOMContentLoaded, channel.onNativeReady, channel.onPluginsReady ]);
 
 }(window));
 
 // file: lib\scripts\bootstrap-windows8.js
 
 require('cordova/channel').onNativeReady.fire();
+
+// file: lib\scripts\plugin_loader.js
+
+// Tries to load all plugins' js-modules.
+// This is an async process, but onDeviceReady is blocked on onPluginsReady.
+// onPluginsReady is fired when there are no plugins to load, or they are all done.
+(function (context) {
+    // To be populated with the handler by handlePluginsObject.
+    var onScriptLoadingComplete;
+
+    var scriptCounter = 0;
+    function scriptLoadedCallback() {
+        scriptCounter--;
+        if (scriptCounter === 0) {
+            onScriptLoadingComplete && onScriptLoadingComplete();
+        }
+    }
+
+    // Helper function to inject a <script> tag.
+    function injectScript(path) {
+        scriptCounter++;
+        var script = document.createElement("script");
+        script.onload = scriptLoadedCallback;
+        script.src = path;
+        document.head.appendChild(script);
+    }
+
+    // Called when:
+    // * There are plugins defined and all plugins are finished loading.
+    // * There are no plugins to load.
+    function finishPluginLoading() {
+        context.cordova.require('cordova/channel').onPluginsReady.fire();
+    }
+
+    // Handler for the cordova_plugins.json content.
+    // See plugman's plugin_loader.js for the details of this object.
+    // This function is only called if the really is a plugins array that isn't empty.
+    // Otherwise the XHR response handler will just call finishPluginLoading().
+    function handlePluginsObject(modules) {
+        // First create the callback for when all plugins are loaded.
+        var mapper = context.cordova.require('cordova/modulemapper');
+        onScriptLoadingComplete = function() {
+            // Loop through all the plugins and then through their clobbers and merges.
+            for (var i = 0; i < modules.length; i++) {
+                var module = modules[i];
+                if (!module) continue;
+
+                if (module.clobbers && module.clobbers.length) {
+                    for (var j = 0; j < module.clobbers.length; j++) {
+                        mapper.clobbers(module.id, module.clobbers[j]);
+                    }
+                }
+
+                if (module.merges && module.merges.length) {
+                    for (var k = 0; k < module.merges.length; k++) {
+                        mapper.merges(module.id, module.merges[k]);
+                    }
+                }
+
+                // Finally, if runs is truthy we want to simply require() the module.
+                // This can be skipped if it had any merges or clobbers, though,
+                // since the mapper will already have required the module.
+                if (module.runs && !(module.clobbers && module.clobbers.length) && !(module.merges && module.merges.length)) {
+                    context.cordova.require(module.id);
+                }
+            }
+
+            finishPluginLoading();
+        };
+
+        // Now inject the scripts.
+        for (var i = 0; i < modules.length; i++) {
+            injectScript(modules[i].file);
+        }
+    }
+
+    // Try to XHR the cordova_plugins.json file asynchronously.
+    try { // we commented we were going to try, so let us actually try and catch 
+        var xhr = new context.XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState != 4) { // not DONE
+                return;
+            }
+
+            // If the response is a JSON string which composes an array, call handlePluginsObject.
+            // If the request fails, or the response is not a JSON array, just call finishPluginLoading.
+            if (this.status == 200) {
+                var obj = JSON.parse(this.responseText);
+                if (obj && obj instanceof Array && obj.length > 0) {
+                    handlePluginsObject(obj);
+                } else {
+                    finishPluginLoading();
+                }
+            } else {
+                finishPluginLoading();
+            }
+        };
+        xhr.open('GET', 'cordova_plugins.json', true); // Async
+        xhr.send();
+    }
+    catch(err) {
+        finishPluginLoading();
+    }
+}(window));
+
 
 
 })();
