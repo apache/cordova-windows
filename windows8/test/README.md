@@ -5,10 +5,7 @@ These specs are designed to run inside the mobile device that implements it - _i
 These set of tests is designed to be used with Cordova. You should initialize a fresh Cordova repository for a target platform and then toss these files into the www folder, replacing the
 contents. 
 
-Make sure you include cordova-\*.js in the www folder.  You also need to edit cordova.js to reference the version of cordova-\*.js file you are testing.
-For example, to test with cordova-0.9.6.1, edit the VERSION variable in the cordova.js file as follows:
-
-    var VERSION='0.9.6.1';
+Make sure you include cordova.js in the www folder (see the code in cordova-incl.js for clarification).
 
 This is done so that you don't have to modify every HTML file when you want to test a new version of Cordova.
 

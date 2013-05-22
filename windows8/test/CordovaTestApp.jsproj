@@ -92,10 +92,14 @@
     <Content Include="autotest\tests\notification.tests.js" />
     <Content Include="autotest\tests\storage.tests.js" />
     <Content Include="battery\index.html" />
+    <Content Include="benchmarks\arraybuffer.html" />
+    <Content Include="benchmarks\autobench.html" />
+    <Content Include="benchmarks\index.html" />
+    <Content Include="benchmarks\uubench.js" />
     <Content Include="camera\index.html" />
     <Content Include="compass\index.html" />
     <Content Include="contacts\index.html" />
-    <Content Include="cordova-2.7.0.js" />
+    <Content Include="cordova-incl.js" />
     <Content Include="cordova.js" />
     <Content Include="events\index.html" />
     <Content Include="images\logo.png" />
@@ -117,6 +121,7 @@
     <Content Include="misc\page2.html" />
     <Content Include="network\index.html" />
     <Content Include="notification\index.html" />
+    <Content Include="splashscreen\index.html" />
     <Content Include="sql\index.html" />
     <Content Include="storage\index.html" />
     <None Include="MetroTestApp_TemporaryKey.pfx" />
