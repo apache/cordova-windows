@@ -1,7 +1,6 @@
 *.user
 .DS_Store
 bld
-bin
 *.opensdf
 *.suo
 *.sdf
