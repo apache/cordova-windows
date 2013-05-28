@@ -15,7 +15,12 @@
   </Resources>
   <Applications>
     <Application Id="App" StartPage="www/index.html">
-      <VisualElements DisplayName="CordovaApp" Logo="www\img\logo.png" SmallLogo="www\img\smalllogo.png" Description="CordovaApp" ForegroundText="light" BackgroundColor="#464646">
+      <VisualElements DisplayName="CordovaApp" 
+                      Logo="www\img\logo.png" 
+                      SmallLogo="www\img\smalllogo.png"
+                      Description="CordovaApp" 
+                      ForegroundText="light" 
+                      BackgroundColor="#464646">
         <DefaultTile ShowName="allLogos" />
         <SplashScreen Image="www\img\splashscreen.png" />
       </VisualElements>

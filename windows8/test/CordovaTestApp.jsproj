@@ -100,7 +100,7 @@
     <Content Include="compass\index.html" />
     <Content Include="contacts\index.html" />
     <Content Include="cordova-incl.js" />
-    <Content Include="cordova.js" />
+    <Content Include="cordova.windows8.js" />
     <Content Include="events\index.html" />
     <Content Include="images\logo.png" />
     <Content Include="images\smalllogo.png" />
