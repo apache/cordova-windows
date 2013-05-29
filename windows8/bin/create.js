@@ -120,6 +120,16 @@ function genGuid() {
     return strGuid;
 }
 
+// deletes the path element if it exists
+function delete_if_exists(path) {
+    if (fso.FolderExists(path)) {
+        fso.DeleteFolder(path);
+    }
+    else if (fso.FileExists(path)) {
+        fso.DeleteFile(path);
+    }
+}
+
 
 // creates new project in path, with the given package and app name
 function create(destPath, namespace, name, guid) {
@@ -158,11 +168,11 @@ function create(destPath, namespace, name, guid) {
     // cleanup
 
     // Delete bld forder and bin folder
-    fso.DeleteFolder(destPath + "\\bld");
-    fso.DeleteFolder(destPath + "\\bin");
-    // delete any user objects that exist
-    fso.DeleteFile(destPath + "\\*.user");
-    fso.DeleteFile(destPath + "\\*.suo");
+
+    delete_if_exists(destPath + "\\bld");
+    delete_if_exists(destPath + "\\bin");
+    delete_if_exists(destPath + "\\*.user");
+    delete_if_exists(destPath + "\\*.suo");
 
     // TODO: Name the project according to the arguments
     // update the solution to include the new project by name
