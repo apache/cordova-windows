@@ -52,7 +52,7 @@ function Log(msg, error) {
 
 // executes a commmand in the shell
 function exec_verbose(command) {
-    //Log("Command: " + command);
+    Log("Command: " + command);
     var oShell=wscript_shell.Exec(command);
     while (oShell.Status == 0) {
         //Wait a little bit so we're not super looping
@@ -77,7 +77,7 @@ function is_cordova_project(path) {
         var proj_folder = fso.GetFolder(path);
         var proj_files = new Enumerator(proj_folder.Files);
         for (;!proj_files.atEnd(); proj_files.moveNext()) {
-            if (fso.GetExtensionName(proj_files.item()) == 'csproj') {
+            if (fso.GetExtensionName(proj_files.item()) == 'jsproj') {
                 return true;  
             }
         }
@@ -85,51 +85,37 @@ function is_cordova_project(path) {
     return false;
 }
 
-// builds the project and .xap in release mode
-function build_xap_release(path) {
-    Log("Building Cordova-WP8 Project:");
-    Log("\tConfiguration : Release");
-    Log("\tDirectory : " + path);
-    
-    wscript_shell.CurrentDirectory = path;
-    exec_verbose('msbuild /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo /p:Configuration=Release');
-    
-    // check if file xap was created
-    if (fso.FolderExists(path + '\\Bin\\Release')) {
-        var out_folder = fso.GetFolder(path + '\\Bin\\Release');
-        var out_files = new Enumerator(out_folder.Files);
-        for (;!out_files.atEnd(); out_files.moveNext()) {
-            if (fso.GetExtensionName(out_files.item()) == 'xap') {
-                Log("BUILD SUCCESS.");
-                return;  
-            }
-        }
-    }
-    Log('ERROR: MSBuild failed to create .xap when building cordova-wp8 for release.', true);
-    WScript.Quit(2);
-}
-
 // builds the project and .xap in debug mode
-function build_xap_debug(path) {
-    Log("Building Cordova-WP8 Project:");
-    Log("\tConfiguration : Debug");
+function build_appx(path,isRelease) {
+
+    var mode = (isRelease ? "Release" : "Debug");
+    Log("Building Cordova Windows 8 Project:");
+    Log("\tConfiguration : " + mode);
     Log("\tDirectory : " + path);
     
     wscript_shell.CurrentDirectory = path;
-    exec_verbose('msbuild /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo /p:Configuration=Debug');
-    
-    // check if file xap was created
-    if (fso.FolderExists(path + '\\Bin\\Debug')) {
-        var out_folder = fso.GetFolder(path + '\\Bin\\Debug');
-        var out_files = new Enumerator(out_folder.Files);
-        for (;!out_files.atEnd(); out_files.moveNext()) {
-            if (fso.GetExtensionName(out_files.item()) == 'xap') {
-                Log("BUILD SUCCESS.");
-                return;  
+    exec_verbose('msbuild /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo /p:Configuration=' + mode);
+
+    // check if file appx was created
+    if (fso.FolderExists(path + '\\AppPackages')) {
+        var out_folder = fso.GetFolder(path + '\\AppPackages');
+        var subFolders = new Enumerator(out_folder.SubFolders);
+        for(;!subFolders.atEnd();subFolders.moveNext())
+        {
+            var subFolder = subFolders.item();
+            var files = new Enumerator(subFolder.Files);
+            for(;!files.atEnd();files.moveNext())
+            {
+                if(fso.GetExtensionName(files.item()) == "appx")
+                {
+                    Log("BUILD SUCCESS.");
+                    return;  
+                }
             }
         }
+
     }
-    Log('ERROR: MSBuild failed to create .xap when building cordova-wp8 for debugging.', true);
+    Log('ERROR: MSBuild failed to create .appx when building cordova-windows8', true);
     WScript.Quit(2);
 }
 
@@ -156,12 +142,12 @@ if (args.Count() > 0) {
         }
 
         if (args(0) == "--debug" || args(0) == "-d") {
-            exec_verbose('%comspec% /c ' + ROOT + '\\cordova\\clean');
-            build_xap_debug(ROOT);
+            //exec_verbose('%comspec% /c ' + ROOT + '\\cordova\\clean');
+            build_appx(ROOT,false);
         }
         else if (args(0) == "--release" || args(0) == "-r") {
-            exec_verbose('%comspec% /c ' + ROOT + '\\cordova\\clean');
-            build_xap_release(ROOT);
+            //exec_verbose('%comspec% /c ' + ROOT + '\\cordova\\clean');
+            build_appx(ROOT,true);
         }
         else {
             Log("Error: \"" + args(0) + "\" is not recognized as a build option", true);
@@ -177,5 +163,5 @@ if (args.Count() > 0) {
 }
 else {
     Log("WARNING: [ --debug | --release ] not specified, defaulting to debug...");
-    build_xap_debug(ROOT);
+    build_appx(ROOT,false);
 }
