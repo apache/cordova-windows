@@ -71,7 +71,7 @@ function exec_verbose(command) {
     }
 }
 
-// checks to see if a .csproj file exists in the project root
+// checks to see if a .jsproj file exists in the project root
 function is_cordova_project(path) {
     if (fso.FolderExists(path)) {
         var proj_folder = fso.GetFolder(path);
