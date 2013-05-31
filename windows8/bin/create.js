@@ -138,6 +138,8 @@ function create(destPath, namespace, name, guid) {
     Log("\tNamespace : " + namespace);
     Log("\tPath : " + destPath);
 
+    var safeProjectName = name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_');
+
     var srcPath = ROOT + CREATE_TEMPLATE;
 
     // Copy the template source files to the new destination
@@ -145,11 +147,13 @@ function create(destPath, namespace, name, guid) {
     var newProjGuid = guid || genGuid();
 
     // replace the guid in the AppManifest
-    //replaceInFile(srcPath + "\\Properties\\WMAppManifest.xml","$guid1$",newProjGuid);
+    replaceInFile(destPath + "\\package.appxmanifest","$guid1$",newProjGuid);
     // replace safe-project-name in AppManifest
-    //replaceInFile(srcPath + "\\Properties\\WMAppManifest.xml",/\$safeprojectname\$/g,name);
-    //replaceInFile(srcPath + "\\Properties\\WMAppManifest.xml",/\$projectname\$/g,name);
 
+    replaceInFile(destPath + "\\package.appxmanifest",/\$safeprojectname\$/g,safeProjectName);
+    replaceInFile(destPath + "\\package.appxmanifest",/\$projectname\$/g,name);
+
+    replaceInFile(destPath + "\\cordova\\lib\\deploy.js","$guid1$",newProjGuid);
 
     // replaceInFile(srcPath + "\\App.xaml",/\$safeprojectname\$/g,namespace);
     // replaceInFile(srcPath + "\\App.xaml.cs",/\$safeprojectname\$/g,namespace);
@@ -173,12 +177,14 @@ function create(destPath, namespace, name, guid) {
     delete_if_exists(destPath + "\\bin");
     delete_if_exists(destPath + "\\*.user");
     delete_if_exists(destPath + "\\*.suo");
+    delete_if_exists(destPath + "\\*.vstemplate");
 
     // TODO: Name the project according to the arguments
     // update the solution to include the new project by name
     // version BS
     // index.html title set to project name ?
 
+    Log("Project created");
 }
 
 if (args.Count() > 0) {
