@@ -43,6 +43,11 @@ int _tmain(int argc, _TCHAR* argv[])
                                                                 &dwProcessId);
             }
         }
+        else 
+        {
+            printf("%s","Missing Command Line Argument");
+            hr = E_ABORT;
+        }
         CoUninitialize();
     }
 
