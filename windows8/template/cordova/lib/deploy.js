@@ -246,6 +246,11 @@ function build(path) {
     }
 }
 
+function getPackageFamilyName(srcId) {
+    var outShell = wscript_shell.Exec('powershell -executionpolicy bypass -Command write-output((Get-AppxPackage ' + srcId + ').PackageFamilyName)');
+    var result = outShell.StdOut.ReadAll();
+    return result;
+}
 
 if (args.Count() > 0) {
     // support help flags
