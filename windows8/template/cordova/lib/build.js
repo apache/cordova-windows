@@ -104,11 +104,14 @@ function build_appx(path,isRelease) {
         {
             var subFolder = subFolders.item();
             var files = new Enumerator(subFolder.Files);
+            // TODO: there could be multiple .appx files
             for(;!files.atEnd();files.moveNext())
             {
                 if(fso.GetExtensionName(files.item()) == "appx")
                 {
-                    Log("BUILD SUCCESS.");
+                    Log("\n\n\n\nBUILD SUCCESS. " + files.item() + "\n\n");
+                    exec_verbose("PowerShell Add-AppxPackage " + files.item());
+                    Log("\n\n\n\nInstall SUCCESS.\n\n\n\n");
                     return;  
                 }
             }
