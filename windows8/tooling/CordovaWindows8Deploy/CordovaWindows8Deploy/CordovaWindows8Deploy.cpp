@@ -1,5 +1,3 @@
-// ConsoleApplication2.cpp : Defines the entry point for the console application.
-//
 
 #include <stdio.h>
 #include <tchar.h>
@@ -9,6 +7,7 @@
 #include <objbase.h>
 #include <atlbase.h>
 #include <string>
+#include <AppxPackaging.h>
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -19,6 +18,7 @@ int _tmain(int argc, _TCHAR* argv[])
     {
         if(argc == 2)
         {
+            CComPtr<IAppxManifestReader> spManifestReader;
 
             CComPtr<IApplicationActivationManager> spAppActivationManager;
             // get IApplicationActivationManager
@@ -37,8 +37,7 @@ int _tmain(int argc, _TCHAR* argv[])
             // Launch it!
             if (SUCCEEDED(hr))
             {  
-                LPCWSTR appId = argv[1];
-                hr = spAppActivationManager->ActivateApplication(appId,
+                hr = spAppActivationManager->ActivateApplication((LPCWSTR)argv[1],
                                                                 NULL,
                                                                 AO_NONE,
                                                                 &dwProcessId);
@@ -47,6 +46,11 @@ int _tmain(int argc, _TCHAR* argv[])
         CoUninitialize();
     }
 
+    if(SUCCEEDED(hr))
+    {
+       printf("%s","Successfully Deployed.");
+    }
+    
     return hr;
 }
 
