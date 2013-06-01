@@ -31,8 +31,9 @@ function Usage() {
     Log("");
     Log("Usage: build [ --debug | --release ]");
     Log("    --help    : Displays this dialog.");
-    Log("    --debug   : Cleans and builds project in debug mode.");
-    Log("    --release : Cleans and builds project in release mode.");
+    Log("    --debug   : builds project in debug mode. (Default)");
+    Log("    --release : builds project in release mode.");
+    Log("    -r        : shortcut :: builds project in release mode.");
     Log("examples:");
     Log("    build ");
     Log("    build --debug");
@@ -52,7 +53,7 @@ function Log(msg, error) {
 
 // executes a commmand in the shell
 function exec_verbose(command) {
-    Log("Command: " + command);
+    //Log("Command: " + command);
     var oShell=wscript_shell.Exec(command);
     while (oShell.Status == 0) {
         //Wait a little bit so we're not super looping
@@ -96,7 +97,8 @@ function build_appx(path,isRelease) {
     wscript_shell.CurrentDirectory = path;
     exec_verbose('msbuild /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo /p:Configuration=' + mode);
 
-    // check if file appx was created
+    // TODO: there could be multiple AppPackages
+    // check if AppPackages created
     if (fso.FolderExists(path + '\\AppPackages')) {
         var out_folder = fso.GetFolder(path + '\\AppPackages');
         var subFolders = new Enumerator(out_folder.SubFolders);
@@ -104,26 +106,30 @@ function build_appx(path,isRelease) {
         {
             var subFolder = subFolders.item();
             var files = new Enumerator(subFolder.Files);
-            // TODO: there could be multiple .appx files
             for(;!files.atEnd();files.moveNext())
             {
-                if(fso.GetExtensionName(files.item()) == "appx")
+                if(fso.GetExtensionName(files.item()) == "ps1")
                 {
-                    Log("\n\n\n\nBUILD SUCCESS. " + files.item() + "\n\n");
-                    exec_verbose("PowerShell Add-AppxPackage " + files.item());
-                    Log("\n\n\n\nInstall SUCCESS.\n\n\n\n");
-                    return;  
+                    var command = "PowerShell " + files.item();
+                    Log("\nRunning Command :: " + command);
+                    // run it and wait for the result
+                    var retCode = wscript_shell.Run(command, 1, true);
+                    return retCode == 0 ? "Success" : "Error running PowerShell script : " + retCode;
                 }
+
             }
         }
 
     }
-    Log('ERROR: MSBuild failed to create .appx when building cordova-windows8', true);
-    WScript.Quit(2);
+    return "Error : AppPackages were not built";
+
 }
 
 
 Log("");
+
+var result;
+var isRelease = false;
 
 if (args.Count() > 0) {
     // support help flags
@@ -132,39 +138,12 @@ if (args.Count() > 0) {
         Usage();
         WScript.Quit(2);
     }
-    else if (args.Count() > 1) {
-        Log("Error: Too many arguments.", true);
-        Usage();
+    else if (!fso.FolderExists(ROOT) || !is_cordova_project(ROOT)) {
+        Log("Error: could not find project at " + ROOT, true);
         WScript.Quit(2);
     }
-    else if (fso.FolderExists(ROOT)) {
-        if (!is_cordova_project(ROOT)) {
-            Log('Error: .csproj file not found in ' + ROOT, true);
-            Log('could not build project.', true);
-            WScript.Quit(2);
-        }
+     
+    isRelease = (args(0) == "--release" || args(0) == "-r");   
+}
 
-        if (args(0) == "--debug" || args(0) == "-d") {
-            //exec_verbose('%comspec% /c ' + ROOT + '\\cordova\\clean');
-            build_appx(ROOT,false);
-        }
-        else if (args(0) == "--release" || args(0) == "-r") {
-            //exec_verbose('%comspec% /c ' + ROOT + '\\cordova\\clean');
-            build_appx(ROOT,true);
-        }
-        else {
-            Log("Error: \"" + args(0) + "\" is not recognized as a build option", true);
-            Usage();
-            WScript.Quit(2);
-        }
-    }
-    else {
-        Log("Error: Project directory not found,", true);
-        Usage();
-        WScript.Quit(2);
-    }
-}
-else {
-    Log("WARNING: [ --debug | --release ] not specified, defaulting to debug...");
-    build_appx(ROOT,false);
-}
+Log(build_appx(ROOT,isRelease));

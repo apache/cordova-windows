@@ -252,6 +252,12 @@ function getPackageFamilyName(srcId) {
     return result;
 }
 
+
+var res = getPackageFamilyName('$guid1$');
+Log("Res = " + res);
+WScript.Quit(0);
+
+
 if (args.Count() > 0) {
     // support help flags
     if (args(0) == "--help" || args(0) == "/?" ||
