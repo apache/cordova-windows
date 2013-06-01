@@ -179,8 +179,8 @@ static HRESULT open_database(BSTR callback_id, BSTR args, VARIANT *result)
 	}
 
 	VariantInit(result);
-	result->vt = VT_INT;
-	result->intVal = (int) db;
+	result->vt = VT_I8;
+	result->llVal = (__int64) db;
 
 	return S_OK;
 }
