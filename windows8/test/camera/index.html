@@ -289,7 +289,7 @@
             var value = el.value;
             if (value === '') continue;
             if (el.isBool) {
-                ret[el.keyName] = !!value;
+                ret[el.keyName] = !!+value;
             } else {
                 ret[el.keyName] = +value;
             }

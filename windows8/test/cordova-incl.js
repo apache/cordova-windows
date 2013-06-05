@@ -20,15 +20,22 @@
 */
 
 var PLAT;
-if (/Android/.exec(navigator.userAgent)) {
-    PLAT = 'android';
-} else if (/(iPad)|(iPhone)|(iPod)/.exec(navigator.userAgent)) {
-    PLAT = 'ios';
-} else if (/(BB10)/.exec(navigator.userAgent)) {
-    PLAT = 'blackberry10';
-} else if (/(PlayBook)|(BlackBerry)/.exec(navigator.userAgent)) {
-    PLAT = 'blackberry';
-}
+(function getPlatform() {
+    var platforms = {
+        android: /Android/,
+        ios: /(iPad)|(iPhone)|(iPod)/,
+        blackberry10: /(BB10)/,
+        blackberry: /(PlayBook)|(BlackBerry)/,
+        windows8: /MSAppHost/,
+        windowsphone: /Windows Phone/
+    };
+    for (var key in platforms) {
+        if (platforms[key].exec(navigator.userAgent)) {
+            PLAT = key;
+            break;
+        }
+    }
+})();
 
 var scripts = document.getElementsByTagName('script');
 var currentPath = scripts[scripts.length - 1].src;
@@ -59,16 +66,20 @@ if (PLAT) {
 }
 
 if (!window._doNotWriteCordovaScript) {
-    var script = document.createElement("script");
-    script.src = cordovaPath;
-    document.head.appendChild(script);
+    if (PLAT != "windows8") {
+        document.write('<script type="text/javascript" charset="utf-8" src="' + cordovaPath + '"></script>');
+    } else {
+        var s = document.createElement('script');
+        s.src = cordovaPath;
+        document.head.appendChild(s);
+    }
 }
 
 function backHome() {
-	if (window.device && device.platform && device.platform.toLowerCase() == 'android') {
-            navigator.app.backHistory();
-	}
-	else {
-	    window.history.go(-1);
-	}
+    if (window.device && device.platform && device.platform.toLowerCase() == 'android') {
+        navigator.app.backHistory();
+    }
+    else {
+        window.history.go(-1);
+    }
 }
