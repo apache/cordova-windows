@@ -1,5 +1,5 @@
 ﻿// Platform: windows8
-// 2.9.0rc1-0-g002f33d
+// 2.7.0rc1-106-gd81abfc
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
  under the License.
 */
 ;(function() {
-var CORDOVA_JS_BUILD_LABEL = '2.9.0rc1-0-g002f33d';
+var CORDOVA_JS_BUILD_LABEL = '2.7.0rc1-106-gd81abfc';
 // file: lib/scripts/require.js
 
 var require,
@@ -376,7 +376,7 @@ function checkArgs(spec, functionName, args, opt_callee) {
     if (errMsg) {
         errMsg += ', but got ' + typeName + '.';
         errMsg = 'Wrong type for parameter "' + extractParamName(opt_callee || args.callee, i) + '" of ' + functionName + ': ' + errMsg;
-        // Don't log when running jake test.
+        // Don't log when running unit tests.
         if (typeof jasmine == 'undefined') {
             console.error(errMsg);
         }
@@ -2893,26 +2893,27 @@ FileWriter.prototype.abort = function() {
  */
 FileWriter.prototype.write = function(data) {
 
-    var isBinary = false;
+    var that=this;
+    var supportsBinary = (typeof window.Blob !== 'undefined' && typeof window.ArrayBuffer !== 'undefined');
+    var isBinary;
 
-    // If we don't have Blob or ArrayBuffer support, don't bother.
-    if (typeof window.Blob !== 'undefined' && typeof window.ArrayBuffer !== 'undefined') {
-
-        // Check to see if the incoming data is a blob
-        if (data instanceof Blob) {
-            var that=this;
-            var fileReader = new FileReader();
-            fileReader.onload = function() {
-                // Call this method again, with the arraybuffer as argument
-                FileWriter.prototype.write.call(that, this.result);
-            };
+    // Check to see if the incoming data is a blob
+    if (data instanceof File || (supportsBinary && data instanceof Blob)) {
+        var fileReader = new FileReader();
+        fileReader.onload = function() {
+            // Call this method again, with the arraybuffer as argument
+            FileWriter.prototype.write.call(that, this.result);
+        };
+        if (supportsBinary) {
             fileReader.readAsArrayBuffer(data);
-            return;
+        } else {
+            fileReader.readAsText(data);
         }
-
-        // Mark data type for safer transport over the binary bridge
-        isBinary = (data instanceof ArrayBuffer);
+        return;
     }
+
+    // Mark data type for safer transport over the binary bridge
+    isBinary = supportsBinary && (data instanceof ArrayBuffer);
 
     // Throw an exception if we are already writing a file
     if (this.readyState === FileWriter.WRITING) {
@@ -6389,16 +6390,6 @@ var FileError = require('cordova/plugin/FileError');
 module.exports = {
 
     getDeviceInfo:function(win,fail,args) {
-        //console.log("NativeProxy::getDeviceInfo");
-        var hostNames = Windows.Networking.Connectivity.NetworkInformation.getHostNames();
-
-        var name = "unknown";
-        hostNames.some(function (nm) {
-            if (nm.displayName.indexOf(".local") > -1) {
-                name = nm.displayName.split(".local")[0];
-                return true;
-            }
-        });
 
         // deviceId aka uuid, stored in Windows.Storage.ApplicationData.current.localSettings.values.deviceId
         var deviceId;
@@ -6412,7 +6403,7 @@ module.exports = {
         }
 
         setTimeout(function () {
-            win({ platform: "windows8", version: "8", name: name, uuid: deviceId, cordova: CORDOVA_JS_BUILD_LABEL });
+            win({ platform: "windows8", version: "8", uuid: deviceId, cordova: CORDOVA_JS_BUILD_LABEL });
         }, 0);
     }
 
