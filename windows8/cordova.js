@@ -1162,8 +1162,12 @@ define("cordova/plugin/CaptureError", function(require, exports, module) {
 /**
  * The CaptureError interface encapsulates all errors in the Capture API.
  */
-var CaptureError = function(c) {
+var CaptureError = function(c, message) {
    this.code = c || null;
+   this.message = message || this.messages[String(c)] || '';
+};
+CaptureError.prototype.toString = function(){
+   return this.message;
 };
 
 // Camera or microphone failed to capture image or sound.
@@ -1176,6 +1180,14 @@ CaptureError.CAPTURE_INVALID_ARGUMENT = 2;
 CaptureError.CAPTURE_NO_MEDIA_FILES = 3;
 // The requested capture operation is not supported.
 CaptureError.CAPTURE_NOT_SUPPORTED = 20;
+
+CaptureError.messages = {
+  "0": "Failed to capture",
+  "1": "Application is currently busy",
+  "2": "Invalid argument",
+  "3": "User cancelled",
+  "20": "Not supported on this device"
+};
 
 module.exports = CaptureError;
 
