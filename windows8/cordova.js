@@ -7709,23 +7709,21 @@ module.exports = {
 
     beep:function(winX, loseX, args) {
         var count = args[0];
-        /*
-        var src = //filepath//
-        var playTime = 500; // ms
-        var quietTime = 1000; // ms
-        var media = new Media(src, function(){});
-        var hit = 1;
-        var intervalId = window.setInterval( function () {
-            media.play();
-            sleep(playTime);
-            media.stop();
-            media.seekTo(0);
-            if (hit < count) {
-                hit++;
-            } else {
-                window.clearInterval(intervalId);
-            }
-        }, playTime + quietTime); */
+		if (count <= 0) return;
+
+		var playTime = 500; // ms
+		var quietTime = 1000; // ms
+		var m = new Audio('ms-winsoundevent:Notification.Default');
+		m.play();
+		count--;
+		if (count > 0) {
+			var id = setInterval(function () {
+				count--;
+				if (count <= 0) clearInterval(id);
+				m.currentTime = 0;
+				m.play();
+			}, playTime + quietTime);
+		}
     }
 };
 
