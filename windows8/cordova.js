@@ -2730,7 +2730,7 @@ FileTransfer.prototype.download = function(source, target, successCallback, erro
         errorCallback(error);
     };
 
-    exec(win, fail, 'FileTransfer', 'download', [source, target, trustAllHosts, this._id, headers]);
+    exec(win, fail, 'FileTransfer', 'download', [source, target, trustAllHosts, this._id, headers, this.onprogress]);
 };
 
 /**
@@ -7300,6 +7300,7 @@ module.exports = {
     download:function(win, error, options) {
         var source = options[0];
         var target = options[1];
+     			var progress = options[5];
 
 
         if (target === null || typeof target === undefined) {
@@ -7328,7 +7329,13 @@ module.exports = {
                     win(new FileEntry(storageFile.name, storageFile.path));
                 }, function () {
                     error(FileTransferError.INVALID_URL_ERR);
-                });
+                }, function (p) {
+					progress && progress({
+						lengthComputable: true,
+						loaded: p.progress.bytesReceived,
+						total: p.progress.totalBytesToReceive
+					});
+				});
             });
         });
     }
