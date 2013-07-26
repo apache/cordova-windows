@@ -224,13 +224,10 @@ var cordova = {
               documentEventHandlers[type].fire(evt);
             }
             else {
-              setTimeout(function() {
-                  // Fire deviceready on listeners that were registered before cordova.js was loaded.
-                  if (type == 'deviceready') {
-                      document.dispatchEvent(evt);
-                  }
-                  documentEventHandlers[type].fire(evt);
-              }, 0);
+				if (type == 'deviceready') {
+					document.dispatchEvent(evt);
+				}
+				documentEventHandlers[type].fire(evt);
             }
         } else {
             document.dispatchEvent(evt);
