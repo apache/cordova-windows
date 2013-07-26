@@ -2802,10 +2802,10 @@ define("cordova/plugin/FileUploadResult", function(require, exports, module) {
  * FileUploadResult
  * @constructor
  */
-var FileUploadResult = function() {
-    this.bytesSent = 0;
-    this.responseCode = null;
-    this.response = null;
+var FileUploadResult = function (size, code, content) {
+	this.bytesSent = size;
+	this.responseCode = code;
+	this.response = content;
 };
 
 module.exports = FileUploadResult;
