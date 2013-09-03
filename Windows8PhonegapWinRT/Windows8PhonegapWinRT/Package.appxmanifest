@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/2010/manifest">
+  <Identity Name="LarsenToubroInfotechLtd.MarketsOnGoBeta" Publisher="CN=E8F5D462-080D-4198-8FC0-F1BB5151A18F" Version="1.0.0.0" />
+  <Properties>
+    <DisplayName>MarketsOnGoBeta</DisplayName>
+    <PublisherDisplayName>Larsen &amp; Toubro Infotech Ltd</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+  <Prerequisites>
+    <OSMinVersion>6.2.1</OSMinVersion>
+    <OSMaxVersionTested>6.2.1</OSMaxVersionTested>
+  </Prerequisites>
+  <Resources>
+    <Resource Language="x-generate" />
+  </Resources>
+  <Applications>
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="Windows8PhonegapWinRT.App">
+      <VisualElements DisplayName="MarketsOnGoBeta" Logo="Assets\Logo.png" SmallLogo="Assets\SmallLogo.png" Description="Windows8PhonegapWinRT" ForegroundText="light" BackgroundColor="#FFFFFF">
+        <DefaultTile ShowName="allLogos" />
+        <SplashScreen Image="SplashScreenImage.png" />
+      </VisualElements>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <Capability Name="internetClient" />
+    <Capability Name="videosLibrary" />
+    <Capability Name="musicLibrary" />
+    <Capability Name="picturesLibrary" />
+    <DeviceCapability Name="location" />
+    <DeviceCapability Name="webcam" />
+    <DeviceCapability Name="microphone" />
+  </Capabilities>
+</Package>

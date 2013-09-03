@@ -1,0 +1,17 @@
+﻿<Page
+    x:Class="Windows8PhonegapWinRT.ExtendedSplashScreen"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Windows8PhonegapWinRT"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Canvas Grid.Row="0" Background="White">
+        <Image x:Name="extendedSplashImage" Source="SplashScreenImage.png" />
+        <ProgressRing x:Name="ProgressRing" Foreground="Purple" 
+            HorizontalAlignment="Center" IsActive="True" 
+                MaxHeight="40" MinHeight="40" MaxWidth="40" 
+            MinWidth="40"></ProgressRing>
+    </Canvas>
+</Page>
