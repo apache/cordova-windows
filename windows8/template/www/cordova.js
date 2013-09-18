@@ -4345,6 +4345,7 @@ function Device() {
     this.uuid = null;
     this.cordova = null;
     this.model = null;
+	this.name = null;
 
     var me = this;
 
@@ -4360,6 +4361,7 @@ function Device() {
             me.uuid = info.uuid;
             me.cordova = buildLabel;
             me.model = info.model;
+			me.name = info.name;
             channel.onCordovaInfoReady.fire();
         },function(e) {
             me.available = false;
