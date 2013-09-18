@@ -1,5 +1,5 @@
 ﻿// Platform: windows8
-// 3.2.0-dev-45b5057
+// 3.1.0-rc1
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
  under the License.
 */
 ;(function() {
-var CORDOVA_JS_BUILD_LABEL = '3.2.0-dev-45b5057';
+var CORDOVA_JS_BUILD_LABEL = '3.1.0-rc1';
 // file: lib/scripts/require.js
 
 var require,
