@@ -312,6 +312,10 @@ static HRESULT execute_sql(BSTR callback_id, BSTR args)
 						static wchar_t number[20];
 						swprintf(number, 19, L"%d", sqlite3_column_int(stmt, j));
 						text_buf_append(response, number);
+					} else if(sqlite3_column_type(stmt, j) == SQLITE_FLOAT){
+						static wchar_t number[50];
+						swprintf(number, 49, L"%f", sqlite3_column_double(stmt, j));
+						text_buf_append(response, number);						
 					} else if (sqlite3_column_type(stmt, j) == SQLITE_TEXT) {
 						text_buf_append(response, L"\"");
 						text_buf_append(response, (wchar_t *) sqlite3_column_text16(stmt, j));
