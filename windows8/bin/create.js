@@ -36,8 +36,8 @@ var args = WScript.Arguments,
     TEMPLATES_PATH = '\\template',
     // default template to use when creating the project
     CREATE_TEMPLATE = TEMPLATES_PATH,
-    PROJECT_PATH, 
-    PACKAGE, 
+    PROJECT_PATH,
+    PACKAGE,
     NAME,
     GUID;
 
@@ -115,8 +115,8 @@ function exec_verbose(command) {
 //generate guid for the project
 function genGuid() {
     var TypeLib = WScript.CreateObject("Scriptlet.TypeLib");
-    strGuid = TypeLib.Guid.split("}")[0]; // there is extra crap after the } that is causing file streams to break, probably an EOF ... 
-    strGuid = strGuid.replace(/[\{\}]/g,""); 
+    strGuid = TypeLib.Guid.split("}")[0]; // there is extra crap after the } that is causing file streams to break, probably an EOF ...
+    strGuid = strGuid.replace(/[\{\}]/g,"");
     return strGuid;
 }
 
@@ -146,28 +146,14 @@ function create(destPath, namespace, name, guid) {
     fso.CopyFolder(srcPath,destPath);
     var newProjGuid = guid || genGuid();
 
-    // replace the guid in the AppManifest
+    // replace the guid in the AppManifest and deploy script
     replaceInFile(destPath + "\\package.appxmanifest","$guid1$",newProjGuid);
-    // replace safe-project-name in AppManifest
+    replaceInFile(destPath + "\\cordova\\lib\\deploy.js","$guid1$",newProjGuid);
 
+    // replace $safeprojectname$ and $projectname$ in AppManifest
     replaceInFile(destPath + "\\package.appxmanifest",/\$safeprojectname\$/g,safeProjectName);
     replaceInFile(destPath + "\\package.appxmanifest",/\$projectname\$/g,name);
 
-    replaceInFile(destPath + "\\cordova\\lib\\deploy.js","$guid1$",newProjGuid);
-
-    // replaceInFile(srcPath + "\\App.xaml",/\$safeprojectname\$/g,namespace);
-    // replaceInFile(srcPath + "\\App.xaml.cs",/\$safeprojectname\$/g,namespace);
-
-    // replaceInFile(srcPath + "\\MainPage.xaml",/\$safeprojectname\$/g,namespace);
-    // replaceInFile(srcPath + "\\MainPage.xaml.cs",/\$safeprojectname\$/g,namespace);
-    // replaceInFile(srcPath + "\\CordovaAppProj.csproj",/\$safeprojectname\$/g,namespace);
-    // if (NAME != "CordovaAppProj") {
-    //     var valid_name = NAME.replace(/(\.\s|\s\.|\s+|\.+)/g, '_');
-    //     replaceInFile(srcPath + "\\CordovaSolution.sln", /CordovaAppProj/g, valid_name);
-    //     // rename project and solution
-    //     exec('%comspec% /c ren ' + srcPath + "\\CordovaSolution.sln " + valid_name + '.sln');
-    //     exec('%comspec% /c ren ' + srcPath + "\\CordovaAppProj.csproj " + valid_name + '.csproj');
-    // }
 
     // cleanup
 
