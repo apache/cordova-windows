@@ -1,5 +1,5 @@
 ﻿// Platform: windows8
-// 2.9.0-0-g83dc4bd
+// 2.9.1
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
  under the License.
 */
 ;(function() {
-var CORDOVA_JS_BUILD_LABEL = '2.9.0-0-g83dc4bd';
+var CORDOVA_JS_BUILD_LABEL = '2.9.1';
 // file: lib/scripts/require.js
 
 var require,
@@ -100,6 +100,7 @@ define("cordova", function(require, exports, module) {
 
 
 var channel = require('cordova/channel');
+var platform = require('cordova/platform');
 
 /**
  * Listen for DOMContentLoaded and notify our channel subscribers.
@@ -182,10 +183,18 @@ if(typeof window.console === "undefined") {
         log:function(){}
     };
 }
+// there are places in the framework where we call `warn` also, so we should make sure it exists
+if(typeof window.console.warn === "undefined") {
+    window.console.warn = function(msg) {
+        this.log("warn: " + msg);
+    };
+}
 
 var cordova = {
     define:define,
     require:require,
+    version:CORDOVA_JS_BUILD_LABEL,
+    platformId:platform.id,
     /**
      * Methods to add/remove your own addEventListener hijacking on document + window.
      */
@@ -221,16 +230,16 @@ var cordova = {
         var evt = createEvent(type, data);
         if (typeof documentEventHandlers[type] != 'undefined') {
             if( bNoDetach ) {
-              documentEventHandlers[type].fire(evt);
+                documentEventHandlers[type].fire(evt);
             }
             else {
-              setTimeout(function() {
-                  // Fire deviceready on listeners that were registered before cordova.js was loaded.
-                  if (type == 'deviceready') {
-                      document.dispatchEvent(evt);
-                  }
-                  documentEventHandlers[type].fire(evt);
-              }, 0);
+                setTimeout(function() {
+                    // Fire deviceready on listeners that were registered before cordova.js was loaded.
+                    if (type == 'deviceready') {
+                        document.dispatchEvent(evt);
+                    }
+                    documentEventHandlers[type].fire(evt);
+                }, 0);
             }
         } else {
             document.dispatchEvent(evt);
@@ -347,7 +356,7 @@ var typeMap = {
 };
 
 function extractParamName(callee, argIndex) {
-  return (/.*?\((.*?)\)/).exec(callee)[1].split(', ')[argIndex];
+    return (/.*?\((.*?)\)/).exec(callee)[1].split(', ')[argIndex];
 }
 
 function checkArgs(spec, functionName, args, opt_callee) {
@@ -376,7 +385,7 @@ function checkArgs(spec, functionName, args, opt_callee) {
     if (errMsg) {
         errMsg += ', but got ' + typeName + '.';
         errMsg = 'Wrong type for parameter "' + extractParamName(opt_callee || args.callee, i) + '" of ' + functionName + ': ' + errMsg;
-        // Don't log when running jake test.
+        // Don't log when running unit tests.
         if (typeof jasmine == 'undefined') {
             console.error(errMsg);
         }
@@ -392,6 +401,62 @@ moduleExports.checkArgs = checkArgs;
 moduleExports.getValue = getValue;
 moduleExports.enableChecks = true;
 
+
+});
+
+// file: lib/common/base64.js
+define("cordova/base64", function(require, exports, module) {
+
+var base64 = exports;
+
+base64.fromArrayBuffer = function(arrayBuffer) {
+    var array = new Uint8Array(arrayBuffer);
+    return uint8ToBase64(array);
+};
+
+//------------------------------------------------------------------------------
+
+/* This code is based on the performance tests at http://jsperf.com/b64tests
+ * This 12-bit-at-a-time algorithm was the best performing version on all
+ * platforms tested.
+ */
+
+var b64_6bit = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+var b64_12bit;
+
+var b64_12bitTable = function() {
+    b64_12bit = [];
+    for (var i=0; i<64; i++) {
+        for (var j=0; j<64; j++) {
+            b64_12bit[i*64+j] = b64_6bit[i] + b64_6bit[j];
+        }
+    }
+    b64_12bitTable = function() { return b64_12bit; };
+    return b64_12bit;
+};
+
+function uint8ToBase64(rawData) {
+    var numBytes = rawData.byteLength;
+    var output="";
+    var segment;
+    var table = b64_12bitTable();
+    for (var i=0;i<numBytes-2;i+=3) {
+        segment = (rawData[i] << 16) + (rawData[i+1] << 8) + rawData[i+2];
+        output += table[segment >> 12];
+        output += table[segment & 0xfff];
+    }
+    if (numBytes - i == 2) {
+        segment = (rawData[i] << 16) + (rawData[i+1] << 8);
+        output += table[segment >> 12];
+        output += b64_6bit[(segment & 0xfff) >> 6];
+        output += '=';
+    } else if (numBytes - i == 1) {
+        segment = (rawData[i] << 16);
+        output += table[segment >> 12];
+        output += '==';
+    }
+    return output;
+}
 
 });
 
@@ -435,36 +500,36 @@ function assignOrWrapInDeprecateGetter(obj, key, value, message) {
 function include(parent, objects, clobber, merge) {
     each(objects, function (obj, key) {
         try {
-          var result = obj.path ? require(obj.path) : {};
+            var result = obj.path ? require(obj.path) : {};
 
-          if (clobber) {
-              // Clobber if it doesn't exist.
-              if (typeof parent[key] === 'undefined') {
-                  assignOrWrapInDeprecateGetter(parent, key, result, obj.deprecated);
-              } else if (typeof obj.path !== 'undefined') {
-                  // If merging, merge properties onto parent, otherwise, clobber.
-                  if (merge) {
-                      recursiveMerge(parent[key], result);
-                  } else {
-                      assignOrWrapInDeprecateGetter(parent, key, result, obj.deprecated);
-                  }
-              }
-              result = parent[key];
-          } else {
-            // Overwrite if not currently defined.
-            if (typeof parent[key] == 'undefined') {
-              assignOrWrapInDeprecateGetter(parent, key, result, obj.deprecated);
+            if (clobber) {
+                // Clobber if it doesn't exist.
+                if (typeof parent[key] === 'undefined') {
+                    assignOrWrapInDeprecateGetter(parent, key, result, obj.deprecated);
+                } else if (typeof obj.path !== 'undefined') {
+                    // If merging, merge properties onto parent, otherwise, clobber.
+                    if (merge) {
+                        recursiveMerge(parent[key], result);
+                    } else {
+                        assignOrWrapInDeprecateGetter(parent, key, result, obj.deprecated);
+                    }
+                }
+                result = parent[key];
             } else {
-              // Set result to what already exists, so we can build children into it if they exist.
-              result = parent[key];
+                // Overwrite if not currently defined.
+                if (typeof parent[key] == 'undefined') {
+                    assignOrWrapInDeprecateGetter(parent, key, result, obj.deprecated);
+                } else {
+                    // Set result to what already exists, so we can build children into it if they exist.
+                    result = parent[key];
+                }
             }
-          }
 
-          if (obj.children) {
-            include(result, obj.children, clobber, merge);
-          }
+            if (obj.children) {
+                include(result, obj.children, clobber, merge);
+            }
         } catch(e) {
-          utils.alert('Exception building cordova JS globals: ' + e + ' for key "' + key + '"');
+            utils.alert('Exception building cordova JS globals: ' + e + ' for key "' + key + '"');
         }
     });
 }
@@ -808,24 +873,44 @@ var commandProxy = require('cordova/commandProxy');
  * @param {String} action       Action to be run in cordova
  * @param {String[]} [args]     Zero or more arguments to pass to the method
  */
-module.exports = function(success, fail, service, action, args) {
 
-    var proxy = commandProxy.get(service,action);
+module.exports = function (success, fail, service, action, args) {
+
+    var proxy = commandProxy.get(service, action),
+        callbackId,
+        onSuccess,
+        onError;
+
     if(proxy) {
-        var callbackId = service + cordova.callbackId++;
+        callbackId = service + cordova.callbackId++;
         // console.log("EXEC:" + service + " : " + action);
         if (typeof success == "function" || typeof fail == "function") {
             cordova.callbacks[callbackId] = {success:success, fail:fail};
         }
         try {
-            proxy(success, fail, args);
-        }
-        catch(e) {
+            onSuccess = function (result) {
+                cordova.callbackSuccess(callbackId,
+                        {
+                        status: cordova.callbackStatus.OK,
+                        message: result
+                    });
+            };
+            onError = function (err) {
+                cordova.callbackError(callbackId,
+                        {
+                        status: cordova.callbackStatus.ERROR,
+                        message: err
+                    });
+            };
+            proxy(onSuccess, onError, args);
+
+        } catch (e) {
             console.log("Exception calling native with command :: " + service + " :: " + action  + " ::exception=" + e);
         }
-    }
-    else {
-        fail && fail("Missing Command Error");
+    } else {
+        if (typeof fail === "function") {
+            fail("Missing Command Error");
+        }
     }
 };
 
@@ -867,6 +952,10 @@ exports.defaults = function(moduleName, symbolPath, opt_deprecationMessage) {
     addEntry('d', moduleName, symbolPath, opt_deprecationMessage);
 };
 
+exports.runs = function(moduleName) {
+    addEntry('r', moduleName, null);
+};
+
 function prepareNamespace(symbolPath, context) {
     if (!symbolPath) {
         return context;
@@ -885,12 +974,16 @@ exports.mapModules = function(context) {
     for (var i = 0, len = symbolList.length; i < len; i += 3) {
         var strategy = symbolList[i];
         var moduleName = symbolList[i + 1];
+        var module = require(moduleName);
+        // <runs/>
+        if (strategy == 'r') {
+            continue;
+        }
         var symbolPath = symbolList[i + 2];
         var lastDot = symbolPath.lastIndexOf('.');
         var namespace = symbolPath.substr(0, lastDot);
         var lastName = symbolPath.substr(lastDot + 1);
 
-        var module = require(moduleName);
         var deprecationMsg = symbolPath in deprecationMap ? 'Access made to deprecated symbol: ' + symbolPath + '. ' + deprecationMsg : null;
         var parentObj = prepareNamespace(namespace, context);
         var target = parentObj[lastName];
@@ -935,19 +1028,23 @@ exports.reset();
 // file: lib/windows8/platform.js
 define("cordova/platform", function(require, exports, module) {
 
-var cordova = require('cordova'),
-    exec = require('cordova/exec'),
-    channel = cordova.require("cordova/channel"),
-    modulemapper = require('cordova/modulemapper');
 
-/*
- * Define native implementations ( there is no native layer, so need to make sure the proxies are there )
- */
-modulemapper.loadMatchingModules(/cordova.*\/windows8\/.*Proxy$/);
+
+
 
 module.exports = {
     id: "windows8",
     initialize:function() {
+
+        var cordova = require('cordova'),
+            exec = require('cordova/exec'),
+            channel = cordova.require("cordova/channel"),
+            modulemapper = require('cordova/modulemapper');
+
+        /*
+         * Define native implementations ( there is no native layer, so need to make sure the proxies are there )
+         */
+        modulemapper.loadMatchingModules(/cordova.*\/windows8\/.*Proxy$/);
 
         modulemapper.loadMatchingModules(/cordova.*\/plugininit$/);
 
@@ -955,6 +1052,9 @@ module.exports = {
         modulemapper.clobbers('cordova/commandProxy', 'cordova.commandProxy');
 
         modulemapper.mapModules(window);
+
+        window.alert = window.alert || require("cordova/plugin/notification").alert;
+        window.confirm = window.confirm || require("cordova/plugin/notification").confirm;
 
         var onWinJSReady = function () {
             var app = WinJS.Application;
@@ -1758,6 +1858,7 @@ var exec = require('cordova/exec'),
  */
 function DirectoryReader(path) {
     this.path = path || null;
+    this.hasReadEntries = false;
 }
 
 /**
@@ -1767,6 +1868,12 @@ function DirectoryReader(path) {
  * @param {Function} errorCallback is called with a FileError
  */
 DirectoryReader.prototype.readEntries = function(successCallback, errorCallback) {
+    // If we've already read and passed on this directory's entries, return an empty list.
+    if (this.hasReadEntries) {
+        successCallback([]);
+        return;
+    }
+    var reader = this;
     var win = typeof successCallback !== 'function' ? null : function(result) {
         var retVal = [];
         for (var i=0; i<result.length; i++) {
@@ -1783,6 +1890,7 @@ DirectoryReader.prototype.readEntries = function(successCallback, errorCallback)
             entry.fullPath = result[i].fullPath;
             retVal.push(entry);
         }
+        reader.hasReadEntries = true;
         successCallback(retVal);
     };
     var fail = typeof errorCallback !== 'function' ? null : function(code) {
@@ -2893,26 +3001,27 @@ FileWriter.prototype.abort = function() {
  */
 FileWriter.prototype.write = function(data) {
 
-    var isBinary = false;
+    var that=this;
+    var supportsBinary = (typeof window.Blob !== 'undefined' && typeof window.ArrayBuffer !== 'undefined');
+    var isBinary;
 
-    // If we don't have Blob or ArrayBuffer support, don't bother.
-    if (typeof window.Blob !== 'undefined' && typeof window.ArrayBuffer !== 'undefined') {
-
-        // Check to see if the incoming data is a blob
-        if (data instanceof Blob) {
-            var that=this;
-            var fileReader = new FileReader();
-            fileReader.onload = function() {
-                // Call this method again, with the arraybuffer as argument
-                FileWriter.prototype.write.call(that, this.result);
-            };
+    // Check to see if the incoming data is a blob
+    if (data instanceof File || (supportsBinary && data instanceof Blob)) {
+        var fileReader = new FileReader();
+        fileReader.onload = function() {
+            // Call this method again, with the arraybuffer as argument
+            FileWriter.prototype.write.call(that, this.result);
+        };
+        if (supportsBinary) {
             fileReader.readAsArrayBuffer(data);
-            return;
+        } else {
+            fileReader.readAsText(data);
         }
-
-        // Mark data type for safer transport over the binary bridge
-        isBinary = (data instanceof ArrayBuffer);
+        return;
     }
+
+    // Mark data type for safer transport over the binary bridge
+    isBinary = supportsBinary && (data instanceof ArrayBuffer);
 
     // Throw an exception if we are already writing a file
     if (this.readyState === FileWriter.WRITING) {
@@ -3146,6 +3255,7 @@ define("cordova/plugin/InAppBrowser", function(require, exports, module) {
 var exec = require('cordova/exec');
 var channel = require('cordova/channel');
 var modulemapper = require('cordova/modulemapper');
+var urlutil = require('cordova/urlutil');
 
 function InAppBrowser() {
    this.channels = {
@@ -3154,6 +3264,7 @@ function InAppBrowser() {
         'loaderror' : channel.create('loaderror'),
         'exit' : channel.create('exit')
    };
+   this._alive = true;
 }
 
 InAppBrowser.prototype = {
@@ -3163,7 +3274,10 @@ InAppBrowser.prototype = {
         }
     },
     close: function (eventname) {
-        exec(null, null, "InAppBrowser", "close", []);
+        if (this._alive) {
+            this._alive = false;
+            exec(null, null, "InAppBrowser", "close", []);
+        }
     },
     show: function (eventname) {
       exec(null, null, "InAppBrowser", "show", []);
@@ -3201,16 +3315,17 @@ InAppBrowser.prototype = {
 };
 
 module.exports = function(strUrl, strWindowName, strWindowFeatures) {
-    var iab = new InAppBrowser();
-    var cb = function(eventname) {
-       iab._eventHandler(eventname);
-    };
-
     // Don't catch calls that write to existing frames (e.g. named iframes).
     if (window.frames && window.frames[strWindowName]) {
         var origOpenFunc = modulemapper.getOriginalSymbol(window, 'open');
         return origOpenFunc.apply(window, arguments);
     }
+
+    strUrl = urlutil.makeAbsolute(strUrl);
+    var iab = new InAppBrowser();
+    var cb = function(eventname) {
+       iab._eventHandler(eventname);
+    };
 
     exec(cb, cb, "InAppBrowser", "open", [strUrl, strWindowName, strWindowFeatures]);
     return iab;
@@ -3981,7 +4096,7 @@ module.exports = new Capture();
 
 });
 
-// file: lib/windows8/plugin/capture/symbols.js
+// file: lib/common/plugin/capture/symbols.js
 define("cordova/plugin/capture/symbols", function(require, exports, module) {
 
 var modulemapper = require('cordova/modulemapper');
@@ -3990,11 +4105,10 @@ modulemapper.clobbers('cordova/plugin/CaptureError', 'CaptureError');
 modulemapper.clobbers('cordova/plugin/CaptureAudioOptions', 'CaptureAudioOptions');
 modulemapper.clobbers('cordova/plugin/CaptureImageOptions', 'CaptureImageOptions');
 modulemapper.clobbers('cordova/plugin/CaptureVideoOptions', 'CaptureVideoOptions');
+modulemapper.clobbers('cordova/plugin/ConfigurationData', 'ConfigurationData');
 modulemapper.clobbers('cordova/plugin/MediaFile', 'MediaFile');
 modulemapper.clobbers('cordova/plugin/MediaFileData', 'MediaFileData');
 modulemapper.clobbers('cordova/plugin/capture', 'navigator.device.capture');
-
-modulemapper.merges('cordova/plugin/windows8/MediaFile', 'MediaFile');
 
 });
 
@@ -4456,7 +4570,7 @@ module.exports = function(successCallback, errorCallback, message, forceAsync) {
 
 });
 
-// file: lib/windows8/plugin/file/symbols.js
+// file: lib/common/plugin/file/symbols.js
 define("cordova/plugin/file/symbols", function(require, exports, module) {
 
 
@@ -4464,8 +4578,6 @@ var modulemapper = require('cordova/modulemapper'),
     symbolshelper = require('cordova/plugin/file/symbolshelper');
 
 symbolshelper(modulemapper.defaults);
-modulemapper.clobbers('cordova/plugin/File', 'File');
-modulemapper.clobbers('cordova/plugin/FileReader', 'FileReader');
 
 });
 
@@ -5441,14 +5553,14 @@ modulemapper.clobbers('cordova/plugin/logger', 'cordova.logger');
 
 });
 
-// file: lib/windows8/plugin/media/symbols.js
+// file: lib/common/plugin/media/symbols.js
 define("cordova/plugin/media/symbols", function(require, exports, module) {
 
 
 var modulemapper = require('cordova/modulemapper');
 
 modulemapper.defaults('cordova/plugin/Media', 'Media');
-modulemapper.clobbers('cordova/plugin/MediaError', 'MediaError');
+modulemapper.defaults('cordova/plugin/MediaError', 'MediaError');
 
 });
 
@@ -6300,41 +6412,43 @@ require("cordova/commandProxy").add("Capture",module.exports);
 // file: lib/windows8/plugin/windows8/CompassProxy.js
 define("cordova/plugin/windows8/CompassProxy", function(require, exports, module) {
 
-/*global Windows:true */
+/*jslint sloppy:true */
+/*global Windows:true, require, module, setTimeout */
 
 var cordova = require('cordova'),
-    CompassHeading = require('cordova/plugin/CompassHeading');
+    CompassHeading = require('cordova/plugin/CompassHeading'),
+    CompassError = require('cordova/plugin/CompassError');
 
 
 module.exports = {
 
-    onReadingChanged:null,
-    getHeading:function(win,lose) {
+    onReadingChanged: null,
+    getHeading: function (win, lose) {
         var deviceCompass = Windows.Devices.Sensors.Compass.getDefault();
-        if(!deviceCompass) {
-            setTimeout(function(){lose("Compass not available");},0);
-        }
-        else {
+        if (!deviceCompass) {
+            setTimeout(function () {
+                lose(CompassError.COMPASS_NOT_SUPPORTED);
+            }, 0);
+        } else {
 
-            deviceCompass.reportInterval = Math.max(16,deviceCompass.minimumReportInterval);
+            deviceCompass.reportInterval = Math.max(16, deviceCompass.minimumReportInterval);
 
-            this.onReadingChanged = function(e) {
-                var reading = e.reading;
-                var heading = new CompassHeading(reading.headingMagneticNorth, reading.headingTrueNorth);
+            this.onReadingChanged = function (e) {
+                var reading = e.reading,
+                    heading = new CompassHeading(reading.headingMagneticNorth, reading.headingTrueNorth, null, reading.timestamp);
                 win(heading);
             };
-            deviceCompass.addEventListener("readingchanged",this.onReadingChanged);
+            deviceCompass.addEventListener("readingchanged", this.onReadingChanged);
         }
-
     },
-    stopHeading:function(win,lose) {
+    stopHeading: function (win, lose) {
         var deviceCompass = Windows.Devices.Sensors.Compass.getDefault();
-        if(!deviceCompass) {
-            setTimeout(function(){lose("Compass not available");},0);
-        }
-        else {
-
-            deviceCompass.removeEventListener("readingchanged",this.onReadingChanged);
+        if (!deviceCompass) {
+            setTimeout(function () {
+                lose(CompassError.COMPASS_NOT_SUPPORTED);
+            }, 0);
+        } else {
+            deviceCompass.removeEventListener("readingchanged", this.onReadingChanged);
             this.onReadingChanged = null;
             deviceCompass.reportInterval = 0;
             win();
@@ -6343,7 +6457,7 @@ module.exports = {
     }
 };
 
-require("cordova/commandProxy").add("Compass",module.exports);
+require("cordova/commandProxy").add("Compass", module.exports);
 });
 
 // file: lib/windows8/plugin/windows8/ContactsProxy.js
@@ -6381,27 +6495,17 @@ require("cordova/commandProxy").add("Contacts",module.exports);
 // file: lib/windows8/plugin/windows8/DeviceProxy.js
 define("cordova/plugin/windows8/DeviceProxy", function(require, exports, module) {
 
+
 var cordova = require('cordova');
 var utils = require('cordova/utils');
-var FileError = require('cordova/plugin/FileError');
-
 
 module.exports = {
 
     getDeviceInfo:function(win,fail,args) {
-        //console.log("NativeProxy::getDeviceInfo");
-        var hostNames = Windows.Networking.Connectivity.NetworkInformation.getHostNames();
-
-        var name = "unknown";
-        hostNames.some(function (nm) {
-            if (nm.displayName.indexOf(".local") > -1) {
-                name = nm.displayName.split(".local")[0];
-                return true;
-            }
-        });
 
         // deviceId aka uuid, stored in Windows.Storage.ApplicationData.current.localSettings.values.deviceId
         var deviceId;
+
         var localSettings = Windows.Storage.ApplicationData.current.localSettings;
 
         if (localSettings.values.deviceId) {
@@ -6412,13 +6516,17 @@ module.exports = {
         }
 
         setTimeout(function () {
-            win({ platform: "windows8", version: "8", name: name, uuid: deviceId, cordova: CORDOVA_JS_BUILD_LABEL });
+            win({ platform: "windows8",
+                version: "8",
+                uuid: deviceId,
+                cordova: CORDOVA_JS_BUILD_LABEL,
+                model: window.clientInformation.platform });
         }, 0);
     }
 
 };
 
-require("cordova/commandProxy").add("Device",module.exports);
+require("cordova/commandProxy").add("Device", module.exports);
 
 });
 
@@ -6708,59 +6816,59 @@ module.exports = {
         var fullPath = args[0];
 
         Windows.Storage.StorageFolder.getFolderFromPathAsync(fullPath).done(function (storageFolder) {
-        var storageFolderPer = Windows.Storage.ApplicationData.current.localFolder;
-        var storageFolderTem = Windows.Storage.ApplicationData.current.temporaryFolder;
+            var storageFolderPer = Windows.Storage.ApplicationData.current.localFolder;
+            var storageFolderTem = Windows.Storage.ApplicationData.current.temporaryFolder;
 
-        if (storageFolder.path == storageFolderPer.path || storageFolder.path == storageFolderTem.path) {
-            fail && fail(FileError.NO_MODIFICATION_ALLOWED_ERR);
-            return;
-        }
+            if (storageFolder.path == storageFolderPer.path || storageFolder.path == storageFolderTem.path) {
+                fail && fail(FileError.NO_MODIFICATION_ALLOWED_ERR);
+                return;
+            }
 
-        var removeFolders = function (path) {
-            return new WinJS.Promise(function (complete) {
-                var filePromiseArr = [];
-                var storageFolderTop = null;
-                Windows.Storage.StorageFolder.getFolderFromPathAsync(path).then(
-                    function (storageFolder) {
-                        var fileListPromise = storageFolder.createFileQuery().getFilesAsync();
+            var removeFolders = function (path) {
+                return new WinJS.Promise(function (complete) {
+                    var filePromiseArr = [];
+                    var storageFolderTop = null;
+                    Windows.Storage.StorageFolder.getFolderFromPathAsync(path).then(
+                        function (storageFolder) {
+                            var fileListPromise = storageFolder.createFileQuery().getFilesAsync();
 
-                        storageFolderTop = storageFolder;
-                        return fileListPromise;
-                    }
-                // remove all the files directly under the folder.
-                ).then(function (fileList) {
-                    if (fileList !== null) {
-                        for (var i = 0; i < fileList.length; i++) {
-                            var filePromise = fileList[i].deleteAsync();
-                            filePromiseArr.push(filePromise);
+                            storageFolderTop = storageFolder;
+                            return fileListPromise;
                         }
-                    }
-                    WinJS.Promise.join(filePromiseArr).then(function () {
-                        var folderListPromise = storageFolderTop.createFolderQuery().getFoldersAsync();
-                        return folderListPromise;
-                    // remove empty folders.
-                    }).then(function (folderList) {
-                        var folderPromiseArr = [];
-                        if (folderList.length !== 0) {
-                            for (var j = 0; j < folderList.length; j++) {
-
-                                folderPromiseArr.push(removeFolders(folderList[j].path));
+                    // remove all the files directly under the folder.
+                    ).then(function (fileList) {
+                        if (fileList !== null) {
+                            for (var i = 0; i < fileList.length; i++) {
+                                var filePromise = fileList[i].deleteAsync();
+                                filePromiseArr.push(filePromise);
                             }
-                            WinJS.Promise.join(folderPromiseArr).then(function () {
-                                storageFolderTop.deleteAsync().then(complete);
-                            });
-                        } else {
-                            storageFolderTop.deleteAsync().then(complete);
                         }
+                        WinJS.Promise.join(filePromiseArr).then(function () {
+                            var folderListPromise = storageFolderTop.createFolderQuery().getFoldersAsync();
+                            return folderListPromise;
+                        // remove empty folders.
+                        }).then(function (folderList) {
+                            var folderPromiseArr = [];
+                            if (folderList.length !== 0) {
+                                for (var j = 0; j < folderList.length; j++) {
+
+                                    folderPromiseArr.push(removeFolders(folderList[j].path));
+                                }
+                                WinJS.Promise.join(folderPromiseArr).then(function () {
+                                    storageFolderTop.deleteAsync().then(complete);
+                                });
+                            } else {
+                                storageFolderTop.deleteAsync().then(complete);
+                            }
+                        }, function () { });
                     }, function () { });
-                }, function () { });
-            });
-        };
-        removeFolders(storageFolder.path).then(function () {
-            Windows.Storage.StorageFolder.getFolderFromPathAsync(storageFolder.path).then(
-                function () {},
-                function () {
-                    if (typeof successCallback !== 'undefined' && successCallback !== null) { successCallback(); }
+                });
+            };
+            removeFolders(storageFolder.path).then(function () {
+                Windows.Storage.StorageFolder.getFolderFromPathAsync(storageFolder.path).then(
+                    function () {},
+                    function () {
+                        if (typeof successCallback !== 'undefined' && successCallback !== null) { successCallback(); }
                 });
             });
         });
@@ -7265,6 +7373,7 @@ module.exports = {
     upload:function(successCallback, error, options) {
         var filePath = options[0];
         var server = options[1];
+        var headers = options[8] || {};
 
 
         var win = function (fileUploadResult) {
@@ -7285,7 +7394,7 @@ module.exports = {
                 var blob = MSApp.createBlobFromRandomAccessStream(storageFile.contentType, stream);
                 var formData = new FormData();
                 formData.append("source\";filename=\"" + storageFile.name + "\"", blob);
-                WinJS.xhr({ type: "POST", url: server, data: formData }).then(function (response) {
+                WinJS.xhr({ type: "POST", url: server, data: formData, headers: headers }).then(function (response) {
                     var code = response.status;
                     storageFile.getBasicPropertiesAsync().done(function (basicProperties) {
 
@@ -7309,6 +7418,7 @@ module.exports = {
     download:function(win, error, options) {
         var source = options[0];
         var target = options[1];
+        var headers = options[4] || {};
 
 
         if (target === null || typeof target === undefined) {
@@ -7332,6 +7442,12 @@ module.exports = {
             storageFolder.createFileAsync(fileName, Windows.Storage.CreationCollisionOption.generateUniqueName).then(function (storageFile) {
                 var uri = Windows.Foundation.Uri(source);
                 var downloader = new Windows.Networking.BackgroundTransfer.BackgroundDownloader();
+
+                for (var header in headers) {
+                    downloader.setRequestHeader(header, headers[header]);
+                }
+
+
                 download = downloader.createDownload(uri, storageFile);
                 download.startAsync().then(function () {
                     win(new FileEntry(storageFile.name, storageFile.path));
@@ -7741,52 +7857,123 @@ module.exports = {
 require("cordova/commandProxy").add("Notification",module.exports);
 });
 
-// file: lib/windows8/plugin/windows8/console.js
-define("cordova/plugin/windows8/console", function(require, exports, module) {
+// file: lib/common/pluginloader.js
+define("cordova/pluginloader", function(require, exports, module) {
 
-
-if(!console || !console.log)
-{
-    var exec = require('cordova/exec');
-
-    var debugConsole = {
-        log:function(msg){
-            exec(null,null,"DebugConsole","log",msg);
-        },
-        warn:function(msg){
-            exec(null,null,"DebugConsole","warn",msg);
-        },
-        error:function(msg){
-            exec(null,null,"DebugConsole","error",msg);
-        }
-    };
-
-    module.exports = debugConsole;
-}
-else if(console && console.log) {
-
-  console.log("console.log exists already!");
-  console.warn = console.warn || function(msg){console.log("warn:"+msg);};
-  console.error = console.error || function(msg){console.log("error:"+msg);};
-}
-
-});
-
-// file: lib/windows8/plugin/windows8/console/symbols.js
-define("cordova/plugin/windows8/console/symbols", function(require, exports, module) {
-
-
+var channel = require('cordova/channel');
 var modulemapper = require('cordova/modulemapper');
 
-modulemapper.clobbers('cordova/plugin/windows8/console', 'navigator.console');
+// Helper function to inject a <script> tag.
+function injectScript(url, onload, onerror) {
+    var script = document.createElement("script");
+    // onload fires even when script fails loads with an error.
+    script.onload = onload;
+    script.onerror = onerror || onload;
+    script.src = url;
+    document.head.appendChild(script);
+}
 
-});
+function onScriptLoadingComplete(moduleList) {
+    // Loop through all the plugins and then through their clobbers and merges.
+    for (var i = 0, module; module = moduleList[i]; i++) {
+        if (module) {
+            try {
+                if (module.clobbers && module.clobbers.length) {
+                    for (var j = 0; j < module.clobbers.length; j++) {
+                        modulemapper.clobbers(module.id, module.clobbers[j]);
+                    }
+                }
 
-// file: lib/windows8/plugin/windows8/notification/plugininit.js
-define("cordova/plugin/windows8/notification/plugininit", function(require, exports, module) {
+                if (module.merges && module.merges.length) {
+                    for (var k = 0; k < module.merges.length; k++) {
+                        modulemapper.merges(module.id, module.merges[k]);
+                    }
+                }
 
-window.alert = window.alert || require("cordova/plugin/notification").alert;
-window.confirm = window.confirm || require("cordova/plugin/notification").confirm;
+                // Finally, if runs is truthy we want to simply require() the module.
+                // This can be skipped if it had any merges or clobbers, though,
+                // since the mapper will already have required the module.
+                if (module.runs && !(module.clobbers && module.clobbers.length) && !(module.merges && module.merges.length)) {
+                    modulemapper.runs(module.id);
+                }
+            }
+            catch(err) {
+                // error with module, most likely clobbers, should we continue?
+            }
+        }
+    }
+
+    finishPluginLoading();
+}
+
+// Called when:
+// * There are plugins defined and all plugins are finished loading.
+// * There are no plugins to load.
+function finishPluginLoading() {
+    channel.onPluginsReady.fire();
+}
+
+// Handler for the cordova_plugins.js content.
+// See plugman's plugin_loader.js for the details of this object.
+// This function is only called if the really is a plugins array that isn't empty.
+// Otherwise the onerror response handler will just call finishPluginLoading().
+function handlePluginsObject(path, moduleList) {
+    // Now inject the scripts.
+    var scriptCounter = moduleList.length;
+
+    if (!scriptCounter) {
+        finishPluginLoading();
+        return;
+    }
+    function scriptLoadedCallback() {
+        if (!--scriptCounter) {
+            onScriptLoadingComplete(moduleList);
+        }
+    }
+
+    for (var i = 0; i < moduleList.length; i++) {
+        injectScript(path + moduleList[i].file, scriptLoadedCallback);
+    }
+}
+
+function injectPluginScript(pathPrefix) {
+    injectScript(pathPrefix + 'cordova_plugins.js', function(){
+        try {
+            var moduleList = require("cordova/plugin_list");
+            handlePluginsObject(pathPrefix, moduleList);
+        } catch (e) {
+            // Error loading cordova_plugins.js, file not found or something
+            // this is an acceptable error, pre-3.0.0, so we just move on.
+            finishPluginLoading();
+        }
+    },finishPluginLoading); // also, add script load error handler for file not found
+}
+
+function findCordovaPath() {
+    var path = null;
+    var scripts = document.getElementsByTagName('script');
+    var term = 'cordova.js';
+    for (var n = scripts.length-1; n>-1; n--) {
+        var src = scripts[n].src;
+        if (src.indexOf(term) == (src.length - term.length)) {
+            path = src.substring(0, src.length - term.length);
+            break;
+        }
+    }
+    return path;
+}
+
+// Tries to load all plugins' js-modules.
+// This is an async process, but onDeviceReady is blocked on onPluginsReady.
+// onPluginsReady is fired when there are no plugins to load, or they are all done.
+exports.load = function() {
+    var pathPrefix = findCordovaPath();
+    if (pathPrefix === null) {
+        console.log('Could not find cordova.js script tag. Plugin loading may fail.');
+        pathPrefix = '';
+    }
+    injectPluginScript(pathPrefix);
+};
 
 
 });
@@ -7801,6 +7988,23 @@ var modulemapper = require('cordova/modulemapper');
 modulemapper.merges('cordova', 'cordova');
 modulemapper.clobbers('cordova/exec', 'cordova.exec');
 modulemapper.clobbers('cordova/exec', 'Cordova.exec');
+
+});
+
+// file: lib/common/urlutil.js
+define("cordova/urlutil", function(require, exports, module) {
+
+var urlutil = exports;
+var anchorEl = document.createElement('a');
+
+/**
+ * For already absolute URLs, returns what is passed in.
+ * For relative URLs, converts them to absolute ones.
+ */
+urlutil.makeAbsolute = function(url) {
+  anchorEl.href = url;
+  return anchorEl.href;
+};
 
 });
 
@@ -7984,6 +8188,8 @@ window.cordova = require('cordova');
     context._cordovaJsLoaded = true;
 
     var channel = require('cordova/channel');
+    var pluginloader = require('cordova/pluginloader');
+
     var platformInitChannelsArray = [channel.onNativeReady, channel.onPluginsReady];
 
     function logUnfiredChannels(arr) {
@@ -8052,170 +8258,14 @@ window.cordova = require('cordova');
 
     }, platformInitChannelsArray);
 
+    // Don't attempt to load when running unit tests.
+    if (typeof XMLHttpRequest != 'undefined') {
+        pluginloader.load();
+    }
 }(window));
 
 // file: lib/scripts/bootstrap-windows8.js
 
 require('cordova/channel').onNativeReady.fire();
-
-// file: lib/scripts/plugin_loader.js
-
-// Tries to load all plugins' js-modules.
-// This is an async process, but onDeviceReady is blocked on onPluginsReady.
-// onPluginsReady is fired when there are no plugins to load, or they are all done.
-(function (context) {
-    // To be populated with the handler by handlePluginsObject.
-    var onScriptLoadingComplete;
-
-    var scriptCounter = 0;
-    function scriptLoadedCallback() {
-        scriptCounter--;
-        if (scriptCounter === 0) {
-            onScriptLoadingComplete && onScriptLoadingComplete();
-        }
-    }
-
-    function scriptErrorCallback(err) {
-        // Open Question: If a script path specified in cordova_plugins.js does not exist, do we fail for all?
-        // this is currently just continuing.
-        scriptCounter--;
-        if (scriptCounter === 0) {
-            onScriptLoadingComplete && onScriptLoadingComplete();
-        }
-    }
-
-    // Helper function to inject a <script> tag.
-    function injectScript(path) {
-        scriptCounter++;
-        var script = document.createElement("script");
-        script.onload = scriptLoadedCallback;
-        script.onerror = scriptErrorCallback;
-        script.src = path;
-        document.head.appendChild(script);
-    }
-
-    // Called when:
-    // * There are plugins defined and all plugins are finished loading.
-    // * There are no plugins to load.
-    function finishPluginLoading() {
-        context.cordova.require('cordova/channel').onPluginsReady.fire();
-    }
-
-    // Handler for the cordova_plugins.js content.
-    // See plugman's plugin_loader.js for the details of this object.
-    // This function is only called if the really is a plugins array that isn't empty.
-    // Otherwise the onerror response handler will just call finishPluginLoading().
-    function handlePluginsObject(modules, path) {
-        // First create the callback for when all plugins are loaded.
-        var mapper = context.cordova.require('cordova/modulemapper');
-        onScriptLoadingComplete = function() {
-            // Loop through all the plugins and then through their clobbers and merges.
-            for (var i = 0; i < modules.length; i++) {
-                var module = modules[i];
-                if (module) {
-                    try { 
-                        if (module.clobbers && module.clobbers.length) {
-                            for (var j = 0; j < module.clobbers.length; j++) {
-                                mapper.clobbers(module.id, module.clobbers[j]);
-                            }
-                        }
-
-                        if (module.merges && module.merges.length) {
-                            for (var k = 0; k < module.merges.length; k++) {
-                                mapper.merges(module.id, module.merges[k]);
-                            }
-                        }
-
-                        // Finally, if runs is truthy we want to simply require() the module.
-                        // This can be skipped if it had any merges or clobbers, though,
-                        // since the mapper will already have required the module.
-                        if (module.runs && !(module.clobbers && module.clobbers.length) && !(module.merges && module.merges.length)) {
-                            context.cordova.require(module.id);
-                        }
-                    }
-                    catch(err) {
-                        // error with module, most likely clobbers, should we continue?
-                    }
-                }
-            }
-
-            finishPluginLoading();
-        };
-
-        // Now inject the scripts.
-        for (var i = 0; i < modules.length; i++) {
-            injectScript(path + modules[i].file);
-        }
-    }
-
-    // Find the root of the app
-    var path = '';
-    var scripts = document.getElementsByTagName('script');
-    var term = 'cordova.js';
-    for (var n = scripts.length-1; n>-1; n--) {
-        var src = scripts[n].src;
-        if (src.indexOf(term) == (src.length - term.length)) {
-            path = src.substring(0, src.length - term.length);
-            break;
-        }
-    }
-
-    var plugins_json = path + 'cordova_plugins.json';
-    var plugins_js = path + 'cordova_plugins.js';
-
-    // One some phones (Windows) this xhr.open throws an Access Denied exception
-    // So lets keep trying, but with a script tag injection technique instead of XHR
-    var injectPluginScript = function injectPluginScript() {
-        try {
-            var script = document.createElement("script");
-            script.onload = function(){
-                var list = cordova.require("cordova/plugin_list");
-                handlePluginsObject(list,path);
-            };
-            script.onerror = function() {
-                // Error loading cordova_plugins.js, file not found or something
-                // this is an acceptable error, pre-3.0.0, so we just move on.
-                finishPluginLoading();
-            };
-            script.src = plugins_js;
-            document.head.appendChild(script);
-
-        } catch(err){
-            finishPluginLoading();
-        }
-    } 
-
-
-    // Try to XHR the cordova_plugins.json file asynchronously.
-    var xhr = new XMLHttpRequest();
-    xhr.onload = function() {
-        // If the response is a JSON string which composes an array, call handlePluginsObject.
-        // If the request fails, or the response is not a JSON array, just call finishPluginLoading.
-        var obj;
-        try {
-            obj = (this.status == 0 || this.status == 200) && this.responseText && JSON.parse(this.responseText);
-        } catch (err) {
-            // obj will be undefined.
-        }
-        if (Array.isArray(obj) && obj.length > 0) {
-            handlePluginsObject(obj, path);
-        } else {
-            finishPluginLoading();
-        }
-    };
-    xhr.onerror = function() {
-        // In this case, the json file was not present, but XHR was allowed, 
-        // so we should still try the script injection technique with the js file
-        // in case that is there.
-        injectPluginScript();
-    };
-    try { // we commented we were going to try, so let us actually try and catch
-        xhr.open('GET', plugins_json, true); // Async
-        xhr.send();
-    } catch(err){
-        injectPluginScript();
-    }
-}(window));
-
 
 })();
