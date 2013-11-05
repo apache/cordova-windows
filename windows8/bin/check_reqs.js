@@ -49,7 +49,7 @@ function check_command(cmd, fail_msg) {
         WScript.Sleep(100);
     }
 
-    //Check that command executed 
+    //Check that command executed
     if (!out.StdErr.AtEndOfStream) {
         var line = out.StdErr.ReadLine();
         Log(fail_msg, true);
@@ -77,7 +77,7 @@ function CheckSystem() {
     var cmd = 'msbuild -version'
     var fail_msg = 'The command `msbuild` failed. Make sure you have the latest Windows Phone SDKs installed, and the `msbuild.exe` command (inside C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319) is added to your path.'
     var output = check_command(cmd, fail_msg);
-    var msversion = output.match(/\.NET\sFramework\,\sversion\s4\.0/);
+    var msversion = output.match(/Microsoft\s\(R\)\s+Build\sEngine\s[a-z]+\s4\.0/i);
     if (!msversion) {
         Log('Please install the .NET Framwork v4.0.30319 (in the latest windows phone SDK\'s).', true);
         Log('Make sure the "msbuild" command in your path is pointing to  v4.0.30319 of msbuild as well (inside C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319).', true);
@@ -100,7 +100,7 @@ if (args.Count() > 0) {
     Usage();
     WScript.Quit(1);
 }
-else 
+else
 {
     CheckSystem();
 }
