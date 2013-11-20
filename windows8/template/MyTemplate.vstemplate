@@ -1,7 +1,7 @@
 <VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
   <TemplateData>
     <Name>CordovaAppWin8</Name>
-    <Description>CordovaAppWin8</Description>
+    <Description>Apache Cordova 3.2.0 application for Windows Store</Description>
     <ProjectType>JavaScript</ProjectType>
     <ProjectSubType>
     </ProjectSubType>
