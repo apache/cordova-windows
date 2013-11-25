@@ -149,6 +149,7 @@ function create(destPath, namespace, name, guid) {
     // replace the guid in the AppManifest and deploy script
     replaceInFile(destPath + "\\package.appxmanifest","$guid1$",newProjGuid);
     replaceInFile(destPath + "\\cordova\\lib\\deploy.js","$guid1$",newProjGuid);
+    replaceInFile(destPath + "\\cordova\\lib\\deploy.js","$namespace$",namespace);
 
     // replace $safeprojectname$ and $projectname$ in AppManifest
     replaceInFile(destPath + "\\package.appxmanifest",/\$safeprojectname\$/g,safeProjectName);
