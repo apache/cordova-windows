@@ -110,11 +110,8 @@ function build_appx(path,isRelease) {
             {
                 if(fso.GetExtensionName(files.item()) == "ps1")
                 {
-                    var command = "PowerShell " + files.item();
-                    Log("\nRunning Command :: " + command);
-                    // run it and wait for the result
-                    var retCode = wscript_shell.Run(command, 1, true);
-                    return retCode == 0 ? "Success" : "Error running PowerShell script : " + retCode;
+                    // app was built, installation script exists
+                    return "Success";
                 }
 
             }
