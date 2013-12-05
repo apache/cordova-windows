@@ -1,5 +1,5 @@
 ﻿// Platform: windows8
-// 3.1.0-rc1
+// 3.4.0-dev-c13f84f
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -19,8 +19,11 @@
  under the License.
 */
 ;(function() {
-var CORDOVA_JS_BUILD_LABEL = '3.1.0-rc1';
+var CORDOVA_JS_BUILD_LABEL = '3.4.0-dev-c13f84f';
 // file: lib/scripts/require.js
+
+/*jshint -W079 */
+/*jshint -W020 */
 
 var require,
     define;
@@ -504,7 +507,7 @@ function include(parent, objects, clobber, merge) {
                 include(result, obj.children, clobber, merge);
             }
         } catch(e) {
-            utils.alert('Exception building cordova JS globals: ' + e + ' for key "' + key + '"');
+            utils.alert('Exception building Cordova JS globals: ' + e + ' for key "' + key + '"');
         }
     });
 }
@@ -792,8 +795,11 @@ module.exports = channel;
 // file: lib/windows8/exec.js
 define("cordova/exec", function(require, exports, module) {
 
+/*jslint sloppy:true, plusplus:true*/
+/*global require, module, console */
+
 var cordova = require('cordova');
-var commandProxy = require('cordova/windows8/commandProxy');
+var execProxy = require('cordova/exec/proxy');
 
 /**
  * Execute a cordova command.  It is up to the native side whether this action
@@ -809,27 +815,76 @@ var commandProxy = require('cordova/windows8/commandProxy');
  * @param {String} action       Action to be run in cordova
  * @param {String[]} [args]     Zero or more arguments to pass to the method
  */
-module.exports = function(success, fail, service, action, args) {
+module.exports = function (success, fail, service, action, args) {
 
-    var proxy = commandProxy.get(service,action);
-    if(proxy) {
-        var callbackId = service + cordova.callbackId++;
+    var proxy = execProxy.get(service, action),
+        callbackId,
+        onSuccess,
+        onError;
+
+    if (proxy) {
+        callbackId = service + cordova.callbackId++;
         // console.log("EXEC:" + service + " : " + action);
-        if (typeof success == "function" || typeof fail == "function") {
-            cordova.callbacks[callbackId] = {success:success, fail:fail};
+        if (typeof success === "function" || typeof fail === "function") {
+            cordova.callbacks[callbackId] = {success: success, fail: fail};
         }
         try {
-            proxy(success, fail, args);
-        }
-        catch(e) {
+            onSuccess = function (result) {
+                cordova.callbackSuccess(callbackId,
+                        {
+                        status: cordova.callbackStatus.OK,
+                        message: result
+                    });
+            };
+            onError = function (err) {
+                cordova.callbackError(callbackId,
+                        {
+                        status: cordova.callbackStatus.ERROR,
+                        message: err
+                    });
+            };
+            proxy(onSuccess, onError, args);
+
+        } catch (e) {
             console.log("Exception calling native with command :: " + service + " :: " + action  + " ::exception=" + e);
         }
-    }
-    else {
-        fail && fail("Missing Command Error");
+    } else {
+        if (typeof fail === "function") {
+            fail("Missing Command Error");
+        }
     }
 };
 
+});
+
+// file: lib/common/exec/proxy.js
+define("cordova/exec/proxy", function(require, exports, module) {
+
+
+// internal map of proxy function
+var CommandProxyMap = {};
+
+module.exports = {
+
+    // example: cordova.commandProxy.add("Accelerometer",{getCurrentAcceleration: function(successCallback, errorCallback, options) {...},...);
+    add:function(id,proxyObj) {
+        console.log("adding proxy for " + id);
+        CommandProxyMap[id] = proxyObj;
+        return proxyObj;
+    },
+
+    // cordova.commandProxy.remove("Accelerometer");
+    remove:function(id) {
+        var proxy = CommandProxyMap[id];
+        delete CommandProxyMap[id];
+        CommandProxyMap[id] = null;
+        return proxy;
+    },
+
+    get:function(service,action) {
+        return ( CommandProxyMap[service] ? CommandProxyMap[service][action] : null );
+    }
+};
 });
 
 // file: lib/common/init.js
@@ -1058,7 +1113,7 @@ module.exports = {
             channel = cordova.require('cordova/channel'),
             modulemapper = require('cordova/modulemapper');
 
-        modulemapper.clobbers('cordova/windows8/commandProxy', 'cordova.commandProxy');
+        modulemapper.clobbers('cordova/exec/proxy', 'cordova.commandProxy');
         channel.onNativeReady.fire();
 
         var onWinJSReady = function () {
@@ -1218,8 +1273,8 @@ var anchorEl = document.createElement('a');
  * For relative URLs, converts them to absolute ones.
  */
 urlutil.makeAbsolute = function(url) {
-  anchorEl.href = url;
-  return anchorEl.href;
+    anchorEl.href = url;
+    return anchorEl.href;
 };
 
 });
@@ -1397,31 +1452,9 @@ function UUIDcreatePart(length) {
 // file: lib/windows8/windows8/commandProxy.js
 define("cordova/windows8/commandProxy", function(require, exports, module) {
 
+console.log('WARNING: please require cordova/exec/proxy instead');
+module.exports = require('cordova/exec/proxy');
 
-// internal map of proxy function
-var CommandProxyMap = {};
-
-module.exports = {
-
-    // example: cordova.commandProxy.add("Accelerometer",{getCurrentAcceleration: function(successCallback, errorCallback, options) {...},...);
-    add:function(id,proxyObj) {
-        console.log("adding proxy for " + id);
-        CommandProxyMap[id] = proxyObj;
-        return proxyObj;
-    },
-
-    // cordova.commandProxy.remove("Accelerometer");
-    remove:function(id) {
-        var proxy = CommandProxyMap[id];
-        delete CommandProxyMap[id];
-        CommandProxyMap[id] = null;
-        return proxy;
-    },
-
-    get:function(service,action) {
-        return ( CommandProxyMap[service] ? CommandProxyMap[service][action] : null );
-    }
-};
 });
 
 window.cordova = require('cordova');
