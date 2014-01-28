@@ -1,5 +1,5 @@
 ﻿// Platform: windows8
-// 3.4.0-dev-c13f84f
+// 3.4.0-rc1
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -19,8 +19,8 @@
  under the License.
 */
 ;(function() {
-var CORDOVA_JS_BUILD_LABEL = '3.4.0-dev-c13f84f';
-// file: lib/scripts/require.js
+var CORDOVA_JS_BUILD_LABEL = '3.4.0-rc1';
+// file: src/scripts/require.js
 
 /*jshint -W079 */
 /*jshint -W020 */
@@ -34,7 +34,7 @@ var require,
         requireStack = [],
     // Map of module ID -> index into requireStack of modules currently being built.
         inProgressModules = {},
-        SEPERATOR = ".";
+        SEPARATOR = ".";
 
 
 
@@ -44,7 +44,7 @@ var require,
                 var resultantId = id;
                 //Its a relative path, so lop off the last portion and add the id (minus "./")
                 if (id.charAt(0) === ".") {
-                    resultantId = module.id.slice(0, module.id.lastIndexOf(SEPERATOR)) + SEPERATOR + id.slice(2);
+                    resultantId = module.id.slice(0, module.id.lastIndexOf(SEPARATOR)) + SEPARATOR + id.slice(2);
                 }
                 return require(resultantId);
             };
@@ -98,7 +98,7 @@ if (typeof module === "object" && typeof require === "function") {
     module.exports.define = define;
 }
 
-// file: lib/cordova.js
+// file: src/cordova.js
 define("cordova", function(require, exports, module) {
 
 
@@ -316,7 +316,7 @@ module.exports = cordova;
 
 });
 
-// file: lib/common/argscheck.js
+// file: src/common/argscheck.js
 define("cordova/argscheck", function(require, exports, module) {
 
 var exec = require('cordova/exec');
@@ -382,7 +382,7 @@ moduleExports.enableChecks = true;
 
 });
 
-// file: lib/common/base64.js
+// file: src/common/base64.js
 define("cordova/base64", function(require, exports, module) {
 
 var base64 = exports;
@@ -438,7 +438,7 @@ function uint8ToBase64(rawData) {
 
 });
 
-// file: lib/common/builder.js
+// file: src/common/builder.js
 define("cordova/builder", function(require, exports, module) {
 
 var utils = require('cordova/utils');
@@ -551,7 +551,7 @@ exports.replaceHookForTesting = function() {};
 
 });
 
-// file: lib/common/channel.js
+// file: src/common/channel.js
 define("cordova/channel", function(require, exports, module) {
 
 var utils = require('cordova/utils'),
@@ -792,7 +792,7 @@ module.exports = channel;
 
 });
 
-// file: lib/windows8/exec.js
+// file: src/windows8/exec.js
 define("cordova/exec", function(require, exports, module) {
 
 /*jslint sloppy:true, plusplus:true*/
@@ -829,18 +829,25 @@ module.exports = function (success, fail, service, action, args) {
             cordova.callbacks[callbackId] = {success: success, fail: fail};
         }
         try {
-            onSuccess = function (result) {
-                cordova.callbackSuccess(callbackId,
-                        {
-                        status: cordova.callbackStatus.OK,
-                        message: result
+            // callbackOptions param represents additional optional parameters command could pass back, like keepCallback or
+            // custom callbackId, for example {callbackId: id, keepCallback: true, status: cordova.callbackStatus.JSON_EXCEPTION }
+            // CB-5806 [Windows8] Add keepCallback support to proxy
+            onSuccess = function (result, callbackOptions) {
+                callbackOptions = callbackOptions || {};
+                cordova.callbackSuccess(callbackOptions.callbackId || callbackId,
+                    {
+                        status: callbackOptions.status || cordova.callbackStatus.OK,
+                        message: result,
+                        keepCallback: callbackOptions.keepCallback || false
                     });
             };
-            onError = function (err) {
-                cordova.callbackError(callbackId,
-                        {
-                        status: cordova.callbackStatus.ERROR,
-                        message: err
+            onError = function (err, callbackOptions) {
+                callbackOptions = callbackOptions || {};
+                cordova.callbackError(callbackOptions.callbackId || callbackId,
+                    {
+                        status: callbackOptions.status || cordova.callbackStatus.ERROR,
+                        message: err,
+                        keepCallback: callbackOptions.keepCallback || false
                     });
             };
             proxy(onSuccess, onError, args);
@@ -857,7 +864,7 @@ module.exports = function (success, fail, service, action, args) {
 
 });
 
-// file: lib/common/exec/proxy.js
+// file: src/common/exec/proxy.js
 define("cordova/exec/proxy", function(require, exports, module) {
 
 
@@ -887,7 +894,7 @@ module.exports = {
 };
 });
 
-// file: lib/common/init.js
+// file: src/common/init.js
 define("cordova/init", function(require, exports, module) {
 
 var channel = require('cordova/channel');
@@ -1001,7 +1008,7 @@ channel.join(function() {
 
 });
 
-// file: lib/common/modulemapper.js
+// file: src/common/modulemapper.js
 define("cordova/modulemapper", function(require, exports, module) {
 
 var builder = require('cordova/builder'),
@@ -1102,7 +1109,7 @@ exports.reset();
 
 });
 
-// file: lib/windows8/platform.js
+// file: src/windows8/platform.js
 define("cordova/platform", function(require, exports, module) {
 
 module.exports = {
@@ -1149,10 +1156,11 @@ module.exports = {
 
 });
 
-// file: lib/common/pluginloader.js
+// file: src/common/pluginloader.js
 define("cordova/pluginloader", function(require, exports, module) {
 
 var modulemapper = require('cordova/modulemapper');
+var urlutil = require('cordova/urlutil');
 
 // Helper function to inject a <script> tag.
 function injectScript(url, onload, onerror) {
@@ -1221,11 +1229,14 @@ function handlePluginsObject(path, moduleList, finishPluginLoading) {
 }
 
 function injectPluginScript(pathPrefix, finishPluginLoading) {
-    injectScript(pathPrefix + 'cordova_plugins.js', function(){
+    var pluginPath = pathPrefix + 'cordova_plugins.js';
+
+    injectScript(pluginPath, function() {
         try {
             var moduleList = require("cordova/plugin_list");
             handlePluginsObject(pathPrefix, moduleList, finishPluginLoading);
-        } catch (e) {
+        }
+        catch (e) {
             // Error loading cordova_plugins.js, file not found or something
             // this is an acceptable error, pre-3.0.0, so we just move on.
             finishPluginLoading();
@@ -1262,24 +1273,24 @@ exports.load = function(callback) {
 
 });
 
-// file: lib/common/urlutil.js
+// file: src/common/urlutil.js
 define("cordova/urlutil", function(require, exports, module) {
 
-var urlutil = exports;
-var anchorEl = document.createElement('a');
 
 /**
  * For already absolute URLs, returns what is passed in.
  * For relative URLs, converts them to absolute ones.
  */
-urlutil.makeAbsolute = function(url) {
+exports.makeAbsolute = function makeAbsolute(url) {
+    var anchorEl = document.createElement('a');
     anchorEl.href = url;
     return anchorEl.href;
 };
 
+
 });
 
-// file: lib/common/utils.js
+// file: src/common/utils.js
 define("cordova/utils", function(require, exports, module) {
 
 var utils = exports;
@@ -1449,7 +1460,7 @@ function UUIDcreatePart(length) {
 
 });
 
-// file: lib/windows8/windows8/commandProxy.js
+// file: src/windows8/windows8/commandProxy.js
 define("cordova/windows8/commandProxy", function(require, exports, module) {
 
 console.log('WARNING: please require cordova/exec/proxy instead');
@@ -1458,7 +1469,7 @@ module.exports = require('cordova/exec/proxy');
 });
 
 window.cordova = require('cordova');
-// file: lib/scripts/bootstrap.js
+// file: src/scripts/bootstrap.js
 
 require('cordova/init');
 
