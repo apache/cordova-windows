@@ -164,7 +164,7 @@ function create(destPath, namespace, name, guid) {
     delete_if_exists(destPath + "\\bin");
     delete_if_exists(destPath + "\\*.user");
     delete_if_exists(destPath + "\\*.suo");
-    delete_if_exists(destPath + "\\*.vstemplate");
+    delete_if_exists(destPath + "\\MyTemplate.vstemplate");
 
     // TODO: Name the project according to the arguments
     // update the solution to include the new project by name
