@@ -66,12 +66,36 @@ function Uninstall-App {
     }
 }
 
+#
+# Checks whether the machine is missing a valid developer license.
+#
+function CheckIfNeedDeveloperLicense
+{
+    $Result = $true
+    try
+    {
+        $Result = (Get-WindowsDeveloperLicense | Where-Object { $_.IsValid }).Count -eq 0
+    }
+    catch {}
+
+    return $Result
+}
+
 function Install-App {
     param(
         [Parameter(Mandatory=$true, Position=0, ValueFromPipelineByPropertyName=$true)]
         [string] $Path <# Full path to Add-AppDevPackage.ps1 #>
     )
-    Invoke-Expression ($Path + " -force")
+
+    if (CheckIfNeedDeveloperLicense)
+    {
+        # we can't run the script with -force param if license installation step is required
+        Invoke-Expression ($Path)
+    }
+    else
+    {
+        Invoke-Expression ($Path + " -force")
+    }
 }
 
 function Start-Locally {
