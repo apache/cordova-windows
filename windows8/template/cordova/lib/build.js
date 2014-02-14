@@ -55,6 +55,7 @@ function Log(msg, error) {
 function exec_verbose(command) {
     //Log("Command: " + command);
     var oShell=wscript_shell.Exec(command);
+    var output = '';
     while (oShell.Status == 0) {
         //Wait a little bit so we're not super looping
         WScript.sleep(100);
@@ -62,6 +63,7 @@ function exec_verbose(command) {
         if (!oShell.StdOut.AtEndOfStream) {
             var line = oShell.StdOut.ReadLine();
             Log(line);
+            output += line;
         }
     }
     //Check to make sure our scripts did not encounter an error
@@ -70,6 +72,8 @@ function exec_verbose(command) {
         Log(line, true);
         WScript.Quit(2);
     }
+
+    return output;
 }
 
 // checks to see if a .jsproj file exists in the project root
@@ -86,6 +90,39 @@ function is_cordova_project(path) {
     return false;
 }
 
+// checks whether correct msbuild version is added to path
+function checkMSBuild(path) {
+    Log('check msbuild version start');
+    var verMSBuild = null;
+    var pathMSBuild4 = 'C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319 (none or Visual Studio 12 is installed)';
+    var pathMSBuild12 = 'C:\\Program Files (x86)\\MSBuild\\12.0\\Bin (Visual Studio 13 or higher)';
+
+    try {
+        verMSBuild = exec_verbose('msbuild -version');
+    } catch(ex) {
+        Log(ex.message, true);
+    }
+    if(!verMSBuild) {
+        var msbuildLocation = 'inside ' + pathMSBuild4 + ' or ' + pathMSBuild12;
+        Log('Make sure the "msbuild" command in your path: ' + msbuildLocation, true);
+        WScript.Quit(2);
+    }
+    // windows8.1 template requires msbuild v12.0
+    // get tools version from jsproj file
+    isWindows81Project = false;
+    var proj_folder = fso.GetFolder(path);
+    var proj_files = new Enumerator(proj_folder.Files);
+        for (;!proj_files.atEnd(); proj_files.moveNext()) {
+            if (fso.GetExtensionName(proj_files.item()) == 'jsproj') {
+                isWindows81Project = fso.OpenTextFile(proj_files.item(), 1).ReadAll().indexOf('ToolsVersion="12.0"') > 0;
+            }
+        }
+    if (isWindows81Project && !verMSBuild.match(/Microsoft\s\(R\)\s+Build\sEngine,?\s[a-z]+\s12\.0/i)) {
+        Log('Incorrect version of "msbuild" is in path; msbuild v12.0 is required. Inside ' + pathMSBuild12, true);
+        WScript.Quit(2);
+    }
+}
+
 // builds the project and .xap in debug mode
 function build_appx(path,isRelease) {
 
@@ -95,6 +132,8 @@ function build_appx(path,isRelease) {
     Log("\tDirectory : " + path);
     
     wscript_shell.CurrentDirectory = path;
+    // check msbuild
+    checkMSBuild(path);
     exec_verbose('msbuild /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo /p:Configuration=' + mode);
 
     // TODO: there could be multiple AppPackages
