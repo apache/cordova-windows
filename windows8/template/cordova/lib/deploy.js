@@ -197,7 +197,7 @@ function installApp(path) {
             {
                 if(fso.GetExtensionName(files.item()) == "ps1")
                 {
-                    var command = "powershell \". .\\" + WINDOWS_STORE_UTILS + "; Install-App " + files.item();
+                    var command = "powershell \". .\\" + WINDOWS_STORE_UTILS + "; Install-App " + "'" + files.item() + "'";
                     Log(command);
                     exec_verbose(command);
                     return;
@@ -214,16 +214,16 @@ function installApp(path) {
 function build(path) {
     switch (build_type) {
         case DEBUG :
-            exec_verbose('%comspec% /c ' + ROOT + '\\cordova\\build --debug');
+            exec_verbose('%comspec% /c "' + ROOT + '\\cordova\\build" --debug');
             break;
         case RELEASE :
-            exec_verbose('%comspec% /c ' + ROOT + '\\cordova\\build --release');
+            exec_verbose('%comspec% /c "' + ROOT + '\\cordova\\build" --release');
             break;
         case NO_BUILD :
             break;
         case NONE :
             Log("WARNING: [ --debug | --release | --nobuild ] not specified, defaulting to --debug.");
-            exec_verbose('%comspec% /c ' + ROOT + '\\cordova\\build --debug');
+            exec_verbose('%comspec% /c "' + ROOT + '\\cordova\\build" --debug');
             break;
         default :
             Log("Build option not recognized: " + build_type, true);

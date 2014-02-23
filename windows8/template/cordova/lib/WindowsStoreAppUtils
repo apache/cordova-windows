@@ -90,11 +90,11 @@ function Install-App {
     if (CheckIfNeedDeveloperLicense)
     {
         # we can't run the script with -force param if license installation step is required
-        Invoke-Expression ($Path)
+        Invoke-Expression ("& `"$Path`"")
     }
     else
     {
-        Invoke-Expression ($Path + " -force")
+        Invoke-Expression ("& `"$Path`" -force")
     }
 }
 

@@ -1,6 +1,6 @@
 @ECHO OFF
 SET full_path=%~dp0
-IF EXIST %full_path%lib\clean.js (
+IF EXIST "%full_path%lib\clean.js" (
     cscript "%full_path%lib\clean.js" %* //nologo
 ) ELSE (
     ECHO.
