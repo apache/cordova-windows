@@ -16,15 +16,20 @@
        specific language governing permissions and limitations
        under the License.
 */
-
-
-var fso = WScript.CreateObject('Scripting.FileSystemObject');
-var wscript_shell = WScript.CreateObject("WScript.Shell");
-
-var args = WScript.Arguments;
-
-// working dir
 var ROOT = WScript.ScriptFullName.split('\\cordova\\lib\\build.js').join('');
+var DIR = ROOT + '\\cordova\\lib\\';
+
+function include(path) {
+    var fs, file, code;
+
+    fs = WScript.createObject("Scripting.FileSystemObject");
+    file = fs.openTextFile(DIR + '\\' + path);
+    code = file.readAll();
+    file.close();
+
+    eval(code);
+}
+include('common.js');
 
 // help/usage function
 function Usage() {
@@ -39,52 +44,6 @@ function Usage() {
     Log("    build --debug");
     Log("    build --release");
     Log("");
-}
-
-// logs messaged to stdout and stderr
-function Log(msg, error) {
-    if (error) {
-        WScript.StdErr.WriteLine(msg);
-    }
-    else {
-        WScript.StdOut.WriteLine(msg);
-    }
-}
-
-// executes a commmand in the shell
-function exec_verbose(command) {
-    //Log("Command: " + command);
-    var oShell=wscript_shell.Exec(command);
-    while (oShell.Status == 0) {
-        //Wait a little bit so we're not super looping
-        WScript.sleep(100);
-        //Print any stdout output from the script
-        if (!oShell.StdOut.AtEndOfStream) {
-            var line = oShell.StdOut.ReadLine();
-            Log(line);
-        }
-    }
-    //Check to make sure our scripts did not encounter an error
-    if (!oShell.StdErr.AtEndOfStream) {
-        var line = oShell.StdErr.ReadAll();
-        Log(line, true);
-        WScript.Quit(2);
-    }
-    return oShell.ExitCode;
-}
-
-// checks to see if a .jsproj file exists in the project root
-function is_cordova_project(path) {
-    if (fso.FolderExists(path)) {
-        var proj_folder = fso.GetFolder(path);
-        var proj_files = new Enumerator(proj_folder.Files);
-        for (;!proj_files.atEnd(); proj_files.moveNext()) {
-            if (fso.GetExtensionName(proj_files.item()) == 'jsproj') {
-                return true;  
-            }
-        }
-    }
-    return false;
 }
 
 // escapes a path so that it can be passed to shell command. 
@@ -103,33 +62,6 @@ function getSolutionDir(path) {
     }
 
     return null;
-}
-
-// returns full path to msbuild tools required to build the project
-function getMSBuildToolsPath(path) {
-    // target windows8 by default
-    var MSBuildVer = '4.0';
-    var installInstructions = 'Please install the .NET Framework v4.0.';
-    // windows8.1 template requires msbuild v12.0
-    // get tools version from jsproj file
-    var proj_folder = fso.GetFolder(path);
-    var proj_files = new Enumerator(proj_folder.Files);
-    for (;!proj_files.atEnd(); proj_files.moveNext()) {
-        if (fso.GetExtensionName(proj_files.item()) == 'jsproj' && 
-            fso.OpenTextFile(proj_files.item(), 1).ReadAll().indexOf('ToolsVersion="12.0"') > 0) {
-                MSBuildVer = '12.0';
-                installInstructions = 'Please install Microsoft Visual Studio 2013 or later';
-        }
-    }
-    Log('\tMSBuild version required: ' + MSBuildVer);
-    try {
-        return wscript_shell.RegRead('HKLM\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\' + MSBuildVer + '\\MSBuildToolsPath');
-    } catch (err) {
-        Log(installInstructions, true);
-        WScript.Quit(2);
-    }
-    
-    return MSBuildToolsPath;
 }
 
 // builds the project and .xap in debug mode
@@ -198,7 +130,7 @@ if (args.Count() > 0) {
         Usage();
         WScript.Quit(2);
     }
-    else if (!fso.FolderExists(ROOT) || !is_cordova_project(ROOT)) {
+    else if (!fso.FolderExists(ROOT) || !is_cordova_project(ROOT, 'jsproj')) {
         Log("Error: could not find project at " + ROOT, true);
         WScript.Quit(2);
     }
