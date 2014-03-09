@@ -16,13 +16,21 @@
        specific language governing permissions and limitations
        under the License.
 */
-
-var fso = WScript.CreateObject('Scripting.FileSystemObject');
-var wscript_shell = WScript.CreateObject("WScript.Shell");
-
-var args = WScript.Arguments;
-// working dir
 var ROOT = WScript.ScriptFullName.split('\\cordova\\lib\\deploy.js').join('');
+var DIR = ROOT + '\\cordova\\lib\\';
+
+function include(path) {
+    var fs, file, code;
+
+    fs = WScript.createObject("Scripting.FileSystemObject");
+    file = fs.openTextFile(DIR + '\\' + path);
+    code = file.readAll();
+    file.close();
+
+    eval(code);
+}
+include('common.js');
+
 // path to WindowsStoreAppUtils.ps1; provides helper functions to install/unistall/start Windows Store app
 var WINDOWS_STORE_UTILS = '\\cordova\\lib\\WindowsStoreAppUtils.ps1';
 var WINDOWS_STORE_UTILS_SRC = '\\cordova\\lib\\WindowsStoreAppUtils';
@@ -56,46 +64,14 @@ function Usage() {
     Log("");
 }
 
-// log to stdout or stderr
-function Log(msg, error) {
-    if (error) {
-        WScript.StdErr.WriteLine(msg);
-    }
-    else {
-        WScript.StdOut.WriteLine(msg);
-    }
-} 
-
 var ForReading = 1, ForWriting = 2, ForAppending = 8;
 var TristateUseDefault = 2, TristateTrue = 1, TristateFalse = 0;
-
 
 // executes a commmand in the shell
 function exec(command) {
     var oShell=wscript_shell.Exec(command);
     while (oShell.Status == 0) {
         WScript.sleep(100);
-    }
-}
-
-// executes a commmand in the shell
-function exec_verbose(command) {
-    //Log("Command: " + command);
-    var oShell=wscript_shell.Exec(command);
-    while (oShell.Status == 0) {
-        //Wait a little bit so we're not super looping
-        WScript.sleep(100);
-        //Print any stdout output from the script
-        if (!oShell.StdOut.AtEndOfStream) {
-            var line = oShell.StdOut.ReadAll();
-            Log(line);
-        }
-    }
-    //Check to make sure our scripts did not encounter an error
-    if (!oShell.StdErr.AtEndOfStream) {
-        var line = oShell.StdErr.ReadAll();
-        Log(line, true);
-        WScript.Quit(2);
     }
 }
 
