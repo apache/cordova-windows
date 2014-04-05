@@ -215,13 +215,15 @@ var cordova = {
                 documentEventHandlers[type].fire(evt);
             }
             else {
-                setTimeout(function() {
-                    // Fire deviceready on listeners that were registered before cordova.js was loaded.
-                    if (type == 'deviceready') {
-                        document.dispatchEvent(evt);
-                    }
+                if (type == 'pause') {
                     documentEventHandlers[type].fire(evt);
-                }, 0);
+                } else {
+                    setTimeout(function() {
+                        // Fire deviceready on listeners that were registered before cordova.js was loaded.
+                        document.dispatchEvent(evt);
+                        documentEventHandlers[type].fire(evt);
+                    }, 0);
+                }
             }
         } else {
             document.dispatchEvent(evt);
