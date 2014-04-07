@@ -26,6 +26,8 @@ var args = WScript.Arguments;
 // working dir
 var ROOT = WScript.ScriptFullName.split('\\cordova\\lib\\build.js').join('');
 
+var PLATFORM_CONFIG_SCRIPT = "\\cordova\\lib\\ApplyPlatformConfig.ps1";
+
 // help/usage function
 function Usage() {
     Log("");
@@ -80,7 +82,7 @@ function is_cordova_project(path) {
         var proj_files = new Enumerator(proj_folder.Files);
         for (;!proj_files.atEnd(); proj_files.moveNext()) {
             if (fso.GetExtensionName(proj_files.item()) == 'jsproj') {
-                return true;  
+                return true;
             }
         }
     }
@@ -98,7 +100,7 @@ function getSolutionDir(path) {
     var proj_files = new Enumerator(proj_folder.Files);
     for (;!proj_files.atEnd(); proj_files.moveNext()) {
         if (fso.GetExtensionName(proj_files.item()) == 'sln') {
-            return path + '\\' + fso.GetFileName(proj_files.item());  
+            return path + '\\' + fso.GetFileName(proj_files.item());
         }
     }
 
@@ -115,7 +117,7 @@ function getMSBuildToolsPath(path) {
     var proj_folder = fso.GetFolder(path);
     var proj_files = new Enumerator(proj_folder.Files);
     for (;!proj_files.atEnd(); proj_files.moveNext()) {
-        if (fso.GetExtensionName(proj_files.item()) == 'jsproj' && 
+        if (fso.GetExtensionName(proj_files.item()) == 'jsproj' &&
             fso.OpenTextFile(proj_files.item(), 1).ReadAll().indexOf('ToolsVersion="12.0"') > 0) {
                 MSBuildVer = '12.0';
                 installInstructions = 'Please install Microsoft Visual Studio 2013 or later';
@@ -142,6 +144,11 @@ function build_appx(path,isRelease) {
 
     try {
         wscript_shell.CurrentDirectory = path;
+        
+        // Apply config.xml settings to package.appxmanifest
+        Log("Applying config.xml to package.appxmanifest");
+        exec_verbose('powershell -ExecutionPolicy RemoteSigned  \"Unblock-File .' + PLATFORM_CONFIG_SCRIPT + '; . .' + PLATFORM_CONFIG_SCRIPT + ' ' + path + '\"');
+
         var MSBuildToolsPath = getMSBuildToolsPath(path);
         Log("\tMSBuildToolsPath: " + MSBuildToolsPath);
         var solutionDir = getSolutionDir(path);
@@ -203,7 +210,7 @@ if (args.Count() > 0) {
         WScript.Quit(2);
     }
      
-    isRelease = (args(0) == "--release" || args(0) == "-r");   
+    isRelease = (args(0) == "--release" || args(0) == "-r");
 }
 
 Log(build_appx(ROOT,isRelease));
