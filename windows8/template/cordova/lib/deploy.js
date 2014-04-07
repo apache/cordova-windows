@@ -25,7 +25,6 @@ var args = WScript.Arguments;
 var ROOT = WScript.ScriptFullName.split('\\cordova\\lib\\deploy.js').join('');
 // path to WindowsStoreAppUtils.ps1; provides helper functions to install/unistall/start Windows Store app
 var WINDOWS_STORE_UTILS = '\\cordova\\lib\\WindowsStoreAppUtils.ps1';
-var WINDOWS_STORE_UTILS_SRC = '\\cordova\\lib\\WindowsStoreAppUtils';
 
 //build types
 var NONE = 0,
@@ -64,7 +63,7 @@ function Log(msg, error) {
     else {
         WScript.StdOut.WriteLine(msg);
     }
-} 
+}
 
 var ForReading = 1, ForWriting = 2, ForAppending = 8;
 var TristateUseDefault = 2, TristateTrue = 1, TristateFalse = 0;
@@ -99,35 +98,13 @@ function exec_verbose(command) {
     }
 }
 
-// returns the contents of a file
-function read(filename) {
-    if (fso.FileExists(filename)) {
-        var f=fso.OpenTextFile(filename, 1,2);
-        var s=f.ReadAll();
-        f.Close();
-        return s;
-    }
-    else {
-        Log('Cannot read non-existant file : ' + filename, true);
-        WScript.Quit(2);
-    }
-    return null;
-}
-
-// writes content to a file
-function write(filename, content) {
-    var f=fso.OpenTextFile(filename, 2,2);
-    f.Write(content);
-    f.Close();
-}
-
 function localMachine(path) {
     Log('Deploying to local machine ...');
     makeAppStoreUtils(path);
     uninstallApp(path);
     installApp(path);
 
-    var command = "powershell \". .\\" + WINDOWS_STORE_UTILS + "; Start-Locally " + PACKAGE_NAME;
+    var command = "powershell -ExecutionPolicy RemoteSigned \". .\\" + WINDOWS_STORE_UTILS + "; Start-Locally " + PACKAGE_NAME;
     Log(command);
     exec_verbose(command);
 }
@@ -155,14 +132,12 @@ function target(path, device_id) {
 }
 
 function makeAppStoreUtils(path) {
-
     if (fso.FileExists(path + WINDOWS_STORE_UTILS)) {
+        Log("Removing execution restrictions from AppStoreUtils...");
+        var command = "powershell \"Unblock-File " + path + WINDOWS_STORE_UTILS + "\"";
+        exec_verbose(command);
         return;
     }
-
-    Log("Making PowerShell script for Windows Store Apps..");
-
-    write(path + WINDOWS_STORE_UTILS, read(path + WINDOWS_STORE_UTILS_SRC));
 }
 
 // uninstalls previous application instance (if exists)
@@ -171,7 +146,7 @@ function uninstallApp(path) {
     Log("\tDirectory : " + path);
 
     wscript_shell.CurrentDirectory = path;
-    var command = "powershell \". .\\" + WINDOWS_STORE_UTILS + "; Uninstall-App " + PACKAGE_NAME;
+    var command = "powershell -ExecutionPolicy RemoteSigned \". .\\" + WINDOWS_STORE_UTILS + "; Uninstall-App " + PACKAGE_NAME;
     Log(command);
     exec_verbose(command);
 }
@@ -197,7 +172,7 @@ function installApp(path) {
             {
                 if(fso.GetExtensionName(files.item()) == "ps1")
                 {
-                    var command = "powershell \". .\\" + WINDOWS_STORE_UTILS + "; Install-App " + "'" + files.item() + "'";
+                    var command = "powershell -ExecutionPolicy RemoteSigned \". .\\" + WINDOWS_STORE_UTILS + "; Install-App " + "'" + files.item() + "'";
                     Log(command);
                     exec_verbose(command);
                     return;
