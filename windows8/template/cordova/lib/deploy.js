@@ -104,7 +104,7 @@ function localMachine(path) {
     uninstallApp(path);
     installApp(path);
 
-    var command = "powershell -ExecutionPolicy RemoteSigned \". .\\" + WINDOWS_STORE_UTILS + "; Start-Locally " + PACKAGE_NAME;
+    var command = "powershell -ExecutionPolicy RemoteSigned \". .\\" + WINDOWS_STORE_UTILS + "; Start-Locally '" + PACKAGE_NAME + "'\"";
     Log(command);
     exec_verbose(command);
 }
@@ -134,7 +134,7 @@ function target(path, device_id) {
 function makeAppStoreUtils(path) {
     if (fso.FileExists(path + WINDOWS_STORE_UTILS)) {
         Log("Removing execution restrictions from AppStoreUtils...");
-        var command = "powershell \"Unblock-File " + path + WINDOWS_STORE_UTILS + "\"";
+        var command = "powershell \"Unblock-File \'" + path + WINDOWS_STORE_UTILS + "\'\"";
         exec_verbose(command);
         return;
     }
@@ -172,7 +172,7 @@ function installApp(path) {
             {
                 if(fso.GetExtensionName(files.item()) == "ps1")
                 {
-                    var command = "powershell -ExecutionPolicy RemoteSigned \". .\\" + WINDOWS_STORE_UTILS + "; Install-App " + "'" + files.item() + "'";
+                    var command = "powershell -ExecutionPolicy RemoteSigned \". .\\" + WINDOWS_STORE_UTILS + "; Install-App " + "'" + files.item() + "'\"";
                     Log(command);
                     exec_verbose(command);
                     return;

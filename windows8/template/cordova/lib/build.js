@@ -133,7 +133,7 @@ function build_appx(path,isRelease) {
         
         // Apply config.xml settings to package.appxmanifest
         Log("Applying config.xml to package.appxmanifest");
-        exec_verbose('powershell -ExecutionPolicy RemoteSigned  \"Unblock-File .' + PLATFORM_CONFIG_SCRIPT + '; . .' + PLATFORM_CONFIG_SCRIPT + ' ' + path + '\"');
+        exec_verbose('powershell -ExecutionPolicy RemoteSigned  \"Unblock-File .' + PLATFORM_CONFIG_SCRIPT + '; . .' + PLATFORM_CONFIG_SCRIPT + ' \'' + path + '\'\"');
 
         var MSBuildToolsPath = getMSBuildToolsPath(path);
         Log("\tMSBuildToolsPath: " + MSBuildToolsPath);
