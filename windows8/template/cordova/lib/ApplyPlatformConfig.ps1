@@ -29,8 +29,10 @@ $manifestFile = "$platformRoot\package.appxmanifest"
 [xml]$manifest = Get-Content $manifestFile
 
 # Replace app start page with config.xml setting.
-$startPage = $config.widget.content.src
-$manifest.Package.Applications.Application.StartPage = "www/$startpage"
+if($config.widget.content -and $config.widget.content.src) {
+	$startPage = $config.widget.content.src
+	$manifest.Package.Applications.Application.StartPage = "www/$startpage"
+}
 
 # Add domain whitelist rules
 
@@ -40,7 +42,9 @@ $NS = $manifest.DocumentElement.NamespaceURI
 
 # Remove existing rules from manifest
 
-if ($rules) { $manifest.Package.Applications.Application.RemoveChild($rules)}
+if ($rules) { 
+	$manifest.Package.Applications.Application.RemoveChild($rules)
+}
 
 if ($acls -and ($acls -notcontains "*")) {
     $rules = $manifest.CreateElement("ApplicationContentUriRules", $NS)
@@ -54,30 +58,32 @@ if ($acls -and ($acls -notcontains "*")) {
 }
 
 # Format background color to windows8 format
-
 $configBgColor = [string]$config.widget.preference.value
-$bgColor = ($configBgColor -replace "0x", "") -replace "#", ""
+if($configBgColor.Length > 0) 
+{
+	$bgColor = ($configBgColor -replace "0x", "") -replace "#", ""
 
-# Double all bytes if color specified as "fff"
-if ($bgColor.Length -eq 3) {
-    $bgColor = $bgColor[0] + $bgColor[0] + $bgColor[1] + $bgColor[1] + $bgColor[2] + $bgColor[2] 
+	# Double all bytes if color specified as "fff"
+	if ($bgColor.Length -eq 3) {
+		$bgColor = $bgColor[0] + $bgColor[0] + $bgColor[1] + $bgColor[1] + $bgColor[2] + $bgColor[2] 
+	}
+
+	# Parse hex representation to array of color bytes [b, g, r, a]
+	$colorBytes = [System.BitConverter]::GetBytes(
+		[int]::Parse($bgColor,
+		[System.Globalization.NumberStyles]::HexNumber))
+
+	Add-Type -AssemblyName PresentationCore
+
+	# Create new Color object ignoring alpha, because windows 8 doesn't support it
+	# see http://msdn.microsoft.com/en-us/library/windows/apps/br211471.aspx
+	$color = ([System.Windows.Media.Color]::FromRgb(
+		$colorBytes[2], $colorBytes[1], $colorBytes[0]
+		# FromRGB method add 100% alpha, so we remove it from resulting string
+		).ToString()) -replace "#FF", "#"
+
+	$manifest.Package.Applications.Application.VisualElements.BackgroundColor = [string]$color
 }
-
-# Parse hex representation to array of color bytes [b, g, r, a]
-$colorBytes = [System.BitConverter]::GetBytes(
-    [int]::Parse($bgColor,
-    [System.Globalization.NumberStyles]::HexNumber))
-
-Add-Type -AssemblyName PresentationCore
-
-# Create new Color object ignoring alpha, because windows 8 doesn't support it
-# see http://msdn.microsoft.com/en-us/library/windows/apps/br211471.aspx
-$color = ([System.Windows.Media.Color]::FromRgb(
-    $colorBytes[2], $colorBytes[1], $colorBytes[0]
-    # FromRGB method add 100% alpha, so we remove it from resulting string
-    ).ToString()) -replace "#FF", "#"
-
-$manifest.Package.Applications.Application.VisualElements.BackgroundColor = [string]$color
 
 # Write modified manifest file
 $xmlWriter = New-Object System.Xml.XmlTextWriter($manifestFile, $null)
