@@ -82,4 +82,9 @@
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
   </PropertyGroup>
   -->
+    <PropertyGroup>
+    <PreBuildEvent>
+Powershell -ExecutionPolicy RemoteSigned Unblock-File $(ProjectDir)\cordova\lib\ApplyPlatformConfig.ps1; Powershell -File $(ProjectDir)\cordova\lib\ApplyPlatformConfig.ps1 $(ProjectDir);
+    </PreBuildEvent>
+  </PropertyGroup>
 </Project>

@@ -22,6 +22,8 @@ param(
     [string] $platformRoot
 )
 
+Write-Host "Applying Platform Config"
+
 $configFile = "$platformRoot\config.xml"
 $manifestFile = "$platformRoot\package.appxmanifest"
 

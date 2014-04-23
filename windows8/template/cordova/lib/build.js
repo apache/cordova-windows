@@ -26,8 +26,6 @@ var args = WScript.Arguments;
 // working dir
 var ROOT = WScript.ScriptFullName.split('\\cordova\\lib\\build.js').join('');
 
-var PLATFORM_CONFIG_SCRIPT = "\\cordova\\lib\\ApplyPlatformConfig.ps1";
-
 // help/usage function
 function Usage() {
     Log("");
@@ -131,10 +129,6 @@ function build_appx(path,isRelease) {
     try {
         wscript_shell.CurrentDirectory = path;
         
-        // Apply config.xml settings to package.appxmanifest
-        Log("Applying config.xml to package.appxmanifest");
-        exec_verbose('powershell -ExecutionPolicy RemoteSigned  \"Unblock-File .' + PLATFORM_CONFIG_SCRIPT + '; . .' + PLATFORM_CONFIG_SCRIPT + ' \'' + path + '\'\"');
-
         var MSBuildToolsPath = getMSBuildToolsPath(path);
         Log("\tMSBuildToolsPath: " + MSBuildToolsPath);
         var solutionDir = getSolutionDir(path);
