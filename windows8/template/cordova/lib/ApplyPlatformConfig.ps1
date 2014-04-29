@@ -22,7 +22,7 @@ param(
     [string] $platformRoot
 )
 
-Write-Host "Applying Platform Config"
+Write-Host "Applying Platform Config ..."
 
 $configFile = "$platformRoot\config.xml"
 $manifestFile = "$platformRoot\package.appxmanifest"
@@ -59,10 +59,52 @@ if ($acls -and ($acls -notcontains "*")) {
     }
 }
 
-# Format background color to windows8 format
-$configBgColor = [string]$config.widget.preference.value
-if($configBgColor.Length > 0) 
+# Format splash screen to windows8 format
+$configSplashScreen = $config.SelectNodes('//*[local-name()="preference"][@name="SplashScreen"]').value
+if($configSplashScreen) 
 {
+	"Setting SplashScreen = $configSplashScreen"
+	$manifest.Package.Applications.Application.VisualElements.SplashScreen.Image = [string]$configSplashScreen
+
+}
+
+# Format splash screen background color to windows8 format
+$configSplashScreenBGColor = $config.SelectNodes('//*[local-name()="preference"][@name="SplashScreenBackgroundColor"]').value
+if($configSplashScreenBGColor) 
+{
+	"Setting SplashScreenBackgroundColor = $configSplashScreenBGColor"
+
+	$bgColor = ($configSplashScreenBGColor -replace "0x", "") -replace "#", ""
+
+	# Double all bytes if color specified as "fff"
+	if ($bgColor.Length -eq 3) {
+		$bgColor = $bgColor[0] + $bgColor[0] + $bgColor[1] + $bgColor[1] + $bgColor[2] + $bgColor[2] 
+	}
+
+	# Parse hex representation to array of color bytes [b, g, r, a]
+	$colorBytes = [System.BitConverter]::GetBytes(
+		[int]::Parse($bgColor,
+		[System.Globalization.NumberStyles]::HexNumber))
+
+	Add-Type -AssemblyName PresentationCore
+
+	# Create new Color object ignoring alpha, because windows 8 doesn't support it
+	# see http://msdn.microsoft.com/en-us/library/windows/apps/br211471.aspx
+	$color = ([System.Windows.Media.Color]::FromRgb(
+		$colorBytes[2], $colorBytes[1], $colorBytes[0]
+		# FromRGB method add 100% alpha, so we remove it from resulting string
+		).ToString()) -replace "#FF", "#"
+
+	$manifest.Package.Applications.Application.VisualElements.SplashScreen.BackgroundColor = [string]$color
+}
+
+
+# Format background color to windows8 format
+$configBgColor = $config.SelectNodes('//*[local-name()="preference"][@name="BackgroundColor"]').value
+
+if($configBgColor) 
+{
+	"Setting BackgroundColor = $configBgColor"
 	$bgColor = ($configBgColor -replace "0x", "") -replace "#", ""
 
 	# Double all bytes if color specified as "fff"
