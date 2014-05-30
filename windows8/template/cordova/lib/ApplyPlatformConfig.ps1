@@ -32,8 +32,8 @@ $manifestFile = "$platformRoot\package.appxmanifest"
 
 # Replace app start page with config.xml setting.
 if($config.widget.content -and $config.widget.content.src) {
-	$startPage = $config.widget.content.src
-	$manifest.Package.Applications.Application.StartPage = "www/$startpage"
+    $startPage = $config.widget.content.src
+    $manifest.Package.Applications.Application.StartPage = "www/$startpage"
 }
 
 # Add domain whitelist rules
@@ -45,7 +45,7 @@ $NS = $manifest.DocumentElement.NamespaceURI
 # Remove existing rules from manifest
 
 if ($rules) { 
-	$manifest.Package.Applications.Application.RemoveChild($rules)
+    $manifest.Package.Applications.Application.RemoveChild($rules)
 }
 
 if ($acls -and ($acls -notcontains "*")) {
@@ -59,43 +59,63 @@ if ($acls -and ($acls -notcontains "*")) {
     }
 }
 
-# Format splash screen to windows8 format
+# Splash screen support
 $configSplashScreen = $config.SelectNodes('//*[local-name()="preference"][@name="SplashScreen"]').value
 if($configSplashScreen) 
 {
-	"Setting SplashScreen = $configSplashScreen"
-	$manifest.Package.Applications.Application.VisualElements.SplashScreen.Image = [string]$configSplashScreen
+    "Setting SplashScreen = $configSplashScreen"
+    $imgPath = $null;
 
+    # do search relative to platform and app folders
+    foreach ($testPath in @($configSplashScreen, "..\..\$configSplashScreen")) 
+    {
+        $testPath = join-path $platformRoot $testPath
+
+        if (Test-Path -PathType Leaf $testPath)
+        {
+            $imgPath = $testPath;
+            break
+        }
+    }
+
+    if ($imgPath -eq $null)
+    {
+        "Unable to locate splash image: $configSplashScreen"
+    } else {
+        # Default splash screen is stored as 'images\splashscreen.png'
+        # http://msdn.microsoft.com/en-us/library/windows/apps/hh465346.aspx
+        Copy-Item $imgPath -Destination (join-path $platformRoot "images\splashscreen.png")
+    }
 }
 
 # Format splash screen background color to windows8 format
 $configSplashScreenBGColor = $config.SelectNodes('//*[local-name()="preference"][@name="SplashScreenBackgroundColor"]').value
 if($configSplashScreenBGColor) 
 {
-	"Setting SplashScreenBackgroundColor = $configSplashScreenBGColor"
+    "Setting SplashScreenBackgroundColor = $configSplashScreenBGColor"
 
-	$bgColor = ($configSplashScreenBGColor -replace "0x", "") -replace "#", ""
+    $bgColor = ($configSplashScreenBGColor -replace "0x", "") -replace "#", ""
 
-	# Double all bytes if color specified as "fff"
-	if ($bgColor.Length -eq 3) {
-		$bgColor = $bgColor[0] + $bgColor[0] + $bgColor[1] + $bgColor[1] + $bgColor[2] + $bgColor[2] 
-	}
+    # Double all bytes if color specified as "fff"
+    if ($bgColor.Length -eq 3) {
+        $bgColor = $bgColor[0] + $bgColor[0] + $bgColor[1] + $bgColor[1] + $bgColor[2] + $bgColor[2] 
+    }
 
-	# Parse hex representation to array of color bytes [b, g, r, a]
-	$colorBytes = [System.BitConverter]::GetBytes(
-		[int]::Parse($bgColor,
-		[System.Globalization.NumberStyles]::HexNumber))
+    # Parse hex representation to array of color bytes [b, g, r, a]
+    $colorBytes = [System.BitConverter]::GetBytes(
+        [int]::Parse($bgColor,
+        [System.Globalization.NumberStyles]::HexNumber))
 
-	Add-Type -AssemblyName PresentationCore
+    Add-Type -AssemblyName PresentationCore
 
-	# Create new Color object ignoring alpha, because windows 8 doesn't support it
-	# see http://msdn.microsoft.com/en-us/library/windows/apps/br211471.aspx
-	$color = ([System.Windows.Media.Color]::FromRgb(
-		$colorBytes[2], $colorBytes[1], $colorBytes[0]
-		# FromRGB method add 100% alpha, so we remove it from resulting string
-		).ToString()) -replace "#FF", "#"
+    # Create new Color object ignoring alpha, because windows 8 doesn't support it
+    # see http://msdn.microsoft.com/en-us/library/windows/apps/br211471.aspx
+    $color = ([System.Windows.Media.Color]::FromRgb(
+        $colorBytes[2], $colorBytes[1], $colorBytes[0]
+        # FromRGB method add 100% alpha, so we remove it from resulting string
+        ).ToString()) -replace "#FF", "#"
 
-	$manifest.Package.Applications.Application.VisualElements.SplashScreen.BackgroundColor = [string]$color
+    $manifest.Package.Applications.Application.VisualElements.SplashScreen.BackgroundColor = [string]$color
 }
 
 
@@ -104,29 +124,29 @@ $configBgColor = $config.SelectNodes('//*[local-name()="preference"][@name="Back
 
 if($configBgColor) 
 {
-	"Setting BackgroundColor = $configBgColor"
-	$bgColor = ($configBgColor -replace "0x", "") -replace "#", ""
+    "Setting BackgroundColor = $configBgColor"
+    $bgColor = ($configBgColor -replace "0x", "") -replace "#", ""
 
-	# Double all bytes if color specified as "fff"
-	if ($bgColor.Length -eq 3) {
-		$bgColor = $bgColor[0] + $bgColor[0] + $bgColor[1] + $bgColor[1] + $bgColor[2] + $bgColor[2] 
-	}
+    # Double all bytes if color specified as "fff"
+    if ($bgColor.Length -eq 3) {
+        $bgColor = $bgColor[0] + $bgColor[0] + $bgColor[1] + $bgColor[1] + $bgColor[2] + $bgColor[2] 
+    }
 
-	# Parse hex representation to array of color bytes [b, g, r, a]
-	$colorBytes = [System.BitConverter]::GetBytes(
-		[int]::Parse($bgColor,
-		[System.Globalization.NumberStyles]::HexNumber))
+    # Parse hex representation to array of color bytes [b, g, r, a]
+    $colorBytes = [System.BitConverter]::GetBytes(
+        [int]::Parse($bgColor,
+        [System.Globalization.NumberStyles]::HexNumber))
 
-	Add-Type -AssemblyName PresentationCore
+    Add-Type -AssemblyName PresentationCore
 
-	# Create new Color object ignoring alpha, because windows 8 doesn't support it
-	# see http://msdn.microsoft.com/en-us/library/windows/apps/br211471.aspx
-	$color = ([System.Windows.Media.Color]::FromRgb(
-		$colorBytes[2], $colorBytes[1], $colorBytes[0]
-		# FromRGB method add 100% alpha, so we remove it from resulting string
-		).ToString()) -replace "#FF", "#"
+    # Create new Color object ignoring alpha, because windows 8 doesn't support it
+    # see http://msdn.microsoft.com/en-us/library/windows/apps/br211471.aspx
+    $color = ([System.Windows.Media.Color]::FromRgb(
+        $colorBytes[2], $colorBytes[1], $colorBytes[0]
+        # FromRGB method add 100% alpha, so we remove it from resulting string
+        ).ToString()) -replace "#FF", "#"
 
-	$manifest.Package.Applications.Application.VisualElements.BackgroundColor = [string]$color
+    $manifest.Package.Applications.Application.VisualElements.BackgroundColor = [string]$color
 }
 
 # Write modified manifest file
