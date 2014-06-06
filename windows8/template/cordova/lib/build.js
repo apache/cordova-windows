@@ -39,7 +39,7 @@ function Usage() {
     Log("    --debug   : builds project in debug mode. (Default)");
     Log("    --release : builds project in release mode.");
     Log("    -r        : shortcut :: builds project in release mode.");
-    Log("    --archs   : Builds project binaries for specific chip architectures.");
+    Log("    --archs   : Builds project binaries for specific chip architectures. `arm` + `x86` + `x64` are supported.");
     Log("examples:");
     Log("    build ");
     Log("    build --debug");
