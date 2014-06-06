@@ -23,21 +23,28 @@ var wscript_shell = WScript.CreateObject("WScript.Shell");
 
 var args = WScript.Arguments;
 
+// build type. Possible values: "debug", "release"
+var buildType = null,
+// list of build architectures. list of strings
+buildArchs = null;
+
 // working dir
 var ROOT = WScript.ScriptFullName.split('\\cordova\\lib\\build.js').join('');
 
 // help/usage function
 function Usage() {
     Log("");
-    Log("Usage: build [ --debug | --release ]");
+    Log("Usage: build [ --debug | --release ] [--archs=\"<list of architectures...>\"]");
     Log("    --help    : Displays this dialog.");
     Log("    --debug   : builds project in debug mode. (Default)");
     Log("    --release : builds project in release mode.");
     Log("    -r        : shortcut :: builds project in release mode.");
+    Log("    --archs   : Builds project binaries for specific chip architectures.");
     Log("examples:");
     Log("    build ");
     Log("    build --debug");
     Log("    build --release");
+    Log("    build --release --archs=\"arm x86\"");
     Log("");
 }
 
@@ -119,61 +126,122 @@ function getMSBuildToolsPath(path) {
 }
 
 // builds the project and .xap in debug mode
-function build_appx(path,isRelease) {
+function build_appx(path, buildtype, buildarchs) {
 
-    var mode = (isRelease ? "Release" : "Debug");
-    Log("Building Cordova Windows 8 Project:");
-    Log("\tConfiguration : " + mode);
-    Log("\tDirectory : " + path);
+    if (!buildtype) {
+        Log("WARNING: [ --debug | --release ] not specified, defaulting to debug...");
+        buildtype = "debug";
+    }
 
-    try {
-        wscript_shell.CurrentDirectory = path;
-        
-        var MSBuildToolsPath = getMSBuildToolsPath(path);
-        Log("\tMSBuildToolsPath: " + MSBuildToolsPath);
-        var solutionDir = getSolutionDir(path);
-        var buildCommand = escapePath(MSBuildToolsPath + 'msbuild') + ' ' + escapePath(solutionDir) +
-            ' /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo /p:Configuration=' + mode;
-        
-        // hack to get rid of 'Access is denied.' error when running the shell w/ access to C:\path..
-        buildCommand = 'cmd /c "' + buildCommand + '"';
-        Log(buildCommand);
-        if (exec_verbose(buildCommand) != 0) {
-            // msbuild failed
-            WScript.Quit(2);
+    if (!buildarchs) {
+        Log("WARNING: target architecture not specified, defaulting to AnyCPU...");
+        buildarchs = ["Any CPU"];
+    }
+
+    for (var i = 0; i < buildarchs.length; i++) {
+
+        var buildarch = buildarchs[i];
+
+        Log("\nBuilding Cordova Windows 8 Project:");
+        Log("\tConfiguration : " + buildtype);
+        Log("\tPlatform      : " + buildarch);
+        Log("\tDirectory     : " + path);
+
+        try {
+            wscript_shell.CurrentDirectory = path;
+            
+            var MSBuildToolsPath = getMSBuildToolsPath(path);
+            Log("\tMSBuildToolsPath: " + MSBuildToolsPath);
+            var solutionDir = getSolutionDir(path);
+            var buildCommand = escapePath(MSBuildToolsPath + 'msbuild') +
+                    ' ' + escapePath(solutionDir) +
+                        ' /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal' +
+                        ' /nologo' +
+                        ' /p:Configuration=' + buildtype +
+                        ' /p:Platform="' + buildarch + '"';
+            
+            // hack to get rid of 'Access is denied.' error when running the shell w/ access to C:\path..
+            buildCommand = 'cmd /c "' + buildCommand + '"';
+            Log(buildCommand);
+            if (exec_verbose(buildCommand) !== 0) {
+                // msbuild failed
+                WScript.Quit(2);
+            }
+        } catch (err) {
+            Log("Build failed: " + err.message, true);
         }
+    }
 
-        // TODO: there could be multiple AppPackages
-        // check if AppPackages created
-        if (fso.FolderExists(path + '\\AppPackages')) {
-            var out_folder = fso.GetFolder(path + '\\AppPackages');
-            var subFolders = new Enumerator(out_folder.SubFolders);
-            for(;!subFolders.atEnd();subFolders.moveNext())
+    // TODO: there could be multiple AppPackages
+    // check if AppPackages created
+    if (fso.FolderExists(path + '\\AppPackages')) {
+        var out_folder = fso.GetFolder(path + '\\AppPackages');
+        var subFolders = new Enumerator(out_folder.SubFolders);
+        for(;!subFolders.atEnd();subFolders.moveNext())
+        {
+            var subFolder = subFolders.item();
+            var files = new Enumerator(subFolder.Files);
+            for(;!files.atEnd();files.moveNext())
             {
-                var subFolder = subFolders.item();
-                var files = new Enumerator(subFolder.Files);
-                for(;!files.atEnd();files.moveNext())
+                if(fso.GetExtensionName(files.item()) == "ps1")
                 {
-                    if(fso.GetExtensionName(files.item()) == "ps1")
-                    {
-                        // app was built, installation script exists
-                        return "Success";
-                    }
-
+                    // app was built, installation script exists
+                    return "\nSUCCESS";
                 }
             }
 
         }
-    } catch (err) {
-        Log("Build failed: " + err.message, true);
+
     }
     Log("Error : AppPackages were not built");
     WScript.Quit(2);
 
 }
 
+// parses script args and set global variables for build
+// throws error if unknown argument specified.
+function parseArgs () {
 
-Log("");
+    // return build type, specified by input string, or null, if not build type parameter
+    function getBuildType (arg) {
+        arg = arg.toLowerCase();
+        if (arg == "--debug" || arg == "-d") {
+            return "debug";
+        }
+        else if (arg == "--release" || arg == "-r") {
+            return "release";
+        }
+        return null;
+    }
+
+    // returns build architectures list, specified by input string
+    // or null if nothing specified, or not --archs parameter
+    function getBuildArchs (arg) {
+        arg = arg.toLowerCase();
+        var archs = /--archs=(.+)/.exec(arg);
+        if (archs) {
+            // if architectures list contains commas, suppose that is comma delimited
+            if (archs[1].indexOf(',') != -1){
+                return archs[1].split(',');
+            }
+            // else space delimited
+            return archs[1].split(/\s/);
+        }
+        return null;
+    }
+
+    for (var i = 0; i < args.Length; i++) {
+        if (getBuildType(args(i))) {
+            buildType = getBuildType(args(i));
+        } else if (getBuildArchs(args(i))) {
+            buildArchs = getBuildArchs(args(i));
+        } else {
+            Log("Error: \"" + args(i) + "\" is not recognized as a build option", true);
+            Usage();
+            WScript.Quit(2);
+        }
+    }
+}
 
 var result;
 var isRelease = false;
@@ -189,8 +257,8 @@ if (args.Count() > 0) {
         Log("Error: could not find project at " + ROOT, true);
         WScript.Quit(2);
     }
-     
-    isRelease = (args(0) == "--release" || args(0) == "-r");
+
+    parseArgs();
 }
 
-Log(build_appx(ROOT,isRelease));
+Log(build_appx(ROOT, buildType, buildArchs));
