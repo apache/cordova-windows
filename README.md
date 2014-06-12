@@ -19,7 +19,6 @@
 #
 -->
 
-
 Apache Cordova for Windows 8
 ===
 
