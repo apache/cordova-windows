@@ -130,7 +130,9 @@ function build_appx(path, buildtype, buildarchs) {
 
     for (var i = 0; i < buildarchs.length; i++) {
 
-        var buildarch = buildarchs[i];
+        var buildarch = buildarchs[i].toLowerCase();
+        // support for "any cpu" specified with or without space
+        buildarch = buildarch !== "anycpu" ? buildarch : "any cpu";
 
         Log("Building Cordova Windows Project:");
         Log("\tConfiguration : " + buildtype);
@@ -165,7 +167,6 @@ function build_appx(path, buildtype, buildarchs) {
                 // msbuild failed
                 WScript.Quit(2);
             }
-            return "Success";
         } catch (err) {
             Log("Build failed: " + err.message, true);
         }

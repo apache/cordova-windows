@@ -35,29 +35,18 @@ if (!fso.FileExists(APP_DEPLOY_UTILS)) {
     APP_DEPLOY_UTILS = "AppDeployCmd";
 }
 
-//device_id for targeting specific device
-var device_id;
-
-//build types
-var NONE = 0,
-    DEBUG = 1,
-    RELEASE = 2,
-    NO_BUILD = 3;
-var build_type = NONE;
-
-//deploy types
-var NONE = 0,
-    EMULATOR = 1,
-    DEVICE = 2,
-    TARGET = 3;
-var deploy_type = NONE;
-
-// project types
-var NONE = 0;
-    STORE80 = 1;
-    STORE81 = 2;
-    PHONE = 3;
-var project_type = NONE;
+// build type. Possible values: "debug", "release"
+// required to determine which package should be deployed
+var buildType = null,
+    // nobuild flag
+    noBuild = false,
+    // list of build architectures. list of strings
+    // required to determine which package should be deployed
+    buildArchs = null,
+    // build target. Possible values: "device", "emulator", "<target_name>"
+    buildTarget = null,
+    // project type. Possible values are "phone", "store" == "store81", "store80"
+    projectType = null;
 
 
 var PACKAGE_NAME = '$namespace$';
@@ -99,15 +88,10 @@ function Log(msg, error) {
     }
 }
 
-var ForReading = 1, ForWriting = 2, ForAppending = 8;
-var TristateUseDefault = 2, TristateTrue = 1, TristateFalse = 0;
-
-
-
 // executes a commmand in the shell
 function exec(command) {
     var oShell=wscript_shell.Exec(command);
-    while (oShell.Status == 0) {
+    while (oShell.Status === 0) {
         WScript.sleep(100);
     }
 }
@@ -115,100 +99,63 @@ function exec(command) {
 // executes a commmand in the shell
 function exec_verbose(command) {
     //Log("Command: " + command);
-    var oShell=wscript_shell.Exec(command);
-    while (oShell.Status == 0) {
+    var oShell=wscript_shell.Exec(command),
+        line;
+    while (oShell.Status === 0) {
         //Wait a little bit so we're not super looping
         WScript.sleep(100);
         //Print any stdout output from the script
         if (!oShell.StdOut.AtEndOfStream) {
-            var line = oShell.StdOut.ReadAll();
+            line = oShell.StdOut.ReadAll();
             Log(line);
         }
     }
     //Check to make sure our scripts did not encounter an error
     if (!oShell.StdErr.AtEndOfStream) {
-        var line = oShell.StdErr.ReadAll();
+        line = oShell.StdErr.ReadAll();
         Log(line, true);
         WScript.Quit(2);
     }
 }
 
-// return chip architecture specified in script arguments
-// used to select/find appropriate appx package to deploy.
-function getChipArchitecture() {
-    if (joinArgs().indexOf('--arm') > -1) {
-        return 'arm';
-    } else if (joinArgs().indexOf('--x86') > -1) {
-        return 'x86';
-    } else if (joinArgs().indexOf('--x64') > -1) {
-        return 'x64';
-    }
-    return 'anycpu';
-}
-
-// returns build type (debug/release) specified in script arguments
-// used to select/find appropriate appx package to deploy.
-function getBuildType() {
-    if (joinArgs().indexOf("--release") > -1) {
-        return "release";
-    }
-    return "debug";
-}
-
-// returns project type (phone/store/store80) specified in script arguments
-// used to select/find appropriate appx package to deploy.
-function getProjectType() {
-    var argString = joinArgs();
-    if (argString.indexOf("--phone") > -1) {
-        return "phone";
-    }
-    else if (argString.indexOf("--store80") > -1) {
-        return "store80";
-    }
-    // default is 'store' - Windows 8.1 store app
-    return "store";
-}
-
 // returns folder that contains package with chip architecture,
 // build and project types specified by script parameters
-function getPackage (path) {
+function getPackage (path, projecttype, buildtype, buildarchs) {
     wscript_shell.CurrentDirectory = path;
 
     // check if AppPackages created
     if (fso.FolderExists(path + '\\AppPackages')) {
         var out_folder = fso.GetFolder(path + '\\AppPackages');
 
-        // Get preferred chip architecture, build and project types
-        var chipArch = getChipArchitecture();
-        var buildType = getBuildType();
-        var projectType = getProjectType();
+        // set default values
+        // because "store81" and "store" are synonims, replace "store81" with "store" due to appx naming.
+        projecttype = projecttype != "store81" ? projecttype : "store";
+        buildtype = buildtype ? buildtype : "debug";
+        buildarchs = buildarchs ? buildarchs : ["anycpu"];
+        // if "Any CPU" is arch to deploy, remove space because folder name will contain
+        // smth like CordovaApp_0.0.1.0_AnyCPU_Test
+        var buildarch = buildarchs[0].toLowerCase() == "any cpu" ? "anycpu" : buildarchs[0].toLowerCase();
 
         // Iterating over AppPackages subfolders with built packages
         var subFolders = new Enumerator(out_folder.SubFolders);
         for(;!subFolders.atEnd();subFolders.moveNext())
         {
             var subFolder = subFolders.item();
-            var appx_props,
-                appxProjectType,
-                appxChipArch,
-                appxBuildType;
-
+            var appx_props = /^.*\.(Phone|Store|Store80)_((?:\d\.)*\d)_(AnyCPU|x64|x86|ARM)(?:_(Debug))?_Test$/.exec(subFolder.Name);
             // This RE matches with package folder name like:
             // CordovaApp.Phone_0.0.1.0_AnyCPU_Debug_Test
             // Group:     ( 1 ) (  2  ) (  3 ) ( 4 )
-            appx_props = /^.*\.(Phone|Store|Store80)_((?:\d\.)*\d)_(AnyCPU|x64|x86|ARM)(?:_(Debug))?_Test$/.exec(subFolder.Name);
             if (appx_props){
-                appxProjectType = appx_props[1].toLowerCase();
-                appxChipArch = appx_props[3].toLowerCase();
-                appxBuildType = appx_props[4] ? appx_props[4].toLowerCase() : "release";
-            }
-
-            // compare chip architecture and build type of package found with
-            // chip architecture and build type specified in script arguments
-            if (appxChipArch == chipArch && appxBuildType == buildType && appxProjectType == projectType) {
-                // Appropriate package found
-                Log('Appropriate package found at ' + subFolder.Path);
-                return subFolder.Path;
+                var appx_projecttype = appx_props[1].toLowerCase();
+                var appx_buildarch = appx_props[3].toLowerCase();
+                var appx_buildtype = appx_props[4] ? appx_props[4].toLowerCase() : "release";
+                // compare chip architecture and build type of package found with
+                // chip architecture and build type specified in script arguments
+                if (appx_buildarch == buildarch && appx_buildtype == buildType && appx_projecttype == projecttype) {
+                    // Appropriate package found
+                    Log('Appropriate package found at ' + subFolder.Path);
+                    return subFolder.Path;
+                }
             }
         }
     }
@@ -217,11 +164,11 @@ function getPackage (path) {
 }
 
 // launches project on local machine
-function localMachine(path) {
+function localMachine(path, projecttype, buildtype, buildarchs) {
     Log('Deploying to local machine ...');
     makeAppStoreUtils(path);
     uninstallApp(path);
-    installApp(path);
+    installApp(path, projecttype, buildtype, buildarchs);
 
     var command = "powershell -ExecutionPolicy RemoteSigned \". " + WINDOWS_STORE_UTILS + "; Start-Locally '" + PACKAGE_NAME + "'\"";
     Log(command);
@@ -229,13 +176,13 @@ function localMachine(path) {
 }
 
 // launches project on device
-function device(path) {
-    if (project_type != PHONE) {
+function device(path, projecttype, buildtype, buildarchs) {
+    if (projecttype != "phone") {
         // on windows8 platform we treat this command as running application on local machine
-        localMachine(path);
+        localMachine(path, projecttype, buildtype, buildarchs);
     } else {
         Log('Deploying to device ...');
-        var appxFolder = getPackage(path);
+        var appxFolder = getPackage(path, projecttype, buildtype, buildarchs);
         var appxPath = appxFolder + '\\' + fso.GetFolder(appxFolder).Name.split('_Test').join('') + '.appx';
         var cmd = '"' + APP_DEPLOY_UTILS + '" /installlaunch "' + appxPath + '" /targetdevice:de';
         Log(cmd);
@@ -244,13 +191,13 @@ function device(path) {
 }
 
 // launches project on emulator
-function emulator(path) {
-    if (project_type != PHONE) {
+function emulator(path, projecttype, buildtype, buildarchs) {
+    if (projecttype != "phone") {
         // TODO: currently we can run application on local machine only
-        localMachine(path);
+        localMachine(path, projecttype, buildtype, buildarchs);
     } else {
         Log('Deploying to emulator ...');
-        var appxFolder = getPackage(path);
+        var appxFolder = getPackage(path, projecttype, buildtype, buildarchs);
         var appxPath = appxFolder + '\\' + fso.GetFolder(appxFolder).Name.split('_Test').join('') + '.appx';
         var cmd = '"' + APP_DEPLOY_UTILS + '" /installlaunch "' + appxPath + '" /targetdevice:xd';
         Log(cmd);
@@ -259,8 +206,8 @@ function emulator(path) {
 }
 
 // builds and launches the project on the specified target
-function target(path) {
-    if (project_type != PHONE){
+function target(path, projecttype, buildtype, buildarchs, buildtarget) {
+    if (projecttype != "phone"){
         Log('ERROR: not supported yet', true);
         Log('DEPLOY FAILED.', true);
         WScript.Quit(2);
@@ -290,18 +237,18 @@ function target(path) {
                     var deviceMatch = lines[line].match(deviceRe);
                     // check that line contains device id and name
                     // and match with 'target' parameter of script
-                    if (deviceMatch && deviceMatch[1] == device_id) {
+                    if (deviceMatch && deviceMatch[1] == buildtarget) {
                         // start deploy to target specified
-                        var appxFolder = getPackage(path);
+                        var appxFolder = getPackage(path, projecttype, buildtype, buildarchs);
                         var appxPath = appxFolder + '\\' + fso.GetFolder(appxFolder).Name.split('_Test').join('') + '.appx';
-                        Log('Deploying to target with id: ' + device_id);
+                        Log('Deploying to target with id: ' + buildtarget);
                         cmd = '"' + APP_DEPLOY_UTILS + '" /installlaunch "' + appxPath + '" /targetdevice:' + deviceMatch[1];
                         Log(cmd);
                         exec_verbose(cmd);
                         return;
                     }
                 }
-                Log('Error : target ' + device_id + ' was not found.', true);
+                Log('Error : target ' + buildtarget + ' was not found.', true);
                 Log('DEPLOY FAILED.', true);
                 WScript.Quit(2);
             }
@@ -335,12 +282,12 @@ function uninstallApp(path) {
 }
 
 // executes store application installation script (Add-AppDevPackage.ps1)
-function installApp(path) {
+function installApp(path, projecttype, buildtype, buildarchs) {
 
     Log("Attempt to install application...");
     Log("\tDirectory : " + path);
 
-    var command = "powershell -ExecutionPolicy RemoteSigned \". " + WINDOWS_STORE_UTILS + "; Install-App " + "'" + getPackage(path) + "\\Add-AppDevPackage.ps1" + "'\"";
+    var command = "powershell -ExecutionPolicy RemoteSigned \". " + WINDOWS_STORE_UTILS + "; Install-App " + "'" + getPackage(path, projecttype, buildtype, buildarchs) + "\\Add-AppDevPackage.ps1" + "'\"";
     Log(command);
     exec_verbose(command);
     return;
@@ -348,118 +295,141 @@ function installApp(path) {
 
 // builds project with arguments specified
 // all arguments passes directly into build script without changes
-function build(path) {
+function build(path, buildtype, buildarchs) {
+    // if --nobuild flag is specified, no action required here
+    if (noBuild) return;
 
-    switch (build_type) {
-        // debug & release configurations are specified 
-        case DEBUG :
-        case RELEASE :
-            exec_verbose('%comspec% /c "' + ROOT + '\\cordova\\build" ' + joinArgs());
-            break;
-        case NO_BUILD :
-            break;
-        case NONE :
-            Log("WARNING: [ --debug | --release | --nobuild ] not specified, defaulting to --debug.");
-            exec_verbose('%comspec% /c "' + ROOT + '\\cordova\\build" ' + joinArgs());
-            break;
-        default :
-            Log("Build option not recognized: " + build_type, true);
-            WScript.Quit(2);
-            break;
+    var cmd = '%comspec% /c ""' + path + '\\cordova\\build"';
+    if (buildtype){
+        cmd += " --" + buildtype;
     }
+    if (buildarchs){
+        cmd += ' --archs="' + buildarchs.join(",") + '"';
+    }
+    cmd += '"';
+    exec_verbose(cmd);
 }
 
-function run(path) {
-    switch(deploy_type) {
-        case EMULATOR :
-            build(path);
-            emulator(path);
+function run(path, projecttype, buildtype, buildarchs, buildtarget) {
+    build(path, buildtype, buildarchs);
+    switch (buildtarget){
+        case "device":
+            device(path, projecttype, buildtype, buildarchs);
             break;
-        case DEVICE :
-            build(path);
-            device(path);
+        case "emulator":
+            emulator(path, projecttype, buildtype, buildarchs);
             break;
-        case TARGET :
-            build(path);
-            target(path);
-            break;
-        case NONE :
+        case null:
             Log("WARNING: [ --target=<ID> | --emulator | --device ] not specified, defaulting to --emulator");
-            build(path);
-            emulator(path);
+            emulator(path, projecttype, buildtype, buildarchs);
             break;
-        default :
-            Log("Deploy option not recognized: " + deploy_type, true);
-            WScript.Quit(2);
+        default:
+            // if buildTarget is neither "device", "emulator" or null
+            // then it is a name of target
+            target(path, projecttype, buildtype, buildarchs, buildtarget);
             break;
     }
 }
 
-// returns script arguments, joined into string
-function joinArgs () {
-    var argArray = [];
-    for (var i = 0; i < args.Length; i++) {
-        argArray[i] = args.Item(i);
-    }
-    return argArray.join(" ");
-}
-
-// parses script arguments and sets script's build_type/deploy_type variables
+// parses script args and set global variables for build/deploy
+// throws error if unknown argument specified.
 function parseArgs () {
 
+    // return build type, specified by input string, or null, if not build type parameter
+    function getBuildType (arg) {
+        arg = arg.toLowerCase();
+        if (arg == "--debug" || arg == "-d") {
+            return "debug";
+        }
+        else if (arg == "--release" || arg == "-r") {
+            return "release";
+        }
+        else if (arg == "--nobuild") {
+            noBuild = true;
+            return true;
+        }
+        return null;
+    }
+
+    // returns build architectures list, specified by input string
+    // or null if nothing specified, or not --archs parameter
+    function getBuildArchs (arg) {
+        arg = arg.toLowerCase();
+        var archs = /--archs=(.+)/.exec(arg);
+        if (archs) {
+            // if architectures list contains commas, suppose that is comma delimited
+            if (archs[1].indexOf(',') != -1){
+                return archs[1].split(',');
+            }
+            // else space delimited
+            return archs[1].split(/\s/);
+        }
+        return null;
+    }
+
+    // returns deploy target, specified by input string or null, if not deploy target parameter
+    function getBuildTarget (arg) {
+        arg = arg.toLowerCase();
+        if (arg == "--device"){
+            return "device";
+        }
+        else if (arg == "--emulator"){
+            return "emulator";
+        }
+        else {
+            var target = /--target=(.*)/.exec(arg);
+            if (target){
+                return target[1];
+            }
+        }
+        return null;
+    }
+
+    // returns project type, specified by input string or null, if not project type parameter
+    function getProjectType (arg) {
+        arg = arg.toLowerCase();
+        if (arg == "--phone"){
+            return "phone";
+        }
+        else if (arg == "--store80"){
+            return "store80";
+        }
+        else if (arg == "--store81" || arg == "--store"){
+            return "store";
+        }
+        return null;
+    }
+
+    for (var i = 0; i < args.Length; i++) {
+        if (getBuildType(args(i))) {
+            buildType = getBuildType(args(i));
+        } else if (getBuildArchs(args(i))) {
+            buildArchs = getBuildArchs(args(i));
+        } else if (getBuildTarget(args(i))){
+            buildTarget = getBuildTarget(args(i));
+        } else if (getProjectType(args(i))){
+            projectType = getProjectType(args(i));
+        } else {
+            Log("Error: \"" + args(i) + "\" is not recognized as a build/deploy option", true);
+            Usage();
+            WScript.Quit(2);
+        }
+    }
+}
+
+if (args.Count() > 0) {
     // support help flags
     if (args(0) == "--help" || args(0) == "/?" ||
             args(0) == "help" || args(0) == "-help" || args(0) == "/help") {
         Usage();
         WScript.Quit(2);
     }
-
-    var argString = joinArgs();
-
-    // Check for build type
-    if (argString.indexOf('--release') > -1){
-        build_type = RELEASE;
-    } else if (argString.indexOf('--debug') > -1) {
-        build_type = DEBUG;
-    } else if (argString.indexOf('--nobuild') > -1) {
-        build_type = NO_BUILD;
+    else if (!fso.FolderExists(ROOT)) {
+        Log('Error: Project directory not found,', true);
+        Usage();
+        WScript.Quit(2);
     }
-
-    // Check for deploy destination
-    if (argString.indexOf("--emulator") > -1 || argString.indexOf("-e") > -1) {
-        deploy_type = EMULATOR;
-    }
-    else if (argString.indexOf("--device") > -1 || argString.indexOf("-d") > -1) {
-        deploy_type = DEVICE;
-    }
-    else if (argString.indexOf("--target=") > -1) {
-        device_id = argString.split("--target=")[1].split(' ')[0];
-        deploy_type = TARGET;
-    }
-
-    // Check for project type
-    if (argString.indexOf("--phone") > -1) {
-        project_type = PHONE;
-    }
-    else if (argString.indexOf("--store80") > -1) {
-        project_type = STORE80;
-    }
-    else if (argString.indexOf("--store") > -1 || argString.indexOf("--store81") > -1) {
-        project_type = STORE81;
-    }
-}
-
-// check root folder exists
-if (!fso.FolderExists(ROOT)) {
-    Log('Error: Project directory not found,', true);
-    Usage();
-    WScript.Quit(2);
-}
-
-if (args.Count() > 0) {
-
-    // parse arguments
     parseArgs();
 }
 
-run(ROOT);
+run(ROOT, projectType, buildType, buildArchs, buildTarget);
