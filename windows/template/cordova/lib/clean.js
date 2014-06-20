@@ -45,17 +45,21 @@ function Log(msg, error) {
 
 // cleans any generated files in the cordova project
 function clean_project(path) {
-    delete_if_exists(path + "\\bld");
-    delete_if_exists(path + "\\bin");
+    delete_if_exists(path + "\\Windows\\bld");
+    delete_if_exists(path + "\\WindowsPhone\\bld");
+    delete_if_exists(path + "\\Windows\\bin");
+    delete_if_exists(path + "\\WindowsPhone\\bin");
 }
 
 
 // deletes the path element if it exists
 function delete_if_exists(path) {
     if (fso.FolderExists(path)) {
+        Log('Deleting folder: ' + path);
         fso.DeleteFolder(path);
     }
     else if (fso.FileExists(path)) {
+        Log('Deleting file: ' + path);
         fso.DeleteFile(path);
     }
 }

@@ -133,7 +133,7 @@ function delete_if_exists(path) {
 
 // creates new project in path, with the given package and app name
 function create(destPath, namespace, name, guid) {
-    Log("Creating Cordova Windows 8 Project:");
+    Log("Creating Cordova Windows Project:");
     Log("\tApp Name : " + name);
     Log("\tNamespace : " + namespace);
     Log("\tPath : " + destPath);
@@ -147,13 +147,20 @@ function create(destPath, namespace, name, guid) {
     var newProjGuid = guid || genGuid();
 
     // replace the guid in the AppManifest and deploy script
-    replaceInFile(destPath + "\\package.appxmanifest","$guid1$",newProjGuid);
-    replaceInFile(destPath + "\\cordova\\lib\\deploy.js","$guid1$",newProjGuid);
-    replaceInFile(destPath + "\\cordova\\lib\\deploy.js","$namespace$",namespace);
+    replaceInFile(destPath + "\\package.store.appxmanifest",/\$guid1\$/g,newProjGuid);
+    replaceInFile(destPath + "\\package.store80.appxmanifest",/\$guid1\$/g,newProjGuid);
+    replaceInFile(destPath + "\\package.phone.appxmanifest",/\$guid1\$/g,newProjGuid);
+
+    replaceInFile(destPath + "\\cordova\\lib\\deploy.js",/\$guid1\$/g,newProjGuid);
+    replaceInFile(destPath + "\\cordova\\lib\\deploy.js",/\$namespace\$/g,namespace);
 
     // replace $safeprojectname$ and $projectname$ in AppManifest
-    replaceInFile(destPath + "\\package.appxmanifest",/\$safeprojectname\$/g,safeProjectName);
-    replaceInFile(destPath + "\\package.appxmanifest",/\$projectname\$/g,name);
+    replaceInFile(destPath + "\\package.store.appxmanifest",/\$safeprojectname\$/g,safeProjectName);
+    replaceInFile(destPath + "\\package.store80.appxmanifest",/\$safeprojectname\$/g,safeProjectName);
+    replaceInFile(destPath + "\\package.phone.appxmanifest",/\$safeprojectname\$/g,safeProjectName);
+    replaceInFile(destPath + "\\package.store.appxmanifest",/\$projectname\$/g,name);
+    replaceInFile(destPath + "\\package.store80.appxmanifest",/\$projectname\$/g,name);
+    replaceInFile(destPath + "\\package.phone.appxmanifest",/\$projectname\$/g,name);
 
 
     // cleanup

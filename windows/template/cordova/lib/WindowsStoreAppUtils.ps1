@@ -112,5 +112,5 @@ function Start-Locally {
 
     add-type -TypeDefinition $code
     $appActivator = new-object StoreAppRunner.ApplicationActivationManager
-    $appActivator.ActivateApplication($applicationUserModelId,$null,[StoreAppRunner.ActivateOptions]::None,[ref]0)
+    $appActivator.ActivateApplication($applicationUserModelId,$null,[StoreAppRunner.ActivateOptions]::None,[ref]0) | Out-Null
 }

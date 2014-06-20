@@ -62,7 +62,7 @@ function Log(msg, error) {
 function exec_verbose(command) {
     //Log("Command: " + command);
     var oShell=wscript_shell.Exec(command);
-    while (oShell.Status == 0) {
+    while (oShell.Status === 0) {
         //Wait a little bit so we're not super looping
         WScript.sleep(100);
         //Print any stdout output from the script
@@ -86,7 +86,7 @@ function is_cordova_project(path) {
         var proj_folder = fso.GetFolder(path);
         var proj_files = new Enumerator(proj_folder.Files);
         for (;!proj_files.atEnd(); proj_files.moveNext()) {
-            if (fso.GetExtensionName(proj_files.item()) == 'jsproj') {
+            if (fso.GetExtensionName(proj_files.item()) == 'shproj') {
                 return true;
             }
         }
@@ -99,29 +99,19 @@ function escapePath(path) {
     return '"' + path + '"';
 }
 
-// returns full path to .sln file
-function getSolutionDir(path) {
-    var proj_folder = fso.GetFolder(path);
-    var proj_files = new Enumerator(proj_folder.Files);
-    for (;!proj_files.atEnd(); proj_files.moveNext()) {
-        if (fso.GetExtensionName(proj_files.item()) == 'sln') {
-            return path + '\\' + fso.GetFileName(proj_files.item());
-        }
-    }
-
-    return null;
-}
-
-// returns full path to msbuild tools required to build the project
-function getMSBuildToolsPath(path) {
+// returns full path to msbuild tools required to build the project and tools version
+function getMSBuildTools() {
     // use the latest version of the msbuild tools available on this machine
     var toolsVersions = ['12.0', '4.0'];
-    for (idx in toolsVersions) {
+    for (var idx in toolsVersions) {
         try {
-            return wscript_shell.RegRead('HKLM\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\' + toolsVersions[idx] + '\\MSBuildToolsPath');
+            return  {
+                version: toolsVersions[idx],
+                path: wscript_shell.RegRead('HKLM\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\' + toolsVersions[idx] + '\\MSBuildToolsPath')
+            };
         } catch(err) {}
     }
-    Log('MSBuild tools have not been found. Please install Microsoft Visual Studio 2012 or later', true);
+    Log('MSBuild tools have not been found. Please install Microsoft Visual Studio 2013 or later', true);
     WScript.Quit(2);
 }
 
@@ -142,23 +132,31 @@ function build_appx(path, buildtype, buildarchs) {
 
         var buildarch = buildarchs[i];
 
-        Log("\nBuilding Cordova Windows 8 Project:");
+        Log("Building Cordova Windows Project:");
         Log("\tConfiguration : " + buildtype);
         Log("\tPlatform      : " + buildarch);
         Log("\tDirectory     : " + path);
 
         try {
             wscript_shell.CurrentDirectory = path;
-            
-            var MSBuildToolsPath = getMSBuildToolsPath(path);
-            Log("\tMSBuildToolsPath: " + MSBuildToolsPath);
-            var solutionDir = getSolutionDir(path);
-            var buildCommand = escapePath(MSBuildToolsPath + 'msbuild') +
-                    ' ' + escapePath(solutionDir) +
-                        ' /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal' +
-                        ' /nologo' +
-                        ' /p:Configuration=' + buildtype +
-                        ' /p:Platform="' + buildarch + '"';
+
+            // Get the latest build tools available on this machine
+            var msbuild = getMSBuildTools();
+            Log("\tMSBuildToolsPath: " + msbuild.path);
+
+            var solutionFilePath = path+'\\CordovaApp.sln'; // default sln file
+
+            if (msbuild.version == '4.0') {
+                Log("\r\nWarning. Windows 8.1 and Windows Phone 8.1 target platforms are not supported on this development machine and will be skipped.");
+                Log("Please install OS Windows 8.1 and Visual Studio 2013 Update2 in order to build for Windows 8.1 and Windows Phone 8.1.\r\n");
+                solutionFilePath = path+'\\CordovaApp.vs2012.sln';
+            }
+
+            var buildCommand = escapePath(msbuild.path + 'msbuild') +
+                ' ' + escapePath(solutionFilePath) +
+                ' /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo' +
+                ' /p:Configuration=' + buildtype +
+                ' /p:Platform="' + buildarch + '"';
             
             // hack to get rid of 'Access is denied.' error when running the shell w/ access to C:\path..
             buildCommand = 'cmd /c "' + buildCommand + '"';
@@ -167,6 +165,7 @@ function build_appx(path, buildtype, buildarchs) {
                 // msbuild failed
                 WScript.Quit(2);
             }
+            return "Success";
         } catch (err) {
             Log("Build failed: " + err.message, true);
         }
@@ -236,15 +235,17 @@ function parseArgs () {
         } else if (getBuildArchs(args(i))) {
             buildArchs = getBuildArchs(args(i));
         } else {
-            Log("Error: \"" + args(i) + "\" is not recognized as a build option", true);
-            Usage();
-            WScript.Quit(2);
+            // Skip unknown args. Build could be called from run/emulate commands,
+            // so there could be additional args (specific for run/emulate)
+
+            // Log("Error: \"" + args(i) + "\" is not recognized as a build option", true);
+            // Usage();
+            // WScript.Quit(2);
         }
     }
 }
 
-var result;
-var isRelease = false;
+Log("");
 
 if (args.Count() > 0) {
     // support help flags
