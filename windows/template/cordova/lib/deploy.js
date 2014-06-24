@@ -129,7 +129,7 @@ function getPackage (path, projecttype, buildtype, buildarchs) {
 
         // set default values
         // because "store81" and "store" are synonims, replace "store81" with "store" due to appx naming.
-        projecttype = projecttype != "store81" ? projecttype : "store";
+        projecttype = projecttype && projecttype != "store81" ? projecttype : "store";
         buildtype = buildtype ? buildtype : "debug";
         buildarchs = buildarchs ? buildarchs : ["anycpu"];
         // if "Any CPU" is arch to deploy, remove space because folder name will contain
@@ -151,7 +151,7 @@ function getPackage (path, projecttype, buildtype, buildarchs) {
                 var appx_buildtype = appx_props[4] ? appx_props[4].toLowerCase() : "release";
                 // compare chip architecture and build type of package found with
                 // chip architecture and build type specified in script arguments
-                if (appx_buildarch == buildarch && appx_buildtype == buildType && appx_projecttype == projecttype) {
+                if (appx_buildarch == buildarch && appx_buildtype == buildtype && appx_projecttype == projecttype) {
                     // Appropriate package found
                     Log('Appropriate package found at ' + subFolder.Path);
                     return subFolder.Path;
