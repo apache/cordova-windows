@@ -175,6 +175,32 @@ function localMachine(path, projecttype, buildtype, buildarchs) {
     exec_verbose(command);
 }
 
+function readAppIdWindowsPhone() {
+    var manifestPath = ROOT + '\\package.phone.appxmanifest';
+
+    if (!fso.FileExists(manifestPath)) {
+        Log('Error: ' + manifestPath + ' does not exist', true);
+        WScript.Quit(2);
+    }
+    var manifestFile = fso.OpenTextFile(manifestPath, 1);
+    var manifest = manifestFile.ReadAll();
+    manifestFile.Close();
+    return /PhoneProductId="(.*?)"/i.exec(manifest)[1];
+}
+
+function deployWindowsPhone(appxPath, target) {
+    // /installlaunch option sometimes fails with 'Error: The parameter is incorrect.'
+    // so we use separate steps to /install and then /launch
+    // install
+    var cmd = '"' + APP_DEPLOY_UTILS + '" /install "' + appxPath + '" /targetdevice:' + target;
+    Log(cmd);
+    exec_verbose(cmd);
+    // launch
+    cmd = '"' + APP_DEPLOY_UTILS + '" /launch "' + readAppIdWindowsPhone() + '" /targetdevice:' + target;
+    Log(cmd);
+    exec_verbose(cmd);
+}
+
 // launches project on device
 function device(path, projecttype, buildtype, buildarchs) {
     if (projecttype != "phone") {
@@ -184,9 +210,7 @@ function device(path, projecttype, buildtype, buildarchs) {
         Log('Deploying to device ...');
         var appxFolder = getPackage(path, projecttype, buildtype, buildarchs);
         var appxPath = appxFolder + '\\' + fso.GetFolder(appxFolder).Name.split('_Test').join('') + '.appx';
-        var cmd = '"' + APP_DEPLOY_UTILS + '" /installlaunch "' + appxPath + '" /targetdevice:de';
-        Log(cmd);
-        exec_verbose(cmd);
+        deployWindowsPhone(appxPath, 'de');
     }
 }
 
@@ -199,9 +223,7 @@ function emulator(path, projecttype, buildtype, buildarchs) {
         Log('Deploying to emulator ...');
         var appxFolder = getPackage(path, projecttype, buildtype, buildarchs);
         var appxPath = appxFolder + '\\' + fso.GetFolder(appxFolder).Name.split('_Test').join('') + '.appx';
-        var cmd = '"' + APP_DEPLOY_UTILS + '" /installlaunch "' + appxPath + '" /targetdevice:xd';
-        Log(cmd);
-        exec_verbose(cmd);
+        deployWindowsPhone(appxPath, 'xd');
     }
 }
 
@@ -242,9 +264,7 @@ function target(path, projecttype, buildtype, buildarchs, buildtarget) {
                         var appxFolder = getPackage(path, projecttype, buildtype, buildarchs);
                         var appxPath = appxFolder + '\\' + fso.GetFolder(appxFolder).Name.split('_Test').join('') + '.appx';
                         Log('Deploying to target with id: ' + buildtarget);
-                        cmd = '"' + APP_DEPLOY_UTILS + '" /installlaunch "' + appxPath + '" /targetdevice:' + deviceMatch[1];
-                        Log(cmd);
-                        exec_verbose(cmd);
+                        deployWindowsPhone(appxPath, deviceMatch[1]);
                         return;
                     }
                 }
