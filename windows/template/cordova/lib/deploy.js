@@ -364,10 +364,6 @@ function parseArgs () {
         else if (arg == "--release" || arg == "-r") {
             return "release";
         }
-        else if (arg == "--nobuild") {
-            noBuild = true;
-            return true;
-        }
         return null;
     }
 
@@ -420,6 +416,14 @@ function parseArgs () {
         return null;
     }
 
+    // returns true if nobuild option is specified else false
+    function getNoBuildOption (arg) {
+        if (arg.toLowerCase() == "--nobuild") {
+            return true;
+        }
+        return false;
+    }
+
     for (var i = 0; i < args.Length; i++) {
         if (getBuildType(args(i))) {
             buildType = getBuildType(args(i));
@@ -429,6 +433,8 @@ function parseArgs () {
             buildTarget = getBuildTarget(args(i));
         } else if (getProjectType(args(i))){
             projectType = getProjectType(args(i));
+        } else if (getNoBuildOption(args(i))) {
+            noBuild = getNoBuildOption(args(i));
         } else {
             Log("Error: \"" + args(i) + "\" is not recognized as a build/deploy option", true);
             Usage();
