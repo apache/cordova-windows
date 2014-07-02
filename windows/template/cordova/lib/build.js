@@ -66,7 +66,7 @@ function exec_verbose(command) {
         //Wait a little bit so we're not super looping
         WScript.sleep(100);
         //Print any stdout output from the script
-        if (!oShell.StdOut.AtEndOfStream) {
+        while (!oShell.StdOut.AtEndOfStream) {
             var line = oShell.StdOut.ReadLine();
             Log(line);
         }
