@@ -114,36 +114,6 @@ Function UpdateManifest ($manifestFile)
     }
   }
 
-  # Splash screen support
-  $configSplashScreen = $config.SelectNodes('//*[local-name()="preference"][@name="SplashScreen"]').value
-  if($configSplashScreen) 
-  {
-    "Setting SplashScreen = $configSplashScreen"
-    $imgPath = $null;
-
-    # do search relative to platform and app folders
-    foreach ($testPath in @($configSplashScreen, "..\..\$configSplashScreen")) 
-    {
-        $testPath = join-path $platformRoot $testPath
-
-        if (Test-Path -PathType Leaf $testPath)
-        {
-            $imgPath = $testPath;
-            break
-        }
-    }
-
-    if ($imgPath -eq $null)
-    {
-        "Unable to locate splash image: $configSplashScreen"
-    } else {
-        # Default splash screen is stored as 'images\splashscreen.png'
-        # http://msdn.microsoft.com/en-us/library/windows/apps/hh465346.aspx
-        Copy-Item $imgPath -Destination (join-path $platformRoot "images\splashscreen.png")
-    }
-
-  }
-
   # Format splash screen background color to windows8 format
   $configSplashScreenBGColor = $config.SelectNodes('//*[local-name()="preference"][@name="SplashScreenBackgroundColor"]').value
   if($configSplashScreenBGColor) 
@@ -211,6 +181,104 @@ Function UpdateManifest ($manifestFile)
   $xmlWriter.Close()
 }
 
+Function CopyImage($src, $dest) 
+{
+  $resolvedPath = $null;
+
+  # do search relative to platform and app folders
+  foreach ($testPath in @($src, "..\..\$src")) 
+  {
+    $testPath = join-path $platformRoot $testPath
+    if (Test-Path -PathType Leaf $testPath)
+    {
+      $resolvedPath = $testPath;
+      break
+    }
+  }
+
+  if ($resolvedPath -eq $null)
+  {
+      Write-Host "Image doesn't exist: $src"
+      return
+  }
+  Copy-Item $resolvedPath -Destination (join-path $platformRoot $dest)
+}
+
+Function UpdateAssets ()
+{
+  $configFile = "$platformRoot\config.xml"
+  [xml]$config = Get-Content $configFile
+
+  # Splash screen images
+  $splashScreens = $config.SelectNodes('//*[local-name()="splash"]')
+
+  foreach ($splash in $splashScreens)
+  {
+    $width = $splash.getAttribute("width")
+    $height= $splash.getAttribute("height")
+    $src = $splash.getAttribute("src")
+    if ($width -eq 620 -and $height -eq 300) {
+      CopyImage $src "images/splashscreen.png"
+      continue
+    }
+    if ($width -eq 1152 -and $height -eq 1920) {
+      CopyImage $src "images/SplashScreen.scale-240.png"
+      continue
+    }
+     Write-Host "Unknown image ($src) size, skip"
+  }
+
+  # App icons
+  $configIcons= $config.SelectNodes('//*[local-name()="icon"]')
+
+  foreach ($icon in $configIcons)
+  {
+    $width = $icon.getAttribute("width")
+    $height= $icon.getAttribute("height")
+    $src = $icon.getAttribute("src")
+
+    if ($width -eq 150) {
+      CopyImage $src "images/logo.png"
+      continue
+    }
+    if ($width -eq 30) {
+      CopyImage $src "images/smalllogo.png"
+      continue
+    }
+    if ($width -eq 50) {
+      CopyImage $src "images/storelogo.png"
+      continue
+    }
+    if ($width -eq 120) {
+      CopyImage $src "images/StoreLogo.scale-240.png"
+      continue
+    }
+
+    if ($width -eq 106) {
+      CopyImage $src "images/Square44x44Logo.scale-240.png"
+      continue
+    }
+    if ($width -eq 170) {
+      CopyImage $src "images/Square71x71Logo.scale-240.png"
+      continue
+    }
+    if ($width -eq 360) {
+      CopyImage $src "images/Square150x150Logo.scale-240.png"
+      continue
+    }
+    if ($width -eq 744 -and $height -eq 360) {
+      CopyImage $src "images/Wide310x150Logo.scale-240.png"
+      continue
+    }
+
+     Write-Host "Unknown image ($src) size, skip"
+  }
+
+}
+
 UpdateManifest "$platformRoot\package.store.appxmanifest"
 UpdateManifest "$platformRoot\package.store80.appxmanifest"
 UpdateManifest "$platformRoot\package.phone.appxmanifest"
+
+# replace splash screen images and icons
+UpdateAssets
