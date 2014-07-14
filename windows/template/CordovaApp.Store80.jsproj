@@ -88,7 +88,7 @@
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />
   <PropertyGroup>
     <PreBuildEvent>
-      Powershell -ExecutionPolicy RemoteSigned Unblock-File '$(ProjectDir)\cordova\lib\ApplyPlatformConfig.ps1'; Powershell -File '$(ProjectDir)\cordova\lib\ApplyPlatformConfig.ps1' '$(ProjectDir)\';
+      Powershell -ExecutionPolicy RemoteSigned Unblock-File '..\..\..\..\cordova\lib\ApplyPlatformConfig.ps1'; Powershell -File '..\..\..\..\cordova\lib\ApplyPlatformConfig.ps1' '..\..\..\..\';
     </PreBuildEvent>
   </PropertyGroup>
 </Project>

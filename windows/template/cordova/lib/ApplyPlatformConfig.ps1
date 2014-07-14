@@ -27,8 +27,8 @@ Write-Host "Applying Platform Config..."
 Function UpdateManifest ($manifestFile)
 {
   $configFile = "$platformRoot\config.xml"
-  [xml]$config = Get-Content $configFile
-  [xml]$manifest = Get-Content $manifestFile
+  [xml]$config = Get-Content $configFile -Encoding UTF8
+  [xml]$manifest = Get-Content $manifestFile -Encoding UTF8
 
   # Replace app start page with config.xml setting.
 

@@ -15,11 +15,11 @@
 :: specific language governing permissions and limitations
 :: under the License
 @ECHO OFF
-SET full_path=%~dp0
-IF EXIST "%full_path%lib\deploy.js" (
-    cscript "%full_path%lib\deploy.js" %* //nologo
+SET script_path="%~dp0run"
+IF EXIST %script_path% (
+        node %script_path% %*
 ) ELSE (
     ECHO.
-    ECHO ERROR: Could not find 'deploy.js' in cordova/lib, aborting...>&2
+    ECHO ERROR: Could not find 'build' script in 'cordova' folder, aborting...>&2
     EXIT /B 1
 )

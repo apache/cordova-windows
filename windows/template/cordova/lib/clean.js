@@ -17,75 +17,14 @@
        under the License.
 */
 
+var Q     = require('q'),
+    path  = require('path'),
+    shell = require('shelljs');
 
-var fso = WScript.CreateObject('Scripting.FileSystemObject');
-var wscript_shell = WScript.CreateObject("WScript.Shell");
-var args = WScript.Arguments;
-// working dir
-var ROOT = WScript.ScriptFullName.split('\\cordova\\lib\\clean.js').join('');
-
-
-// help function
-function Usage() {
-    Log("");
-    Log("Usage: clean");
-    Log("   - deletes all generated files in project");
-    Log("");
-}
-
-//  logs to stdout or stderr
-function Log(msg, error) {
-    if (error) {
-        WScript.StdErr.WriteLine(msg);
-    }
-    else {
-        WScript.StdOut.WriteLine(msg);
-    }
-}
-
-// cleans any generated files in the cordova project
-function clean_project(path) {
-    delete_if_exists(path + "\\Windows\\bld");
-    delete_if_exists(path + "\\WindowsPhone\\bld");
-    delete_if_exists(path + "\\Windows\\bin");
-    delete_if_exists(path + "\\WindowsPhone\\bin");
-}
-
-
-// deletes the path element if it exists
-function delete_if_exists(path) {
-    if (fso.FolderExists(path)) {
-        Log('Deleting folder: ' + path);
-        fso.DeleteFolder(path);
-    }
-    else if (fso.FileExists(path)) {
-        Log('Deleting file: ' + path);
-        fso.DeleteFile(path);
-    }
-}
-
-
-if (args.Count() > 0) {
-    // support help flags
-    if (args(0) == "--help" || args(0) == "/?" ||
-            args(0) == "help" || args(0) == "-help" || args(0) == "/help") {
-        Usage();
-        WScript.Quit(2);
-    }
-    else if (args.Count() > 1) {
-        Log("Error: Too many arguments.", true);
-        Usage();
-        WScript.Quit(2);
-    }
-}
-else {
-   if (fso.FolderExists(ROOT)) {
-        Log("Cleaning cordova project...");
-        clean_project(ROOT);
-    }
-    else {
-        Log("Error: Project directory not found,", true);
-        Usage();
-        WScript.Quit(2);
-    }
-}
+// cleans the project, removes AppPackages and build folders.
+module.exports.run = function (platformpath) {
+    ['AppPackages', 'build'].forEach(function(dir) {
+        shell.rm('-rf', path.join(platformpath, dir));
+    });
+    return Q.resolve();
+};

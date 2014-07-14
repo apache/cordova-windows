@@ -15,5 +15,11 @@
 :: specific language governing permissions and limitations
 :: under the License
 @ECHO OFF
-ECHO Error! Windows 8 Cordova CLI tools do not support multiple devices currently.
-EXIT /B 1
+SET script_path="%~dp0package.js"
+IF EXIST %script_path% (
+        node -e "require('./%script_path%').listDevices().done(function(devices){console.log(devices)})"
+) ELSE (
+    ECHO.
+    ECHO ERROR: Could not find 'package' script in 'cordova/lib' folder, aborting...>&2
+    EXIT /B 1
+)
