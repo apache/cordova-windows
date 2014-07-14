@@ -1,5 +1,5 @@
-﻿// Platform: windows8
-// 3.6.0-dev-59ff215
+﻿// Platform: windows
+// 3.6.0-dev-b3e7f4d
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
  under the License.
 */
 ;(function() {
-var CORDOVA_JS_BUILD_LABEL = '3.6.0-dev-59ff215';
+var CORDOVA_JS_BUILD_LABEL = '3.6.0-dev-b3e7f4d';
 // file: src/scripts/require.js
 
 /*jshint -W079 */
@@ -265,7 +265,7 @@ var cordova = {
         try {
             cordova.callbackFromNative(callbackId, true, args.status, [args.message], args.keepCallback);
         } catch (e) {
-            console.log("Error in error callback: " + callbackId + " = "+e);
+            console.log("Error in success callback: " + callbackId + " = "+e);
         }
     },
 
@@ -803,7 +803,7 @@ module.exports = channel;
 
 });
 
-// file: src/windows8/exec.js
+// file: src/windows/exec.js
 define("cordova/exec", function(require, exports, module) {
 
 /*jslint sloppy:true, plusplus:true*/
@@ -832,6 +832,8 @@ module.exports = function (success, fail, service, action, args) {
         callbackId,
         onSuccess,
         onError;
+
+    args = args || [];
 
     if (proxy) {
         callbackId = service + cordova.callbackId++;
@@ -872,7 +874,6 @@ module.exports = function (success, fail, service, action, args) {
         }
     }
 };
-
 });
 
 // file: src/common/exec/proxy.js
@@ -1229,11 +1230,13 @@ exports.reset();
 
 });
 
-// file: src/windows8/platform.js
+// file: src/windows/platform.js
 define("cordova/platform", function(require, exports, module) {
 
 module.exports = {
-    id: 'windows8',
+    // for backward compatibility we report 'windows8' when run on Windows 8.0 and 
+    // 'windows' for Windows 8.1 and Windows Phone 8.1
+    id: (navigator.appVersion.indexOf("MSAppHost/1.0") !== -1) ? 'windows8' : 'windows',
     bootstrap:function() {
         var cordova = require('cordova'),
             exec = require('cordova/exec'),
@@ -1256,21 +1259,20 @@ module.exports = {
             app.addEventListener("checkpoint", checkpointHandler);
             Windows.UI.WebUI.WebUIApplication.addEventListener("resuming", resumingHandler, false);
             app.start();
-
         };
 
         if (!window.WinJS) {
-            // <script src="//Microsoft.WinJS.1.0/js/base.js"></script>
             var scriptElem = document.createElement("script");
-            if (navigator.appVersion.indexOf("MSAppHost/2.0;") < 0) {
-                // windows 8.0 + IE 10
-                scriptElem.src = "//Microsoft.WinJS.1.0/js/base.js";
-            } else if (navigator.appVersion.indexOf("Windows Phone 8.1;") > -1) {
+
+            if (navigator.appVersion.indexOf("Windows Phone 8.1;") !== -1) {
                 // windows phone 8.1 + Mobile IE 11
                 scriptElem.src = "//Microsoft.Phone.WinJS.2.1/js/base.js";
-            } else {
+            } else if (navigator.appVersion.indexOf("MSAppHost/2.0;") !== -1) {
                 // windows 8.1 + IE 11
                 scriptElem.src = "//Microsoft.WinJS.2.0/js/base.js";
+            } else {
+                // windows 8.0 + IE 10
+                scriptElem.src = "//Microsoft.WinJS.1.0/js/base.js";
             }
             scriptElem.addEventListener("load", onWinJSReady);
             document.head.appendChild(scriptElem);
@@ -1582,7 +1584,15 @@ function UUIDcreatePart(length) {
 
 });
 
-// file: src/windows8/windows8/commandProxy.js
+// file: src/windows/windows/commandProxy.js
+define("cordova/windows/commandProxy", function(require, exports, module) {
+
+console.log('WARNING: please require cordova/exec/proxy instead');
+module.exports = require('cordova/exec/proxy');
+
+});
+
+// file: src/windows/windows8/commandProxy.js
 define("cordova/windows8/commandProxy", function(require, exports, module) {
 
 console.log('WARNING: please require cordova/exec/proxy instead');
