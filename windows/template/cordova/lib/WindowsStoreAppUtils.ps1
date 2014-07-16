@@ -81,15 +81,46 @@ function CheckIfNeedDeveloperLicense
     return $Result
 }
 
+#
+# Checks whether the package certificate must be installed on the machine.
+#
+function CheckIfNeedInstallCertificate
+{
+    param(
+        [Parameter(Mandatory=$true, Position=0, ValueFromPipelineByPropertyName=$true)]
+        [string] $ScriptDir <# Full path to the dir where Add-AppDevPackage.ps1 is stored #>
+    )
+
+    $PackagePath = Get-ChildItem (Join-Path $ScriptDir "*.appx") | Where-Object { $_.Mode -NotMatch "d" }
+    $BundlePath = Get-ChildItem (Join-Path $ScriptDir "*.appxbundle") | Where-Object { $_.Mode -NotMatch "d" }
+    # There must be exactly 1 package/bundle
+    if (($PackagePath.Count + $BundlePath.Count) -lt 1)
+    {
+        Throw "The app package has not been found at dir $ScriptDir"
+    }
+    if (($PackagePath.Count + $BundlePath.Count) -gt 1)
+    {
+        Throw "To many app packages have been found at dir $ScriptDir"
+    }
+
+    if ($PackagePath.Count -ne 1) # there is *.appxbundle
+    {
+        $PackagePath = $BundlePath
+    }
+
+    $PackageSignature = (Get-AuthenticodeSignature $PackagePath)
+    $Valid = ($PackageSignature -and $PackageSignature.Status -eq "Valid")
+    return (-not $Valid)
+}
+
 function Install-App {
     param(
         [Parameter(Mandatory=$true, Position=0, ValueFromPipelineByPropertyName=$true)]
         [string] $Path <# Full path to Add-AppDevPackage.ps1 #>
     )
-
-    if (CheckIfNeedDeveloperLicense)
+    if ((CheckIfNeedDeveloperLicense) -or (CheckIfNeedInstallCertificate (Join-Path $Path "..")))
     {
-        # we can't run the script with -force param if license installation step is required
+        # we can't run the script with -force param if license/certificate installation step is required
         Invoke-Expression ("& `"$Path`"")
     }
     else
