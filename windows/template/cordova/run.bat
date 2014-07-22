@@ -20,6 +20,6 @@ IF EXIST %script_path% (
         node %script_path% %*
 ) ELSE (
     ECHO.
-    ECHO ERROR: Could not find 'build' script in 'cordova' folder, aborting...>&2
+    ECHO ERROR: Could not find 'run' script in 'cordova' folder, aborting...>&2
     EXIT /B 1
 )
