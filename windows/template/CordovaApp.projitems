@@ -24,14 +24,7 @@
     <SharedGUID>9ebdb27f-d75b-4d8c-b53f-7be4a1fe89f9</SharedGUID>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="$(MSBuildThisFileDirectory)www\cordova.js" />
-    <Content Include="$(MSBuildThisFileDirectory)www\css\index.css" />
-    <Content Include="$(MSBuildThisFileDirectory)www\img\logo.png" />
-    <Content Include="$(MSBuildThisFileDirectory)www\img\smalllogo.png" />
-    <Content Include="$(MSBuildThisFileDirectory)www\img\splashscreen.png" />
-    <Content Include="$(MSBuildThisFileDirectory)www\img\storelogo.png" />
-    <Content Include="$(MSBuildThisFileDirectory)www\index.html" />
-    <Content Include="$(MSBuildThisFileDirectory)www\js\index.js" />
+    <Content Include="$(MSBuildThisFileDirectory)www\**" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)config.xml" />
