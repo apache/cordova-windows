@@ -144,6 +144,9 @@ function create(destPath, namespace, name, guid) {
 
     // Copy the template source files to the new destination
     fso.CopyFolder(srcPath,destPath);
+    // Copy our unique VERSION file, so peeps can tell what version this project was created from.
+    fso.CopyFile(ROOT +'\\VERSION',destPath + "\\" );
+
     var newProjGuid = guid || genGuid();
 
     // replace the guid in the AppManifest and deploy script
@@ -161,7 +164,6 @@ function create(destPath, namespace, name, guid) {
     replaceInFile(destPath + "\\package.store.appxmanifest",/\$projectname\$/g,name);
     replaceInFile(destPath + "\\package.store80.appxmanifest",/\$projectname\$/g,name);
     replaceInFile(destPath + "\\package.phone.appxmanifest",/\$projectname\$/g,name);
-
 
     // cleanup
 
