@@ -170,7 +170,7 @@ function localMachine(path, projecttype, buildtype, buildarchs) {
     uninstallApp(path);
     installApp(path, projecttype, buildtype, buildarchs);
 
-    var command = "powershell -ExecutionPolicy RemoteSigned \". " + WINDOWS_STORE_UTILS + "; Start-Locally '" + PACKAGE_NAME + "'\"";
+    var command = "powershell -noprofile -ExecutionPolicy RemoteSigned \". " + WINDOWS_STORE_UTILS + "; Start-Locally '" + PACKAGE_NAME + "'\"";
     Log(command);
     exec_verbose(command);
 }
@@ -284,7 +284,7 @@ function target(path, projecttype, buildtype, buildarchs, buildtarget) {
 function makeAppStoreUtils(path) {
     if (fso.FileExists(WINDOWS_STORE_UTILS)) {
         Log("Removing execution restrictions from AppStoreUtils...");
-        var command = "powershell \"Unblock-File \'" + WINDOWS_STORE_UTILS + "\'\"";
+        var command = "powershell -noprofile \"Unblock-File \'" + WINDOWS_STORE_UTILS + "\'\"";
         exec_verbose(command);
         return;
     }
@@ -296,7 +296,7 @@ function uninstallApp(path) {
     Log("\tDirectory : " + path);
 
     wscript_shell.CurrentDirectory = path;
-    var command = "powershell -ExecutionPolicy RemoteSigned \". " + WINDOWS_STORE_UTILS + "; Uninstall-App " + PACKAGE_NAME;
+    var command = "powershell -noprofile -ExecutionPolicy RemoteSigned \". " + WINDOWS_STORE_UTILS + "; Uninstall-App " + PACKAGE_NAME;
     Log(command);
     exec_verbose(command);
 }
@@ -307,7 +307,7 @@ function installApp(path, projecttype, buildtype, buildarchs) {
     Log("Attempt to install application...");
     Log("\tDirectory : " + path);
 
-    var command = "powershell -ExecutionPolicy RemoteSigned \". " + WINDOWS_STORE_UTILS + "; Install-App " + "'" + getPackage(path, projecttype, buildtype, buildarchs) + "\\Add-AppDevPackage.ps1" + "'\"";
+    var command = "powershell -noprofile -ExecutionPolicy RemoteSigned \". " + WINDOWS_STORE_UTILS + "; Install-App " + "'" + getPackage(path, projecttype, buildtype, buildarchs) + "\\Add-AppDevPackage.ps1" + "'\"";
     Log(command);
     exec_verbose(command);
     return;
