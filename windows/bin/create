@@ -28,12 +28,11 @@
 
 var create = require('./lib/create');
 
-// check for help flag
-if (process.argv[2] == '--help' || process.argv[2] == '/?' || process.argv[2] == '-h' ||
-            process.argv[2] == 'help' || process.argv[2] == '-help' || process.argv[2] == '/help') {
-    check_reqs.help();
+if (['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(process.argv[2]) > -1) {
+    create.help();
 } else {
     create.run(process.argv).done(null, function (err) {
-        console.error('Failed to check requirements due to', err);
+        console.error('Failed to create project due to', err);
+        process.exit(2);
     });
 }

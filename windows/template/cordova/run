@@ -23,12 +23,12 @@ var args = process.argv,
     run   = require('./lib/run');
 
 // Handle help flag
-if (args[2] == '--help' || args[2] == '/?' || args[2] == '-h' ||
-            args[2] == 'help' || args[2] == '-help' || args[2] == '/help') {
+if (['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(args[2]) > -1) {
     run.help();
 } else {
     run.run(args).done(null, function (err) {
-        console.error('ERROR: ' + err);
+        var errorMessage = (err && err.stack) ? err.stack : err;
+        console.error('ERROR: ' + errorMessage);
         process.exit(2);
     });
 }

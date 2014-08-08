@@ -22,6 +22,7 @@ var Q = require('q'),
     path  = require('path'),
     build = require('./build'),
     utils = require('./utils'),
+    ConfigParser = require('./ConfigParser'),
     packages = require('./package');
 
 var ROOT = path.join(__dirname, '..', '..');
@@ -34,8 +35,7 @@ module.exports.run = function (argv) {
     // parse args
     var args  = nopt({"debug": Boolean, "release": Boolean, "nobuild": Boolean,
         "device": Boolean, "emulator": Boolean, "target": String, "archs": String,
-        "phone": Boolean, "store": Boolean, "store80": Boolean
-    }, {"store81": "--store", "r" : "--release"}, argv);
+        "phone": Boolean, "store": Boolean}, {"r" : "--release"}, argv);
 
     // Validate args
     if (args.debug && args.release) {
@@ -44,15 +44,20 @@ module.exports.run = function (argv) {
     if ((args.device && args.emulator) || ((args.device || args.emulator) && args.target)) {
         return Q.reject('Only one of "device"/"emulator"/"target" options should be specified');
     }
-    if ((args.phone && args.store) || ((args.phone || args.store) && args.store80)) {
-        return Q.reject('Only one of "phone"/"store"/"store80" options should be specified');
+    if (args.phone && args.store) {
+        return Q.reject('Only one of "phone"/"store" options should be specified');
     }
 
     // Get build/deploy options
     var buildType    = args.release ? "release" : "debug",
         buildArchs   = args.archs ? args.archs.split(' ') : ["anycpu"],
-        projectType  = args.phone ? "phone" : args.store80 ? "store80" : "store",
+        projectType  = args.phone ? "phone" : "store",
         deployTarget = args.target ? args.target : args.device ? "device" : "emulator";
+
+    // for store switch we should correctly handle 8.0 and 8.1 version as per configuration
+    if (projectType == 'store' && getStoreTargetVersion() == '8.0') {
+        projectType = 'store80'
+    }
 
     // if --nobuild isn't specified then build app first
     var buildPackages = args.nobuild ? Q() : build.run(argv);
@@ -91,3 +96,18 @@ module.exports.help = function () {
     console.log("");
     process.exit(0);
 };
+
+
+function getStoreTargetVersion() {
+    var config = new ConfigParser(path.join(ROOT, 'config.xml'));
+    var windowsTargetVersion = config.getPreference('windows-target-version')
+    switch(windowsTargetVersion) {
+    case '8':
+    case '8.0':
+        return '8.0'
+    case '8.1':
+        return '8.1'
+    default:
+        throw new Error('Unsupported windows-target-version value: ' + windowsTargetVersion)
+    }
+}

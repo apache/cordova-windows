@@ -19,11 +19,13 @@
 
 var Q      = require('Q'),
     fs     = require('fs'),
+    path   = require('path'),
+    shell   = require('shelljs'),
     create = require('./create');
 
 // returns package metadata from config.xml with fields 'namespace' and 'name'
-function extractMetadata(path) {
-    if (fs.existsSync(path.join(path, 'config.xml'))){
+function extractMetadata(projectPath) {
+    if (!fs.existsSync(path.join(projectPath, 'config.xml'))){
         return Q.reject('config.xml does not exist');
     }
 
@@ -33,40 +35,35 @@ function extractMetadata(path) {
     };
 
     // TODO: read real values from config.xml
-    //var config = read(path + '/config.xml').split('\n');
-    //for (line in config) {
-        // in case of cli all values will be updated by cli for you
-        // but the script could be used w/o cli so we should correctly populate meta
-    //}
+
+    // in case of Cordova CLI all values will be automatically updated by cli for you
+    // but the script could be used w/o CLI so we should correctly populate meta
 
     return Q.resolve(meta);
 }
 
 module.exports.help = function () {
-    Log("WARNING : Make sure to back up your project before updating!");
-    Log("Usage: update Path-To-Project ");
-    Log("    Path-To-Old-Project : The path the project you would like to update.");
-    Log("examples:");
-    Log("    update C:\\Users\\anonymous\\Desktop\\MyProject");
+    console.log("WARNING : Make sure to back up your project before updating!");
+    console.log("Usage: update PathToProject ");
+    console.log("    PathToProject : The path the project you would like to update.");
+    console.log("examples:");
+    console.log("    update C:\\Users\\anonymous\\Desktop\\MyProject");
 };
 
 // updates the cordova.js in project along with the cordova tooling.
 module.exports.run = function (argv) {
-    var projectpath = argv[2];
-    if (!fs.existsSync(projectpath)){
+    var projectPath = argv[2];
+    if (!fs.existsSync(projectPath)){
         // if specified project path is not valid then reject promise
         Q.reject("The given path to the project does not exist." +
             " Please provide a path to the project you would like to update.");
     }
 
-    return extractMetadata(projectpath).then(function (metadata) {
-        // this could be used to automatically produce correct folder name under cli
-        // var projectpath = path.replace(/platforms\\windows8$/, 'platforms\\windows')
-        shell.rm('-rf', projectpath);
+    return extractMetadata(projectPath).then(function (metadata) {
+        shell.rm('-rf', projectPath);
+
         // setup args for create.run which requires process.argv-like array
-        [metadata.namespace, metadata.name].forEach(function (arg) {
-            argv.push(arg);
-        });
-        return create.run(argv);
+        var createArgs = argv.concat([metadata.namespace, metadata.name]);
+        return create.run(createArgs);
     });
 };

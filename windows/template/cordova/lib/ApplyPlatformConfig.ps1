@@ -75,8 +75,8 @@ Function UpdateManifest ($manifestFile)
       while ($version.Split(".").Length -lt 4) {
           $version = $version + ".0"
       }
+      $manifest.Package.Identity.Version = $version
   }
-  $manifest.Package.Identity.Version = $version
 
   # Sort capabilities elements
   $capabilities = $manifest.Package.Capabilities

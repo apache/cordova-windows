@@ -24,7 +24,7 @@ var Q     = require('Q'),
     spawn = require('./spawn');
 
 // returns full path to msbuild tools required to build the project and tools version
-module.exports.getMSBuild = function () {
+module.exports.getMSBuildTools = function () {
     var versions = ['12.0', '4.0'];
     // create chain of promises, which returns specific msbuild version object
     // or null, if specific msbuild path not found in registry
@@ -55,9 +55,23 @@ module.exports.getAppStoreUtils = function () {
     if (!fs.existsSync (appStoreUtils)) {
         return Q.reject("Can't unblock AppStoreUtils script");
     }
-    console.log("Removing execution restrictions from AppStoreUtils...");
+    //console.log("Removing execution restrictions from AppStoreUtils...");
     return spawn('powershell', ['Unblock-File', module.exports.quote(appStoreUtils)]).then(function () {
         return Q.resolve(appStoreUtils);
+    }).fail(function (err) {
+        return Q.reject(err);
+    });
+};
+
+// unblocks and returns path to ApplyPlatformConfig.ps1
+module.exports.getApplyPlatformConfigScript = function () {
+    var scriptPath = path.join(__dirname, 'ApplyPlatformConfig.ps1');
+    if (!fs.existsSync (scriptPath)) {
+        return Q.reject("Can't unblock ApplyPlatformConfig.ps1 script");
+    }
+    //console.log("Removing execution restrictions from ApplyPlatformConfig...");
+    return spawn('powershell', ['Unblock-File', module.exports.quote(scriptPath)]).then(function () {
+        return Q.resolve(scriptPath);
     }).fail(function (err) {
         return Q.reject(err);
     });

@@ -22,13 +22,13 @@
 var update = require('./lib/update');
 
 // check for help flag
-if (process.argv[2] == '--help' || process.argv[2] == '/?' || process.argv[2] == '-h' ||
-            process.argv[2] == 'help' || process.argv[2] == '-help' || process.argv[2] == '/help') {
+if (['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(process.argv[2]) > -1) {
     update.help();
 } else {
     update.run(process.argv).done(function () {
         console.log('Successfully updated windows project.');
     }, function (err) {
         console.error('Failed to check requirements due to', err);
+        process.exit(2);
     });
 }

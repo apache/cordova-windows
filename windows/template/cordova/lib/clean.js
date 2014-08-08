@@ -21,10 +21,13 @@ var Q     = require('q'),
     path  = require('path'),
     shell = require('shelljs');
 
+var ROOT = path.join(__dirname, '..', '..');
+
 // cleans the project, removes AppPackages and build folders.
-module.exports.run = function (platformpath) {
+module.exports.run = function (argv) {
+    var projectPath = ROOT;
     ['AppPackages', 'build'].forEach(function(dir) {
-        shell.rm('-rf', path.join(platformpath, dir));
+        shell.rm('-rf', path.join(projectPath, dir));
     });
     return Q.resolve();
 };

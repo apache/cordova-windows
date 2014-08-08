@@ -19,23 +19,17 @@
 
 var Q     = require('Q'),
     os    = require('os'),
-    utils = require('../../template/cordova/lib/utils');
-
-module.exports.help = function () {
-    Log("Usage: [ check_reqs | node check_reqs ]");
-    Log("examples:");
-    Log("    cscript C:\\Users\\anonymous\\cordova-windows\\windows8\\bin\\check_reqs.bat");
-    Log("    CordovaWindowsPhone\\bin\\check_reqs");
-};
+    MSBuildTools = require('../../template/cordova/lib/MSBuildTools');
 
 module.exports.run = function () {
     if (os.platform() != 'win32'){
       // Build Universal windows apps available for windows platform only, so we reject on others platforms
-        return Q.reject(
-            "ERROR: Cordova tooling for Windows 8 requires Windows 8 Professional with the 'msbuild' command\n" +
-            "in the PATH environment variable as well as having .NET Framework 4.0 (from WP SDK's)"
-        );
+        return Q.reject("ERROR: Cordova tooling for Windows requires Windows OS");
     }
-    // Check for MSBuild available
-    return utils.getMSBuild();
+    // Check whther MSBuild Tools are available
+    return MSBuildTools.findAvailableVersion();
+};
+
+module.exports.help = function () {
+    console.log("Usage: check_reqs or node check_reqs");
 };

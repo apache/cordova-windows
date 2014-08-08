@@ -21,12 +21,7 @@
 
 var clean = require('./lib/clean');
 
-// Usage support for when args are given
-if(process.argv.length > 2) {
-    clean.help();
-} else {
-    clean.run().done(null, function(err) {
-        console.error('ERROR: ' + err);
-        process.exit(2);
-    });
-}
+clean.run(process.argv).done(null, function(err) {
+    console.error('ERROR: ' + err);
+    process.exit(2);
+});
