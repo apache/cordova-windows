@@ -29,8 +29,8 @@ var Q     = require('Q'),
 var ROOT = path.join(__dirname, '..', '..');
 var projFiles = {
     phone: 'CordovaApp.Phone.jsproj',
-    store: 'CordovaApp.Store.jsproj',
-    store80: 'CordovaApp.Store80.jsproj'
+    win: 'CordovaApp.Store.jsproj',
+    win80: 'CordovaApp.Store80.jsproj'
 };
 // parsed nopt arguments
 var args;
@@ -66,12 +66,14 @@ module.exports.run = function run (argv) {
 // help/usage function
 module.exports.help = function help() {
     console.log("");
-    console.log("Usage: build [ --debug | --release ] [--archs=\"<list of architectures...>\"]");
+    console.log("Usage: build [ --debug | --release ] [--archs=\"<list of architectures...>\"] [--phone | --win]");
     console.log("    --help    : Displays this dialog.");
-    console.log("    --debug   : builds project in debug mode. (Default)");
-    console.log("    --release : builds project in release mode.");
-    console.log("    -r        : shortcut :: builds project in release mode.");
-    console.log("    --archs   : Builds project binaries for specific chip architectures. `anycpu` + `arm` + `x86` + `x64` are supported.");
+    console.log("    --debug   : Builds project in debug mode. (Default)");
+    console.log("    --release : Builds project in release mode.");
+    console.log("    -r        : Shortcut :: builds project in release mode.");
+    console.log("    --archs   : Builds project binaries for specific chip architectures (`anycpu`, `arm`, `x86`, `x64`).");
+    console.log("    --phone, --win");
+    console.log("              : Specifies, what type of project to build");
     console.log("examples:");
     console.log("    build ");
     console.log("    build --debug");
@@ -84,13 +86,13 @@ module.exports.help = function help() {
 function parseAndValidateArgs(argv) {
     // parse and validate args
     args = nopt({'debug': Boolean, 'release': Boolean, 'archs': [String],
-        'phone': Boolean, 'store': Boolean}, {'-r': '--release'}, argv);
+        'phone': Boolean, 'win': Boolean}, {'-r': '--release'}, argv);
     // Validate args
     if (args.debug && args.release) {
         throw 'Only one of "debug"/"release" options should be specified';
     }
-    if (args.phone && args.store) {
-        throw 'Only one of "phone"/"store" options should be specified';
+    if (args.phone && args.win) {
+        throw 'Only one of "phone"/"win" options should be specified';
     }
     
     // get build options/defaults
@@ -120,7 +122,7 @@ function buildTargets() {
                 build.arch = 'anycpu';
             }
             // msbuild 4.0 requires .sln file, we can't build jsproj
-            if (msbuild.version == '4.0' && build.target == projFiles.store80) {
+            if (msbuild.version == '4.0' && build.target == projFiles.win80) {
                 build.target = 'CordovaApp.vs2012.sln';
             }
             return msbuild.buildProject(path.join(ROOT, build.target), buildType,  build.arch);
@@ -138,23 +140,23 @@ function applyPlatformConfig() {
 function getBuildTargets() {
     var config = new ConfigParser(path.join(ROOT, 'config.xml'));
     var targets = [];
-    var noSwitches = !(args.phone || args.store);
-
-    if (args.store || noSwitches) { // if --store or no arg
+    var noSwitches = !(args.phone || args.win);
+    // Windows
+    if (args.win || noSwitches) { // if --win or no arg
         var windowsTargetVersion = config.getPreference('windows-target-version')
         switch(windowsTargetVersion) {
         case '8':
         case '8.0':
-            targets.push(projFiles.store80);
+            targets.push(projFiles.win80);
             break;
         case '8.1':
-            targets.push(projFiles.store);
+            targets.push(projFiles.win);
             break;
         default:
             throw new Error('Unsupported windows-target-version value: ' + windowsTargetVersion)
         }
     }
-
+    // Windows Phone
     if (args.phone || noSwitches) { // if --phone or no arg
         var windowsPhoneTargetVersion = config.getPreference('windows-phone-target-version')
         switch(windowsPhoneTargetVersion) {
@@ -180,7 +182,7 @@ function filterSupportedTargets (targets) {
 
     // MSBuild 4.0 does not support Windows 8.1 and Windows Phone 8.1
     var supportedTargets = targets.filter(function(target) {
-        return target != projFiles.store && target != projFiles.phone;
+        return target != projFiles.win && target != projFiles.phone;
     });
 
     // unsupported targets have been detected

@@ -35,7 +35,7 @@ module.exports.run = function (argv) {
     // parse args
     var args  = nopt({"debug": Boolean, "release": Boolean, "nobuild": Boolean,
         "device": Boolean, "emulator": Boolean, "target": String, "archs": String,
-        "phone": Boolean, "store": Boolean}, {"r" : "--release"}, argv);
+        "phone": Boolean, "win": Boolean}, {"r" : "--release"}, argv);
 
     // Validate args
     if (args.debug && args.release) {
@@ -44,8 +44,8 @@ module.exports.run = function (argv) {
     if ((args.device && args.emulator) || ((args.device || args.emulator) && args.target)) {
         return Q.reject('Only one of "device"/"emulator"/"target" options should be specified');
     }
-    if (args.phone && args.store) {
-        return Q.reject('Only one of "phone"/"store" options should be specified');
+    if (args.phone && args.win) {
+        return Q.reject('Only one of "phone"/"win" options should be specified');
     }
 
     // Get build/deploy options
@@ -55,7 +55,7 @@ module.exports.run = function (argv) {
         deployTarget = args.target ? args.target : args.device ? "device" : "emulator";
 
     // for store switch we should correctly handle 8.0 and 8.1 version as per configuration
-    if (projectType == 'store' && getStoreTargetVersion() == '8.0') {
+    if (projectType == 'store' && getWindowsTargetVersion() == '8.0') {
         projectType = 'store80'
     }
 
@@ -74,17 +74,16 @@ module.exports.run = function (argv) {
 
 module.exports.help = function () {
     console.log("\nUsage: run [ --device | --emulator | --target=<id> ] [ --debug | --release | --nobuild ]");
-    console.log("           [ --x86 | --x64 | --arm ] [--phone | --store | --store81 | --store80]");
+    console.log("           [ --x86 | --x64 | --arm ] [--phone | --win]");
     console.log("    --device      : Deploys and runs the project on the connected device.");
     console.log("    --emulator    : Deploys and runs the project on an emulator.");
     console.log("    --target=<id> : Deploys and runs the project on the specified target.");
     console.log("    --debug       : Builds project in debug mode.");
     console.log("    --release     : Builds project in release mode.");
-    console.log("    --nobuild     : Uses pre-built xap, or errors if project is not built.");
-    console.log("    --x86, --x64, --arm");
-    console.log("                  : Specifies chip architecture.");
-    console.log("    --phone, --store, --store81, --store80");
-    console.log("                  : Specifies, what type of project to deploy");
+    console.log("    --nobuild     : Uses pre-built package, or errors if project is not built.");
+    console.log("    --archs       : Specific chip architectures (`anycpu`, `arm`, `x86`, `x64`).");
+    console.log("    --phone, --win");
+    console.log("                  : Specifies project type to deploy");
     console.log("");
     console.log("Examples:");
     console.log("    run");
@@ -98,7 +97,7 @@ module.exports.help = function () {
 };
 
 
-function getStoreTargetVersion() {
+function getWindowsTargetVersion() {
     var config = new ConfigParser(path.join(ROOT, 'config.xml'));
     var windowsTargetVersion = config.getPreference('windows-target-version')
     switch(windowsTargetVersion) {
