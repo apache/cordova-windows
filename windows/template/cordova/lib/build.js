@@ -29,8 +29,8 @@ var Q     = require('Q'),
 var ROOT = path.join(__dirname, '..', '..');
 var projFiles = {
     phone: 'CordovaApp.Phone.jsproj',
-    win: 'CordovaApp.Store.jsproj',
-    win80: 'CordovaApp.Store80.jsproj'
+    win: 'CordovaApp.Windows.jsproj',
+    win80: 'CordovaApp.Windows80.jsproj'
 };
 // parsed nopt arguments
 var args;

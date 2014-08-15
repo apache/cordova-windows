@@ -75,7 +75,7 @@ module.exports.getInfo = function (packagePath) {
     // This RE matches with package folder name like:
     // CordovaApp.Phone_0.0.1.0_AnyCPU_Debug_Test
     // Group:     ( 1 ) (  2  ) (  3 ) ( 4 )
-    var props = /.*\.(Phone|Store|Store80)_((?:\d\.)*\d)_(AnyCPU|x64|x86|ARM)(?:_(Debug))?_Test$/i.exec(path.basename(packagePath));
+    var props = /.*\.(Phone|Windows|Windows80)_((?:\d\.)*\d)_(AnyCPU|x64|x86|ARM)(?:_(Debug))?_Test$/i.exec(path.basename(packagePath));
     if (props){
         // return package info object inside of promise
         return Q.resolve({path: packagePath,
@@ -104,7 +104,7 @@ module.exports.getAppId = function (platformPath) {
 // return package name fetched from appxmanifest
 // return rejected promise if appxmanifest not valid
 module.exports.getPackageName = function (platformPath) {
-    var manifest = path.join(platformPath, 'package.store.appxmanifest');
+    var manifest = path.join(platformPath, 'package.windows.appxmanifest');
     try {
         return Q.resolve(/Application Id="(.*?)"/gi.exec(fs.readFileSync(manifest, 'utf8'))[1]);
     } catch (e) {

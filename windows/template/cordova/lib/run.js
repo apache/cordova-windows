@@ -51,12 +51,12 @@ module.exports.run = function (argv) {
     // Get build/deploy options
     var buildType    = args.release ? "release" : "debug",
         buildArchs   = args.archs ? args.archs.split(' ') : ["anycpu"],
-        projectType  = args.phone ? "phone" : "store",
+        projectType  = args.phone ? "phone" : "windows",
         deployTarget = args.target ? args.target : args.device ? "device" : "emulator";
 
-    // for store switch we should correctly handle 8.0 and 8.1 version as per configuration
-    if (projectType == 'store' && getWindowsTargetVersion() == '8.0') {
-        projectType = 'store80'
+    // for win switch we should correctly handle 8.0 and 8.1 version as per configuration
+    if (projectType == 'windows' && getWindowsTargetVersion() == '8.0') {
+        projectType = 'windows80'
     }
 
     // if --nobuild isn't specified then build app first

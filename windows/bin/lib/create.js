@@ -54,7 +54,7 @@ module.exports.run = function (argv) {
     shell.cp("-rf", path.join(root, 'VERSION'), projectPath);
 
     // replace specific values in manifests' templates
-    ["package.store.appxmanifest", "package.store80.appxmanifest", "package.phone.appxmanifest"].forEach(function (file) {
+    ["package.windows.appxmanifest", "package.windows80.appxmanifest", "package.phone.appxmanifest"].forEach(function (file) {
         var fileToReplace = path.join(projectPath, file);
         shell.sed('-i', /\$guid1\$/g, guid, fileToReplace);
         shell.sed('-i', /\$safeprojectname\$/g, safeAppName, fileToReplace);

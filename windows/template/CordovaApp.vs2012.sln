@@ -19,7 +19,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # specific language governing permissions and limitations
 # under the License.
 #
-Project("{262852C6-CD72-467D-83FE-5EEB1973A190}") = "CordovaApp.Store8.0", "CordovaApp.Store80.jsproj", "{EFFFAB2F-BFC5-4EDA-B545-45EF4995F55A}"
+Project("{262852C6-CD72-467D-83FE-5EEB1973A190}") = "CordovaApp.Windows8.0", "CordovaApp.Windows80.jsproj", "{EFFFAB2F-BFC5-4EDA-B545-45EF4995F55A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
