@@ -131,7 +131,7 @@ function buildTargets() {
 function applyPlatformConfig() {
     // run powershell ApplyPlatformConfig.ps1
     return utils.getApplyPlatformConfigScript().then(function(ApplyPlatformConfigScript) {
-        return spawn('Powershell', ['-File', ApplyPlatformConfigScript, ROOT]);
+        return spawn('Powershell', ['-ExecutionPolicy', 'RemoteSigned', '-File',  ApplyPlatformConfigScript, ROOT]);
     });
 }
 
