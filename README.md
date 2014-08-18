@@ -19,35 +19,32 @@
 #
 -->
 
-Apache Cordova for Windows 8
+Apache Cordova for Windows
 ===
 
+Includes Windows universal app template to build [Apache Cordova](http://cordova.apache.org) applications that target Windows 8.0, Windows 8.1 and Windows Phone 8.1. An Apache Cordova based applications is, at the core, an application written with web technology: HTML, CSS and JavaScript.
 
-This repo includes code to build Apache Cordova applications that target Windows 8 SDK.
-
-An Apache Cordova based applications is, at the core, an application written with web technology: HTML, CSS and JavaScript.
-
-[Apache Cordova][] is a project at The Apache Software Foundation (ASF).
+[Apache Cordova](http://cordova.apache.org) is a project of [The Apache Software Foundation (ASF)](http://apache.org)
 
 Requires
 ---
 
-- [Windows 8 SDK][]
--- Windows 8 development requires Windows 8 Professional, and Visual Studio 2012 ( express works )
+**To build for all platforms** (Windows 8.0, Windows 8.1 and Windows Phone 8.1)
+
+  Windows 8.1 along with [Visual Studio 2013 Express](http://www.visualstudio.com/downloads/download-visual-studio-vs#d-express-windows-8).
+
+**To build for Windows 8.0 only**
+
+   Windows 8.0 or 8.1 along with [Visual Studio 2012 Express](http://www.visualstudio.com/downloads).
 
 BUGS?
 -----
 
-- File them at the [Apache Cordova Issue Tracker][]
+- File them at the [Apache Cordova Issue Tracker](https://issues.apache.org/jira/browse/CB)
 
 
 Further Reading
 ---
 
-- [Apache Cordova Documentation][]
-- [Apache Cordova Wiki][]
-
-[Apache Cordova]: http://cordova.io "Apache Cordova"
-[Apache Cordova Issue Tracker]: https://issues.apache.org/jira/browse/CB "Apache Cordova Issue Tracker"
-[Apache Cordova Documentation]: http://cordova.io/docs "Apache Cordova Documentation"
-[Apache Cordova Wiki]: http://wiki.apache.org/cordova "Apache Cordova Wiki"
+- [Windows Platform Guide](http://cordova.apache.org/docs/en/edge/guide_platforms_win8_index.md.html#Windows%208%20Platform%20Guide)
+- [Apache Cordova Documentation](http://docs.cordova.io)
