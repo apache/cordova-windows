@@ -1,0 +1,16 @@
+# appveyor file
+# http://www.appveyor.com/docs/appveyor-yml
+
+nodejs_version: 0.10
+
+install:
+  - cd windows
+  - npm install
+
+build: off
+
+test_script:
+  - node --version
+  - npm --version
+  - msbuild /version
+  - npm test
