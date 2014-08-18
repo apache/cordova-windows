@@ -18,6 +18,9 @@
     "node-uuid": "~1.4",
     "shelljs": "~0.3"
   },
+  "scripts": {
+    "test": "bin\\create .\\testcreate & .\\testcreate\\cordova\\build & rm -rf .\\testcreate"
+  },
   "author": "Apache Software Foundation",
   "license": "Apache Version 2.0"
 }

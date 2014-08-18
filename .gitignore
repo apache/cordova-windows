@@ -8,3 +8,6 @@ Debug
 obj
 Thumbs.db
 
+# Skip node_modules
+
+windows/node_modules/

@@ -19,8 +19,8 @@
 -->
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <OutputPath>build\store80\$(Configuration)\$(Platform)\</OutputPath>
-  <IntermediateOutputPath>build\store80\bld\</IntermediateOutputPath>
+    <OutputPath>build\windows80\$(Configuration)\$(Platform)\</OutputPath>
+  <IntermediateOutputPath>build\windows80\bld\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|AnyCPU">
@@ -72,7 +72,7 @@
     <PackageCertificateKeyFile>CordovaApp_TemporaryKey.pfx</PackageCertificateKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <AppxManifest Include="package.store80.appxmanifest">
+    <AppxManifest Include="package.windows80.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
     <Content Include="images\logo.png" />

@@ -276,8 +276,8 @@ Function UpdateAssets ()
 
 }
 
-UpdateManifest "$platformRoot\package.store.appxmanifest"
-UpdateManifest "$platformRoot\package.store80.appxmanifest"
+UpdateManifest "$platformRoot\package.windows.appxmanifest"
+UpdateManifest "$platformRoot\package.windows80.appxmanifest"
 UpdateManifest "$platformRoot\package.phone.appxmanifest"
 
 # replace splash screen images and icons
