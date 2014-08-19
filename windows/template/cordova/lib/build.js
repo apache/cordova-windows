@@ -118,8 +118,8 @@ function buildTargets() {
     return buildConfigs.reduce(function (promise, build) {
          return promise.then(function () {
             // support for "any cpu" specified with or without space
-            if (build.arch == 'any cpu') {
-                build.arch = 'anycpu';
+            if (build.arch == 'anycpu') {
+                build.arch = 'any cpu';
             }
             // msbuild 4.0 requires .sln file, we can't build jsproj
             if (msbuild.version == '4.0' && build.target == projFiles.win80) {

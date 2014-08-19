@@ -34,16 +34,18 @@ module.exports.findAvailableVersion = function () {
 
 function checkMSBuildVersion(version) {
     var deferred = Q.defer();
-
-    exec('reg query HKLM\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\' + version + ' /v MSBuildToolsPath').then(
-        function(output) {
-            // fetch msbuild path from 'reg' output
-            var path = /MSBuildToolsPath\s+REG_SZ\s+(.*)/i.exec(output);
-            if (path) {
-                deferred.resolve(new MSBuildTools(version, path[1]));
-            } else {
-                deferred.resolve(null); // not found
-            }
-        });
+    exec('reg query HKLM\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\' + version + ' /v MSBuildToolsPath')
+    .then(function(output) {
+        // fetch msbuild path from 'reg' output
+        var path = /MSBuildToolsPath\s+REG_SZ\s+(.*)/i.exec(output);
+        if (path) {
+            deferred.resolve(new MSBuildTools(version, path[1]));
+            return;
+        }
+        deferred.resolve(null); // not found
+    }, function (err) {
+        // if 'reg' exits with error, assume that registry key not found
+        deferred.resolve(null);
+    });
     return deferred.promise;
 }
