@@ -38,6 +38,7 @@ module.exports.run = function (argv) {
     var packageName = args.argv.remain[1] || "Cordova.Example",
         appName     = args.argv.remain[2] || "CordovaAppProj",
         safeAppName = appName.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'),
+        templateOverrides = args.argv.remain[3],
         guid        = args['guid'] || uuid.v1(),
         root        = path.join(__dirname, '..', '..');
 
@@ -45,6 +46,9 @@ module.exports.run = function (argv) {
     console.log("\tApp Name  : " + appName);
     console.log("\tNamespace : " + packageName);
     console.log("\tPath      : " + projectPath);
+    if (templateOverrides) {
+        Log("\tCustomTemplatePath : " + templateOverrides);
+    }
 
     // Copy the template source files to the new destination
     console.log('Copying template to ' + projectPath);
@@ -52,6 +56,11 @@ module.exports.run = function (argv) {
 
     // Copy our unique VERSION file, so peeps can tell what version this project was created from.
     shell.cp("-rf", path.join(root, 'VERSION'), projectPath);
+
+    if (templateOverrides && fs.existsSync(templateOverrides)) {
+        console.log('Copying template overrides from ' + templateOverrides + ' to ' + projectPath);
+        shell.cp("-rf", templateOverrides, projectPath);
+    }
 
     // replace specific values in manifests' templates
     ["package.windows.appxmanifest", "package.windows80.appxmanifest", "package.phone.appxmanifest"].forEach(function (file) {
@@ -75,10 +84,12 @@ module.exports.run = function (argv) {
 };
 
 module.exports.help = function () {
-    console.log("Usage: create PathToProject [ PackageName [ AppName [--guid=<GUID string>] ] ]");
+    console.log("Usage: create PathToProject [ PackageName [ AppName [ CustomTemplate ] ] ] [--guid=<GUID string>]");
     console.log("    PathToProject : The path to where you wish to create the project");
     console.log("    PackageName   : The namespace for the project (default is Cordova.Example)");
     console.log("    AppName       : The name of the application (default is CordovaAppProj)");
+    console.log("    CustomTemplate: The path to project template overrides");
+    console.log("                        (will be copied over default platform template files)");
     console.log("    --guid        : The App's GUID (default is random generated)");
     console.log("examples:");
     console.log("    create C:\\Users\\anonymous\\Desktop\\MyProject");
