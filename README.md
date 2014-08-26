@@ -22,6 +22,8 @@
 Apache Cordova for Windows
 ===
 
+[![Build status](https://ci.appveyor.com/api/projects/status/19h1fq0lyvwtei05)](https://ci.appveyor.com/project/Humbedooh/cordova-windows)
+
 Includes Windows universal app template to build [Apache Cordova](http://cordova.apache.org) applications that target Windows 8.0, Windows 8.1 and Windows Phone 8.1. An Apache Cordova based applications is, at the core, an application written with web technology: HTML, CSS and JavaScript.
 
 [Apache Cordova](http://cordova.apache.org) is a project of [The Apache Software Foundation (ASF)](http://apache.org)
