@@ -26,8 +26,6 @@ Write-Host "Applying Platform Config..."
 
 Function UpdateManifest ($manifestFile)
 {
-  $configFile = "$platformRoot\config.xml"
-  [xml]$config = Get-Content $configFile -Encoding UTF8
   [xml]$manifest = Get-Content $manifestFile -Encoding UTF8
 
   # Replace app start page with config.xml setting.
@@ -95,22 +93,20 @@ Function UpdateManifest ($manifestFile)
   }
 
   # Add domain whitelist rules
-  $acls = [string[]]$config.widget.access.origin
   $rules = $manifest.Package.Applications.Application.ApplicationContentUriRules
 
   # Remove existing rules from manifest
   if ($rules) {
-    $manifest.Package.Applications.Application.RemoveChild($rules)
+    $manifest.Package.Applications.Application.RemoveChild($rules) | Out-Null
   }
-
   if ($acls -and ($acls -notcontains "*")) {
     $rules = $manifest.CreateElement("ApplicationContentUriRules", $manifest.DocumentElement.NamespaceURI)
-    $manifest.Package.Applications.Application.AppendChild($rules)
+    $manifest.Package.Applications.Application.AppendChild($rules) | Out-Null
     $acls | foreach {
       $elem = $manifest.CreateElement("Rule", $manifest.DocumentElement.NamespaceURI)
       $elem.SetAttribute("Match", $_)
       $elem.SetAttribute("Type", "include")
-      $rules.AppendChild($elem)
+      $rules.AppendChild($elem) | Out-Null
     }
   }
 
@@ -204,6 +200,26 @@ Function CopyImage($src, $dest)
   Copy-Item $resolvedPath -Destination (join-path $platformRoot $dest)
 }
 
+Function Get-Access-Rules () 
+{
+  $aclsAll = ([string[]]$config.widget.access.origin)
+  if ($aclsAll -eq $null) {
+    return @();
+  }
+
+  $acls = @()
+ 
+  $aclsAll | foreach {
+      $_
+      if ($_.StartsWith("https://","CurrentCultureIgnoreCase") -or ($_ -eq "*")) {
+        $acls += $_
+      } else {
+        Write-Host "Access rules must begin with 'https://', the following rule is ignored: $_"
+      }
+    }
+  return $acls
+}
+
 Function UpdateAssets ()
 {
   $configFile = "$platformRoot\config.xml"
@@ -275,6 +291,12 @@ Function UpdateAssets ()
   }
 
 }
+
+$configFile = "$platformRoot\config.xml"
+[xml]$config = Get-Content $configFile -Encoding UTF8
+
+# Domain whitelist rules defined in configuration file
+$acls = Get-Access-Rules $config
 
 UpdateManifest "$platformRoot\package.windows.appxmanifest"
 UpdateManifest "$platformRoot\package.windows80.appxmanifest"
