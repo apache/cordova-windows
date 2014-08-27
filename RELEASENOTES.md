@@ -6,6 +6,7 @@ cordova-windows is a library that enables developers to create Windows 8/8.1 and
 
 
 [3.6.0]
+* CB-7377 Removes unnecessary rules tracing which is also incorrectly handled by PS
 * update cordova.js
 * Removed un-needed files, multiple cordova.js files can only cause confusion
 * CB-7377 Whitelist. Windows build error due to 'invalid URI rules in config.xml'
