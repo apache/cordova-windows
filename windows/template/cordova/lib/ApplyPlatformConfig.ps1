@@ -210,7 +210,6 @@ Function Get-Access-Rules ()
   $acls = @()
  
   $aclsAll | foreach {
-      $_
       if ($_.StartsWith("https://","CurrentCultureIgnoreCase") -or ($_ -eq "*")) {
         $acls += $_
       } else {
