@@ -73,6 +73,13 @@ ConfigParser.prototype = {
         var el = findOrCreate(this.doc, 'name');
         el.text = name;
     },
+    startPage: function() {
+        var content = this.doc.find('content');
+        if (content) {
+            return content.attrib.src;
+        }
+        return null;
+    },
     description: function() {
         return this.doc.find('description').text.trim();
     },
@@ -200,6 +207,21 @@ ConfigParser.prototype = {
      */
     getSplashScreens: function(platform) {
         return this.getStaticResources(platform, 'splash');
+    },
+
+    /**
+     * Returns all access rules.
+     * @return {string[]}      Array of access rules.
+     */
+    getAccessRules: function() { 
+        var rules = this.doc.getroot().findall('access'); 
+        var ret = []; 
+        rules.forEach(function (rule) { 
+         if (rule.attrib.origin) {
+             ret.push(rule.attrib.origin); 
+         } 
+        }); 
+        return ret; 
     }
 };
 
