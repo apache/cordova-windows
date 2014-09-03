@@ -63,20 +63,6 @@ module.exports.getAppStoreUtils = function () {
     });
 };
 
-// unblocks and returns path to ApplyPlatformConfig.ps1
-module.exports.getApplyPlatformConfigScript = function () {
-    var scriptPath = path.join(__dirname, 'ApplyPlatformConfig.ps1');
-    if (!fs.existsSync (scriptPath)) {
-        return Q.reject("Can't unblock ApplyPlatformConfig.ps1 script");
-    }
-    //console.log("Removing execution restrictions from ApplyPlatformConfig...");
-    return spawn('powershell', ['Unblock-File', module.exports.quote(scriptPath)]).then(function () {
-        return Q.resolve(scriptPath);
-    }).fail(function (err) {
-        return Q.reject(err);
-    });
-};
-
 // returns path to AppDeploy util from Windows Phone 8.1 SDK
 module.exports.getAppDeployUtils = function () {
     var appDeployUtils = path.join((process.env["ProgramFiles(x86)"] || process.env["ProgramFiles"]),
