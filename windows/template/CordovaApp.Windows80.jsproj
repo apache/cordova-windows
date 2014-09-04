@@ -20,7 +20,7 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <OutputPath>build\windows80\$(Configuration)\$(Platform)\</OutputPath>
-  <IntermediateOutputPath>build\windows80\bld\</IntermediateOutputPath>
+    <IntermediateOutputPath>build\windows80\bld\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|AnyCPU">
@@ -75,10 +75,7 @@
     <AppxManifest Include="package.windows80.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <Content Include="images\logo.png" />
-    <Content Include="images\smalllogo.png" />
-    <Content Include="images\splashscreen.png" />
-    <Content Include="images\storelogo.png" />
+    <Content Include="images\*.png" Exclude="images\*.scale-240.*" />
     <None Include="CordovaApp_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
