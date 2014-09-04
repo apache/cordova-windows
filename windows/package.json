@@ -1,26 +1,32 @@
 {
-  "name": "cordova-windows",
-  "version": "3.6.0",
-  "description": "cordova-windows release",
-  "main": "bin/create",
-  "repository":{
-    "type":"git",
-    "url":"https://github.com/apache/cordova-windows"
-  },
-  "keywords": [
-    "windows",
-    "cordova",
-    "apache"
-  ],
-  "dependencies": {
-    "q": "^0.9.0",
-    "nopt": "~3",
-    "node-uuid": "~1.4",
-    "shelljs": "~0.3"
-  },
-  "scripts": {
-    "test": "bin\\create .\\testcreate & .\\testcreate\\cordova\\build & rm -rf .\\testcreate"
-  },
-  "author": "Apache Software Foundation",
-  "license": "Apache Version 2.0"
+    "name": "cordova-windows",
+    "version": "3.6.0",
+    "description": "cordova-windows release",
+    "main": "bin/create",
+    "repository":{
+        "type":"git",
+        "url":"https://github.com/apache/cordova-windows"
+    },
+    "keywords": [
+        "windows",
+        "cordova",
+        "apache"
+    ],
+    "dependencies": {
+        "q": "^0.9.0",
+        "nopt": "~3",
+        "node-uuid": "~1.4",
+        "shelljs": "~0.3"
+    },
+    "bundledDependencies": [
+        "nopt",
+        "shelljs",
+        "node-uuid",
+        "q"
+    ],
+    "scripts": {
+        "test": "bin\\create .\\testcreate & .\\testcreate\\cordova\\build & rm -rf .\\testcreate"
+    },
+    "author": "Apache Software Foundation",
+    "license": "Apache Version 2.0"
 }
