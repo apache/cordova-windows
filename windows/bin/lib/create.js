@@ -37,7 +37,9 @@ module.exports.run = function (argv) {
     }
     var packageName = args.argv.remain[1] || "Cordova.Example",
         appName     = args.argv.remain[2] || "CordovaAppProj",
-        safeAppName = appName.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'),
+        // 64 symbols restriction goes from manifest schema definition
+        // http://msdn.microsoft.com/en-us/library/windows/apps/br211415.aspx
+        safeAppName = appName.length <= 64 ? appName : appName.substr(0, 64),
         templateOverrides = args.argv.remain[3],
         guid        = args['guid'] || uuid.v1(),
         root        = path.join(__dirname, '..', '..');
@@ -66,8 +68,8 @@ module.exports.run = function (argv) {
     ["package.windows.appxmanifest", "package.windows80.appxmanifest", "package.phone.appxmanifest"].forEach(function (file) {
         var fileToReplace = path.join(projectPath, file);
         shell.sed('-i', /\$guid1\$/g, guid, fileToReplace);
-        shell.sed('-i', /\$safeprojectname\$/g, safeAppName, fileToReplace);
-        shell.sed('-i', /\$projectname\$/g, packageName, fileToReplace);
+        shell.sed('-i', /\$safeprojectname\$/g, packageName, fileToReplace);
+        shell.sed('-i', /\$projectname\$/g, safeAppName, fileToReplace);
     });
 
     // Delete bld forder and bin folder
