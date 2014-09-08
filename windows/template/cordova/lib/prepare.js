@@ -86,15 +86,20 @@ function applyCoreProperties(config, manifest) {
         throw new Error('Invalid manifest file (no <Identity> node): ' + manifestPath);
     }
     // Update identity name and version
-    identityNode.attrib.Name = pkgName;
-    identityNode.attrib.Version = version;
+    pkgName && (identityNode.attrib.Name = pkgName);
+    version && (identityNode.attrib.Version = version);
 
     // Update name (windows8 has it in the Application[@Id] and Application.VisualElements[@DisplayName])
     var app = manifest.find('.//Application');
     if(!app) {
         throw new Error('Invalid manifest file (no <Application> node): ' + manifestPath);
     }
-    app.attrib.Id = pkgName;
+    if (pkgName) {
+        // 64 symbols restriction goes from manifest schema definition
+        // http://msdn.microsoft.com/en-us/library/windows/apps/br211415.aspx
+        var appId = pkgName.length <= 64 ? pkgName : pkgName.substr(0, 64);
+        app.attrib.Id = appId;
+    }
     app.attrib.StartPage = 'www/' + startPage;
 
     var visualElems = manifest.find('.//VisualElements') // windows 8.0
@@ -104,18 +109,18 @@ function applyCoreProperties(config, manifest) {
     if(!visualElems) {
         throw new Error('Invalid manifest file (no <VisualElements> node): ' + manifestPath);
     }
-    visualElems.attrib.DisplayName = name;
+    name && (visualElems.attrib.DisplayName = name);
 
     // Update properties
     var properties = manifest.find('.//Properties');
     if (properties && properties.find) {
         var displayNameElement = properties.find('.//DisplayName');
-        if (displayNameElement) {
+        if (displayNameElement && name) {
             displayNameElement.text = name;
         }
 
         var publisherNameElement = properties.find('.//PublisherDisplayName');
-        if (publisherNameElement) {
+        if (publisherNameElement && author) {
             publisherNameElement.text = author;
         }
     }
