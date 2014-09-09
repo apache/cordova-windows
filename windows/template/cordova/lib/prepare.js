@@ -186,43 +186,88 @@ function copyImages(config) {
 
     function copyImage(src, dest) {
         src = path.join(appRoot, src),
-        dest = path.join(platformRoot, dest);
-        console.log('Copying image from ' + src + ' to ' + dest);
+        dest = path.join(platformRoot, 'images', dest);
+        //console.log('Copying image from ' + src + ' to ' + dest);
         shell.cp('-f', src, dest);
     }
 
-    // Icons, supported by the platform
-    var platformIcons = [
-        {dest: 'images/logo.png', width: 150, height: 150},
-        {dest: 'images/smalllogo.png', width: 30, height: 30},
-        {dest: 'images/storelogo.png', width: 50, height: 50},
-        {dest: 'images/StoreLogo.scale-240.png', width: 120, height: 120},
-        {dest: 'images/Square44x44Logo.scale-240.png', width: 106, height: 106},
-        {dest: 'images/Square71x71Logo.scale-240.png', width: 170, height: 170},
-        {dest: 'images/Square150x150Logo.scale-240.png', width: 360, height: 360},
-        {dest: 'images/Wide310x150Logo.scale-240.png', width: 744, height: 360},
-    ];
+    function copyMrtImage(src, dest) {
+        var srcDir = path.dirname(src),
+            srcExt = path.extname(src),
+            srcFileName = path.basename(src, srcExt);
+     
+        var destExt = path.extname(dest),
+            destFileName = path.basename(dest, destExt);
 
-    var icons = config.getIcons();
-    platformIcons.forEach(function (item) {
-        var img = icons.getBySize(item.width, item.height);
-        if (img) {
-            copyImage(img.src, item.dest);
+        // all MRT images: logo.png, logo.scale-100.png, logo.scale-200.png, etc
+        var images = fs.readdirSync(srcDir).filter(function(e) { 
+            return e.match('^'+srcFileName + '(.scale-[0-9]+)?' + srcExt);
+        });
+        // warn if no images found
+        if (images.length == 0) {
+            console.log('No images found for target: ' + destFileName);
+            return;
         }
-    });
+        // copy images with new name but keeping scale suffix
+        images.forEach(function(img) {
+            var scale = path.extname(path.basename(img, srcExt));
+            if (scale == '') {
+                scale = '.scale-100';
+            }
+            copyImage(path.join(srcDir, img), destFileName+scale+destExt);
+        });
+        
+    }
 
-    // Splash screen images, supported by the platform
-    var platformSplashImages = [
-        {dest: 'images/splashscreen.png', width: 620, height: 300},
-        {dest: 'images/SplashScreen.scale-240.png', width: 1152, height: 1920}
+    // Platform default images
+    var platformImages = [
+        {dest: 'Square150x150Logo.scale-100.png', width: 150, height: 150},
+        {dest: 'Square30x30Logo.scale-100.png', width: 30, height: 30},
+        {dest: 'StoreLogo.scale-100.png', width: 50, height: 50},
+        {dest: 'SplashScreen.scale-100.png', width: 620, height: 300},
+        // scaled images are specified here for backward compatibility only so we can find them by size
+        {dest: 'StoreLogo.scale-240.png', width: 120, height: 120},
+        {dest: 'Square44x44Logo.scale-240.png', width: 106, height: 106},
+        {dest: 'Square71x71Logo.scale-240.png', width: 170, height: 170},
+        {dest: 'Square70x70Logo.scale-100.png', width: 70, height: 70},
+        {dest: 'Square150x150Logo.scale-240.png', width: 360, height: 360},
+        {dest: 'Square310x310Logo.scale-100.png', width: 310, height: 310},
+        {dest: 'Wide310x150Logo.scale-100.png', width: 310, height: 150},
+        {dest: 'Wide310x150Logo.scale-240.png', width: 744, height: 360},
+        {dest: 'SplashScreenPhone.scale-240.png', width: 1152, height: 1920}
     ];
 
-    var splashImages = config.getSplashScreens();
+    function findPlatformImage(width, height) {
+        if (!width && !height){
+            // this could be default image, 
+            // Windows requires specific image dimension so we can't apply it
+            return null;
+        }
+        for (var idx in platformImages){
+            var res = platformImages[idx];
+            // If only one of width or height is not specified, use another parameter for comparation
+            // If both specified, compare both.
+            if ((!width || (width == res.width)) &&
+                (!height || (height == res.height))){
+                return res;
+            }
+        }
+        return null;
+    }
 
-    platformSplashImages.forEach(function (item) {
-        var img = splashImages.getBySize(item.width, item.height);
-        if (img) {
-            copyImage(img.src, item.dest);
+    var images = config.getIcons().concat(config.getSplashScreens());
+
+    images.forEach(function (img) {
+        if (img.target) {
+            copyMrtImage(img.src, img.target + '.png');
+        } else {
+            // find target image by size
+            var targetImg = findPlatformImage (img.width, img.height);
+            if (targetImg) {
+                copyImage(img.src, targetImg.dest);
+            } else {
+                console.log('The following image is skipped due to unsupported size: ' + img.src);
+            }
         }
     });
 }
