@@ -1,6 +1,6 @@
 {
     "name": "cordova-windows",
-    "version": "3.6.1",
+    "version": "3.6.3",
     "description": "cordova-windows release",
     "main": "bin/create",
     "repository":{
