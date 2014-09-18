@@ -114,99 +114,39 @@ ConfigParser.prototype = {
         return ret;
     },
     /**
-     * Returns all resources for the platform specified.
-     * @param  {String} platform     The platform.
+     * Returns all resources.
      * @param {string}  resourceName Type of static resources to return.
      *                               "icon" and "splash" currently supported.
      * @return {Array}               Resources for the platform specified.
      */
-    getStaticResources: function(platform, resourceName) {
-        var ret = [],
-            staticResources = [];
-        if (platform) { // platform specific icons
-            this.doc.findall('platform[@name=\'' + platform + '\']/' + resourceName).forEach(function(elt){
-                elt.platform = platform; // mark as platform specific resource
-                staticResources.push(elt);
-            });
-        }
-        // root level resources
-        staticResources = staticResources.concat(this.doc.findall(resourceName));
-        // parse resource elements
-        staticResources.forEach(function (elt) {
+    getStaticResources: function(resourceName) {
+        return this.doc.findall(resourceName).map(function (elt) {
             var res = {};
             res.src = elt.attrib.src;
+            res.target = elt.attrib.target;
             res.density = elt.attrib['density'] || elt.attrib['cdv:density'] || elt.attrib['gap:density'];
             res.platform = elt.platform || null; // null means icon represents default icon (shared between platforms)
             res.width = elt.attrib.width;
             res.height = elt.attrib.height;
 
-            // default icon
-            if (!res.width && !res.height && !res.density) {
-                ret.defaultResource = res;
-            }
-            ret.push(res);
+            return res;
         });
-
-        /**
-         * Returns resource with specified width and/or height.
-         * @param  {number} width Width of resource.
-         * @param  {number} height Height of resource.
-         * @return {Resource} Resource object or null if not found.
-         */
-        ret.getBySize = function(width, height) {
-            if (!width && !height){
-                throw 'One of width or height must be defined';
-            }
-            for (var idx in this){
-                var res = this[idx];
-                // If only one of width or height is not specified, use another parameter for comparation
-                // If both specified, compare both.
-                if ((!width || (width == res.width)) &&
-                    (!height || (height == res.height))){
-                    return res;
-                }
-            }
-            return null;
-        };
-
-        /**
-         * Returns resource with specified density.
-         * @param  {string} density Density of resource.
-         * @return {Resource}       Resource object or null if not found.
-         */
-        ret.getByDensity = function (density) {
-            for (var idx in this) {
-                if (this[idx].density == density) {
-                    return this[idx];
-                }
-            }
-            return null;
-        };
-
-        /** Returns default icons */
-        ret.getDefault = function() {
-            return ret.defaultResource;
-        };
-
-        return ret;
     },
 
     /**
-     * Returns all icons for specific platform.
-     * @param  {string} platform Platform name
+     * Returns all defined icons.
      * @return {Resource[]}      Array of icon objects.
      */
-    getIcons: function(platform) {
-        return this.getStaticResources(platform, 'icon');
+    getIcons: function() {
+        return this.getStaticResources('icon');
     },
 
     /**
-     * Returns all splash images for specific platform.
-     * @param  {string} platform Platform name
+     * Returns all defined splash images.
      * @return {Resource[]}      Array of Splash objects.
      */
-    getSplashScreens: function(platform) {
-        return this.getStaticResources(platform, 'splash');
+    getSplashScreens: function() {
+        return this.getStaticResources('splash');
     },
 
     /**

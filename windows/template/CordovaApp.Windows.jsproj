@@ -77,10 +77,7 @@
     <AppxManifest Include="package.windows.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <Content Include="images\logo.png" />
-    <Content Include="images\smalllogo.png" />
-    <Content Include="images\splashscreen.png" />
-    <Content Include="images\storelogo.png" />
+    <Content Include="images\*.png" Exclude="images\*.scale-240.*" />
     <None Include="CordovaApp_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>

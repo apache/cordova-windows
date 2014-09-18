@@ -41,53 +41,43 @@ module.exports.getPackage = function (projectType, buildtype, buildArch) {
         return fs.statSync(pkgDir).isDirectory();
     });
 
-    // Retrieve package infos for all packages found
-    // that corresponds to package properties provided
-    return Q.all(pkgDirs.map(function (pkgDir) {
-        // get info about package
-        return module.exports.getInfo(pkgDir).then(function(pkgInfo) {
+    for (var dir in pkgDirs) {
+        var packageFiles = fs.readdirSync(pkgDirs[dir]).filter(function(e) {
+            return e.match('.*.(appx|appxbundle)$');
+        });
+
+        for (var pkgFile in packageFiles) {
+            var packageFile = path.join(pkgDirs[dir], packageFiles[pkgFile]);
+            var pkgInfo = module.exports.getPackageFileInfo(packageFile);
+
             if (pkgInfo && pkgInfo.type == projectType &&
                 pkgInfo.arch == buildArch && pkgInfo.buildtype == buildtype) {
                 // if package's properties are corresponds to properties provided
                 // resolve the promise with this package's info
                 return Q.resolve(pkgInfo);
             }
-            // else resove with no info
-            return Q.resolve();
-        });
-    })).then(function (packages) {
-        for (var idx in packages) {
-            // iterate through infos found and resolve with first
-            if (packages[idx]) {
-                return Q.resolve(packages[idx]);
-            }
         }
-        // else reject because seems that no corresponding packages found
-        return Q.reject('Package with specified parameters not found in AppPackages folder');
-    });
+    }
+    // reject because seems that no corresponding packages found
+    return Q.reject('Package with specified parameters not found in AppPackages folder');
 };
 
 // returns package info object or null if it is not valid package
-module.exports.getInfo = function (packagePath) {
-    if (!fs.statSync(packagePath).isDirectory()){
-        return Q.reject('Provided path is not a directory');
-    }
-    // This RE matches with package folder name like:
-    // CordovaApp.Phone_0.0.1.0_AnyCPU_Debug_Test
-    // Group:     ( 1 ) (  2  ) (  3 ) ( 4 )
-    var props = /.*\.(Phone|Windows|Windows80)_((?:\d\.)*\d)_(AnyCPU|x64|x86|ARM)(?:_(Debug))?_Test$/i.exec(path.basename(packagePath));
-    if (props){
-        // return package info object inside of promise
-        return Q.resolve({path: packagePath,
-            type      : props[1].toLowerCase(),
+module.exports.getPackageFileInfo = function (packageFile) {
+    var pkgName = path.basename(packageFile);
+    // CordovaApp.Windows_0.0.1.0_anycpu_debug.appx
+    // CordovaApp.Phone_0.0.1.0_x86_debug.appxbundle
+    var props = /.*\.(Phone|Windows|Windows80)_((?:\d\.)*\d)_(AnyCPU|x64|x86|ARM)(?:_(Debug))?.(appx|appxbundle)$/i.exec(pkgName);
+    if (props) {
+        return {type      : props[1].toLowerCase(),
             arch      : props[3].toLowerCase(),
             buildtype : props[4] ? props[4].toLowerCase() : "release",
             file      : props[1].toLowerCase() != "phone" ?
-                path.join(packagePath, 'Add-AppDevPackage.ps1') :
-                path.join(packagePath, path.basename(packagePath).replace(/_test$/i, '') + '.appx')
-        });
+                path.join(packageFile, '..', 'Add-AppDevPackage.ps1') :
+                packageFile
+        };
     }
-    return Q.reject('Can\'t fetch info for package at ' + packagePath);
+    return null;
 };
 
 // return package app ID fetched from appxmanifest

@@ -65,7 +65,7 @@ module.exports.run = function (argv) {
     return buildPackages.then(function () {
         return packages.getPackage(projectType, buildType, buildArchs[0]);
     }).then(function(pkg) {
-        console.log('\nDeploying ' + pkg.type + ' package to ' + deployTarget);
+        console.log('\nDeploying ' + pkg.type + ' package to ' + deployTarget + ':\n' + pkg.file);
         return pkg.type == "phone" ?
             packages.deployToPhone(pkg.file, deployTarget) :
             packages.deployToDesktop(pkg.file, deployTarget);
