@@ -22,6 +22,7 @@ var Q     = require('Q'),
     nopt  = require('nopt'),
     spawn = require('./spawn'),
     utils = require('./utils'),
+    prepare = require('./prepare'),
     MSBuildTools = require('./MSBuildTools'),
     ConfigParser = require('./ConfigParser');
 
@@ -55,11 +56,14 @@ module.exports.run = function run (argv) {
         return Q.reject(error);
     }
 
+    // update platform as per configuration settings
+    prepare.applyPlatformConfig();
+
     return MSBuildTools.findAvailableVersion().then(
         function(msbuildTools) {
             msbuild = msbuildTools;
             console.log('MSBuildToolsPath: ' + msbuild.path);
-            return applyPlatformConfig().then(buildTargets);
+            return buildTargets();
         });
 };
 
@@ -128,13 +132,6 @@ function buildTargets() {
             return msbuild.buildProject(path.join(ROOT, build.target), buildType,  build.arch);
          });
     }, Q()); 
-}
-
-function applyPlatformConfig() {
-    // run powershell ApplyPlatformConfig.ps1
-    return utils.getApplyPlatformConfigScript().then(function(ApplyPlatformConfigScript) {
-        return spawn('Powershell', ['-ExecutionPolicy', 'RemoteSigned', '-File',  ApplyPlatformConfigScript, ROOT]);
-    });
 }
 
 function getBuildTargets() {
