@@ -165,16 +165,25 @@ function applyAccessRules (config, manifest) {
 }
 
 function sortCapabilities(manifest) {
+
+    // removes namespace prefix (m3:Capability -> Capability)
+    // this is required since elementtree returns qualified name with namespace
+    function extractLocalName(tag) {
+        return tag.split(':').pop(); // takes last part of string after ':'
+    }
+
     var capabilitiesRoot = manifest.find('.//Capabilities'),
         capabilities = capabilitiesRoot._children || [];
     // to sort elements we remove them and then add again in the appropriate order
     capabilities.forEach(function(elem) { // no .clear() method
         capabilitiesRoot.remove(0, elem);
+        // CB-7601 we need local name w/o namespace prefix to sort capabilities correctly
+        elem.localName = extractLocalName(elem.tag);
     });
     capabilities.sort(function(a, b) {
-        return (a.tag > b.tag) ? 1: -1;
+        return (a.localName > b.localName) ? 1: -1;
     });
-    capabilities.forEach(function(elem){
+    capabilities.forEach(function(elem) {
         capabilitiesRoot.append(elem);
     });
 }
