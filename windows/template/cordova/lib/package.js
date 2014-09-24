@@ -107,9 +107,13 @@ module.exports.getPackageName = function (platformPath) {
 module.exports.findDevice = function (target) {
     target = target.toLowerCase();
     return module.exports.listDevices().then(function(deviceList) {
-        for (var idx in deviceList){
-            if (deviceList[idx].toLowerCase() == target) {
-                return Q.resolve(idx);
+        // CB-7617 since we use partial match shorter names should go first,
+        // example case is ['Emulator 8.1 WVGA 4 inch 512MB', 'Emulator 8.1 WVGA 4 inch']
+        var sortedList = deviceList.concat().sort(function (l, r) { return l.length > r.length; });
+        for (var idx in sortedList){
+            if (sortedList[idx].toLowerCase().indexOf(target) > -1) {
+                // we should return index based on original list
+                return Q.resolve(deviceList.indexOf(sortedList[idx]));
             }
         }
         return Q.reject('Specified device not found');
