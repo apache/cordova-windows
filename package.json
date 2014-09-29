@@ -13,11 +13,19 @@
         "apache"
     ],
     "dependencies": {
-        "q": "^0.9.0",
+        "q": ">0.9.0",
         "nopt": "~3",
         "node-uuid": "~1.4",
-        "shelljs": "~0.3"
+        "shelljs": "~0.3",
+        "elementtree": "~0.1.5"
     },
+    "bundledDependencies": [
+        "q",
+        "nopt",
+        "node-uuid",
+        "shelljs",
+        "elementtree"
+    ],
     "scripts": {
         "test": "bin\\create .\\testcreate & .\\testcreate\\cordova\\build & rm -rf .\\testcreate"
     },
