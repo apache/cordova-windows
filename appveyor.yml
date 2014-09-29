@@ -4,7 +4,6 @@
 nodejs_version: 0.10
 
 install:
-  - cd windows
   - npm install
 
 build: off
