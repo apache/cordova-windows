@@ -15,5 +15,11 @@
 :: specific language governing permissions and limitations
 :: under the License
 @ECHO OFF
-ECHO Error! Windows 8 Cordova CLI tools do not support list-emulator-images currently.
-EXIT /B 1
+SET script_path="%~dp0target-list.js"
+IF EXIST %script_path% (
+    node %script_path% %* --emulators
+) ELSE (
+    ECHO. 
+    ECHO ERROR: Could not find 'target-list.js' in cordova/lib, aborting...>&2
+    EXIT /B 1
+)

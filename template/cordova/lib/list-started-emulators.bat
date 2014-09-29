@@ -15,5 +15,5 @@
 :: specific language governing permissions and limitations
 :: under the License
 @ECHO OFF
-ECHO Error! Windows 8 Cordova CLI tools do not support list-started-emulators currently.
+ECHO Sorry, list-started-emulators is not availible yet for Windows. 1>&2
 EXIT /B 1
