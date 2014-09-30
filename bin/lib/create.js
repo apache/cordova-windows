@@ -59,6 +59,9 @@ module.exports.run = function (argv) {
     // Copy our unique VERSION file, so peeps can tell what version this project was created from.
     shell.cp("-rf", path.join(root, 'VERSION'), projectPath);
 
+    // copy node_modules to cordova directory
+    shell.cp('-r', path.join(root, 'node_modules'), path.join(projectPath, 'cordova'));
+
     if (templateOverrides && fs.existsSync(templateOverrides)) {
         console.log('Copying template overrides from ' + templateOverrides + ' to ' + projectPath);
         shell.cp("-rf", templateOverrides, projectPath);
