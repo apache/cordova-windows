@@ -4,6 +4,12 @@ Update these notes using: git log --pretty=format:'* %s' --topo-order --no-merge
 
 cordova-windows is a library that enables developers to create Windows 8/8.1 and WP8.1 application projects that support Cordova APIs.
 
+[3.6.4]
+* Set VERSION to 3.6.4 (via coho)
+* Update JS snapshot to version 3.6.4 (via coho)
+* CB-7617 partial match support for --target
+* CB-7617 Deploy on WP8.1 incorrectly handles --target name
+* bundledDependencies + fixed some whitespace
 
 [3.6.0]
 * CB-7377 Removes unnecessary rules tracing which is also incorrectly handled by PS
