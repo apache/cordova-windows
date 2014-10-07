@@ -84,7 +84,10 @@
   <Import Project="CordovaApp.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />
   <PropertyGroup>
-    <PreBuildEvent>
+    <BuildFromCordovaTooling>false</BuildFromCordovaTooling>
+    <PreBuildEvent Condition="$(BuildFromCordovaTooling) != true">
+      cd /d $(MSBuildThisFileDirectory)
+      node -e "require('./cordova/lib/prepare.js').applyPlatformConfig()"
     </PreBuildEvent>
   </PropertyGroup>
 </Project>
