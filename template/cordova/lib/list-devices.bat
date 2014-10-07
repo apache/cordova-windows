@@ -15,11 +15,11 @@
 :: specific language governing permissions and limitations
 :: under the License
 @ECHO OFF
-SET script_path="%~dp0package.js"
+SET script_path="%~dp0target-list.js"
 IF EXIST %script_path% (
-        node -e "require('./%script_path%').listDevices().done(function(devices){console.log(devices)})"
+    node %script_path% %* --devices
 ) ELSE (
-    ECHO.
-    ECHO ERROR: Could not find 'package' script in 'cordova/lib' folder, aborting...>&2
+    ECHO. 
+    ECHO ERROR: Could not find 'target-list.js' in cordova/lib, aborting...>&2
     EXIT /B 1
 )
