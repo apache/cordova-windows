@@ -30,6 +30,10 @@ module.exports.run = function (argv) {
     // Parse args
     var args = nopt({"guid": String}, {}, argv);
 
+    if(!args.argv.remain.length) {
+        return Q.reject("No path specified.");
+    }
+
     // Set parameters/defaults for create
     var projectPath = args.argv.remain[0];
     if (fs.existsSync(projectPath)){
