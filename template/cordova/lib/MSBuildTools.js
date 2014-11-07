@@ -23,7 +23,7 @@ MSBuildTools.prototype.buildProject = function(projFile, buildType, buildarch) {
 
 // returns full path to msbuild tools required to build the project and tools version
 module.exports.findAvailableVersion = function () {
-    var versions = ['12.0', '4.0'];
+    var versions = ['14.0', '12.0', '4.0'];
 
     return Q.all(versions.map(checkMSBuildVersion)).then(function (versions) {
         // select first msbuild version available, and resolve promise with it
