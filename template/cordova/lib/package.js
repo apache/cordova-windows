@@ -67,7 +67,7 @@ module.exports.getPackageFileInfo = function (packageFile) {
     var pkgName = path.basename(packageFile);
     // CordovaApp.Windows_0.0.1.0_anycpu_debug.appx
     // CordovaApp.Phone_0.0.1.0_x86_debug.appxbundle
-    var props = /.*\.(Phone|Windows|Windows80)_((?:\d\.)*\d)_(AnyCPU|x64|x86|ARM)(?:_(Debug))?.(appx|appxbundle)$/i.exec(pkgName);
+    var props = /.*\.(Phone|Windows|Windows80)_((?:\d\.)*\d*)_(AnyCPU|x64|x86|ARM)(?:_(Debug))?.(appx|appxbundle)$/i.exec(pkgName);
     if (props) {
         return {type      : props[1].toLowerCase(),
             arch      : props[3].toLowerCase(),
