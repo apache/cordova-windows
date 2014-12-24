@@ -12,12 +12,21 @@
         "cordova",
         "apache"
     ],
+    "scripts": {
+        "test": "npm run test-unit && npm run test-e2e",
+        "test-unit": "node node_modules/jasmine-node/lib/jasmine-node/cli.js --captureExceptions spec/unit",
+        "test-e2e": "node node_modules/jasmine-node/lib/jasmine-node/cli.js --captureExceptions spec/e2e"
+    },
     "dependencies": {
         "q": ">0.9.0",
         "nopt": "~3",
         "node-uuid": "~1.4",
         "shelljs": "~0.3",
         "elementtree": "~0.1.5"
+    },
+    "devDependencies": {
+        "jasmine-node": "1.14.5",
+        "rewire": ">=2.1.3"
     },
     "bundledDependencies": [
         "q",
@@ -26,9 +35,6 @@
         "shelljs",
         "elementtree"
     ],
-    "scripts": {
-        "test": "RMDIR /s /q \"testcreate 応用\" & bin\\create \"testcreate 応用\" com.test.app 応用 & \".\\testcreate 応用\\cordova\\build\" && RMDIR /s /q \"testcreate 応用\""
-    },
     "author": "Apache Software Foundation",
     "license": "Apache Version 2.0"
 }

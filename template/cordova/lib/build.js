@@ -20,7 +20,6 @@
 var Q     = require('Q'),
     path  = require('path'),
     nopt  = require('nopt'),
-    spawn = require('./spawn'),
     utils = require('./utils'),
     prepare = require('./prepare'),
     MSBuildTools = require('./MSBuildTools'),

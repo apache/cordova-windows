@@ -27,7 +27,7 @@ module.exports.findAvailableVersion = function () {
 
     return Q.all(versions.map(checkMSBuildVersion)).then(function (versions) {
         // select first msbuild version available, and resolve promise with it
-        var msbuildTools = versions[0] || versions[1];
+        var msbuildTools = versions[0] || versions[1] || versions[2];
 
         return msbuildTools ? Q.resolve(msbuildTools) : Q.reject('MSBuild tools not found');
     });
