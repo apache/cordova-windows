@@ -124,6 +124,65 @@ function applyCoreProperties(config, manifest) {
             publisherNameElement.text = author;
         }
     }
+
+    // Supported orientations
+    var isWin80 = manifest.find('.//VisualElements') != null;
+    var isWin81 = manifest.find('.//m2:VisualElements') != null;
+    var isWP81 = manifest.find('.//m3:VisualElements') != null;
+
+    var rotationPreferenceName, rotationPreferenceRootName;
+
+    if(isWin80) {
+        rotationPreferenceName = 'Rotation';
+        rotationPreferenceRootName = 'InitialRotationPreference';
+    } else if(isWin81) {
+        rotationPreferenceName = 'm2:Rotation';
+        rotationPreferenceRootName = 'm2:InitialRotationPreference';
+    } else if(isWP81) {
+        rotationPreferenceName = 'm3:Rotation';
+        rotationPreferenceRootName = 'm3:InitialRotationPreference';
+    }
+
+    var orientation = config.getPreference('Orientation');
+    if (orientation) {
+        var rotationPreferenceRoot = manifest.find('.//' + rotationPreferenceRootName);
+        if(rotationPreferenceRoot == null) {
+            visualElems.append(et.Element(rotationPreferenceRootName));
+            rotationPreferenceRoot = manifest.find('.//' + rotationPreferenceRootName);
+        }
+
+        rotationPreferenceRoot.clear();
+
+        function applyOrientations(orientationsArr) {
+            orientationsArr.forEach(function(orientationValue) {
+                var el = et.Element(rotationPreferenceName)
+                el.attrib.Preference = orientationValue;
+                rotationPreferenceRoot.append(el);
+            });
+        }
+
+        // Updates supported orientations
+        //<InitialRotationPreference>
+        //    <Rotation Preference = "portrait" | "landscape" | "portraitFlipped" | "landscapeFlipped" /> {1,4}
+        //</InitialRotationPreference>
+        var orientations;
+        if(orientation === 'default') {
+            // This means landscape and portrait
+            applyOrientations(['portrait', 'landscape', 'landscapeFlipped']);
+        } else if(orientation === 'portrait') {
+            applyOrientations(['portrait']);
+        } else if(orientation === 'landscape') {
+            applyOrientations(['landscape', 'landscapeFlipped']);
+        } else { // Platform-specific setting like "portrait,landscape,portraitFlipped"
+            applyOrientations(orientation.split(','));
+        }
+    } else {
+        // Remove InitialRotationPreference root element to revert to defaults
+        var rotationPreferenceRoot = visualElems.find('.//' + rotationPreferenceRootName);
+        if(rotationPreferenceRoot != null) {
+            visualElems.remove(null, rotationPreferenceRoot);
+        }
+    }
 }
 
 // Adjust version number as per CB-5337 Windows8 build fails due to invalid app version
