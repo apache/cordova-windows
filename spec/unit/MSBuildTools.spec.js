@@ -25,8 +25,7 @@ var fakeToolsPath = function (version) {
     return "C:\\Program Files (x86)\\MSBuild\\" + version;
 };
 
-describe('findAvailableVersion method tests', function(){
-
+describe('findAvailableVersion method', function(){
     var checkMSBuildVersionOriginal;
 
     var checkMSBuildVersionFake = function (availableVersions, version) {
@@ -34,9 +33,7 @@ describe('findAvailableVersion method tests', function(){
         return (availableVersions.indexOf(version) >= 0) ? Q.resolve(new MSBuildTools(version, fakeToolsPath(version))) : Q.resolve(null);
     };
 
-    var versionTest = function (availableVersions, version) {
-        var done = false;
-
+    var versionTest = function (availableVersions, version, done) {
         buildTools.__set__('checkMSBuildVersion', checkMSBuildVersionFake.bind(null, availableVersions));
         buildTools.findAvailableVersion().then(function (msbuildTools) {
             expect(msbuildTools).not.toBeNull();
@@ -44,10 +41,10 @@ describe('findAvailableVersion method tests', function(){
             expect(msbuildTools.path).toBeDefined();
             expect(msbuildTools.version).toBe(version);
             expect(msbuildTools.path).toBe(fakeToolsPath(version));
-            done = true;
+            if (typeof done === 'function') {
+                done();
+            }
         });
-
-        waitsFor(function () {return done; });
     }
 
     beforeEach(function () {
@@ -58,42 +55,38 @@ describe('findAvailableVersion method tests', function(){
         buildTools.__set__('checkMSBuildVersion', checkMSBuildVersionOriginal);
     });
 
-    it('should find 14.0 available version if 12.0 is unavailable', function(){
-        versionTest(['14.0'], '14.0');
+    it('spec.1 should find 14.0 available version if 12.0 is unavailable', function(done){
+        versionTest(['14.0'], '14.0', done);
     });
 
-    it('should select 14.0 available version even if 12.0 is also available', function(){
-        versionTest(['14.0', '12.0', '4.0'], '14.0');
+    it('spec.2 should select 14.0 available version even if 12.0 is also available', function(done){
+        versionTest(['14.0', '12.0', '4.0'], '14.0', done);
     });
 
-    it('should find 12.0 available version if 14.0 is unavailable', function(){
-        versionTest(['12.0', '4.0'], '12.0');
+    it('spec.3 should find 12.0 available version if 14.0 is unavailable', function(done){
+        versionTest(['12.0', '4.0'], '12.0', done);
     });
 
-    it('should find 4.0 available version if neither 12.0 nor 14.0 are available', function(){
-        versionTest(['4.0'], '4.0');
+    it('spec.4 should find 4.0 available version if neither 12.0 nor 14.0 are available', function(done){
+        versionTest(['4.0'], '4.0', done);
     });
 
-    it('should produce an error if there is no available versions', function(){
-        var done    = false,
-            version = '14.0';
+    it('spec.5 should produce an error if there is no available versions', function(done){
+        var resolveSpy = jasmine.createSpy();
 
         buildTools.__set__('checkMSBuildVersion', checkMSBuildVersionFake.bind(null, []));
-        buildTools.findAvailableVersion().then(function (msbuildTools) {
-            expect(false).toBe(true);
-            done = true;
-        }, function(error){
+        buildTools.findAvailableVersion()
+        .then(resolveSpy, function(error){
             expect(error).toBeDefined();
-            expect(error).toBe('MSBuild tools not found');
-            done = true;
+        })
+        .finally(function() {
+            expect(resolveSpy).not.toHaveBeenCalled();
+            done();
         });
-
-        waitsFor(function () {return done; });
     });
 });
 
-describe('checkMSBuildVersion function tests', function(){
-
+describe('checkMSBuildVersion method', function(){
     var checkMSBuildVersion = buildTools.__get__('checkMSBuildVersion'),
         execOriginal;
 
@@ -105,7 +98,7 @@ describe('checkMSBuildVersion function tests', function(){
         buildTools.__set__('exec', execOriginal);
     });
 
-    it('should return valid version and path', function(){
+    it('spec.6 should return valid version and path', function(){
         var version  = '14.0';
 
         buildTools.__set__('exec', function(cmd) {
@@ -118,8 +111,7 @@ describe('checkMSBuildVersion function tests', function(){
         });
     });
 
-    it('should return null if no tools found for version', function(){
-
+    it('spec.7 should return null if no tools found for version', function(){
         buildTools.__set__('exec', function(cmd) {
             return Q.resolve('ERROR: The system was unable to find the specified registry key or value.');
         });
@@ -129,8 +121,7 @@ describe('checkMSBuildVersion function tests', function(){
         });
     });
 
-    it('should return null on internal error', function(){
-
+    it('spec.8 should return null on internal error', function(){
         buildTools.__set__('exec', function(cmd) {
             return Q.reject();
         });
@@ -141,8 +132,7 @@ describe('checkMSBuildVersion function tests', function(){
     });
 });
 
-describe('MSBuildTools object tests', function(){
-
+describe('MSBuildTools object', function(){
     var MSBuildTools = buildTools.__get__('MSBuildTools'),
         spawnOriginal;
 
@@ -154,8 +144,7 @@ describe('MSBuildTools object tests', function(){
         buildTools.__set__('spawn', spawnOriginal);
     });
 
-    it('should have fields and methods defined', function() {
-
+    it('spec.9 should have fields and methods defined', function() {
         var version   = '14.0',
             toolsPath = fakeToolsPath(version),
             actual    = new MSBuildTools(version, toolsPath);
@@ -167,4 +156,3 @@ describe('MSBuildTools object tests', function(){
         expect(actual.buildProject).toBeDefined();
     });
 });
-

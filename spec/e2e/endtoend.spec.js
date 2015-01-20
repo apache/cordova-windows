@@ -20,7 +20,7 @@ var shell = require('shelljs'),
     fs = require('fs'),
     path = require('path');
 
-describe("Cordova create and build tests", function(){
+describe("Cordova create and build", function(){
 
     var projectFolder     = "testcreate 応用",
         buildDirectory    = path.join(__dirname, '../..'),
@@ -36,25 +36,25 @@ describe("Cordova create and build tests", function(){
         shell.rm('-rf', projectFolder);
     });
 
-    it("spec 1 should create new project", function(){
+    it("spec.1 should create new project", function(){
         expect(fs.existsSync(projectFolder)).toBe(true);
     });
 
-    it("spec 2 should build project", function(){
+    it("spec.2 should build project", function(){
         shell.exec(buildScriptPath, {silent:true});
         var packages = shell.ls(appPackagesFolder);
         expect(packages.filter(function(file) { return file.match(/.*Phone.*\.appx.*/); }).length).toBe(1);
         expect(packages.filter(function(file) { return file.match(/.*Windows.*\.appx.*/); }).length).toBe(1);
     });
 
-    it("spec 3 should build project for particular CPU", function(){
+    it("spec.3 should build project for particular CPU", function(){
         shell.exec(buildScriptPath + ' --archs=\"x64\"', {silent : true});
         var packages = shell.ls(appPackagesFolder);
         expect(packages.filter(function(file) { return file.match(/.*Phone.*x64.*\.appx.*/); }).length).toBe(1);
         expect(packages.filter(function(file) { return file.match(/.*Windows.*x64.*\.appx.*/); }).length).toBe(1);
     });
 
-    it("spec 4 should build project for CPUs separated by whitespaces", function(){
+    it("spec.4 should build project for CPUs separated by whitespaces", function(){
         shell.exec(buildScriptPath + ' --archs=\"x64 x86 arm anycpu\"', {silent : true});
         var packages = shell.ls(appPackagesFolder);
         expect(packages.filter(function(file) { return file.match(/.*Phone.*x86.*\.appx.*/); }).length).toBe(1);

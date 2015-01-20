@@ -102,7 +102,7 @@ module.exports.getPackageName = function (platformPath) {
     }
 };
 
-// returns one of available devices which name match with parovided string
+// returns one of available devices which name match with provided string
 // return rejected promise if device with name specified not found
 module.exports.findDevice = function (target) {
     target = target.toLowerCase();
