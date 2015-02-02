@@ -32,7 +32,7 @@ module.exports.applyPlatformConfig = function () {
     var config = new ConfigParser(path.join(ROOT, 'config.xml'));
 
     accessRules = config.getAccessRules().filter(function(rule) {
-        if (rule.indexOf('https://') == 0 || rule == '*') {
+        if (rule.indexOf('https://') === 0 || rule == '*') {
             return true;
         } else {
             console.log('Access rules must begin with "https://", the following rule will be ignored: ' + rule);
@@ -43,10 +43,10 @@ module.exports.applyPlatformConfig = function () {
     ['package.windows.appxmanifest', 'package.windows80.appxmanifest', 'package.phone.appxmanifest'].forEach(
         function(manifestFile) {
             updateManifestFile(config, path.join(ROOT, manifestFile));
-    })
+    });
 
     copyImages(config);
-}
+};
 
 function updateManifestFile (config, manifestPath) {
 
@@ -54,11 +54,11 @@ function updateManifestFile (config, manifestPath) {
     if(contents) {
         //Windows is the BOM. Skip the Byte Order Mark.
         contents = contents.substring(contents.indexOf('<'));
-    };
+    }
 
     var manifest =  new et.ElementTree(et.XML(contents));
 
-    applyCoreProperties(config, manifest);
+    applyCoreProperties(config, manifest, manifestPath);
     // sort Capability elements as per CB-5350 Windows8 build fails due to invalid 'Capabilities' definition
     sortCapabilities(manifest);
     applyAccessRules(config, manifest);
@@ -68,7 +68,7 @@ function updateManifestFile (config, manifestPath) {
     fs.writeFileSync(manifestPath, manifest.write({indent: 4}), 'utf-8');
 }
 
-function applyCoreProperties(config, manifest) {
+function applyCoreProperties(config, manifest, manifestPath) {
     var version = fixConfigVersion(config.version());
     var name = config.name();
     var pkgName = config.packageName();
@@ -78,7 +78,7 @@ function applyCoreProperties(config, manifest) {
     if (!startPage) {
         // If not specified, set default value
         // http://cordova.apache.org/docs/en/edge/config_ref_index.md.html#The%20config.xml%20File
-        startPage = "index.html";
+        startPage = 'index.html';
     }
 
     var identityNode = manifest.find('.//Identity');
@@ -86,8 +86,12 @@ function applyCoreProperties(config, manifest) {
         throw new Error('Invalid manifest file (no <Identity> node): ' + manifestPath);
     }
     // Update identity name and version
-    pkgName && (identityNode.attrib.Name = pkgName);
-    version && (identityNode.attrib.Version = version);
+    if (pkgName) {
+        (identityNode.attrib.Name = pkgName);
+    }
+    if (version) {
+        (identityNode.attrib.Version = version);
+    }
 
     // Update name (windows8 has it in the Application[@Id] and Application.VisualElements[@DisplayName])
     var app = manifest.find('.//Application');
@@ -102,14 +106,16 @@ function applyCoreProperties(config, manifest) {
     }
     app.attrib.StartPage = 'www/' + startPage;
 
-    var visualElems = manifest.find('.//VisualElements') // windows 8.0
-        || manifest.find('.//m2:VisualElements') // windows 8.1
-        || manifest.find('.//m3:VisualElements'); // windows phone 8.1
+    var visualElems = manifest.find('.//VisualElements') || // windows 8.0
+        manifest.find('.//m2:VisualElements') || // windows 8.1
+        manifest.find('.//m3:VisualElements'); // windows phone 8.1
 
     if(!visualElems) {
         throw new Error('Invalid manifest file (no <VisualElements> node): ' + manifestPath);
     }
-    name && (visualElems.attrib.DisplayName = name);
+    if (name) {
+        (visualElems.attrib.DisplayName = name);
+    }
 
     // Update properties
     var properties = manifest.find('.//Properties');
@@ -145,11 +151,11 @@ function applyAccessRules (config, manifest) {
     var appUriRulesRoot = manifest.find('.//Application'),
         appUriRules = appUriRulesRoot.find('.//ApplicationContentUriRules');
 
-    if (appUriRules != null) {
+    if (appUriRules !== null) {
         appUriRulesRoot.remove(null, appUriRules);
     }
     // rules are not defined or allow any
-    if (accessRules.length == 0 || accessRules.indexOf('*') > -1) {
+    if (accessRules.length === 0 || accessRules.indexOf('*') > -1) {
         return;
     } 
 
@@ -157,7 +163,7 @@ function applyAccessRules (config, manifest) {
     appUriRulesRoot.append(appUriRules);
 
     accessRules.forEach(function(rule) {
-        var el = et.Element('Rule')
+        var el = et.Element('Rule');
         el.attrib.Match = rule;
         el.attrib.Type = 'include';
         appUriRules.append(el);
@@ -194,7 +200,7 @@ function copyImages(config) {
     var appRoot = path.join(platformRoot, '..', '..');
 
     function copyImage(src, dest) {
-        src = path.join(appRoot, src),
+        src = path.join(appRoot, src);
         dest = path.join(platformRoot, 'images', dest);
         //console.log('Copying image from ' + src + ' to ' + dest);
         shell.cp('-f', src, dest);
@@ -213,14 +219,14 @@ function copyImages(config) {
             return e.match('^'+srcFileName + '(.scale-[0-9]+)?' + srcExt);
         });
         // warn if no images found
-        if (images.length == 0) {
+        if (images.length === 0) {
             console.log('No images found for target: ' + destFileName);
             return;
         }
         // copy images with new name but keeping scale suffix
         images.forEach(function(img) {
             var scale = path.extname(path.basename(img, srcExt));
-            if (scale == '') {
+            if (scale === '') {
                 scale = '.scale-100';
             }
             copyImage(path.join(srcDir, img), destFileName+scale+destExt);
@@ -282,12 +288,13 @@ function copyImages(config) {
 }
 
 function applyBackgroundColor (config, manifest) {
+    var visualElems =null;
 
     function refineColor(color) {
         // return three-byte hexadecimal number preceded by "#" (required for Windows)
         color = color.replace('0x', '').replace('#', '');
         if (color.length == 3) {
-            color = color[0] + color[0] + color[1] + color[1] + color[2] + color[2]
+            color = color[0] + color[0] + color[1] + color[1] + color[2] + color[2];
         }
         // alpha is not supported, so we remove it
         if (color.length == 8) { // AArrggbb
@@ -298,18 +305,18 @@ function applyBackgroundColor (config, manifest) {
     // background color
     var bgColor = config.getPreference('BackgroundColor');
     if (bgColor) {
-        var visualElems = manifest.find('.//VisualElements') // windows 8.0
-            || manifest.find('.//m2:VisualElements') // windows 8.1
-            || manifest.find('.//m3:VisualElements'); // windows phone 8.1
+        visualElems = manifest.find('.//VisualElements') || // windows 8.0
+            manifest.find('.//m2:VisualElements') || // windows 8.1
+            manifest.find('.//m3:VisualElements'); // windows phone 8.1
         visualElems.attrib.BackgroundColor = refineColor(bgColor);
     }
 
     // Splash Screen background color
     bgColor = config.getPreference('SplashScreenBackgroundColor');
     if (bgColor) {
-        var visualElems = manifest.find('.//SplashScreen') // windows 8.0
-            || manifest.find('.//m2:SplashScreen') // windows 8.1
-            || manifest.find('.//m3:SplashScreen'); // windows phone 8.1
+        visualElems = manifest.find('.//SplashScreen') || // windows 8.0
+            manifest.find('.//m2:SplashScreen') || // windows 8.1
+            manifest.find('.//m3:SplashScreen'); // windows phone 8.1
         visualElems.attrib.BackgroundColor = refineColor(bgColor);
     }
 }

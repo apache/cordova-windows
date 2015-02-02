@@ -33,11 +33,11 @@ describe('run method', function() {
 
     var isCordovaProjectFalse = function () {
         return false;
-    }
+    };
 
     var isCordovaProjectTrue = function () {
         return true;
-    }
+    };
 
     beforeEach(function () {
         // console output suppression
@@ -126,7 +126,7 @@ describe('run method', function() {
 
     it('spec.5 should build and deploy on phone if --phone arg specified', function(done) {
         var build = jasmine.createSpy(),
-            deployToPhone = jasmine.createSpy()
+            deployToPhone = jasmine.createSpy(),
             deployToDesktop = jasmine.createSpy();
 
         run.__set__('utils.isCordovaProject', isCordovaProjectTrue);
@@ -160,7 +160,7 @@ describe('run method', function() {
 
     it('spec.6 should build and deploy on desktop if --phone arg is not specified', function(done) {
         var build = jasmine.createSpy(),
-            deployToPhone = jasmine.createSpy()
+            deployToPhone = jasmine.createSpy(),
             deployToDesktop = jasmine.createSpy();
 
         run.__set__('utils.isCordovaProject', isCordovaProjectTrue);

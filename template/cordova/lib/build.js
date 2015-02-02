@@ -68,21 +68,21 @@ module.exports.run = function run (argv) {
 
 // help/usage function
 module.exports.help = function help() {
-    console.log("");
-    console.log("Usage: build [ --debug | --release ] [--archs=\"<list of architectures...>\"] [--phone | --win]");
-    console.log("    --help    : Displays this dialog.");
-    console.log("    --debug   : Builds project in debug mode. (Default)");
-    console.log("    --release : Builds project in release mode.");
-    console.log("    -r        : Shortcut :: builds project in release mode.");
-    console.log("    --archs   : Builds project binaries for specific chip architectures (`anycpu`, `arm`, `x86`, `x64`).");
-    console.log("    --phone, --win");
-    console.log("              : Specifies, what type of project to build");
-    console.log("examples:");
-    console.log("    build ");
-    console.log("    build --debug");
-    console.log("    build --release");
-    console.log("    build --release --archs=\"arm x86\"");
-    console.log("");
+    console.log('');
+    console.log('Usage: build [ --debug | --release ] [--archs=\"<list of architectures...>\"] [--phone | --win]');
+    console.log('    --help    : Displays this dialog.');
+    console.log('    --debug   : Builds project in debug mode. (Default)');
+    console.log('    --release : Builds project in release mode.');
+    console.log('    -r        : Shortcut :: builds project in release mode.');
+    console.log('    --archs   : Builds project binaries for specific chip architectures (`anycpu`, `arm`, `x86`, `x64`).');
+    console.log('    --phone, --win');
+    console.log('              : Specifies, what type of project to build');
+    console.log('examples:');
+    console.log('    build ');
+    console.log('    build --debug');
+    console.log('    build --release');
+    console.log('    build --release --archs="arm x86"');
+    console.log('');
     process.exit(0);
 };
 
@@ -106,15 +106,15 @@ function parseAndValidateArgs(argv) {
 function buildTargets() {
 
     // filter targets to make sure they are supported on this development machine
-    var buildTargets = filterSupportedTargets(getBuildTargets(), msbuild);
+    var myBuildTargets = filterSupportedTargets(getBuildTargets(), msbuild);
 
     var buildConfigs = [];
 
     // collect all build configurations (pairs of project to build and target architecture)
-    buildTargets.forEach(function(buildTarget) {
+    myBuildTargets.forEach(function(buildTarget) {
         buildArchs.forEach(function(buildArch) {
             buildConfigs.push({target:buildTarget, arch: buildArch});
-        })
+        });
     });
 
     // run builds serially
@@ -139,7 +139,7 @@ function getBuildTargets() {
     var noSwitches = !(args.phone || args.win);
     // Windows
     if (args.win || noSwitches) { // if --win or no arg
-        var windowsTargetVersion = config.getPreference('windows-target-version')
+        var windowsTargetVersion = config.getPreference('windows-target-version');
         switch(windowsTargetVersion) {
         case '8':
         case '8.0':
@@ -149,26 +149,26 @@ function getBuildTargets() {
             targets.push(projFiles.win);
             break;
         default:
-            throw new Error('Unsupported windows-target-version value: ' + windowsTargetVersion)
+            throw new Error('Unsupported windows-target-version value: ' + windowsTargetVersion);
         }
     }
     // Windows Phone
     if (args.phone || noSwitches) { // if --phone or no arg
-        var windowsPhoneTargetVersion = config.getPreference('windows-phone-target-version')
+        var windowsPhoneTargetVersion = config.getPreference('windows-phone-target-version');
         switch(windowsPhoneTargetVersion) {
         case '8.1':
             targets.push(projFiles.phone);
             break;
         default:
-            throw new Error('Unsupported windows-phone-target-version value: ' + windowsPhoneTargetVersion)
+            throw new Error('Unsupported windows-phone-target-version value: ' + windowsPhoneTargetVersion);
         }
     }
     return targets;
 }
 
 function filterSupportedTargets (targets) {
-    if (!targets || targets.length == 0) {
-        console.warn("\r\nNo build targets are specified.");
+    if (!targets || targets.length === 0) {
+        console.warn('\r\nNo build targets are specified.');
         return [];
     }
 
@@ -183,8 +183,8 @@ function filterSupportedTargets (targets) {
 
     // unsupported targets have been detected
     if (supportedTargets.length != targets.length) {
-        console.warn("\r\nWarning. Windows 8.1 and Windows Phone 8.1 target platforms are not supported on this development machine and will be skipped.");
-        console.warn("Please install OS Windows 8.1 and Visual Studio 2013 Update2 in order to build for Windows 8.1 and Windows Phone 8.1.\r\n");
+        console.warn('\r\nWarning. Windows 8.1 and Windows Phone 8.1 target platforms are not supported on this development machine and will be skipped.');
+        console.warn('Please install OS Windows 8.1 and Visual Studio 2013 Update2 in order to build for Windows 8.1 and Windows Phone 8.1.\r\n');
     }
     return supportedTargets;
 }

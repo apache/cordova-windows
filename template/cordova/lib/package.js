@@ -71,8 +71,8 @@ module.exports.getPackageFileInfo = function (packageFile) {
     if (props) {
         return {type      : props[1].toLowerCase(),
             arch      : props[3].toLowerCase(),
-            buildtype : props[4] ? props[4].toLowerCase() : "release",
-            file      : props[1].toLowerCase() != "phone" ?
+            buildtype : props[4] ? props[4].toLowerCase() : 'release',
+            file      : props[1].toLowerCase() != 'phone' ?
                 path.join(packageFile, '..', 'Add-AppDevPackage.ps1') :
                 packageFile
         };
@@ -136,8 +136,8 @@ module.exports.listDevices = function () {
 
 // deploys specified phone package to device/emulator
 module.exports.deployToPhone = function (appxPath, deployTarget) {
-    var getTarget = deployTarget == "device" ? Q("de") :
-        deployTarget == "emulator" ? Q("xd") : module.exports.findDevice(deployTarget);
+    var getTarget = deployTarget == 'device' ? Q('de') :
+        deployTarget == 'emulator' ? Q('xd') : module.exports.findDevice(deployTarget);
 
     // /installlaunch option sometimes fails with 'Error: The parameter is incorrect.'
     // so we use separate steps to /install and then /launch
@@ -157,20 +157,20 @@ module.exports.deployToPhone = function (appxPath, deployTarget) {
 
 // deploys specified package to desktop
 module.exports.deployToDesktop = function (appxScript, deployTarget) {
-    if (deployTarget != "device" && deployTarget != "emulator") {
-        return Q.reject("Deploying desktop apps to specific target not supported");
+    if (deployTarget != 'device' && deployTarget != 'emulator') {
+        return Q.reject('Deploying desktop apps to specific target not supported');
     }
 
     return utils.getAppStoreUtils().then(function(appStoreUtils) {
         return module.exports.getPackageName(path.join(__dirname, '..', '..')).then(function(pkgname) {
             // uninstalls previous application instance (if exists)
-            console.log("Attempt to uninstall previous application version...");
+            console.log('Attempt to uninstall previous application version...');
             return spawn('powershell', ['-ExecutionPolicy', 'RemoteSigned', 'Import-Module "' + appStoreUtils + '"; Uninstall-App ' + pkgname])
             .then(function() {
-                console.log("Attempt to install application...");
+                console.log('Attempt to install application...');
                 return spawn('powershell', ['-ExecutionPolicy', 'RemoteSigned', 'Import-Module "' + appStoreUtils + '"; Install-App', utils.quote(appxScript)]);
             }).then(function() {
-                console.log("Starting application...");
+                console.log('Starting application...');
                 return spawn('powershell', ['-ExecutionPolicy', 'RemoteSigned', 'Import-Module "' + appStoreUtils + '"; Start-Locally', pkgname]);
             });
         });

@@ -29,13 +29,13 @@ var ROOT = path.join(__dirname, '..', '..');
 
 module.exports.run = function (argv) {
     if (!utils.isCordovaProject(ROOT)){
-        return Q.reject("Could not find project at " + ROOT);
+        return Q.reject('Could not find project at ' + ROOT);
     }
 
     // parse args
-    var args  = nopt({"debug": Boolean, "release": Boolean, "nobuild": Boolean,
-        "device": Boolean, "emulator": Boolean, "target": String, "archs": String,
-        "phone": Boolean, "win": Boolean}, {"r" : "--release"}, argv);
+    var args  = nopt({'debug': Boolean, 'release': Boolean, 'nobuild': Boolean,
+        'device': Boolean, 'emulator': Boolean, 'target': String, 'archs': String,
+        'phone': Boolean, 'win': Boolean}, {'r' : '--release'}, argv);
 
     // Validate args
     if (args.debug && args.release) {
@@ -49,14 +49,14 @@ module.exports.run = function (argv) {
     }
 
     // Get build/deploy options
-    var buildType    = args.release ? "release" : "debug",
-        buildArchs   = args.archs ? args.archs.split(' ') : ["anycpu"],
-        projectType  = args.phone ? "phone" : "windows",
-        deployTarget = args.target ? args.target : args.device ? "device" : "emulator";
+    var buildType    = args.release ? 'release' : 'debug',
+        buildArchs   = args.archs ? args.archs.split(' ') : ['anycpu'],
+        projectType  = args.phone ? 'phone' : 'windows',
+        deployTarget = args.target ? args.target : args.device ? 'device' : 'emulator';
 
     // for win switch we should correctly handle 8.0 and 8.1 version as per configuration
     if (projectType == 'windows' && getWindowsTargetVersion() == '8.0') {
-        projectType = 'windows80'
+        projectType = 'windows80';
     }
 
     // if --nobuild isn't specified then build app first
@@ -66,47 +66,47 @@ module.exports.run = function (argv) {
         return packages.getPackage(projectType, buildType, buildArchs[0]);
     }).then(function(pkg) {
         console.log('\nDeploying ' + pkg.type + ' package to ' + deployTarget + ':\n' + pkg.file);
-        return pkg.type == "phone" ?
+        return pkg.type == 'phone' ?
             packages.deployToPhone(pkg.file, deployTarget) :
             packages.deployToDesktop(pkg.file, deployTarget);
     });
 };
 
 module.exports.help = function () {
-    console.log("\nUsage: run [ --device | --emulator | --target=<id> ] [ --debug | --release | --nobuild ]");
-    console.log("           [ --x86 | --x64 | --arm ] [--phone | --win]");
-    console.log("    --device      : Deploys and runs the project on the connected device.");
-    console.log("    --emulator    : Deploys and runs the project on an emulator.");
-    console.log("    --target=<id> : Deploys and runs the project on the specified target.");
-    console.log("    --debug       : Builds project in debug mode.");
-    console.log("    --release     : Builds project in release mode.");
-    console.log("    --nobuild     : Uses pre-built package, or errors if project is not built.");
-    console.log("    --archs       : Specific chip architectures (`anycpu`, `arm`, `x86`, `x64`).");
-    console.log("    --phone, --win");
-    console.log("                  : Specifies project type to deploy");
-    console.log("");
-    console.log("Examples:");
-    console.log("    run");
-    console.log("    run --emulator");
-    console.log("    run --device");
-    console.log("    run --target=7988B8C3-3ADE-488d-BA3E-D052AC9DC710");
-    console.log("    run --device --release");
-    console.log("    run --emulator --debug");
-    console.log("");
+    console.log('\nUsage: run [ --device | --emulator | --target=<id> ] [ --debug | --release | --nobuild ]');
+    console.log('           [ --x86 | --x64 | --arm ] [--phone | --win]');
+    console.log('    --device      : Deploys and runs the project on the connected device.');
+    console.log('    --emulator    : Deploys and runs the project on an emulator.');
+    console.log('    --target=<id> : Deploys and runs the project on the specified target.');
+    console.log('    --debug       : Builds project in debug mode.');
+    console.log('    --release     : Builds project in release mode.');
+    console.log('    --nobuild     : Uses pre-built package, or errors if project is not built.');
+    console.log('    --archs       : Specific chip architectures (`anycpu`, `arm`, `x86`, `x64`).');
+    console.log('    --phone, --win');
+    console.log('                  : Specifies project type to deploy');
+    console.log('');
+    console.log('Examples:');
+    console.log('    run');
+    console.log('    run --emulator');
+    console.log('    run --device');
+    console.log('    run --target=7988B8C3-3ADE-488d-BA3E-D052AC9DC710');
+    console.log('    run --device --release');
+    console.log('    run --emulator --debug');
+    console.log('');
     process.exit(0);
 };
 
 
 function getWindowsTargetVersion() {
     var config = new ConfigParser(path.join(ROOT, 'config.xml'));
-    var windowsTargetVersion = config.getPreference('windows-target-version')
+    var windowsTargetVersion = config.getPreference('windows-target-version');
     switch(windowsTargetVersion) {
     case '8':
     case '8.0':
-        return '8.0'
+        return '8.0';
     case '8.1':
-        return '8.1'
+        return '8.1';
     default:
-        throw new Error('Unsupported windows-target-version value: ' + windowsTargetVersion)
+        throw new Error('Unsupported windows-target-version value: ' + windowsTargetVersion);
     }
 }

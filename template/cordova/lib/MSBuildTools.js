@@ -9,9 +9,9 @@ function MSBuildTools (version, path) {
 }
 
 MSBuildTools.prototype.buildProject = function(projFile, buildType, buildarch) {
-    console.log("Building project: " + projFile);
-    console.log("\tConfiguration : " + buildType);
-    console.log("\tPlatform      : " + buildarch);
+    console.log('Building project: ' + projFile);
+    console.log('\tConfiguration : ' + buildType);
+    console.log('\tPlatform      : ' + buildarch);
 
     var args = ['/clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal', '/nologo',
     '/p:Configuration=' + buildType,
@@ -19,7 +19,7 @@ MSBuildTools.prototype.buildProject = function(projFile, buildType, buildarch) {
     '/p:BuildFromCordovaTooling=' + true];
 
     return spawn(path.join(this.path, 'msbuild'), [projFile].concat(args));
-}
+};
 
 // returns full path to msbuild tools required to build the project and tools version
 module.exports.findAvailableVersion = function () {
