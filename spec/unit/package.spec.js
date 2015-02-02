@@ -16,8 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 */
-var Q = require('q'),
-    path = require('path'),
+var path = require('path'),
     rewire = require('rewire'),
     shell = require('shelljs'),
     platformRoot = '../../template',

@@ -43,11 +43,11 @@ function extractMetadata(projectPath) {
 }
 
 module.exports.help = function () {
-    console.log("WARNING : Make sure to back up your project before updating!");
-    console.log("Usage: update PathToProject ");
-    console.log("    PathToProject : The path the project you would like to update.");
-    console.log("examples:");
-    console.log("    update C:\\Users\\anonymous\\Desktop\\MyProject");
+    console.log('WARNING : Make sure to back up your project before updating!');
+    console.log('Usage: update PathToProject ');
+    console.log('    PathToProject : The path the project you would like to update.');
+    console.log('examples:');
+    console.log('    update C:\\Users\\anonymous\\Desktop\\MyProject');
 };
 
 // updates the cordova.js in project along with the cordova tooling.
@@ -55,8 +55,8 @@ module.exports.run = function (argv) {
     var projectPath = argv[2];
     if (!fs.existsSync(projectPath)){
         // if specified project path is not valid then reject promise
-        Q.reject("The given path to the project does not exist." +
-            " Please provide a path to the project you would like to update.");
+        Q.reject('The given path to the project does not exist.' +
+            ' Please provide a path to the project you would like to update.');
     }
 
     return extractMetadata(projectPath).then(function (metadata) {

@@ -63,11 +63,11 @@ describe('run method', function() {
 
     var isCordovaProjectFalse = function () {
         return false;
-    }
+    };
 
     var isCordovaProjectTrue = function () {
         return true;
-    }
+    };
 
     beforeEach(function () {
         // console output suppression
@@ -201,20 +201,16 @@ describe('run method', function() {
                         case 'arm':
                             armBuild();
                             return Q();
-                            break;
                         case 'x86':
                             x86Build();
                             return Q();
-                            break;
                         case 'anycpu':
                         case 'any cpu':
                             anyCpuBuild();
                             return Q();
-                            break;
                         case 'x64':
                             x64Build();
                             return Q();
-                            break;
                         default:
                             return Q.reject();
                     }

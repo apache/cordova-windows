@@ -42,7 +42,7 @@ function ConfigParser(path) {
     }
     var r = this.doc.getroot();
     if (r.tag !== 'widget') {
-        throw new CordovaError(path + ' has incorrect root node name (expected "widget", was "' + r.tag + '")');
+        throw new Error(path + ' has incorrect root node name (expected "widget", was "' + r.tag + '")');
     }
 }
 

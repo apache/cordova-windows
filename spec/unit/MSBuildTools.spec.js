@@ -22,7 +22,7 @@ var Q = require('q'),
     buildTools = rewire(platformRoot + '/cordova/lib/MSBuildTools.js');
 
 var fakeToolsPath = function (version) {
-    return "C:\\Program Files (x86)\\MSBuild\\" + version;
+    return 'C:\\Program Files (x86)\\MSBuild\\' + version;
 };
 
 describe('findAvailableVersion method', function(){
@@ -45,7 +45,7 @@ describe('findAvailableVersion method', function(){
                 done();
             }
         });
-    }
+    };
 
     beforeEach(function () {
         checkMSBuildVersionOriginal = buildTools.__get__('checkMSBuildVersion');
@@ -102,7 +102,7 @@ describe('checkMSBuildVersion method', function(){
         var version  = '14.0';
 
         buildTools.__set__('exec', function(cmd) {
-            return Q.resolve("\r\nHKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\12.0\r\n\tMSBuildToolsPath\tREG_SZ\t" + fakeToolsPath(version) + "\r\n\r\n");
+            return Q.resolve('\r\nHKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\12.0\r\n\tMSBuildToolsPath\tREG_SZ\t' + fakeToolsPath(version) + '\r\n\r\n');
         });
 
         checkMSBuildVersion(version).then(function (actual) {

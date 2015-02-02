@@ -24,12 +24,12 @@ var Q     = require('Q'),
 module.exports.run = function () {
     if (os.platform() != 'win32'){
       // Build Universal windows apps available for windows platform only, so we reject on others platforms
-        return Q.reject("ERROR: Cordova tooling for Windows requires Windows OS");
+        return Q.reject('ERROR: Cordova tooling for Windows requires Windows OS');
     }
     // Check whther MSBuild Tools are available
     return MSBuildTools.findAvailableVersion();
 };
 
 module.exports.help = function () {
-    console.log("Usage: check_reqs or node check_reqs");
+    console.log('Usage: check_reqs or node check_reqs');
 };
