@@ -57,7 +57,6 @@ module.exports.getAppStoreUtils = function () {
     if (!fs.existsSync (appStoreUtils)) {
         return Q.reject('Can\'t unblock AppStoreUtils script');
     }
-    //console.log("Removing execution restrictions from AppStoreUtils...");
     return spawn('powershell', ['Unblock-File', module.exports.quote(appStoreUtils)]).then(function () {
         return Q.resolve(appStoreUtils);
     }).fail(function (err) {
@@ -69,9 +68,9 @@ module.exports.getAppStoreUtils = function () {
 module.exports.getAppDeployUtils = function () {
     var appDeployUtils = path.join((process.env['ProgramFiles(x86)'] || process.env['ProgramFiles']),
         'Microsoft SDKs', 'Windows Phone', 'v8.1', 'Tools', 'AppDeploy', 'AppDeployCmd.exe');
-    // Check if AppDeployCmd is exists
+    // Check if AppDeployCmd exists
     if (!fs.existsSync(appDeployUtils)) {
-        console.warn('WARNING: AppDeploy tool (AppDeployCmd.exe) didn\'t found. Assume that it\'s in %PATH%');
+        console.warn('WARNING: AppDeploy tool (AppDeployCmd.exe) wasn\'t found. Make sure that it\'s in %PATH%');
         return Q.resolve('AppDeployCmd');
     }
     return Q.resolve(appDeployUtils);
