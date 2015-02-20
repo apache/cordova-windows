@@ -40,13 +40,34 @@ module.exports.applyPlatformConfig = function () {
         return false;
     });
 
+    // Apply appxmanifest changes
     ['package.windows.appxmanifest', 'package.windows80.appxmanifest', 'package.phone.appxmanifest'].forEach(
         function(manifestFile) {
             updateManifestFile(config, path.join(ROOT, manifestFile));
     });
 
+    // Apply jsproj changes
+    ['CordovaApp.Phone.jsproj', 'CordovaApp.Windows.jsproj', 'CordovaApp.Windows80.jsproj'].forEach(
+        function(jsprojFile) {
+            updatejsprojFile(config, path.join(ROOT, jsprojFile));
+    });
+
     copyImages(config);
 };
+
+function updatejsprojFile(config, jsProjFilePath) {
+    var defaultLocale = config.defaultLocale() || 'en-US';
+
+    var contents = fs.readFileSync(jsProjFilePath, 'utf-8');
+    // Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
+    if (contents.charCodeAt(0) === 0xFEFF) {
+        contents = contents.slice(1);
+    }
+    var jsProjXML =  new et.ElementTree(et.XML(contents));
+    var jsProjDefaultLocale = jsProjXML.find('./PropertyGroup/DefaultLanguage');
+    jsProjDefaultLocale.text = defaultLocale;
+    fs.writeFileSync(jsProjFilePath, jsProjXML.write({indent: 2}), 'utf-8');
+}
 
 function updateManifestFile (config, manifestPath) {
 
