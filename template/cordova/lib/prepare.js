@@ -132,9 +132,9 @@ function applyCoreProperties(config, manifest, manifestPath) {
     }
 
     // Supported orientations
-    var isWin80 = manifest.find('.//VisualElements') != null;
-    var isWin81 = manifest.find('.//m2:VisualElements') != null;
-    var isWP81 = manifest.find('.//m3:VisualElements') != null;
+    var isWin80 = manifest.find('.//VisualElements') !== null;
+    var isWin81 = manifest.find('.//m2:VisualElements') !== null;
+    var isWP81 = manifest.find('.//m3:VisualElements') !== null;
 
     var rotationPreferenceName, rotationPreferenceRootName;
 
@@ -150,28 +150,28 @@ function applyCoreProperties(config, manifest, manifestPath) {
     }
 
     var orientation = config.getPreference('Orientation');
+    var rotationPreferenceRoot;
     if (orientation) {
-        var rotationPreferenceRoot = manifest.find('.//' + rotationPreferenceRootName);
-        if(rotationPreferenceRoot == null) {
+        rotationPreferenceRoot = manifest.find('.//' + rotationPreferenceRootName);
+        if(rotationPreferenceRoot === null) {
             visualElems.append(et.Element(rotationPreferenceRootName));
             rotationPreferenceRoot = manifest.find('.//' + rotationPreferenceRootName);
         }
 
         rotationPreferenceRoot.clear();
 
-        function applyOrientations(orientationsArr) {
+        var applyOrientations = function(orientationsArr) {
             orientationsArr.forEach(function(orientationValue) {
-                var el = et.Element(rotationPreferenceName)
+                var el = et.Element(rotationPreferenceName);
                 el.attrib.Preference = orientationValue;
                 rotationPreferenceRoot.append(el);
             });
-        }
+        };
 
         // Updates supported orientations
         //<InitialRotationPreference>
         //    <Rotation Preference = "portrait" | "landscape" | "portraitFlipped" | "landscapeFlipped" /> {1,4}
         //</InitialRotationPreference>
-        var orientations;
         if(orientation === 'default') {
             // This means landscape and portrait
             applyOrientations(['portrait', 'landscape', 'landscapeFlipped']);
@@ -184,8 +184,8 @@ function applyCoreProperties(config, manifest, manifestPath) {
         }
     } else {
         // Remove InitialRotationPreference root element to revert to defaults
-        var rotationPreferenceRoot = visualElems.find('.//' + rotationPreferenceRootName);
-        if(rotationPreferenceRoot != null) {
+        rotationPreferenceRoot = visualElems.find('.//' + rotationPreferenceRootName);
+        if(rotationPreferenceRoot !== null) {
             visualElems.remove(null, rotationPreferenceRoot);
         }
     }
