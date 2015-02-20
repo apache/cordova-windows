@@ -162,6 +162,11 @@ ConfigParser.prototype = {
          } 
         }); 
         return ret; 
+    },
+
+    // Returns the widget defaultLocale
+    defaultLocale: function() {
+        return this.doc.getroot().attrib['defaultlocale'];
     }
 };
 
