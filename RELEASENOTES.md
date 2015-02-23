@@ -24,9 +24,39 @@ Update these notes using: git log --pretty=format:'* %s' --topo-order --no-merge
 
 cordova-windows is a library that enables developers to create Windows 8/8.1 and WP8.1 application projects that support Cordova APIs.
 
-* updated version to 3.7.0-dev on master
-* merged package.json changes
-* update release notes
+[3.8.0]
+* Update JS snapshot to version 3.8.0 (via coho)
+* CB-7985 windows platform does not build with Visual Studio 14 CTP tools
+* CB-8515 Support DefaultLanguage selection for Windows
+* CB-8321 Add supported orientations config.xml preference handling for `windows` platform
+* CB-8525 Fix audit-license-headers check on Windows
+* CB-8400 Enable jshint for Windows platform and fix all jshint issues
+* CB-8417 moved platform specific js into platform
+* CB-8330 Added new unit tests
+* CB-8136 Implemented prototype for end to end and unit tests via Jasmine
+* Fixed regex used in getPackageFileInfo().
+
+[3.7.1]
+* Updated expired temporary certificate
+
+[3.7.0]
+* Update JS snapshot to version 3.7.0 (via coho)
+* CB-7731 catch obvious missing args error
+* CB-7493 Adds `space-in-path` and `unicode in name` tests for CI
+* CB-7656 Fixes `list-devices` and `list-emulators` commands
+* Fixes `msbuild` failure after **Windows** project creation
+* CB-7617 partial match support for `--target`
+* CB-7666 Merge `node_modules` and move to package root
+* CB-7666 Move stuff outside of **Windows** subdir
+* updated release notes for `3.6.4`
+* CB-7617 Deploy on WP8.1 incorrectly handles `--target` name
+* CB-7601 Build fails due to capabilities with m: prefixes are incorrectly sorted
+* CB-7520 copy MRT images defined in config.xml
+* CB-7520 `.appxbundle` package format support
+* CB-7520 refine image names, use wildcard to include MRT images
+* CB-7494 Fixes wrong replacements in `*.appxmanifest` files
+* CB-7452 Windows. Rewrite `ApplyPlatformConfig.ps1` using NodeJS
+* CB-7377 Removes unnecessary rules tracing which is also incorrectly handled by PS
 
 [3.6.4]
 * Set VERSION to 3.6.4 (via coho)
@@ -71,7 +101,7 @@ cordova-windows is a library that enables developers to create Windows 8/8.1 and
 * Adds support for build archs to run command  + small cleanup and refactoring  + fix jshint issues
 * CB-6976 Add support for Windows Universal apps (Windows 8.1 and WP 8.1)
 * Cleanup. This closes #10
-* Removed Windows7 which is now in it's own branch. This closes #29
+* Removed Windows7 which is now in it\'s own branch. This closes #29
 * Added list of supported architectures in help text
 * Adds support for target architectures to build command
 * Closing merged pull requests. close #31, close #30
@@ -89,7 +119,7 @@ cordova-windows is a library that enables developers to create Windows 8/8.1 and
 * CB-6491 add CONTRIBUTING.md
 * CB-6309 Windows8. Add Splash Screen img support via config.xml preference, CB-6544 SplashScreenBackgroundColor, CB-6545 support multiple preferences
 * moved PlatformConfig functionality to pre-build project level so running outside of cli will still work
-* Fix for when background-color and/or content-src aren't specified in config.xml
+* Fix for when background-color and/or content-src aren\'t specified in config.xml
 * Background color now applied to windows 8 project config during build process. * Added logic to convert hexadecimal color to windows 8 specific format
 * Fix build/deploy errors when path to project contains spaces
 * Version files updated to 3.5.0-dev
