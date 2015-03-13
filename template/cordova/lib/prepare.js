@@ -41,9 +41,11 @@ module.exports.applyPlatformConfig = function () {
     });
 
     // Apply appxmanifest changes
-    ['package.windows.appxmanifest', 'package.windows80.appxmanifest', 'package.phone.appxmanifest'].forEach(
+    [{ fileName: 'package.windows.appxmanifest',   namespacePrefix: 'm2:' }, 
+     { fileName: 'package.windows80.appxmanifest', namespacePrefix: '' },
+     { fileName: 'package.phone.appxmanifest',     namespacePrefix: 'm3:' }].forEach(
         function(manifestFile) {
-            updateManifestFile(config, path.join(ROOT, manifestFile));
+            updateManifestFile(config, path.join(ROOT, manifestFile.fileName), manifestFile.namespacePrefix);
     });
 
     // Apply jsproj changes
@@ -69,7 +71,7 @@ function updatejsprojFile(config, jsProjFilePath) {
     fs.writeFileSync(jsProjFilePath, jsProjXML.write({indent: 2}), 'utf-8');
 }
 
-function updateManifestFile (config, manifestPath) {
+function updateManifestFile (config, manifestPath, namespacePrefix) {
 
     var contents = fs.readFileSync(manifestPath, 'utf-8');
     if(contents) {
@@ -79,17 +81,18 @@ function updateManifestFile (config, manifestPath) {
 
     var manifest =  new et.ElementTree(et.XML(contents));
 
-    applyCoreProperties(config, manifest, manifestPath);
+    applyCoreProperties(config, manifest, manifestPath, namespacePrefix);
     // sort Capability elements as per CB-5350 Windows8 build fails due to invalid 'Capabilities' definition
     sortCapabilities(manifest);
     applyAccessRules(config, manifest);
-    applyBackgroundColor(config, manifest);
+    applyBackgroundColor(config, manifest, namespacePrefix);
+
 
     //Write out manifest
     fs.writeFileSync(manifestPath, manifest.write({indent: 4}), 'utf-8');
 }
 
-function applyCoreProperties(config, manifest, manifestPath) {
+function applyCoreProperties(config, manifest, manifestPath, xmlnsPrefix) {
     var version = fixConfigVersion(config.version());
     var name = config.name();
     var pkgName = config.packageName();
@@ -127,12 +130,11 @@ function applyCoreProperties(config, manifest, manifestPath) {
     }
     app.attrib.StartPage = 'www/' + startPage;
 
-    var visualElems = manifest.find('.//VisualElements') || // windows 8.0
-        manifest.find('.//m2:VisualElements') || // windows 8.1
-        manifest.find('.//m3:VisualElements'); // windows phone 8.1
+    var visualElementsName = './/' + xmlnsPrefix + 'VisualElements'; 
+    var visualElems = manifest.find(visualElementsName); 
 
     if(!visualElems) {
-        throw new Error('Invalid manifest file (no <VisualElements> node): ' + manifestPath);
+        throw new Error('Invalid manifest file (no <' + xmlnsPrefix + 'VisualElements> node): ' + manifestPath);
     }
     if (name) {
         (visualElems.attrib.DisplayName = name);
@@ -153,22 +155,8 @@ function applyCoreProperties(config, manifest, manifestPath) {
     }
 
     // Supported orientations
-    var isWin80 = manifest.find('.//VisualElements') !== null;
-    var isWin81 = manifest.find('.//m2:VisualElements') !== null;
-    var isWP81 = manifest.find('.//m3:VisualElements') !== null;
-
-    var rotationPreferenceName, rotationPreferenceRootName;
-
-    if(isWin80) {
-        rotationPreferenceName = 'Rotation';
-        rotationPreferenceRootName = 'InitialRotationPreference';
-    } else if(isWin81) {
-        rotationPreferenceName = 'm2:Rotation';
-        rotationPreferenceRootName = 'm2:InitialRotationPreference';
-    } else if(isWP81) {
-        rotationPreferenceName = 'm3:Rotation';
-        rotationPreferenceRootName = 'm3:InitialRotationPreference';
-    }
+    var rotationPreferenceName = xmlnsPrefix + 'Rotation';
+    var rotationPreferenceRootName = xmlnsPrefix + 'InitialRotationPreference';
 
     var orientation = config.getPreference('Orientation');
     var rotationPreferenceRoot;
@@ -367,7 +355,7 @@ function copyImages(config) {
     });
 }
 
-function applyBackgroundColor (config, manifest) {
+function applyBackgroundColor (config, manifest, xmlnsPrefix) {
     var visualElems =null;
 
     function refineColor(color) {
@@ -385,18 +373,16 @@ function applyBackgroundColor (config, manifest) {
     // background color
     var bgColor = config.getPreference('BackgroundColor');
     if (bgColor) {
-        visualElems = manifest.find('.//VisualElements') || // windows 8.0
-            manifest.find('.//m2:VisualElements') || // windows 8.1
-            manifest.find('.//m3:VisualElements'); // windows phone 8.1
+        var visualElementsName = './/' + xmlnsPrefix + 'VisualElements';
+        visualElems = manifest.find(visualElementsName);
         visualElems.attrib.BackgroundColor = refineColor(bgColor);
     }
 
     // Splash Screen background color
     bgColor = config.getPreference('SplashScreenBackgroundColor');
     if (bgColor) {
-        visualElems = manifest.find('.//SplashScreen') || // windows 8.0
-            manifest.find('.//m2:SplashScreen') || // windows 8.1
-            manifest.find('.//m3:SplashScreen'); // windows phone 8.1
+        var splashScreenElementsName = './/' + xmlnsPrefix + 'SplashScreen';
+        visualElems = manifest.find(splashScreenElementsName);
         visualElems.attrib.BackgroundColor = refineColor(bgColor);
     }
 }
