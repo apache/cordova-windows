@@ -24,6 +24,16 @@ Update these notes using: git log --pretty=format:'* %s' --topo-order --no-merge
 
 cordova-windows is a library that enables developers to create Windows 8/8.1 and WP8.1 application projects that support Cordova APIs.
 
+[3.8.1]
+* CB-8796 updated package.json version manually
+* CB-8796 updated version file manually
+* Removed verbose strict inequality tests
+* Added check for undefined
+* Fix for callback invocation with NO_RESULT
+* Fixed wording of warning + removed a commented out line
+* make bin scripts executable
+* Update JS snapshot to version 3.8.1 (via coho)
+
 [3.8.0]
 * Update JS snapshot to version 3.8.0 (via coho)
 * CB-7985 windows platform does not build with Visual Studio 14 CTP tools
