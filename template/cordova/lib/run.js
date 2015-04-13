@@ -56,7 +56,7 @@ module.exports.run = function (argv) {
 
     // for win switch we should correctly handle 8.0 and 8.1 version as per configuration
     if (projectType == 'windows' && getWindowsTargetVersion() == '8.0') {
-        console.log("Warning: windows8 has been deprecated.  Please update you project to target windows8.1")
+        console.log('Warning: windows8 has been deprecated.  Please update you project to target windows8.1');
         projectType = 'windows80';
     }
 
