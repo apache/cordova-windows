@@ -26,6 +26,8 @@ Apache Cordova for Windows
 
 Includes Windows universal app template to build [Apache Cordova](http://cordova.apache.org) applications that target Windows 8.0, Windows 8.1 and Windows Phone 8.1. An Apache Cordova based applications is, at the core, an application written with web technology: HTML, CSS and JavaScript.
 
+(Warning: Windows8 has been deprecated, please update your applications to target Windows 8.1)
+
 [Apache Cordova](http://cordova.apache.org) is a project of [The Apache Software Foundation (ASF)](http://apache.org)
 
 Requires
@@ -35,7 +37,7 @@ Requires
 
   Windows 8.1 along with [Visual Studio 2013 Express](http://www.visualstudio.com/downloads/download-visual-studio-vs#d-express-windows-8).
 
-**To build for Windows 8.0 only**
+**To build for Windows 8.0 only (deprecated!)**
 
    Windows 8.0 or 8.1 along with [Visual Studio 2012 Express](http://www.visualstudio.com/downloads).
 
