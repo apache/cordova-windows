@@ -122,12 +122,7 @@ function applyCoreProperties(config, manifest, manifestPath, xmlnsPrefix) {
     if(!app) {
         throw new Error('Invalid manifest file (no <Application> node): ' + manifestPath);
     }
-    if (pkgName) {
-        // 64 symbols restriction goes from manifest schema definition
-        // http://msdn.microsoft.com/en-us/library/windows/apps/br211415.aspx
-        var appId = pkgName.length <= 64 ? pkgName : pkgName.substr(0, 64);
-        app.attrib.Id = appId;
-    }
+
     app.attrib.StartPage = 'www/' + startPage;
 
     var visualElementsName = './/' + xmlnsPrefix + 'VisualElements'; 
