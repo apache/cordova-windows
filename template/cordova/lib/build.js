@@ -24,7 +24,8 @@ var Q     = require('Q'),
     utils = require('./utils'),
     prepare = require('./prepare'),
     MSBuildTools = require('./MSBuildTools'),
-    ConfigParser = require('./ConfigParser');
+    ConfigParser = require('./ConfigParser'),
+    fs = require('fs');
 
 // Platform project root folder
 var ROOT = path.join(__dirname, '..', '..');
@@ -34,97 +35,184 @@ var projFiles = {
     win80: 'CordovaApp.Windows80.jsproj',
     win10: 'CordovaApp.Windows10.jsproj'
 };
-// parsed nopt arguments
-var args;
-// build type (Release vs Debug)
-var buildType;
-// target chip architectures to build for
-var buildArchs;
-// MSBuild Tools available on this development machine
-var msbuild;
-// Override windows-target-version for all devices
-var projVerOverride;
 
 // builds cordova-windows application with parameters provided.
 // See 'help' function for args list
 module.exports.run = function run (argv) {
+    // MSBuild Tools available on this development machine
+    var msbuild;
+
     if (!utils.isCordovaProject(ROOT)){
         return Q.reject('Could not find project at ' + ROOT);
     }
 
-    try {
-        // thows exception if something goes wrong
-        parseAndValidateArgs(argv);
-    } catch (error) {
-        return Q.reject(error);
-    }
-
-    // update platform as per configuration settings
-    prepare.applyPlatformConfig();
-    return MSBuildTools.findAvailableVersion().then(
-        function(msbuildTools) {
+    return Q.all([parseAndValidateArgs(argv), MSBuildTools.findAvailableVersion()])
+        .spread(function(buildConfig, msbuildTools) {
+            // update platform as per configuration settings
+            prepare.applyPlatformConfig(buildConfig);
             cleanIntermediates();
             msbuild = msbuildTools;
             console.log('MSBuildToolsPath: ' + msbuild.path);
-            return buildTargets();
+            return buildTargets(msbuild, buildConfig);
+        }, function(error) {
+            return Q.reject(error);
         });
 };
 
 // help/usage function
 module.exports.help = function help() {
     console.log('');
-    console.log('Usage: build [ --debug | --release ] [--archs="<list of architectures...>""] [--phone | --win]');
-    console.log('    --help    : Displays this dialog.');
-    console.log('    --debug   : Builds project in debug mode. (Default)');
-    console.log('    --release : Builds project in release mode.');
-    console.log('    -r        : Shortcut :: builds project in release mode.');
-    console.log('    --archs   : Builds project binaries for specific chip architectures ("anycpu", "arm", "x86", "x64").');
+    console.log('Usage: build [--debug | --release] [--archs="<list of architectures...>"]');
+    console.log('             [--phone | --win] [--packageCertificateKeyFile="key path"]');
+    console.log('             [--packageThumbprint="thumbprint"] [--publisherId]');
+    console.log('             [--buildConfig="file path"]');
+    console.log('    --help                      : Displays this dialog.');
+    console.log('    --debug                     : Builds project in debug mode. (Default).');
+    console.log('    --release                   : Builds project in release mode.');
+    console.log('    -r                          : (shortcut) Builds project in release mode.');
+    console.log('    --archs                     : Builds project binaries for specific chip');
+    console.log('                                  architectures (`anycpu`, `arm`, `x86`, `x64`).');
     console.log('    --phone, --win');
-    console.log('              : Specifies, what type of project to build');
+    console.log('                                : Specifies, what type of project to build.');
     console.log('    --appx=<8.1-win|8.1-phone|uap>');
-    console.log('              : Overrides windows-target-version to build Windows 8.1, Windows Phone 8.1, or Windows 10 Universal.');
+    console.log('                                : Overrides windows-target-version to build');
+    console.log('                                  Windows 8.1, Windows Phone 8.1, or');
+    console.log('                                  Windows 10 Universal.');
+    console.log('    --packageCertificateKeyFile : Builds the project using provided certificate.');
+    console.log('    --packageThumbprint         : Thumbprint associated with the certificate.');
+    console.log('    --publisherId               : Sets publisher id field in manifest.');
+    console.log('    --buildConfig               : Sets build settings from configuration file.');
+    console.log('');
     console.log('examples:');
     console.log('    build ');
     console.log('    build --debug');
     console.log('    build --release');
     console.log('    build --release --archs="arm x86"');
     console.log('    build --appx=8.1-phone -r');
+    console.log('    build --packageCertificateKeyFile="CordovaApp_TemporaryKey.pfx"');
+    console.log('    build --publisherId="CN=FakeCorp, C=US"');
+    console.log('    build --buildConfig="build.json"');
     console.log('');
 
     process.exit(0);
 };
 
 function parseAndValidateArgs(argv) {
-    // parse and validate args
-    args = nopt({'debug': Boolean, 'release': Boolean, 'archs': [String], 'appx': String,
-        'phone': Boolean, 'win': Boolean}, {'-r': '--release'}, argv);
-    // Validate args
-    if (args.debug && args.release) {
-        throw 'Only one of "debug"/"release" options should be specified';
-    }
-    if (args.phone && args.win) {
-        throw 'Only one of "phone"/"win" options should be specified';
-    }
+    return Q.promise(function(resolve, reject) {
+        // parse and validate args
+        var args = nopt({
+            'debug': Boolean,
+            'release': Boolean,
+            'archs': [String],
+            'appx': String,
+            'phone': Boolean,
+            'win': Boolean,
+            'packageCertificateKeyFile': String,
+            'packageThumbprint': String,
+            'publisherId': String,
+            'buildConfig': String
+            }, {'-r': '--release'}, argv);
 
-    if (args.appx) {
-        projVerOverride = args.appx;
-    }
-    
-    // get build options/defaults
-    buildType = args.release ? 'release' : 'debug';
-    buildArchs = args.archs ? args.archs.split(' ') : ['anycpu'];
+        var config = {};
+        var buildConfig = {};
+
+        // Validate args
+        if (args.debug && args.release) {
+            reject('Only one of "debug"/"release" options should be specified');
+            return;
+        }
+        if (args.phone && args.win) {
+            reject('Only one of "phone"/"win" options should be specified');
+            return;
+        }
+
+        // get build options/defaults
+        config.buildType = args.release ? 'release' : 'debug';
+        config.buildArchs = args.archs ? args.archs.split(' ') : ['anycpu'];
+        config.phone = args.phone ? true : false;
+        config.win = args.win ? true : false;
+        config.projVerOverride = args.appx;
+
+        // if build.json is provided, parse it
+        var buildConfigPath = args.buildConfig;
+        if (buildConfigPath) {
+            buildConfig = parseBuildConfig(buildConfigPath, config);
+            for (var prop in buildConfig) { config[prop] = buildConfig[prop]; }
+        }
+
+        // CLI arguments override build.json config
+        if (args.packageCertificateKeyFile) {
+            args.packageCertificateKeyFile = path.resolve(process.cwd(), args.packageCertificateKeyFile);
+            config.packageCertificateKeyFile = args.packageCertificateKeyFile;
+        }
+
+        config.packageThumbprint = config.packageThumbprint || args.packageThumbprint;
+        config.publisherId = config.publisherId || args.publisherId;
+
+        resolve(config);
+    });
 }
 
-function buildTargets() {
+function parseBuildConfig(buildConfigPath, config) {
+    var buildConfig, result = {};
+    console.log('Reading build config file: '+ buildConfigPath);
+    try {
+        var contents = fs.readFileSync(buildConfigPath, 'utf8');
+        buildConfig = JSON.parse(contents);
+    } catch (e) {
+        if (e.code === 'ENOENT') {
+            throw Error('Specified build config file does not exist: ' + buildConfigPath);
+        } else {
+            throw e;
+        }
+    }
 
+    if (buildConfig.windows && buildConfig.windows[config.buildType]) {
+        var windowsInfo = buildConfig.windows[config.buildType];
+
+        // If provided assume it's a relative path
+        if(windowsInfo.packageCertificateKeyFile) {
+            var buildPath = path.dirname(fs.realpathSync(buildConfigPath));
+            result.packageCertificateKeyFile = path.resolve(buildPath, windowsInfo.packageCertificateKeyFile);
+        }
+
+        if(windowsInfo.packageThumbprint) {
+            result.packageThumbprint = windowsInfo.packageThumbprint;
+        }
+
+        if(windowsInfo.publisherId) {
+            // Quickly validate publisherId
+            var publisherRegexStr = '(CN|L|O|OU|E|C|S|STREET|T|G|I|SN|DC|SERIALNUMBER|(OID\\.(0|[1-9][0-9]*)(\\.(0|[1-9][0-9]*))+))=' +
+                                    '(([^,+="<>#;])+|".*")(, (' +
+                                    '(CN|L|O|OU|E|C|S|STREET|T|G|I|SN|DC|SERIALNUMBER|(OID\\.(0|[1-9][0-9]*)(\\.(0|[1-9][0-9]*))+))=' +
+                                    '(([^,+="<>#;])+|".*")))*';
+
+            var publisherRegex = new RegExp(publisherRegexStr);
+
+            if (!publisherRegex.test(windowsInfo.publisherId)) {
+                throw Error('Invalid publisher id: ' + windowsInfo.publisherId);
+            }
+
+            result.publisherId = windowsInfo.publisherId;
+        }
+    }
+
+    return result;
+}
+
+function buildTargets(msbuild, config) {
     // filter targets to make sure they are supported on this development machine
-    var myBuildTargets = filterSupportedTargets(getBuildTargets(), msbuild);
+    var myBuildTargets = filterSupportedTargets(getBuildTargets(config), msbuild);
+
     var buildConfigs = [];
 
     // collect all build configurations (pairs of project to build and target architecture)
     myBuildTargets.forEach(function(buildTarget) {
-        buildArchs.forEach(function(buildArch) {
-            buildConfigs.push({target:buildTarget, arch: buildArch});
+        config.buildArchs.forEach(function(buildArch) {
+            buildConfigs.push({
+                target:buildTarget,
+                arch: buildArch
+            });
         });
     });
 
@@ -139,18 +227,19 @@ function buildTargets() {
             if (msbuild.version == '4.0' && build.target == projFiles.win80) {
                 build.target = 'CordovaApp.vs2012.sln';
             }
-            return msbuild.buildProject(path.join(ROOT, build.target), buildType,  build.arch);
+            return msbuild.buildProject(path.join(ROOT, build.target), config.buildType,  build.arch);
          });
-    }, Q()); 
+    }, Q());
 }
 
-function getBuildTargets() {
-    var config = new ConfigParser(path.join(ROOT, 'config.xml'));
+function getBuildTargets(buildConfig) {
+    var configXML = new ConfigParser(path.join(ROOT, 'config.xml'));
     var targets = [];
-    var noSwitches = !(args.phone || args.win);
+    var noSwitches = !(buildConfig.phone || buildConfig.win);
+
     // Windows
-    if (args.win || noSwitches) { // if --win or no arg
-        var windowsTargetVersion = config.getWindowsTargetVersion();
+    if (buildConfig.win || noSwitches) { // if --win or no arg
+        var windowsTargetVersion = configXML.getWindowsTargetVersion();
         switch(windowsTargetVersion) {
         case '8':
         case '8.0':
@@ -167,18 +256,19 @@ function getBuildTargets() {
             throw new Error('Unsupported windows-target-version value: ' + windowsTargetVersion);
         }
     }
+
     // Windows Phone
-    if (args.phone || noSwitches) { // if --phone or no arg
-        var windowsPhoneTargetVersion = config.getWindowsPhoneTargetVersion();
+    if (buildConfig.phone || noSwitches) { // if --phone or no arg
+        var windowsPhoneTargetVersion = configXML.getWindowsPhoneTargetVersion();
         switch(windowsPhoneTargetVersion) {
         case '8.1':
             targets.push(projFiles.phone);
             break;
         case '10.0':
         case 'UAP':
-            if (!args.win && !noSwitches) { 
+            if (!buildConfig.win && !noSwitches) {
                 // Already built due to --win or no switches
-                // and since the same thing can be run on Phone as Windows, 
+                // and since the same thing can be run on Phone as Windows,
                 // we can skip this one.
                 targets.push(projFiles.win10);
             }
@@ -189,8 +279,8 @@ function getBuildTargets() {
     }
 
     // apply build target override if one was specified
-    if (projVerOverride) {
-        switch (projVerOverride) {
+    if (buildConfig.projVerOverride) {
+        switch (buildConfig.projVerOverride) {
             case '8.1-phone':
                 targets = [projFiles.phone];
                 break;
@@ -201,7 +291,7 @@ function getBuildTargets() {
                 targets = [projFiles.win10];
                 break;
             default:
-                console.warn('Unrecognized --appx parameter passed to build: "' + projVerOverride + '", ignoring.');
+                console.warn('Unrecognized --appx parameter passed to build: "' + buildConfig.projVerOverride + '", ignoring.');
                 break;
         }
     }
@@ -225,7 +315,7 @@ function msBuild14TargetsFilter(target) {
     return target === projFiles.win || target === projFiles.phone || target === projFiles.win10;
 }
 
-function filterSupportedTargets (targets) {
+function filterSupportedTargets (targets, msbuild) {
     if (!targets || targets.length === 0) {
         console.warn('\r\nNo build targets are specified.');
         return [];
