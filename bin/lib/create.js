@@ -74,7 +74,7 @@ module.exports.run = function (argv) {
     }
 
     // replace specific values in manifests' templates
-    ['package.windows.appxmanifest', 'package.windows80.appxmanifest', 'package.phone.appxmanifest'].forEach(function (file) {
+    ['package.windows.appxmanifest', 'package.windows80.appxmanifest', 'package.phone.appxmanifest', 'package.windows10.appxmanifest'].forEach(function (file) {
         var fileToReplace = path.join(projectPath, file);
         shell.sed('-i', /\$guid1\$/g, guid, fileToReplace);
         shell.sed('-i', /\$safeprojectname\$/g, packageName, fileToReplace);

@@ -19,6 +19,7 @@
 var path = require('path'),
     rewire = require('rewire'),
     shell = require('shelljs'),
+    Q = require('q'),
     platformRoot = '../../template',
     pkgRoot = './template/',
     pkgPath = path.join(pkgRoot, 'AppPackages'),
@@ -51,7 +52,7 @@ describe('getPackage method', function() {
             expect(pkgInfo.type).toBe('windows80');
             expect(pkgInfo.buildtype).toBe('debug');
             expect(pkgInfo.arch).toBe('anycpu');
-            expect(pkgInfo.file).toBeDefined();
+            expect(pkgInfo.script).toBeDefined();
         }, rejected)
         .finally(function() {
             expect(rejected).not.toHaveBeenCalled();
@@ -67,7 +68,7 @@ describe('getPackage method', function() {
             expect(pkgInfo.type).toBe('phone');
             expect(pkgInfo.buildtype).toBe('debug');
             expect(pkgInfo.arch).toBe('anycpu');
-            expect(pkgInfo.file).toBeDefined();
+            expect(pkgInfo.script).toBeDefined();
         }, rejected)
         .finally(function() {
             expect(rejected).not.toHaveBeenCalled();
@@ -100,7 +101,7 @@ describe('getPackage method', function() {
     it('spec.5 should not find windows 8.0 x86 debug package', function(done) {
         var resolved = jasmine.createSpy();
 
-        pkg.getPackage('windows', 'debug', 'x86')
+        pkg.getPackage('windows80', 'debug', 'x86')
         .then(resolved)
         .finally(function() {
             expect(resolved).not.toHaveBeenCalled();
@@ -155,7 +156,7 @@ describe('getAppId method', function() {
     it('spec.10 should properly get phoneProductId value from manifest', function(done) {
         var resolve = jasmine.createSpy();
 
-        pkg.getAppId(pkgRoot)
+        Q(pkg.getAppId(pkgRoot))
         .then(resolve)
         .finally(function() {
             expect(resolve).toHaveBeenCalledWith('$guid1$');
@@ -168,7 +169,7 @@ describe('getPackageName method', function() {
     it('spec.11 should properly get Application Id value from manifest', function(done) {
         var resolve = jasmine.createSpy();
 
-        pkg.getAppId(pkgRoot)
+        Q(pkg.getAppId(pkgRoot))
         .then(resolve)
         .finally(function() {
             expect(resolve).toHaveBeenCalledWith('$guid1$');

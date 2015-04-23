@@ -20,6 +20,7 @@
 var Q     = require('Q'),
     path  = require('path'),
     nopt  = require('nopt'),
+    shell = require('shelljs'),
     utils = require('./utils'),
     prepare = require('./prepare'),
     MSBuildTools = require('./MSBuildTools'),
@@ -30,7 +31,8 @@ var ROOT = path.join(__dirname, '..', '..');
 var projFiles = {
     phone: 'CordovaApp.Phone.jsproj',
     win: 'CordovaApp.Windows.jsproj',
-    win80: 'CordovaApp.Windows80.jsproj'
+    win80: 'CordovaApp.Windows80.jsproj',
+    win10: 'CordovaApp.Windows10.jsproj'
 };
 // parsed nopt arguments
 var args;
@@ -40,6 +42,8 @@ var buildType;
 var buildArchs;
 // MSBuild Tools available on this development machine
 var msbuild;
+// Override WindowsTargetVersion for all devices
+var projVerOverride;
 
 // builds cordova-windows application with parameters provided.
 // See 'help' function for args list
@@ -57,9 +61,9 @@ module.exports.run = function run (argv) {
 
     // update platform as per configuration settings
     prepare.applyPlatformConfig();
-
     return MSBuildTools.findAvailableVersion().then(
         function(msbuildTools) {
+            cleanIntermediates();
             msbuild = msbuildTools;
             console.log('MSBuildToolsPath: ' + msbuild.path);
             return buildTargets();
@@ -69,26 +73,30 @@ module.exports.run = function run (argv) {
 // help/usage function
 module.exports.help = function help() {
     console.log('');
-    console.log('Usage: build [ --debug | --release ] [--archs=\"<list of architectures...>\"] [--phone | --win]');
+    console.log('Usage: build [ --debug | --release ] [--archs="<list of architectures...>""] [--phone | --win]');
     console.log('    --help    : Displays this dialog.');
     console.log('    --debug   : Builds project in debug mode. (Default)');
     console.log('    --release : Builds project in release mode.');
     console.log('    -r        : Shortcut :: builds project in release mode.');
-    console.log('    --archs   : Builds project binaries for specific chip architectures (`anycpu`, `arm`, `x86`, `x64`).');
+    console.log('    --archs   : Builds project binaries for specific chip architectures ("anycpu", "arm", "x86", "x64").');
     console.log('    --phone, --win');
     console.log('              : Specifies, what type of project to build');
+    console.log('    --appx=<8.1-win|8.1-phone|uap>');
+    console.log('              : Overrides WindowsTargetVersion to build Windows 8.1, Windows Phone 8.1, or Windows 10 Universal.');
     console.log('examples:');
     console.log('    build ');
     console.log('    build --debug');
     console.log('    build --release');
     console.log('    build --release --archs="arm x86"');
+    console.log('    build --appx=8.1-phone -r');
     console.log('');
+
     process.exit(0);
 };
 
 function parseAndValidateArgs(argv) {
     // parse and validate args
-    args = nopt({'debug': Boolean, 'release': Boolean, 'archs': [String],
+    args = nopt({'debug': Boolean, 'release': Boolean, 'archs': [String], 'appx': String,
         'phone': Boolean, 'win': Boolean}, {'-r': '--release'}, argv);
     // Validate args
     if (args.debug && args.release) {
@@ -96,6 +104,10 @@ function parseAndValidateArgs(argv) {
     }
     if (args.phone && args.win) {
         throw 'Only one of "phone"/"win" options should be specified';
+    }
+
+    if (args.appx) {
+        projVerOverride = args.appx;
     }
     
     // get build options/defaults
@@ -107,7 +119,6 @@ function buildTargets() {
 
     // filter targets to make sure they are supported on this development machine
     var myBuildTargets = filterSupportedTargets(getBuildTargets(), msbuild);
-
     var buildConfigs = [];
 
     // collect all build configurations (pairs of project to build and target architecture)
@@ -139,7 +150,7 @@ function getBuildTargets() {
     var noSwitches = !(args.phone || args.win);
     // Windows
     if (args.win || noSwitches) { // if --win or no arg
-        var windowsTargetVersion = config.getPreference('windows-target-version');
+        var windowsTargetVersion = config.getWindowsTargetVersion();
         switch(windowsTargetVersion) {
         case '8':
         case '8.0':
@@ -148,22 +159,70 @@ function getBuildTargets() {
         case '8.1':
             targets.push(projFiles.win);
             break;
+        case '10.0':
+        case 'UAP':
+            targets.push(projFiles.win10);
+            break;
         default:
-            throw new Error('Unsupported windows-target-version value: ' + windowsTargetVersion);
+            throw new Error('Unsupported WindowsTargetVersion value: ' + windowsTargetVersion);
         }
     }
     // Windows Phone
     if (args.phone || noSwitches) { // if --phone or no arg
-        var windowsPhoneTargetVersion = config.getPreference('windows-phone-target-version');
+        var windowsPhoneTargetVersion = config.getWindowsPhoneTargetVersion();
         switch(windowsPhoneTargetVersion) {
         case '8.1':
             targets.push(projFiles.phone);
             break;
+        case '10.0':
+        case 'UAP':
+            if (!args.win && !noSwitches) { 
+                // Already built due to --win or no switches
+                // and since the same thing can be run on Phone as Windows, 
+                // we can skip this one.
+                targets.push(projFiles.win10);
+            }
+            break;
         default:
-            throw new Error('Unsupported windows-phone-target-version value: ' + windowsPhoneTargetVersion);
+            throw new Error('Unsupported WindowsPhoneTargetVersion value: ' + windowsPhoneTargetVersion);
         }
     }
+
+    // apply build target override if one was specified
+    if (projVerOverride) {
+        switch (projVerOverride) {
+            case '8.1-phone':
+                targets = [projFiles.phone];
+                break;
+            case '8.1-win':
+                targets = [projFiles.win];
+                break;
+            case 'uap':
+                targets = [projFiles.win10];
+                break;
+            default:
+                console.warn('Unrecognized --appx parameter passed to build: "' + projVerOverride + '", ignoring.');
+                break;
+        }
+    }
+
     return targets;
+}
+
+// TODO: Fix this so that it outlines supported versions based on version criteria:
+// - v14: Windows 8.1, Windows 10
+// - v12: Windows 8.1, Windows 8.0
+// - v4:  Windows 8.0
+function msBuild4TargetsFilter(target) {
+    return target === projFiles.win80;
+}
+
+function msBuild12TargetsFilter(target) {
+    return target === projFiles.win80 || target === projFiles.win || target === projFiles.phone;
+}
+
+function msBuild14TargetsFilter(target) {
+    return target === projFiles.win || target === projFiles.phone || target === projFiles.win10;
 }
 
 function filterSupportedTargets (targets) {
@@ -172,19 +231,30 @@ function filterSupportedTargets (targets) {
         return [];
     }
 
-    if (msbuild.version != '4.0') {
-        return targets;
+    var targetFilters = {
+        '4.0': msBuild4TargetsFilter,
+        '12.0': msBuild12TargetsFilter,
+        '14.0': msBuild14TargetsFilter
+    };
+
+    var filter = targetFilters[msbuild.version];
+    if (!filter) {
+        console.warn('Unsupported msbuild version "' + msbuild.version + '", aborting.');
+        return [];
     }
 
-    // MSBuild 4.0 does not support Windows 8.1 and Windows Phone 8.1
-    var supportedTargets = targets.filter(function(target) {
-        return target != projFiles.win && target != projFiles.phone;
-    });
-
+    var supportedTargets = targets.filter(filter);
     // unsupported targets have been detected
-    if (supportedTargets.length != targets.length) {
-        console.warn('\r\nWarning. Windows 8.1 and Windows Phone 8.1 target platforms are not supported on this development machine and will be skipped.');
-        console.warn('Please install OS Windows 8.1 and Visual Studio 2013 Update2 in order to build for Windows 8.1 and Windows Phone 8.1.\r\n');
+    if (supportedTargets.length !== targets.length) {
+        console.warn('Warning: Not all desired build targets are compatible with the current build environment.');
+        console.warn('Please install Visual Studio 2015 for Windows 8.1 and Windows 10, or Visual Studio 2013 Update 2 for Windows 8 and 8.1.');
     }
     return supportedTargets;
+}
+
+function cleanIntermediates() {
+    var buildPath = path.join(ROOT, 'build');
+    if (shell.test('-e', buildPath)) {
+        shell.rm('-rf', buildPath);
+    }
 }

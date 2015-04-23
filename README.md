@@ -24,14 +24,21 @@ Apache Cordova for Windows
 
 [![Build status](https://ci.appveyor.com/api/projects/status/19h1fq0lyvwtei05/branch/master)](https://ci.appveyor.com/project/Humbedooh/cordova-windows/branch/master)
 
-Includes Windows universal app template to build [Apache Cordova](http://cordova.apache.org) applications that target Windows 8.0, Windows 8.1 and Windows Phone 8.1. An Apache Cordova based applications is, at the core, an application written with web technology: HTML, CSS and JavaScript.
+# Experimental branch for Windows 10 #
+**You are using an experimental branch** which includes support for Windows 10 Universal Apps.  For more information about what's new with Windows 10 support, see [What's New in Windows 10 for Cordova](cordova-windows10.md).
+
+Also includes a universal app template to build [Apache Cordova](http://cordova.apache.org) applications that target Windows 8.0, Windows 8.1 and Windows Phone 8.1. An Apache Cordova based applications is, at the core, an application written with web technology: HTML, CSS and JavaScript.
 
 [Apache Cordova](http://cordova.apache.org) is a project of [The Apache Software Foundation (ASF)](http://apache.org)
 
 Requires
 ---
 
-**To build for all platforms** (Windows 8.0, Windows 8.1 and Windows Phone 8.1)
+**To build for Windows 10** (Windows 10, Windows 8.1, and Windows Phone 8.1)
+
+  Windows 8.1 or Windows 10, along with [Visual Studio 2015 RC](http://www.visualstudio.com/downloads)
+
+**To build for Windows 8 or Windows 8.1** (Windows 8.0, Windows 8.1 and Windows Phone 8.1)
 
   Windows 8.1 along with [Visual Studio 2013 Express](http://www.visualstudio.com/downloads/download-visual-studio-vs#d-express-windows-8).
 
