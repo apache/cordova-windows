@@ -17,42 +17,73 @@
        under the License.
 */
 
-var path  = require('path'),
-    fs  = require('fs'),
-    et = require('elementtree'),
-    shell = require('shelljs'),
-    ConfigParser = require('./ConfigParser');
+var path            = require('path'),
+    fs              = require('fs'),
+    et              = require('elementtree'),
+    subElement      = et.SubElement,
+    shell           = require('shelljs'),
+    MSBuildTools    = require('./MSBuildTools'),
+    Version         = require('./Version'),
+    ConfigParser    = require('./ConfigParser');
 
 var ROOT = path.join(__dirname, '..', '..'),
-    accessRules;
+    PROJECT_WINDOWS10   = 'CordovaApp.Windows10.jsproj',
+    MANIFEST_WINDOWS8   = 'package.windows80.appxmanifest',
+    MANIFEST_WINDOWS    = 'package.windows.appxmanifest',
+    MANIFEST_PHONE      = 'package.phone.appxmanifest',
+    MANIFEST_WINDOWS10  = 'package.windows10.appxmanifest',
+    JSPROJ_WINDOWS8     = 'CordovaApp.Windows80.jsproj',
+    JSPROJ_WINDOWS      = 'CordovaApp.Windows.jsproj',
+    JSPROJ_PHONE        = 'CordovaApp.Phone.jsproj',
+    JSPROJ_WINDOWS10    = 'CordovaApp.Windows10.jsproj',
+    BASE_UAP_VERSION    = new Version(10, 0, 10030, 0),
+    UAP_RESTRICTED_CAPS = ['enterpriseAuthentication', 'sharedUserCertificates', 
+                           'documentsLibrary', 'musicLibrary', 'picturesLibrary', 
+                           'videosLibrary', 'removableStorage', 'internetClientClientServer', 
+                           'privateNetworkClientServer'],
+    // UAP namespace capabilities come from the XSD type ST_Capability_Uap from AppxManifestTypes.xsd
+    CAPS_NEEDING_UAPNS  = ['documentsLibrary', 'picturesLibrary', 'videosLibrary', 
+                           'musicLibrary', 'enterpriseAuthentication', 'sharedUserCertificates', 
+                           'removableStorage', 'appointments', 'contacts', 'userAccountInformation',
+                           'phoneCall', 'blockedChatMessages', 'objects3D'];
 
 module.exports.applyPlatformConfig = function () {
     console.log('Applying Platform Config...');
 
     var config = new ConfigParser(path.join(ROOT, 'config.xml'));
 
-    accessRules = config.getAccessRules().filter(function(rule) {
-        if (rule.indexOf('https://') === 0 || rule == '*') {
-            return true;
-        } else {
-            console.log('Access rules must begin with "https://", the following rule will be ignored: ' + rule);
-        }
-        return false;
-    });
+    var isTargetingWin10 = false;
+    var winTargetVersion = config.getWindowsTargetVersion();
+    if (winTargetVersion === '10.0' || winTargetVersion === 'UAP') {
+        isTargetingWin10 = true;
+    }
 
     // Apply appxmanifest changes
-    [{ fileName: 'package.windows.appxmanifest',   namespacePrefix: 'm2:' }, 
-     { fileName: 'package.windows80.appxmanifest', namespacePrefix: '' },
-     { fileName: 'package.phone.appxmanifest',     namespacePrefix: 'm3:' }].forEach(
+    [{ fileName: MANIFEST_WINDOWS,   namespacePrefix: 'm2:' }, 
+     { fileName: MANIFEST_WINDOWS8,  namespacePrefix: '' },
+     { fileName: MANIFEST_PHONE,     namespacePrefix: 'm3:' }].forEach(
         function(manifestFile) {
-            updateManifestFile(config, path.join(ROOT, manifestFile.fileName), manifestFile.namespacePrefix);
+            updateManifestFile(config, path.join(ROOT, manifestFile.fileName), manifestFile.namespacePrefix, null);
     });
 
     // Apply jsproj changes
-    ['CordovaApp.Phone.jsproj', 'CordovaApp.Windows.jsproj', 'CordovaApp.Windows80.jsproj'].forEach(
+    [JSPROJ_PHONE, JSPROJ_WINDOWS, JSPROJ_WINDOWS8, JSPROJ_WINDOWS10].forEach(
         function(jsprojFile) {
             updatejsprojFile(config, path.join(ROOT, jsprojFile));
     });
+
+    // Break out Windows 10-specific functionality because we also need to 
+    // apply UAP versioning to Windows 10 appx-manifests.
+    var uapVersionInfo = getUAPVersions(config);
+
+    if (uapVersionInfo) {
+        updateManifestFile(config, path.join(ROOT, MANIFEST_WINDOWS10), 'uap:', uapVersionInfo);
+
+        applyUAPVersionToProject(path.join(ROOT, PROJECT_WINDOWS10), uapVersionInfo);
+    }
+    else if (isTargetingWin10) {
+        console.warn('Warning: Requested build targeting Windows 10, but Windows 10 tools were not detected on the system.');
+    }
 
     copyImages(config);
 };
@@ -71,8 +102,7 @@ function updatejsprojFile(config, jsProjFilePath) {
     fs.writeFileSync(jsProjFilePath, jsProjXML.write({indent: 2}), 'utf-8');
 }
 
-function updateManifestFile (config, manifestPath, namespacePrefix) {
-
+function updateManifestFile (config, manifestPath, namespacePrefix, uapVersionInfo) {
     var contents = fs.readFileSync(manifestPath, 'utf-8');
     if(contents) {
         //Windows is the BOM. Skip the Byte Order Mark.
@@ -81,29 +111,27 @@ function updateManifestFile (config, manifestPath, namespacePrefix) {
 
     var manifest =  new et.ElementTree(et.XML(contents));
 
-    applyCoreProperties(config, manifest, manifestPath, namespacePrefix);
+    applyCoreProperties(config, manifest, manifestPath, namespacePrefix, !!uapVersionInfo); 
     // sort Capability elements as per CB-5350 Windows8 build fails due to invalid 'Capabilities' definition
     sortCapabilities(manifest);
-    applyAccessRules(config, manifest);
+    applyAccessRules(config, manifest, !!uapVersionInfo); 
     applyBackgroundColor(config, manifest, namespacePrefix);
 
+    if (uapVersionInfo) {
+        applyTargetPlatformVersion(config, manifest, uapVersionInfo);
+        checkForRestrictedCapabilities(config, manifest);
+        ensureUapPrefixedCapabilities(manifest.find('.//Capabilities'));
+    }
 
     //Write out manifest
     fs.writeFileSync(manifestPath, manifest.write({indent: 4}), 'utf-8');
 }
 
-function applyCoreProperties(config, manifest, manifestPath, xmlnsPrefix) {
+function applyCoreProperties(config, manifest, manifestPath, xmlnsPrefix, targetWin10) {
     var version = fixConfigVersion(config.version());
     var name = config.name();
     var pkgName = config.packageName();
     var author = config.author();
-    var startPage = config.startPage();
-
-    if (!startPage) {
-        // If not specified, set default value
-        // http://cordova.apache.org/docs/en/edge/config_ref_index.md.html#The%20config.xml%20File
-        startPage = 'index.html';
-    }
 
     var identityNode = manifest.find('.//Identity');
     if(!identityNode) {
@@ -128,7 +156,8 @@ function applyCoreProperties(config, manifest, manifestPath, xmlnsPrefix) {
         var appId = pkgName.length <= 64 ? pkgName : pkgName.substr(0, 64);
         app.attrib.Id = appId;
     }
-    app.attrib.StartPage = 'www/' + startPage;
+
+    applyStartPage(app, config, targetWin10); 
 
     var visualElementsName = './/' + xmlnsPrefix + 'VisualElements'; 
     var visualElems = manifest.find(visualElementsName); 
@@ -200,6 +229,46 @@ function applyCoreProperties(config, manifest, manifestPath, xmlnsPrefix) {
     }
 }
 
+function applyStartPage(appNode, config, targetingWin10) {
+    var startPage = config.startPage();
+
+    if (!startPage) {
+        // If not specified, set default value
+        // http://cordova.apache.org/docs/en/edge/config_ref_index.md.html#The%20config.xml%20File
+        startPage = 'index.html';
+    }
+
+    var uriPrefix = '';
+    if (targetingWin10) {
+        // for Win10, we respect config options such as WindowsDefaultUriPrefix and default to 
+        // ms-appx-web:// as the homepage.  Set those here.
+
+        // Only add a URI prefix if the start page doesn't specify a URI scheme
+        if (!(/^[\w-]+?\:\/\//i).test(startPage)) {
+            uriPrefix = config.getPreference('WindowsDefaultUriPrefix');
+            if (!uriPrefix) {
+                uriPrefix = 'ms-appx-web://';
+            }
+            else if (/^ms\-appx\:\/\/$/i.test(uriPrefix)) { 
+                // Explicitly ignore the ms-appx:// scheme because it doesn't validate
+                // in the Windows 10 build schema (treat it as the root).
+                uriPrefix = '';
+            }
+        }
+    }
+
+    var startPagePrefix = 'www/';
+    if ((uriPrefix && uriPrefix.toLowerCase().substring(0, 4) === 'http') || 
+        startPage.toLowerCase().substring(0, 4) === 'http') {
+        startPagePrefix = '';
+    }
+    else if (uriPrefix.toLowerCase().substring(0, 7) === 'ms-appx') {
+        uriPrefix += '/'; // add a 3rd trailing forward slash for correct area resolution
+    }
+
+    appNode.attrib.StartPage = uriPrefix + startPagePrefix + startPage;
+}
+
 // Adjust version number as per CB-5337 Windows8 build fails due to invalid app version
 function fixConfigVersion (version) {
     if(version && version.match(/\.\d/g)) {
@@ -211,29 +280,105 @@ function fixConfigVersion (version) {
     return version;
 }
 
-function applyAccessRules (config, manifest) {
+function applyAccessRules (config, manifest, isTargetingWin10) {
     // Updates WhiteListing rules
     //<ApplicationContentUriRules>
     //    <Rule Match="https://www.example.com" Type="include"/>
     //</ApplicationContentUriRules>
+
+    var AppContentUriRulesElementName = 'ApplicationContentUriRules',
+        RuleElementName = 'Rule';
+
+    if (isTargetingWin10) {
+        return applyNavigationWhitelist(config, manifest);
+    }
+
+    
+    var accessRules = config.getAccessRules().filter(function(rule) {
+        // https:// rules are always good, * rules are always good
+        if (rule.indexOf('https://') === 0 || rule === '*') {
+            return true;
+        } else {
+            console.warn('Access rules must begin with "https://", the following rule will be ignored: ' + rule);
+        }
+        return false;
+    });
+
+    // If * is specified, emit no access rules.
+    if (accessRules.indexOf('*') > -1) {
+        accessRules = [];
+    }
+
+    createApplicationContentUriRules(manifest, AppContentUriRulesElementName, RuleElementName, accessRules, { Type: 'include' });
+}
+
+/** 
+ * Windows 10-based whitelist-plugin-compatible support for the enhanced navigation whitelist.
+ * Allows WinRT access to origins specified by <allow-navigation href="origin" /> elements.
+ */
+function applyNavigationWhitelist(config, manifest) {
+    var AppContentUriRulesElementName = 'uap:ApplicationContentUriRules';
+    var RuleElementName = 'uap:Rule';
+    var UriSchemeTest = /^(?:https?|ms-appx-web):\/\//i;
+
+    var whitelistRules = config.getNavigationWhitelistRules().filter(function(rule) {
+        if (UriSchemeTest.test(rule)) {
+            return true;
+        } else {
+            console.warn('The following navigation rule had an invalid URI scheme and is ignored: "' + rule + '".');
+        }
+        return false;
+    });
+
+    var defaultPrefix = config.getPreference('WindowsDefaultUriPrefix');
+    if ('ms-appx://' !== defaultPrefix) {
+        var hasMsAppxWeb = whitelistRules.some(function(rule) {
+            return /^ms-appx-web:\/\/\/$/i.test(rule);
+        });
+        if (!hasMsAppxWeb) {
+            whitelistRules.push('ms-appx-web:///');
+        }
+    }
+
+    createApplicationContentUriRules(manifest, AppContentUriRulesElementName, RuleElementName, whitelistRules, { 
+        Type: 'include', 
+        WindowsRuntimeAccess: 'all'
+    });
+}
+
+/**
+ * Private function used by applyNavigationWhitelist and applyAccessRules
+ * which creates the corresponding section in the app manifest.
+ * @param manifest {et.ElementTree} The manifest document.
+ * @param acurElementName {string} The name of the AccessContentUriRules element, including prefix if applicable.
+ * @param ruleElementName {string} The name of the Rule element, including prefix if applicable.
+ * @param rulesOrigins {string[]} The origins that will be permitted.
+ * @param commonAttributes {Object} Property bag of additional attributes that should be applied to every rule.
+ */
+function createApplicationContentUriRules(manifest, acurElementName, ruleElementName, rulesOrigins, commonAttributes) {
     var appUriRulesRoot = manifest.find('.//Application'),
-        appUriRules = appUriRulesRoot.find('.//ApplicationContentUriRules');
+        appUriRules = appUriRulesRoot.find(acurElementName);
 
     if (appUriRules !== null) {
         appUriRulesRoot.remove(null, appUriRules);
     }
-    // rules are not defined or allow any
-    if (accessRules.length === 0 || accessRules.indexOf('*') > -1) {
-        return;
-    } 
 
-    appUriRules = et.Element('ApplicationContentUriRules');
+    // No rules defined
+    if (rulesOrigins.length === 0) {
+        return;
+    }
+
+    appUriRules = et.Element(acurElementName);
     appUriRulesRoot.append(appUriRules);
 
-    accessRules.forEach(function(rule) {
-        var el = et.Element('Rule');
+    rulesOrigins.forEach(function(rule) {
+        var el = et.Element(ruleElementName);
         el.attrib.Match = rule;
-        el.attrib.Type = 'include';
+
+        var attributes = Object.keys(commonAttributes);
+        attributes.forEach(function(attributeName) {
+            el.attrib[attributeName] = commonAttributes[attributeName];
+        });
         appUriRules.append(el);
     });
 }
@@ -260,6 +405,20 @@ function sortCapabilities(manifest) {
     capabilities.forEach(function(elem) {
         capabilitiesRoot.append(elem);
     });
+}
+
+function checkForRestrictedCapabilities(config, manifest) {
+    var hasRemoteUris = checkForRemoteModeUris(config);
+    if (hasRemoteUris) {
+        var capabilitiesRoot = manifest.find('.//Capabilities');
+        var badCaps = checkForRestrictedRemoteCapabilityDeclarations(capabilitiesRoot);
+        if (badCaps) {
+            console.warn('The following Capabilities were declared and are restricted:');
+            console.warn('   ' + badCaps.join(','));
+            console.warn('You will be unable to on-board your app to the public Windows Store with');
+            console.warn(' these capabilities and access rules permitting access to remote URIs.');
+        }
+    }
 }
 
 function copyImages(config) {
@@ -310,9 +469,11 @@ function copyImages(config) {
         {dest: 'SplashScreen.scale-100.png', width: 620, height: 300},
         // scaled images are specified here for backward compatibility only so we can find them by size
         {dest: 'StoreLogo.scale-240.png', width: 120, height: 120},
+        {dest: 'Square44x44Logo.scale-100.png', width: 44, height: 44},
         {dest: 'Square44x44Logo.scale-240.png', width: 106, height: 106},
-        {dest: 'Square71x71Logo.scale-240.png', width: 170, height: 170},
         {dest: 'Square70x70Logo.scale-100.png', width: 70, height: 70},
+        {dest: 'Square71x71Logo.scale-100.png', width: 71, height: 71},
+        {dest: 'Square71x71Logo.scale-240.png', width: 170, height: 170},
         {dest: 'Square150x150Logo.scale-240.png', width: 360, height: 360},
         {dest: 'Square310x310Logo.scale-100.png', width: 310, height: 310},
         {dest: 'Wide310x150Logo.scale-100.png', width: 310, height: 150},
@@ -385,4 +546,177 @@ function applyBackgroundColor (config, manifest, xmlnsPrefix) {
         visualElems = manifest.find(splashScreenElementsName);
         visualElems.attrib.BackgroundColor = refineColor(bgColor);
     }
+}
+
+function applyUAPVersionToProject(projectFilePath, uapVersionInfo) {
+    var fileContents = fs.readFileSync(projectFilePath).toString().trim();
+    var xml = et.parse(fileContents);
+    var tpv = xml.find('./PropertyGroup/TargetPlatformVersion');
+    var tpmv = xml.find('./PropertyGroup/TargetPlatformMinVersion');
+
+    tpv.text = uapVersionInfo.targetUAPVersion.toString();
+    tpmv.text = uapVersionInfo.minUAPVersion.toString();
+
+    fs.writeFileSync(projectFilePath, xml.write({ indent: 4 }), {});
+}
+
+function applyTargetPlatformVersion(config, manifest, uapVersionInfo) {
+    var dependencies = manifest.find('./Dependencies');
+    while (dependencies.len() > 0) {
+        dependencies.delItem(0);
+    }
+
+    var uapVersionSet = getAllMinMaxUAPVersions(config);
+    var platformNames = Object.keys(uapVersionSet);
+    for (var i = 0; i < platformNames.length; i++) {
+        var curTargetPlatformName = platformNames[i];
+        var curTargetPlatformInfo = uapVersionSet[curTargetPlatformName];
+
+        var elem = subElement(dependencies, 'TargetDeviceFamily');
+        elem.set('Name', curTargetPlatformName);
+        elem.set('MinVersion', curTargetPlatformInfo.MinVersion.toString());
+        elem.set('MaxVersionTested', curTargetPlatformInfo.MaxVersionTested.toString());
+    }
+}
+
+// returns {minUAPVersion: Version, targetUAPVersion: Version} | false
+function getUAPVersions(config) {
+    // @param config: ConfigParser
+    var baselineVersions = MSBuildTools.getAvailableUAPVersions();
+    if (!baselineVersions || baselineVersions.length === 0) {
+        return false;
+    }
+
+    baselineVersions.sort(Version.comparer);
+
+    return {
+        minUAPVersion: baselineVersions[0],
+        targetUAPVersion: baselineVersions[baselineVersions.length - 1]
+    };
+}
+
+/** 
+ * Gets min/max UAP versions from the configuration.  If no version preferences are
+ * in the configuration file, this will provide Windows.Universal at BASE_UAP_VERSION for both min and max.
+ * This will always return a rational object or will fail; for example, if a platform expects
+ * a higher min-version than max-version, it will raise the max version to the min version.
+ * 
+ * @param config {ConfigParser} The configuration parser
+ * @return An object in the shape of: { 'Windows.Mobile': {'MinVersion': Version, 'MaxVersion': Version } } (where Version is a Version object)
+ * @exception {RangeError} Thrown if a Version string is badly formed.
+ */
+function getAllMinMaxUAPVersions(config) {
+    var uapVersionPreferenceTest = /(Microsoft.+?|Windows.+?)\-(MinVersion|MaxVersionTested)/i;
+    var platformBag = Object.create(null);
+    var preferenceList = config.getMatchingPreferences(uapVersionPreferenceTest);
+    preferenceList.forEach(function(verPref) {
+        var matches = uapVersionPreferenceTest.exec(verPref.name);
+        // 'matches' should look like: ['Windows.Universal-MinVersion', 'Windows.Universal', 'MinVersion']
+        var platformName = matches[1];
+        var versionPropertyName = matches[2];
+
+        var platformVersionSet = platformBag[platformName];
+        if (typeof platformVersionSet === 'undefined') {
+            platformVersionSet = { };
+            platformBag[platformName] = platformVersionSet;
+        }
+
+        var versionTest = Version.tryParse(verPref.value);
+        if (!versionTest) {
+            throw new RangeError('Could not comprehend a valid version from the string "' + verPref.value + '" of platform-boundary "' + verPref.name + '".');
+        }
+
+        platformVersionSet[versionPropertyName] = versionTest;
+    });
+
+    for (var platformName in platformBag) {
+        // Go through each and make sure there are min/max set
+        var versionPref = platformBag[platformName];
+        if (!versionPref.MaxVersionTested && !!versionPref.MinVersion) { // min is set, but max is not
+            versionPref.MaxVersionTested = versionPref.MinVersion;
+        }
+        else if (!versionPref.MinVersion && !!versionPref.MaxVersionTested) { // max is set, min is not
+            versionPref.MinVersion = versionPref.MaxVersionTested;
+        }
+        else if (!versionPref.MinVersion && !versionPref.MaxVersionTested) { // neither are set
+            versionPref.MinVersion = BASE_UAP_VERSION;
+            versionPref.MaxVersionTested = BASE_UAP_VERSION;
+        } 
+        else { // both are set
+            if (versionPref.MinVersion.gt(versionPref.MaxVersionTested)) {
+                versionPref.MaxVersionTested = versionPref.MinVersion;
+            }
+        }
+    }
+
+    if (Object.keys(platformBag).length === 0) {
+        platformBag['Windows.Universal'] = { MinVersion: BASE_UAP_VERSION, MaxVersionTested: BASE_UAP_VERSION };
+    }
+
+    return platformBag;
+}
+
+/**
+ * Checks to see whether access rules or 
+ * @param config {ConfigParser} The configuration parser
+ * @return {boolean} True if the config specifies remote URIs for access or start; false otherwise.
+ */
+function checkForRemoteModeUris(config) {
+    var accessRules = config.getNavigationWhitelistRules();
+    var startPage = config.startPage();
+    var test = /(https?|ms-appx-web):\/\//i;
+
+    var hasRemoteUri = test.test(startPage);
+    hasRemoteUri = hasRemoteUri || accessRules.some(function(rule) {
+        return test.test(rule);
+    });
+
+    return hasRemoteUri;
+}
+
+/** 
+ * Checks for capabilities which are Restricted in Windows 10 UAP.
+ * @param appxManifestCapabilitiesElement {ElementTree.Element} The appx manifest element for <capabilities>
+ * @return {string[]|false} An array of restricted capability names, or false.
+ */
+function checkForRestrictedRemoteCapabilityDeclarations(appxManifestCapabilitiesElement) {
+    if (!appxManifestCapabilitiesElement)
+        return false;
+
+    var hasRestrictedCapabilities = false;
+    var foundRestrictedCapabilities = [];
+
+    var children = appxManifestCapabilitiesElement.getchildren();
+    var declaredCapabilities = children.map(function(el) {
+        return el.attrib.Name;
+    });
+
+    UAP_RESTRICTED_CAPS.forEach(function(cap) {
+        if (declaredCapabilities.indexOf(cap) > -1) {
+            hasRestrictedCapabilities = true;
+            foundRestrictedCapabilities.push(cap);
+        }
+    });
+
+    return hasRestrictedCapabilities ? foundRestrictedCapabilities : hasRestrictedCapabilities;
+}
+
+/**
+ * Checks for capabilities which require the uap: prefix in Windows 10.
+ * @param appxManifestCapabilitiesElement {ElementTree.Element} The appx manifest element for <capabilities>
+ */
+function ensureUapPrefixedCapabilities(appxManifestCapabilitiesElement) {
+    var children = appxManifestCapabilitiesElement.getchildren();
+    var declaredCapabilities = children.map(function(el) {
+        return { name: el.attrib.Name, element: el, elementName: el.tag };
+    });
+
+    declaredCapabilities.forEach(function(cap) {
+        if (CAPS_NEEDING_UAPNS.indexOf(cap.name) > -1) {
+            if (cap.elementName.indexOf('uap:') === -1) {
+                cap.elementName = 'uap:' + cap.elementName;
+                cap.element.tag = cap.elementName;
+            }
+        }
+    });
 }

@@ -24,7 +24,20 @@ Update these notes using: git log --pretty=format:'* %s' --topo-order --no-merge
 
 cordova-windows is a library that enables developers to create Windows 8/8.1 and WP8.1 application projects that support Cordova APIs.
 
+[4.0.0-dev]
+
+* Added support for Windows 10 Universal Apps. 
+* To target Windows 10, add `<preference name="WindowsTargetVersion" value="10.0" />` to config.xml
+
+**Known Issues with 4.0.0-dev and Windows 10**
+
+- Windows 10 Technical Preview 2 does not have a command-line compatible emulator deployment scenario.  To deploy to an emulator, open your solution file in Visual Studio.
+- The Windows SDK included with Visual Studio 2015 RC does not include a tool to deploy to a Windows 10 Phone.  To deploy to a phone, open your solution file in Visual Studio.
+- `-AndContinue` APIs have been deprecated in Windows 10, so plugins may throw an exception if they call such APIs from a Windows 10 app.
+- WinJS is included inline in the package.  In the future, it will be migrated to an NPM dependency, and the dependency will not include any UI-related files.  You should not take a dependency on WinJS UI functionality unless you include it yourself (see [WinJS on Github](http://github.com/winjs/winjs)).
+
 [3.8.1]
+
 * CB-8796 updated package.json version manually
 * CB-8796 updated version file manually
 * Removed verbose strict inequality tests
@@ -35,6 +48,7 @@ cordova-windows is a library that enables developers to create Windows 8/8.1 and
 * Update JS snapshot to version 3.8.1 (via coho)
 
 [3.8.0]
+
 * Update JS snapshot to version 3.8.0 (via coho)
 * CB-7985 windows platform does not build with Visual Studio 14 CTP tools
 * CB-8515 Support DefaultLanguage selection for Windows
@@ -47,9 +61,11 @@ cordova-windows is a library that enables developers to create Windows 8/8.1 and
 * Fixed regex used in getPackageFileInfo().
 
 [3.7.1]
+
 * Updated expired temporary certificate
 
 [3.7.0]
+
 * Update JS snapshot to version 3.7.0 (via coho)
 * CB-7731 catch obvious missing args error
 * CB-7493 Adds `space-in-path` and `unicode in name` tests for CI
@@ -69,6 +85,7 @@ cordova-windows is a library that enables developers to create Windows 8/8.1 and
 * CB-7377 Removes unnecessary rules tracing which is also incorrectly handled by PS
 
 [3.6.4]
+
 * Set VERSION to 3.6.4 (via coho)
 * Update JS snapshot to version 3.6.4 (via coho)
 * CB-7617 partial match support for --target
@@ -76,6 +93,7 @@ cordova-windows is a library that enables developers to create Windows 8/8.1 and
 * bundledDependencies + fixed some whitespace
 
 [3.6.0]
+
 * CB-7377 Removes unnecessary rules tracing which is also incorrectly handled by PS
 * update cordova.js
 * Removed un-needed files, multiple cordova.js files can only cause confusion

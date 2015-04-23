@@ -44,11 +44,17 @@ function createConfigParserMock(winVersion, phoneVersion) {
         return {
             getPreference: function(prefName) {
                 switch (prefName) {
-                    case 'windows-target-version':
+                    case 'WindowsTargetVersion':
                         return winVersion;
-                    case 'windows-phone-target-version':
+                    case 'WindowsPhoneTargetVersion':
                         return phoneVersion;
                 }
+            },
+            getWindowsTargetVersion: function() {
+                return winVersion;
+            },
+            getWindowsPhoneTargetVersion: function() {
+                return phoneVersion;
             }
         };
     });
@@ -235,6 +241,7 @@ describe('run method', function() {
         build.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         createFindAvailableVersionMock('4.0', testPath, buildSpy);
         build.__set__('prepare.applyPlatformConfig', function() {} );
+        createConfigParserMock('8.0');
 
         build.run([ 'node', buildPath, '--win' ])
         .finally(function() {
@@ -258,7 +265,7 @@ describe('run method', function() {
         });
     });
 
-    it('spec.10 should throw an error if windows-target-version has unsupported value', function(done) {
+    it('spec.10 should throw an error if WindowsTargetVersion has unsupported value', function(done) {
         var buildSpy = jasmine.createSpy(),
             errorSpy = jasmine.createSpy();
 
@@ -294,7 +301,7 @@ describe('run method', function() {
         });
     });
 
-    it('spec.12 should throw an error if windows-phone-target-version has unsupported value', function(done) {
+    it('spec.12 should throw an error if WindowsPhoneTargetVersion has unsupported value', function(done) {
         var buildSpy = jasmine.createSpy(),
             errorSpy = jasmine.createSpy();
 

@@ -64,14 +64,27 @@ module.exports.getAppStoreUtils = function () {
     });
 };
 
+function getProgramFiles32Folder() {
+    /* jshint ignore:start */ /* Wants to use dot syntax for ProgramFiles, leaving as-is for consistency */
+    return process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
+    /* jshint ignore:end */
+}
+
 // returns path to AppDeploy util from Windows Phone 8.1 SDK
-module.exports.getAppDeployUtils = function () {
-    var appDeployUtils = path.join((process.env['ProgramFiles(x86)'] || process.env['ProgramFiles']),
-        'Microsoft SDKs', 'Windows Phone', 'v8.1', 'Tools', 'AppDeploy', 'AppDeployCmd.exe');
-    // Check if AppDeployCmd exists
+module.exports.getAppDeployUtils = function (targetWin10) {
+    var appDeployUtils,
+        appDeployCmdName;
+    if (targetWin10) {
+        appDeployCmdName = 'WinAppDeployCmd.exe';
+        appDeployUtils = path.join(getProgramFiles32Folder(), 'Windows Kits', '10', 'bin', 'x86', appDeployCmdName);
+    } else {
+        appDeployCmdName = 'AppDeployCmd.exe';
+        appDeployUtils = path.join(getProgramFiles32Folder(), 'Microsoft SDKs', 'Windows Phone', 'v8.1', 'Tools', 'AppDeploy', appDeployCmdName);
+    }
+    // Check if AppDeployCmd is exists
     if (!fs.existsSync(appDeployUtils)) {
-        console.warn('WARNING: AppDeploy tool (AppDeployCmd.exe) wasn\'t found. Make sure that it\'s in %PATH%');
-        return Q.resolve('AppDeployCmd');
+        console.warn('WARNING: AppDeploy tool (' + appDeployCmdName + ') wasn\'t found. Make sure that it\'s in %PATH%');
+        return Q.resolve(appDeployCmdName);
     }
     return Q.resolve(appDeployUtils);
 };
