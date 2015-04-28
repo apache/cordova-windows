@@ -30,6 +30,7 @@ Includes Windows universal app template to build [Apache Cordova](http://cordova
 
 Requires
 ---
+**To build for Windows 10** Platform support is experimental
 
 **To build for all platforms** (Windows 8.0, Windows 8.1 and Windows Phone 8.1)
 
