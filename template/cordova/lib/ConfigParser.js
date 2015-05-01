@@ -192,8 +192,7 @@ ConfigParser.prototype = {
     },
 
     getWindowsTargetVersion: function() {
-        // PascalCased version is the new official preference name, but retain the old for back-compat
-        var preference = this.getPreference('WindowsTargetVersion') || this.getPreference('windows-target-version');
+        var preference = this.getPreference('windows-target-version');
 
         if (!preference) 
             preference = '8.1'; // default is 8.1.
@@ -206,7 +205,7 @@ ConfigParser.prototype = {
         // 1. Check for an explicit preference.  If the preference is set explicitly, return that, irrespective of whether it is valid
         // 2. Get the Windows baseline version.  If it's equivalent to 8.0, bump it to 8.1.
         // 3. Return the Windows baseline version.
-        var explicitPreference = this.getPreference('WindowsPhoneTargetVersion') || this.getPreference('windows-phone-target-version');
+        var explicitPreference = this.getPreference('windows-phone-target-version');
         if (explicitPreference)
             return explicitPreference;
 

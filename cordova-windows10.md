@@ -11,7 +11,7 @@ app developers and plugin developers need to know about Windows 10 when building
 Adding Windows 10 support to your app is as easy as setting your Windows target platform version to 
 10.0:
 
-    <preference name="WindowsTargetVersion" value="10.0" />
+    <preference name="windows-target-version" value="10.0" />
 
 To develop apps for Windows 10, you require:
 
@@ -71,12 +71,12 @@ manifest, a warning will be displayed.
 
 ### config.xml Preferences ###
 
-#### WindowsTargetVersion, WindowsPhoneTargetVersion ####
+#### windows-target-version, windows-phone-target-version ####
 
-    <preference name="WindowsTargetVersion" value="10.0" />
-    <preference name="WindowsPhoneTargetVersion" value="10.0" />
+    <preference name="windows-target-version" value="10.0" />
+    <preference name="windows-phone-target-version" value="10.0" />
 
-*At least one is required.*
+*The default value is 8.1 for both platforms*
 
 These preferences identify the version of Windows or Windows Phone you would like your app 
 package to target.
@@ -91,8 +91,8 @@ instead)
 **Scenarios**
 
 If you are targeting Windows 8.1 or Windows 10 only, you only need to have a single 
-`WindowsTargetVersion` setting in your config.xml file.  Explicitly setting 
-`WindowsTargetVersion` to specify Windows 10 will push the Phone setting to 10 as well.
+`windows-target-version` setting in your config.xml file.  Explicitly setting 
+`windows-target-version` to specify Windows 10 will push the Phone setting to 10 as well.
 
 #### WindowsDefaultUriPrefix ####
     <preference name="WindowsDefaultUriPrefix" value="ms-appx://|ms-appx-web://" />
