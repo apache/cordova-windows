@@ -89,6 +89,7 @@ module.exports.run = function (argv) {
                 console.warn('Unrecognized --appx parameter passed to run: "' + projOverride + '", ignoring.');
                 break;
         }
+    }
 
     if (projectType == 'windows' && getWindowsTargetVersion() == '8.0') {
         console.log('Warning: windows8 has been deprecated.  Please update you project to target windows8.1');
