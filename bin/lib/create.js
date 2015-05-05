@@ -68,6 +68,10 @@ module.exports.run = function (argv) {
     // copy node_modules to cordova directory
     shell.cp('-r', path.join(root, 'node_modules'), path.join(projectPath, 'cordova'));
 
+    // copy check_reqs module to cordova directory
+    shell.cp('-rf', path.join(root, 'bin', 'check_reqs*'), path.join(projectPath, 'cordova'));
+    shell.cp('-rf', path.join(root, 'bin', 'lib', 'check_reqs*'), path.join(projectPath, 'cordova', 'lib'));
+
     if (templateOverrides && fs.existsSync(templateOverrides)) {
         console.log('Copying template overrides from ' + templateOverrides + ' to ' + projectPath);
         shell.cp('-rf', templateOverrides, projectPath);

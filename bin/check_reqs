@@ -28,7 +28,7 @@ if (['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(process.argv[2]) > 
   check_reqs.run().done(function success(msbuild) {
       console.log('Environment is supported; found MSBuild Tools version ' + msbuild.version + ' at ' + msbuild.path);
   }, function (err) {
-      console.error('Failed to check requirements due to', err);
+      console.error('Environment is not supported: ' + err);
       process.exit(2);
   });
 }
