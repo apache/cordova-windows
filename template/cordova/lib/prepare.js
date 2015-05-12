@@ -116,6 +116,7 @@ function updateManifestFile (config, manifestPath, namespacePrefix, uapVersionIn
     sortCapabilities(manifest);
     applyAccessRules(config, manifest, !!uapVersionInfo); 
     applyBackgroundColor(config, manifest, namespacePrefix);
+    applyToastCapability(config, manifest, namespacePrefix);
 
     if (uapVersionInfo) {
         applyTargetPlatformVersion(config, manifest, uapVersionInfo);
@@ -150,6 +151,7 @@ function applyCoreProperties(config, manifest, manifestPath, xmlnsPrefix, target
     if(!app) {
         throw new Error('Invalid manifest file (no <Application> node): ' + manifestPath);
     }
+    
     if (pkgName) {
         // 64 symbols restriction goes from manifest schema definition
         // http://msdn.microsoft.com/en-us/library/windows/apps/br211415.aspx
@@ -719,4 +721,25 @@ function ensureUapPrefixedCapabilities(appxManifestCapabilitiesElement) {
             }
         }
     });
+}
+
+/**
+ * Applies the ToastCapable attribute to the VisualElements tag
+ * @param config {ConfigParser} The configuration reader
+ * @param manifest {et.ElementTree} The manifest file
+ * @namespacePrefix {String} The XML namespace for the VisualElements tag, in the form 'm2:'
+ */
+function applyToastCapability(config, manifest, namespacePrefix) {
+    var isToastCapable = config.getPreference('WindowsToastCapable');
+    isToastCapable = (isToastCapable && isToastCapable.toString().toLowerCase() === 'true');
+    
+    var visualElementsName = './/' + namespacePrefix + 'VisualElements';
+    var visualElems = manifest.find(visualElementsName);
+    
+    if (isToastCapable) {
+        visualElems.attrib.ToastCapable = 'true';
+    }
+    else {
+        delete visualElems.attrib.ToastCapable;
+    } 
 }

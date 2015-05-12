@@ -18,7 +18,7 @@
        under the License.
 -->
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest" xmlns:m3="http://schemas.microsoft.com/appx/2014/manifest" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest">
-  <Identity Name="$guid1$" Version="1.0.0.0" Publisher="CN=$username$" />
+  <Identity Name="$packagename$" Version="1.0.0.0" Publisher="CN=$username$" />
   <mp:PhoneIdentity PhoneProductId="$guid1$" PhonePublisherId="db093ed5-53b1-45f7-af72-751e8f36ab80" />
   <Properties>
     <DisplayName>$projectname$</DisplayName>
@@ -33,7 +33,7 @@
     <Resource Language="x-generate" />
   </Resources>
   <Applications>
-    <Application Id="$safeprojectname$" StartPage="www/index.html">
+    <Application Id="App" StartPage="www/index.html">
       <m3:VisualElements DisplayName="$projectname$"
                          Square150x150Logo="images\Square150x150Logo.png"
                          Square44x44Logo="images\Square44x44Logo.png"
