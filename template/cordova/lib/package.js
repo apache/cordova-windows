@@ -96,7 +96,7 @@ module.exports.getAppId = function (platformPath) {
 module.exports.getPackageName = function (platformPath) {
     var manifest = path.join(platformPath, 'package.windows.appxmanifest');
     try {
-        return Q.resolve(/Application Id="(.*?)"/gi.exec(fs.readFileSync(manifest, 'utf8'))[1]);
+        return Q.resolve(/Identity Name="(.*?)"/gi.exec(fs.readFileSync(manifest, 'utf8'))[1]);
     } catch (e) {
         return Q.reject('Can\'t read package name from manifest ' + e);
     }

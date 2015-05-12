@@ -77,7 +77,7 @@ module.exports.run = function (argv) {
     ['package.windows.appxmanifest', 'package.windows80.appxmanifest', 'package.phone.appxmanifest'].forEach(function (file) {
         var fileToReplace = path.join(projectPath, file);
         shell.sed('-i', /\$guid1\$/g, guid, fileToReplace);
-        shell.sed('-i', /\$safeprojectname\$/g, packageName, fileToReplace);
+        shell.sed('-i', /\$packagename\$/g, packageName, fileToReplace);
         shell.sed('-i', /\$projectname\$/g, safeAppName, fileToReplace);
     });
 
