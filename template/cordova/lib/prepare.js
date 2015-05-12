@@ -86,6 +86,7 @@ function updateManifestFile (config, manifestPath, namespacePrefix) {
     sortCapabilities(manifest);
     applyAccessRules(config, manifest);
     applyBackgroundColor(config, manifest, namespacePrefix);
+    applyToastCapability(config, manifest, namespacePrefix);
 
 
     //Write out manifest
@@ -380,4 +381,25 @@ function applyBackgroundColor (config, manifest, xmlnsPrefix) {
         visualElems = manifest.find(splashScreenElementsName);
         visualElems.attrib.BackgroundColor = refineColor(bgColor);
     }
+}
+
+/**
+ * Applies the ToastCapable attribute to the VisualElements tag
+ * @param config {ConfigParser} The configuration reader
+ * @param manifest {et.ElementTree} The manifest file
+ * @namespacePrefix {String} The XML namespace for the VisualElements tag, in the form 'm2:'
+ */
+function applyToastCapability(config, manifest, namespacePrefix) {
+    var isToastCapable = config.getPreference('WindowsToastCapable');
+    isToastCapable = (isToastCapable && isToastCapable.toString().toLowerCase() === 'true');
+    
+    var visualElementsName = './/' + namespacePrefix + 'VisualElements';
+    var visualElems = manifest.find(visualElementsName);
+    
+    if (isToastCapable) {
+        visualElems.attrib.ToastCapable = 'true';
+    }
+    else {
+        delete visualElems.attrib.ToastCapable;
+    } 
 }
