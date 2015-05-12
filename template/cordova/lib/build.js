@@ -42,7 +42,7 @@ var buildType;
 var buildArchs;
 // MSBuild Tools available on this development machine
 var msbuild;
-// Override WindowsTargetVersion for all devices
+// Override windows-target-version for all devices
 var projVerOverride;
 
 // builds cordova-windows application with parameters provided.
@@ -82,7 +82,7 @@ module.exports.help = function help() {
     console.log('    --phone, --win');
     console.log('              : Specifies, what type of project to build');
     console.log('    --appx=<8.1-win|8.1-phone|uap>');
-    console.log('              : Overrides WindowsTargetVersion to build Windows 8.1, Windows Phone 8.1, or Windows 10 Universal.');
+    console.log('              : Overrides windows-target-version to build Windows 8.1, Windows Phone 8.1, or Windows 10 Universal.');
     console.log('examples:');
     console.log('    build ');
     console.log('    build --debug');
@@ -164,7 +164,7 @@ function getBuildTargets() {
             targets.push(projFiles.win10);
             break;
         default:
-            throw new Error('Unsupported WindowsTargetVersion value: ' + windowsTargetVersion);
+            throw new Error('Unsupported windows-target-version value: ' + windowsTargetVersion);
         }
     }
     // Windows Phone
@@ -184,7 +184,7 @@ function getBuildTargets() {
             }
             break;
         default:
-            throw new Error('Unsupported WindowsPhoneTargetVersion value: ' + windowsPhoneTargetVersion);
+            throw new Error('Unsupported windows-phone-target-version value: ' + windowsPhoneTargetVersion);
         }
     }
 

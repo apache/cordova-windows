@@ -147,7 +147,7 @@ module.exports.help = function () {
     console.log('    --phone, --win');
     console.log('                  : Specifies project type to deploy');
     console.log('    --appx=<8.1-win|8.1-phone|uap>');
-    console.log('                  : Overrides WindowsTargetVersion to build Windows 8.1, ');
+    console.log('                  : Overrides windows-target-version to build Windows 8.1, ');
     console.log('                              Windows Phone 8.1, or Windows 10.');
     console.log('');
     console.log('Examples:');
@@ -177,6 +177,6 @@ function getWindowsTargetVersion() {
         case 'UAP':
             return '10.0';
         default:
-            throw new Error('Unsupported WindowsTargetVersion value: ' + windowsTargetVersion);
+            throw new Error('Unsupported windows-target-version value: ' + windowsTargetVersion);
     }
 }

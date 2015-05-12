@@ -44,9 +44,9 @@ function createConfigParserMock(winVersion, phoneVersion) {
         return {
             getPreference: function(prefName) {
                 switch (prefName) {
-                    case 'WindowsTargetVersion':
+                    case 'windows-target-version':
                         return winVersion;
-                    case 'WindowsPhoneTargetVersion':
+                    case 'windows-phone-target-version':
                         return phoneVersion;
                 }
             },
@@ -265,7 +265,7 @@ describe('run method', function() {
         });
     });
 
-    it('spec.10 should throw an error if WindowsTargetVersion has unsupported value', function(done) {
+    it('spec.10 should throw an error if windows-target-version has unsupported value', function(done) {
         var buildSpy = jasmine.createSpy(),
             errorSpy = jasmine.createSpy();
 
@@ -301,7 +301,7 @@ describe('run method', function() {
         });
     });
 
-    it('spec.12 should throw an error if WindowsPhoneTargetVersion has unsupported value', function(done) {
+    it('spec.12 should throw an error if windows-phone-target-version has unsupported value', function(done) {
         var buildSpy = jasmine.createSpy(),
             errorSpy = jasmine.createSpy();
 
