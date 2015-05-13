@@ -36,8 +36,7 @@ MSBuildTools.prototype.buildProject = function(projFile, buildType, buildarch) {
 
     var args = ['/clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal', '/nologo',
     '/p:Configuration=' + buildType,
-    '/p:Platform=' + buildarch,
-    '/p:BuildFromCordovaTooling=' + true];
+    '/p:Platform=' + buildarch];
 
     return spawn(path.join(this.path, 'msbuild'), [projFile].concat(args));
 };
