@@ -79,12 +79,5 @@
     <SDKReference Include="Microsoft.WinJS.1.0, Version=1.0" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />
-  <PropertyGroup>
-    <BuildFromCordovaTooling>false</BuildFromCordovaTooling>
-    <PreBuildEvent Condition="$(BuildFromCordovaTooling) != true">
-      cd /d $(MSBuildThisFileDirectory)
-      node -e "require('./cordova/lib/prepare.js').applyPlatformConfig()"
-    </PreBuildEvent>
-  </PropertyGroup>
   <Import Project="CordovaApp.projitems" Label="Shared" />
 </Project>

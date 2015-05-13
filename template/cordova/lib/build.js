@@ -48,8 +48,8 @@ module.exports.run = function run (argv) {
 
     return Q.all([parseAndValidateArgs(argv), MSBuildTools.findAvailableVersion()])
         .spread(function(buildConfig, msbuildTools) {
-            // update platform as per configuration settings
-            prepare.applyPlatformConfig(buildConfig);
+            // Apply build related configs
+            prepare.updateBuildConfig(buildConfig);
             cleanIntermediates();
             msbuild = msbuildTools;
             console.log('MSBuildToolsPath: ' + msbuild.path);
