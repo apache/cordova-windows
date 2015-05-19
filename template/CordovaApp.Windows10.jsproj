@@ -71,8 +71,15 @@
     <TargetPlatformVersion>10.0.10030.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.10030.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
-    <DefaultLanguage>en-US</DefaultLanguage>
-    <PackageCertificateKeyFile>CordovaApp_TemporaryKey.pfx</PackageCertificateKeyFile>
+  </PropertyGroup>
+  <!--
+    MSBuild\12.0\Bin\Microsoft.Common.CurrentVersion.targets contains a "TargetPlatformVersion" check, which will throw if
+    the version is not formatted as X.Y. To workaround this check, change target platform version to 10.0 if Visual Studio
+    Version is less than 14.
+  -->
+  <PropertyGroup Condition="'$(VisualStudioVersion)' &lt; '14.0'">
+    <TargetPlatformVersion>10.0</TargetPlatformVersion>
+    <TargetPlatformMinVersion>10.0</TargetPlatformMinVersion>
   </PropertyGroup>
   <ItemGroup>
     <AppxManifest Include="package.windows10.appxmanifest">
@@ -86,12 +93,11 @@
     <Content Include="WinJS\js\WinJS.js" />
     <None Include="WinJS\js\WinJS.intellisense.js" />
     <None Include="WinJS\js\WinJS.intellisense-setup.js" />
-    <None Include="CordovaApp_TemporaryKey.pfx" />
   </ItemGroup>
   <Import Project="CordovaApp.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />
   <!-- To modify your build process, add your task inside one of the targets below then uncomment
-       that target and the DisableFastUpToDateCheck PropertyGroup. 
+       that target and the DisableFastUpToDateCheck PropertyGroup.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
