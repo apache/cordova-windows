@@ -86,13 +86,7 @@
       <SubType>Designer</SubType>
     </AppxManifest>
     <Content Include="images\*.png" Exclude="images\*.scale-240.*" />
-    <Content Include="WinJS\css\ui-dark.css" />
-    <Content Include="WinJS\css\ui-light.css" />
-    <Content Include="WinJS\fonts\Symbols.ttf" />
-    <Content Include="WinJS\js\en-US\ui.strings.js" />
-    <Content Include="WinJS\js\WinJS.js" />
-    <None Include="WinJS\js\WinJS.intellisense.js" />
-    <None Include="WinJS\js\WinJS.intellisense-setup.js" />
+    <Content Include="WinJS\js\base.js" />
   </ItemGroup>
   <Import Project="CordovaApp.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />
