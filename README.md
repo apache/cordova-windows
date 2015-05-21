@@ -24,12 +24,9 @@ Apache Cordova for Windows
 
 [![Build status](https://ci.appveyor.com/api/projects/status/19h1fq0lyvwtei05/branch/master)](https://ci.appveyor.com/project/Humbedooh/cordova-windows/branch/master)
 
-# Experimental branch for Windows 10 #
-**You are using an experimental branch** which includes support for Windows 10 Universal Apps.  For more information about what's new with Windows 10 support, see [What's New in Windows 10 for Cordova](cordova-windows10.md).
+Includes a universal app template to build [Apache Cordova](http://cordova.apache.org) applications that target Windows 10, and Windows 8.1, as well as Windows Phone 8.1. An Apache Cordova based applications is, at the core, an application written with web technology: HTML, CSS and JavaScript.
 
-Also includes a universal app template to build [Apache Cordova](http://cordova.apache.org) applications that target Windows 8.0, Windows 8.1 and Windows Phone 8.1. An Apache Cordova based applications is, at the core, an application written with web technology: HTML, CSS and JavaScript.
-
-(Warning: Windows8 has been deprecated, please update your applications to target Windows 8.1)
+(Warning: Windows 8 has been deprecated, please update your applications to target Windows 8.1)
 
 [Apache Cordova](http://cordova.apache.org) is a project of [The Apache Software Foundation (ASF)](http://apache.org)
 
@@ -41,13 +38,13 @@ Requires
 
   Windows 8.1 or Windows 10, along with [Visual Studio 2015 RC](http://www.visualstudio.com/downloads)
 
-**To build for Windows 8 or Windows 8.1** (Windows 8.0, Windows 8.1 and Windows Phone 8.1)
+**To build for Windows 8 or Windows 8.1** (Windows 8, Windows 8.1 and Windows Phone 8.1)
 
   Windows 8.1 along with [Visual Studio 2013 Express](http://www.visualstudio.com/downloads/download-visual-studio-vs#d-express-windows-8).
 
-**To build for Windows 8.0 only (deprecated!)**
+**To build for Windows 8 only (deprecated!)**
 
-   Windows 8.0 or 8.1 along with [Visual Studio 2012 Express](http://www.visualstudio.com/downloads).
+   Windows 8 or 8.1 along with [Visual Studio 2012 Express](http://www.visualstudio.com/downloads).
 
 BUGS?
 -----
