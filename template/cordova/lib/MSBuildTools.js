@@ -81,7 +81,6 @@ function getProgramFiles32Folder() {
 function getAvailableUAPVersions() {
     var uapFolderPath = path.join(getProgramFiles32Folder(), 'Windows Kits', '10', 'Platforms', 'UAP');
     if (!shell.test('-e', uapFolderPath)) {
-        console.log('No UAP SDK exists on this machine.');
         return []; // No UAP SDK exists on this machine
     }
 

@@ -49,13 +49,7 @@ var TEMPLATE =
     '    Do not modify this file - YOUR CHANGES WILL BE ERASED!\n-->\n';
 
 module.exports.applyPlatformConfig = function() {
-
     var config = new ConfigParser(path.join(ROOT, 'config.xml'));
-    var isTargetingWin10 = false;
-    var winTargetVersion = config.getWindowsTargetVersion();
-    if (winTargetVersion === '10.0' || winTargetVersion === 'UAP') {
-        isTargetingWin10 = true;
-    }
 
     // Apply appxmanifest changes
     [{ fileName: MANIFEST_WINDOWS,   namespacePrefix: 'm2:' },
@@ -67,15 +61,11 @@ module.exports.applyPlatformConfig = function() {
 
     // Break out Windows 10-specific functionality because we also need to
     // apply UAP versioning to Windows 10 appx-manifests.
-    var uapVersionInfo = getUAPVersions(config);
+    var uapVersionInfo = getUAPVersions();
 
     if (uapVersionInfo) {
         updateManifestFile(config, path.join(ROOT, MANIFEST_WINDOWS10), 'uap:', uapVersionInfo);
-
         applyUAPVersionToProject(path.join(ROOT, PROJECT_WINDOWS10), uapVersionInfo);
-    }
-    else if (isTargetingWin10) {
-        console.warn('Warning: Requested build targeting Windows 10, but Windows 10 tools were not detected on the system.');
     }
 
     copyImages(config);
@@ -620,8 +610,7 @@ function applyTargetPlatformVersion(config, manifest, uapVersionInfo) {
 }
 
 // returns {minUAPVersion: Version, targetUAPVersion: Version} | false
-function getUAPVersions(config) {
-    // @param config: ConfigParser
+function getUAPVersions() {
     var baselineVersions = MSBuildTools.getAvailableUAPVersions();
     if (!baselineVersions || baselineVersions.length === 0) {
         return false;
