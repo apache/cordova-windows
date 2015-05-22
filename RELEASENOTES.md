@@ -22,9 +22,10 @@
 
 Update these notes using: git log --pretty=format:'* %s' --topo-order --no-merges *remote*/3.5.x...HEAD
 
-cordova-windows is a library that enables developers to create Windows 8/8.1 and WP8.1 application projects that support Cordova APIs.
+cordova-windows is a library that enables developers to create Windows 8/8.1/10 and WP8.1 application projects that support Cordova APIs.
 
 [4.0.0-dev]
+* Updating appx manifest to a large extent now happens in the `prepare` step as opposed to the `build` step. This change implies that cordova-windows 4.0.0 can only work with with cordova CLI > 5.0
 * CB-8486 Support for creating signed package and build.json for Windows
 * Add preview support for Windows 10 Universal Apps. To target Windows 10, add `<preference name="windows-target-version" value="10.0" />` to config.xml.
 * The default windows target version is now 8.1.
