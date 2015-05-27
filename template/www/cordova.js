@@ -1,5 +1,5 @@
 ﻿// Platform: windows
-// b0463746dd842818c1f08560e998ec847460596c
+// cb11ad3aedf6c8250b7eac9b2a560d77499062ac
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
  under the License.
 */
 ;(function() {
-var PLATFORM_VERSION_BUILD_LABEL = '3.9.0-dev';
+var PLATFORM_VERSION_BUILD_LABEL = '4.0.0-dev';
 // file: src/scripts/require.js
 
 /*jshint -W079 */
@@ -816,7 +816,7 @@ module.exports = channel;
 
 });
 
-// file: src/windows/exec.js
+// file: node_modules/cordova-windows/cordova-js-src/exec.js
 define("cordova/exec", function(require, exports, module) {
 
 /*jslint sloppy:true, plusplus:true*/
@@ -861,7 +861,11 @@ module.exports = function (success, fail, service, action, args) {
             onSuccess = function (result, callbackOptions) {
                 callbackOptions = callbackOptions || {};
                 var callbackStatus;
-                if (callbackOptions.status !== null) {
+                // covering both undefined and null.
+                // strict null comparison was causing callbackStatus to be undefined
+                // and then no callback was called because of the check in cordova.callbackFromNative
+                // see CB-8996 Mobilespec app hang on windows
+                if (callbackOptions.status !== undefined && callbackOptions.status !== null) {
                     callbackStatus = callbackOptions.status;
                 }
                 else {
@@ -877,7 +881,11 @@ module.exports = function (success, fail, service, action, args) {
             onError = function (err, callbackOptions) {
                 callbackOptions = callbackOptions || {};
                 var callbackStatus;
-                if (callbackOptions.status !== null) {
+                // covering both undefined and null.
+                // strict null comparison was causing callbackStatus to be undefined
+                // and then no callback was called because of the check in cordova.callbackFromNative
+                // see CB-8996 Mobilespec app hang on windows
+                if (callbackOptions.status !== undefined && callbackOptions.status !== null) {
                     callbackStatus = callbackOptions.status;
                 }
                 else {
@@ -1275,7 +1283,7 @@ exports.reset();
 
 });
 
-// file: src/windows/platform.js
+// file: node_modules/cordova-windows/cordova-js-src/platform.js
 define("cordova/platform", function(require, exports, module) {
 
 module.exports = {
@@ -1310,7 +1318,7 @@ module.exports = {
             var scriptElem = document.createElement("script");
 
             if (navigator.appVersion.indexOf('MSAppHost/3.0') !== -1) {
-                // Windows 10 UAP
+                // Windows 10 UWP
                 scriptElem.src = '/WinJS/js/base.js';
             } else if (navigator.appVersion.indexOf("Windows Phone 8.1;") !== -1) {
                 // windows phone 8.1 + Mobile IE 11
