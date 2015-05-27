@@ -140,7 +140,7 @@ describe('run method', function() {
                 file: 'testfile'
             });
         });
-        run.__set__('packages.deployToPhoneAndRun', function() {
+        run.__set__('packages.deployToPhone', function() {
             deployToPhone();
             return Q();
         });
