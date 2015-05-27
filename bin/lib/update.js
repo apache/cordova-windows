@@ -21,23 +21,35 @@ var Q      = require('Q'),
     fs     = require('fs'),
     path   = require('path'),
     shell   = require('shelljs'),
-    create = require('./create');
+    create = require('./create'),
+    ConfigParser = require('../../template/cordova/lib/ConfigParser');
 
 // returns package metadata from config.xml with fields 'namespace' and 'name'
 function extractMetadata(projectPath) {
-    if (!fs.existsSync(path.join(projectPath, 'config.xml'))){
+    var projectConfig = path.join(projectPath, 'config.xml');
+    if (!fs.existsSync(projectConfig)){
         return Q.reject('config.xml does not exist');
     }
 
-    var meta =  { // default values
-        namespace: 'io.cordova.hellocordova',
-        name: 'HelloCordova'
+    var config = new ConfigParser(projectConfig);
+    var meta =  {
+        packageName: config.packageName(),
+        name: config.name(),
+        guid: undefined
     };
 
-    // TODO: read real values from config.xml
-
-    // in case of Cordova CLI all values will be automatically updated by cli for you
-    // but the script could be used w/o CLI so we should correctly populate meta
+    // guid param is used only when adding a platform, and isn't saved anywhere.
+    // The only place, where it is being persisted - phone/win10 appxmanifest file,
+    // but since win10 introduced just recently, we're can't rely on its manifest
+    // for old platform versions.
+    var manifestPath = path.join(projectPath, 'package.phone.appxmanifest');
+    try {
+        var manifest = fs.readFileSync(manifestPath, 'utf-8');
+        var matches = /\bPhoneProductId="(.*?)"/gm.exec(manifest);
+        if (matches) {
+            meta.guid = matches[1];
+        }
+    } catch (e) { /*ignore IO errors */ }
 
     return Q.resolve(meta);
 }
@@ -59,11 +71,17 @@ module.exports.run = function (argv) {
             ' Please provide a path to the project you would like to update.');
     }
 
-    return extractMetadata(projectPath).then(function (metadata) {
+    return extractMetadata(projectPath)
+    .then(function (metadata) {
         shell.rm('-rf', projectPath);
 
         // setup args for create.run which requires process.argv-like array
-        var createArgs = argv.concat([metadata.namespace, metadata.name]);
+        var createArgs = argv.concat([metadata.packageName, metadata.name]);
+        if (metadata.guid) {
+            createArgs.push('--guid=' + metadata.guid);
+        }
+
         return create.run(createArgs);
     });
 };
+
