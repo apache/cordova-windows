@@ -105,13 +105,13 @@ module.exports.run = function (argv) {
         console.log('\nDeploying ' + pkg.type + ' package to ' + deployTarget + ':\n' + pkg.appx);
         switch (pkg.type) {
             case 'phone':
-                return packages.deployToPhoneAndRun(pkg, deployTarget, false).catch(function(e) {
+                return packages.deployToPhone(pkg, deployTarget, false).catch(function(e) {
                     if (args.target || args.emulator || args.device) {
                         throw e; // Explicit target, carry on
                     }
                     
                     // 'device' was inferred initially, because no target was specified
-                    return packages.deployToPhoneAndRun(pkg, 'emulator', false);
+                    return packages.deployToPhone(pkg, 'emulator', false);
                 });
                 
             case 'windows10':
@@ -120,7 +120,7 @@ module.exports.run = function (argv) {
                     if (args.emulator || args.target === 'emulator') {
                         console.warn('Windows 10 Phone emulator is not currently supported, attempting deploy to device.');
                     }
-                    return packages.deployToPhoneAndRun(pkg, 'device', true);
+                    return packages.deployToPhone(pkg, 'device', true);
                 }
                 else {
                     return packages.deployToDesktop(pkg, deployTarget, projectType);

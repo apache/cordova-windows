@@ -143,31 +143,22 @@ module.exports.listDevices = function () {
     });
 };
 
-// deploys specified phone package to device/emulator
-module.exports.deployToPhone = function (package, deployTarget, targetWindows10) {
-    var getTarget = deployTarget == 'device' ? Q('de') :
-        deployTarget == 'emulator' ? Q('xd') : module.exports.findDevice(deployTarget);
-
-    // /installlaunch option sometimes fails with 'Error: The parameter is incorrect.'
-    // so we use separate steps to /install and then /launch
-    return getTarget.then(function(target) {
-        return utils.getAppDeployUtils(targetWindows10).then(function(appDeployUtils) {
-            console.log('Installing application');
-            return spawn(appDeployUtils, ['/install', package.appx, '/targetdevice:' + target]).then(function() {
-                // TODO: resolve AppId without specifying project root;
-                return module.exports.getAppId(path.join(__dirname, '..', '..'));
-            }).then(function(appId) {
-                console.log('Running application');
-                return spawn(appDeployUtils, ['/launch', appId, '/targetdevice:' + target]);
-            });
-        });
-    });
-};
 
 function installAppToPhone(appDeployUtils, package, target, update) {
-    var cmd = update ? '/updatelaunch' : '/installlaunch';
+    // /installlaunch option sometimes fails with 'Error: The parameter is incorrect.'
+    // so we use separate steps to /install or /update and then /launch
+    var cmd = update ? '/update' : '/install';
     console.log('Installing application...');
     return spawn(appDeployUtils, [cmd, package.appx, '/targetdevice:' + target]);
+}
+
+function runAppOnPhone(appDeployUtils, target) {
+    return Q().then(function() {
+        return module.exports.getAppId(path.join(__dirname, '..', '..'));
+    }).then(function(appId) {
+        console.log('Running application... ');
+        return spawn(appDeployUtils, ['/launch', appId, '/targetdevice:' + target]);
+    });
 }
 
 function uninstallAppFromPhone(appDeployUtils, package, target) {
@@ -175,7 +166,8 @@ function uninstallAppFromPhone(appDeployUtils, package, target) {
     return spawn(appDeployUtils, ['/uninstall', package.phoneId, '/targetdevice:' + target]);
 }
 
-module.exports.deployToPhoneAndRun = function (package, deployTarget, targetWindows10) {
+// deploys specified phone package to device/emulator and launches it
+module.exports.deployToPhone = function (package, deployTarget, targetWindows10) {
     var getTarget = deployTarget == 'device' ? Q('de') :
         deployTarget == 'emulator' ? Q('xd') : module.exports.findDevice(deployTarget);
 
@@ -185,20 +177,20 @@ module.exports.deployToPhoneAndRun = function (package, deployTarget, targetWind
             return uninstallAppFromPhone(appDeployUtils, package, target).then(
                 function() {}, function() {}).then(function() {
                     return installAppToPhone(appDeployUtils, package, target, false);
-                }).then(function() {}, function(error) {
-                    
+                }).then(function() {
+                    return runAppOnPhone(appDeployUtils, target);
+                }, function(error) {
                     if (error.indexOf('Error code 2148734208 for command') === 0) {
                         return installAppToPhone(appDeployUtils, package, target, true);
-                    }
-                    else {
+                    } else if (error.indexOf('Error code -2146233088') === 0) {
+                        throw new Error('No Windows Phone device was detected.');
+                    } else {
                         console.warn('Unexpected error from installation:');
                         console.warn(error);
                         console.warn('You may have previously installed the app with an earlier version of cordova-windows.');
                         console.warn('Ensure the app is uninstalled from the phone and then try to run again.');
                         throw error;
                     }
-                }).then(function() {
-                    return module.exports.getAppId(path.join(__dirname, '..', '..'));    
                 });
         });
     });
