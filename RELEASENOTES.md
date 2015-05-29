@@ -38,11 +38,11 @@ cordova-windows is a library that enables developers to create Windows 8/8.1/10 
 * CB-8307: Adding a 25-year expiration temporary certificate.
 * CB-8760 platform list doesn't show version for windows platform.
 
-**Known Issues with 4.0.0-dev and Windows 10**
+**Known Issues with 4.0.0 and Windows 10**
 
 * Windows 10 Technical Preview 2 does not have a command-line compatible emulator deployment scenario.  To deploy to an emulator, open your solution file in Visual Studio.
 * The Windows SDK included with Visual Studio 2015 RC does not include a tool to deploy to a Windows 10 Phone.  To deploy to a phone, open your solution file in Visual Studio.
-* WinJS is included inline in the package.  In the future, it will be migrated to an NPM dependency, and the dependency will not include any UI-related files.  You should not take a dependency on WinJS UI functionality unless you include it yourself (see [WinJS on Github](http://github.com/winjs/winjs)).
+* WinJS is included inline in the package.  In the future, it will be migrated to an NPM dependency. WinJS UI functionality is not included and should be add by you. (see [WinJS on Github](http://github.com/winjs/winjs)).
 
 [3.8.2]
 * Update cordova.js with a fix that causes Ripple emulation to fail.
