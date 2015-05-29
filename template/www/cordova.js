@@ -1,5 +1,5 @@
 ﻿// Platform: windows
-// cb11ad3aedf6c8250b7eac9b2a560d77499062ac
+// 796a18d425a03101a1a931c54cd8ea002230067c
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
  under the License.
 */
 ;(function() {
-var PLATFORM_VERSION_BUILD_LABEL = '4.0.0-dev';
+var PLATFORM_VERSION_BUILD_LABEL = '4.0.0';
 // file: src/scripts/require.js
 
 /*jshint -W079 */
