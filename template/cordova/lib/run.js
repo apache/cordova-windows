@@ -23,7 +23,8 @@ var Q = require('q'),
     build = require('./build'),
     utils = require('./utils'),
     ConfigParser = require('./ConfigParser'),
-    packages = require('./package');
+    packages = require('./package'),
+    execSync = require('child_process').execSync;
 
 var ROOT = path.join(__dirname, '..', '..');
 
@@ -31,6 +32,13 @@ module.exports.run = function (argv) {
     if (!utils.isCordovaProject(ROOT)){
         return Q.reject('Could not find project at ' + ROOT);
     }
+
+    try {
+        // Check if ran from admin prompt and fail quickly if CLI has administrative permissions
+        // http://stackoverflow.com/a/11995662/64949
+        execSync('net session', {'stdio': 'ignore'});
+        return Q.reject('Can not run this platform with administrative permissions. Please run from a non-admin prompt.');
+    } catch (e) {}
 
     // parse arg
     var args  = nopt({'debug': Boolean, 'release': Boolean, 'nobuild': Boolean,
