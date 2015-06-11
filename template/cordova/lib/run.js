@@ -117,27 +117,25 @@ module.exports.run = function (argv) {
                     if (args.target || args.emulator || args.device) {
                         throw e; // Explicit target, carry on
                     }
-                    
                     // 'device' was inferred initially, because no target was specified
                     return packages.deployToPhone(pkg, 'emulator', false);
                 });
-                
             case 'windows10':
                 if (args.phone) {
                     // Win10 emulator launch is not currently supported, always force device
                     if (args.emulator || args.target === 'emulator') {
-                        console.warn('Windows 10 Phone emulator is not currently supported, attempting deploy to device.');
+                        console.warn('Windows 10 Phone emulator is currently not supported.');
+                        console.warn('If you want to deploy to emulator, please use Visual Studio instead.');
+                        console.warn('Attempting to deploy to device...');
                     }
                     return packages.deployToPhone(pkg, 'device', true);
                 }
                 else {
                     return packages.deployToDesktop(pkg, deployTarget, projectType);
                 }
-            
-                break;    
+                break;
             default: // 'windows'
                 return packages.deployToDesktop(pkg, deployTarget, projectType);
-                
         }
     });
 };
