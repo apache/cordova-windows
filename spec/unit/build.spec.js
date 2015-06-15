@@ -321,4 +321,23 @@ describe('run method', function() {
             done();
         });
     });
+
+    it('spec.13 should be able to override target via --appx parameter', function(done) {
+        var buildSpy = jasmine.createSpy().andCallFake(function(solutionFile, buildType, buildArch) {
+                // check that we build Windows 10 and not Windows 8.1
+                expect(solutionFile.toLowerCase().indexOf('cordovaapp.windows10.jsproj') >=0).toBe(true);
+            });
+
+        build.__set__('utils.isCordovaProject', isCordovaProjectTrue);
+        createFindAvailableVersionMock('14.0', testPath, buildSpy);
+        build.__set__('prepare.applyPlatformConfig', function() {} );
+        // provision config to target Windows 8.1
+        createConfigParserMock('8.1', '8.1');
+        // explicitly specify Windows 10 as target
+        build.run([ 'node', buildPath, '--appx=uap' ])
+        .finally(function() {
+            expect(buildSpy).toHaveBeenCalled();
+            done();
+        });
+    });
 });

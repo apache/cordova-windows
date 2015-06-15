@@ -97,6 +97,72 @@ module.exports.help = function help() {
     process.exit(0);
 };
 
+// returns list of projects to be built based on config.xml and additional parameters (-appx)
+module.exports.getBuildTargets  = function(isWinSwitch, isPhoneSwitch, projOverride) {
+
+    // apply build target override if one was specified
+    if (projOverride) {
+        switch (projOverride.toLowerCase()) {
+            case '8.1-phone':
+                return [projFiles.phone];
+            case '8.1-win':
+                return [projFiles.win];
+            case 'uap':
+                return [projFiles.win10];
+            default:
+                console.warn('Unrecognized --appx parameter passed to build: "' + projOverride + '", ignoring.');
+                break;
+        }
+    }
+    
+    var configXML = new ConfigParser(path.join(ROOT, 'config.xml'));
+    var targets = [];
+    var noSwitches = !(isPhoneSwitch || isWinSwitch);
+
+    // Windows
+    if (isWinSwitch || noSwitches) { // if --win or no arg
+        var windowsTargetVersion = configXML.getWindowsTargetVersion();
+        switch(windowsTargetVersion.toLowerCase()) {
+        case '8':
+        case '8.0':
+            targets.push(projFiles.win80);
+            break;
+        case '8.1':
+            targets.push(projFiles.win);
+            break;
+        case '10.0':
+        case 'uap':
+            targets.push(projFiles.win10);
+            break;
+        default:
+            throw new Error('Unsupported windows-target-version value: ' + windowsTargetVersion);
+        }
+    }
+
+    // Windows Phone
+    if (isPhoneSwitch || noSwitches) { // if --phone or no arg
+        var windowsPhoneTargetVersion = configXML.getWindowsPhoneTargetVersion();
+        switch(windowsPhoneTargetVersion.toLowerCase()) {
+        case '8.1':
+            targets.push(projFiles.phone);
+            break;
+        case '10.0':
+        case 'uap':
+            if (targets.indexOf(projFiles.win10) < 0) {
+                // Already built due to --win or no switches
+                // and since the same thing can be run on Phone as Windows,
+                // we can skip this one.
+                targets.push(projFiles.win10);
+            }
+            break;
+        default:
+            throw new Error('Unsupported windows-phone-target-version value: ' + windowsPhoneTargetVersion);
+        }
+    }
+
+    return targets;
+};
+
 function parseAndValidateArgs(argv) {
     return Q.promise(function(resolve, reject) {
         // parse and validate args
@@ -131,7 +197,7 @@ function parseAndValidateArgs(argv) {
         config.buildArchs = args.archs ? args.archs.split(' ') : ['anycpu'];
         config.phone = args.phone ? true : false;
         config.win = args.win ? true : false;
-        config.projVerOverride = args.appx;
+        config.projOverride = args.appx;
 
         // if build.json is provided, parse it
         var buildConfigPath = args.buildConfig;
@@ -202,7 +268,7 @@ function parseBuildConfig(buildConfigPath, config) {
 
 function buildTargets(msbuild, config) {
     // filter targets to make sure they are supported on this development machine
-    var myBuildTargets = filterSupportedTargets(getBuildTargets(config), msbuild);
+    var myBuildTargets = filterSupportedTargets(module.exports.getBuildTargets(config.win, config.phone, config.projOverride), msbuild);
 
     var buildConfigs = [];
 
@@ -230,73 +296,6 @@ function buildTargets(msbuild, config) {
             return msbuild.buildProject(path.join(ROOT, build.target), config.buildType,  build.arch);
          });
     }, Q());
-}
-
-function getBuildTargets(buildConfig) {
-    var configXML = new ConfigParser(path.join(ROOT, 'config.xml'));
-    var targets = [];
-    var noSwitches = !(buildConfig.phone || buildConfig.win);
-
-    // Windows
-    if (buildConfig.win || noSwitches) { // if --win or no arg
-        var windowsTargetVersion = configXML.getWindowsTargetVersion();
-        switch(windowsTargetVersion) {
-        case '8':
-        case '8.0':
-            targets.push(projFiles.win80);
-            break;
-        case '8.1':
-            targets.push(projFiles.win);
-            break;
-        case '10.0':
-        case 'UAP':
-            targets.push(projFiles.win10);
-            break;
-        default:
-            throw new Error('Unsupported windows-target-version value: ' + windowsTargetVersion);
-        }
-    }
-
-    // Windows Phone
-    if (buildConfig.phone || noSwitches) { // if --phone or no arg
-        var windowsPhoneTargetVersion = configXML.getWindowsPhoneTargetVersion();
-        switch(windowsPhoneTargetVersion) {
-        case '8.1':
-            targets.push(projFiles.phone);
-            break;
-        case '10.0':
-        case 'UAP':
-            if (!buildConfig.win && !noSwitches) {
-                // Already built due to --win or no switches
-                // and since the same thing can be run on Phone as Windows,
-                // we can skip this one.
-                targets.push(projFiles.win10);
-            }
-            break;
-        default:
-            throw new Error('Unsupported windows-phone-target-version value: ' + windowsPhoneTargetVersion);
-        }
-    }
-
-    // apply build target override if one was specified
-    if (buildConfig.projVerOverride) {
-        switch (buildConfig.projVerOverride) {
-            case '8.1-phone':
-                targets = [projFiles.phone];
-                break;
-            case '8.1-win':
-                targets = [projFiles.win];
-                break;
-            case 'uap':
-                targets = [projFiles.win10];
-                break;
-            default:
-                console.warn('Unrecognized --appx parameter passed to build: "' + buildConfig.projVerOverride + '", ignoring.');
-                break;
-        }
-    }
-
-    return targets;
 }
 
 // TODO: Fix this so that it outlines supported versions based on version criteria:
