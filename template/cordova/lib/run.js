@@ -22,7 +22,6 @@ var Q = require('q'),
     path  = require('path'),
     build = require('./build'),
     utils = require('./utils'),
-    ConfigParser = require('./ConfigParser'),
     packages = require('./package'),
     execSync = require('child_process').execSync;
 
@@ -59,50 +58,17 @@ module.exports.run = function (argv) {
     // Get build/deploy options
     var buildType    = args.release ? 'release' : 'debug',
         buildArchs   = args.archs ? args.archs.split(' ') : ['anycpu'],
-        projectType  = args.phone ? 'phone' : 'windows',
-        deployTarget = args.target ? args.target : (args.emulator ? 'emulator' : 'device'),
-        projOverride = args.appx;
+        deployTarget = args.target ? args.target : (args.emulator ? 'emulator' : 'device');
 
-    // for win switch we should correctly handle 8.0 and 8.1 version as per configuration
-    // as well as 10
-    var targetWindowsVersion = getWindowsTargetVersion();
-    if (projectType == 'windows') {
-        if (targetWindowsVersion == '8.0') {
-            projectType = 'windows80';
-        }
-        else if (targetWindowsVersion === '10.0') {
-            projectType = 'windows10';
-        }
-    }
-    else if (projectType === 'phone') {
-        if (targetWindowsVersion === '10.0' || targetWindowsVersion === 'UAP') {
-            projectType = 'windows10';
-        }
-    }
+     var buildTargets = build.getBuildTargets(args.win, args.phone, args.appx);
 
-    if (projOverride) {
-        switch (projOverride) {
-            case '8.1-phone':
-                projectType = 'phone';
-                targetWindowsVersion = '8.1';
-                break;
-            case '8.1-win':
-                projectType = 'windows';
-                targetWindowsVersion = '8.1';
-                break;
-            case 'uap':
-                projectType = 'windows10';
-                break;
-            default:
-                console.warn('Unrecognized --appx parameter passed to run: "' + projOverride + '", ignoring.');
-                break;
-        }
-    }
+     if (!buildTargets || buildTargets.lenght <= 0) {
+         return Q.reject('Unable to determine deploy target.');
+     }
 
-    if (projectType == 'windows' && getWindowsTargetVersion() == '8.0') {
-        console.log('Warning: windows8 has been deprecated.  Please update you project to target windows8.1');
-        projectType = 'windows80';
-    }
+     // we deploy the first build target so we use buildTargets[0] to determine
+     // what project type we should deploy
+     var projectType = projFileToType(buildTargets[0]);
 
     // if --nobuild isn't specified then build app first
     var buildPackages = args.nobuild ? Q() : build.run(argv);
@@ -172,20 +138,10 @@ module.exports.help = function () {
     process.exit(0);
 };
 
-
-function getWindowsTargetVersion() {
-    var config = new ConfigParser(path.join(ROOT, 'config.xml'));
-    var windowsTargetVersion = config.getWindowsTargetVersion();
-    switch(windowsTargetVersion) {
-        case '8':
-        case '8.0':
-            return '8.0';
-        case '8.1':
-            return '8.1';
-        case '10.0':
-        case 'UAP':
-            return '10.0';
-        default:
-            throw new Error('Unsupported windows-target-version value: ' + windowsTargetVersion);
-    }
+// Retrieves project type for the project file specified.
+// @param   {String}  projFile Project file, for example 'CordovaApp.Windows10.jsproj'
+// @returns {String}  Proejct type, for example 'windows10'
+function projFileToType(projFile) 
+{
+    return projFile.replace(/CordovaApp|jsproj|\./gi, '').toLowerCase();
 }
