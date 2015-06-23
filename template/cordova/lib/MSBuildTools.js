@@ -53,6 +53,18 @@ module.exports.findAvailableVersion = function () {
     });
 };
 
+module.exports.findAvailableVersions = function () {
+    var versions = ['14.0', '12.0', '4.0'];
+
+    return Q.all(versions.map(checkMSBuildVersion))
+    .then(function (toolsVersions) {
+        return toolsVersions
+        .filter(function (tool) {
+            return tool;
+        });
+    });
+};
+
 function checkMSBuildVersion(version) {
     var deferred = Q.defer();
     exec('reg query HKLM\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\' + version + ' /v MSBuildToolsPath')
