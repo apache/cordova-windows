@@ -77,6 +77,13 @@ module.exports.run = function (argv) {
         shell.cp('-rf', templateOverrides, projectPath);
     }
 
+    // Copy base.js into the target project directory
+    var destinationDirectory = path.join(projectPath, 'platform_www', 'WinJS', 'js');
+    var destBaseJsPath = path.join(destinationDirectory, 'base.js');
+    var srcBaseJsPath = path.join(root, 'node_modules', 'winjs', 'js', 'base.js');
+    recursiveCreateDirectory(destinationDirectory);
+    shell.cp('-f', srcBaseJsPath, destBaseJsPath);
+
     // replace specific values in manifests' templates
     ['package.windows.appxmanifest', 'package.windows80.appxmanifest', 'package.phone.appxmanifest', 'package.windows10.appxmanifest'].forEach(function (file) {
         var fileToReplace = path.join(projectPath, file);
@@ -97,6 +104,22 @@ module.exports.run = function (argv) {
     
     return Q.resolve();
 };
+
+function recursiveCreateDirectory(targetPath, previousPath) {
+    if (previousPath === targetPath) {
+        // Shouldn't ever happen because we're already in a created directory
+        // This is just here to prevent any potential infinite loop / stack overflow condition
+        console.warn('Could not create a directory because its root was never located.');
+        return;
+    }
+
+    var parent = path.join(targetPath, '..');
+    if (!fs.existsSync(parent)) {
+        recursiveCreateDirectory(parent, targetPath);
+    }
+
+    fs.mkdirSync(targetPath);
+}
 
 module.exports.help = function () {
     console.log('Usage: create PathToProject [ PackageName [ AppName [ CustomTemplate ] ] ] [--guid=<GUID string>]');

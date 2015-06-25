@@ -24,7 +24,8 @@
         "node-uuid": "~1.4",
         "nopt": "~3",
         "q": ">0.9.0",
-        "shelljs": "~0.3"
+        "shelljs": "~0.3",
+        "winjs": "^4.0.0"
     },
     "devDependencies": {
         "jasmine-node": "1.14.5",
@@ -37,7 +38,8 @@
         "nopt",
         "node-uuid",
         "shelljs",
-        "elementtree"
+        "elementtree",
+        "winjs"
     ],
     "author": "Apache Software Foundation",
     "license": "Apache Version 2.0"
