@@ -68,16 +68,6 @@
 
   <Capabilities>
     <Capability Name="internetClient" />
-	
-	<!-- Windows 10 Technical Preview 2 has a bug in which enumerating 
-	     devices fails if you don't have the capability for those devices.
-		 This bug causes a fast-fail (no JavaScript handling of the error).
-		 An implementation detail of the Web Platform accessors of hardware
-		 causes these to be aggressively enumerated, therefore, we ask
-		 for the device capabilities up front.  This will be removed in a 
-		 later version of cordova-windows. -->
-	<DeviceCapability Name="webcam" />
-	<DeviceCapability Name="microphone" />
   </Capabilities>
 
 </Package>
