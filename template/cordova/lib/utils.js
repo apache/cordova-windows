@@ -23,7 +23,8 @@ var Q     = require('Q'),
     fs    = require('fs'),
     path  = require('path'),
     exec  = require('./exec'),
-    spawn = require('./spawn');
+    spawn = require('./spawn'),
+    deploy = require('./deployment');
 
 // returns full path to msbuild tools required to build the project and tools version
 module.exports.getMSBuildTools = function () {
@@ -64,29 +65,16 @@ module.exports.getAppStoreUtils = function () {
     });
 };
 
-function getProgramFiles32Folder() {
-    /* jshint ignore:start */ /* Wants to use dot syntax for ProgramFiles, leaving as-is for consistency */
-    return process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
-    /* jshint ignore:end */
-}
-
 // returns path to AppDeploy util from Windows Phone 8.1 SDK
 module.exports.getAppDeployUtils = function (targetWin10) {
-    var appDeployUtils,
-        appDeployCmdName;
-    if (targetWin10) {
-        appDeployCmdName = 'WinAppDeployCmd.exe';
-        appDeployUtils = path.join(getProgramFiles32Folder(), 'Windows Kits', '10', 'bin', 'x86', appDeployCmdName);
-    } else {
-        appDeployCmdName = 'AppDeployCmd.exe';
-        appDeployUtils = path.join(getProgramFiles32Folder(), 'Microsoft SDKs', 'Windows Phone', 'v8.1', 'Tools', 'AppDeploy', appDeployCmdName);
+    var version = targetWin10 ? '10.0' : '8.1';
+    var tool = deploy.getDeploymentTool(version);
+
+    if (!tool.isAvailable()) {
+        return Q.reject('App deployment utilities: "' + tool.path + '", not found.  Ensure the Windows SDK is installed.');
     }
-    // Check if AppDeployCmd is exists
-    if (!fs.existsSync(appDeployUtils)) {
-        console.warn('WARNING: AppDeploy tool (' + appDeployCmdName + ') wasn\'t found. Make sure that it\'s in %PATH%');
-        return Q.resolve(appDeployCmdName);
-    }
-    return Q.resolve(appDeployUtils);
+
+    return Q.resolve(tool);
 };
 
 // checks to see if a .jsproj file exists in the project root

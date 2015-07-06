@@ -18,7 +18,6 @@
 */
 
 var Q     = require('q'),
-    exec  = require('./exec'),
     fs    = require('fs'),
     path  = require('path'),
     spawn = require('./spawn'),
@@ -113,16 +112,32 @@ function getPackageName(platformPath) {
 
 // returns one of available devices which name match with provided string
 // return rejected promise if device with name specified not found
-module.exports.findDevice = function (target) {
+module.exports.findDevice = function (deploymentTool, target) {
     target = target.toLowerCase();
-    return module.exports.listDevices().then(function(deviceList) {
+    return deploymentTool.enumerateDevices().then(function(deviceList) {
         // CB-7617 since we use partial match shorter names should go first,
         // example case is ['Emulator 8.1 WVGA 4 inch 512MB', 'Emulator 8.1 WVGA 4 inch']
-        var sortedList = deviceList.concat().sort(function (l, r) { return l.length > r.length; });
-        for (var idx in sortedList){
-            if (sortedList[idx].toLowerCase().indexOf(target) > -1) {
-                // we should return index based on original list
-                return Q.resolve(deviceList.indexOf(sortedList[idx]));
+        // In CB-9283, we need to differentiate between emulator, device, and target.
+        // So, for emulators to honor the above CB-7617, we preserve the original behavior.
+        // Else, we choose either the target by ID (DeviceInfo.index) or if it's just device,
+        // we choose the default (aka first) device.
+        if (target === 'emulator') {
+            var sortedList = deviceList.concat().sort(function (l, r) { return l.toString().length > r.toString().length; });
+            for (var idx in sortedList){
+                if (sortedList[idx].toString().toLowerCase().indexOf(target) > -1) {
+                    // we should return index based on original list
+                    return Q.resolve(sortedList[idx]);
+                }
+            }
+        } else if (target === 'device') {
+            return Q.resolve(deviceList[0]);
+        } else {
+            var candidateList = deviceList.filter(function(device) {
+                return device.index === parseInt(target, 10);
+            });
+
+            if (candidateList.length > 0) {
+                return candidateList[0];
             }
         }
         return Q.reject('Specified device not found');
@@ -130,58 +145,46 @@ module.exports.findDevice = function (target) {
 };
 
 // returns array of available devices names
-module.exports.listDevices = function () {
-    return utils.getAppDeployUtils().then(function(appDeployUtils) {
-        return exec('"' + appDeployUtils + '" /enumeratedevices').then(function(output) {
-            return Q.resolve(output.split('\n').map(function(line) {
-                var match = /\s*(\d)+\s+(.*)/.exec(line);
-                return match && match[2];
-            }).filter(function (line) {
-                return line;
-            }));
+module.exports.listDevices = function (deploymentTool) {
+    
+    return deploymentTool.enumerateDevices().then(function(deviceList) {
+        return deviceList.map(function(device) {
+            return device.toString();
         });
+
+    }, function(e) {
+        console.warn('Failed to enumerate devices');
+        console.warn(e);
+
+        throw e;
     });
 };
 
 
-function installAppToPhone(appDeployUtils, package, target, update) {
-    // /installlaunch option sometimes fails with 'Error: The parameter is incorrect.'
-    // so we use separate steps to /install or /update and then /launch
-    var cmd = update ? '/update' : '/install';
-    console.log('Installing application...');
-    return spawn(appDeployUtils, [cmd, package.appx, '/targetdevice:' + target]);
-}
-
-function runAppOnPhone(appDeployUtils, target) {
-    return Q().then(function() {
-        return module.exports.getAppId(path.join(__dirname, '..', '..'));
-    }).then(function(appId) {
-        console.log('Running application... ');
-        return spawn(appDeployUtils, ['/launch', appId, '/targetdevice:' + target]);
-    });
-}
-
 function uninstallAppFromPhone(appDeployUtils, package, target) {
     console.log('Attempting to remove previously installed application...');
-    return spawn(appDeployUtils, ['/uninstall', package.phoneId, '/targetdevice:' + target]);
+    return appDeployUtils.uninstallAppPackage(package.phoneId, target);
 }
 
 // deploys specified phone package to device/emulator and launches it
-module.exports.deployToPhone = function (package, deployTarget, targetWindows10) {
-    var getTarget = deployTarget == 'device' ? Q('de') :
-        deployTarget == 'emulator' ? Q('xd') : module.exports.findDevice(deployTarget);
+module.exports.deployToPhone = function (package, deployTarget, targetWindows10, deploymentTool) {
+    var deployment;
+    if (deploymentTool) {
+        deployment = Q(deploymentTool);
+    }
+    else {
+        deployment = utils.getAppDeployUtils(targetWindows10);
+    }
 
-    return getTarget.then(function(target) {
-        return utils.getAppDeployUtils(targetWindows10).then(function(appDeployUtils) {
-
-            return uninstallAppFromPhone(appDeployUtils, package, target).then(
+    return deployment.then(function(deploymentTool) {
+        return module.exports.findDevice(deploymentTool, deployTarget).then(function(target) {
+            return uninstallAppFromPhone(deploymentTool, package, target).then(
                 function() {}, function() {}).then(function() {
-                    return installAppToPhone(appDeployUtils, package, target, false);
-                }).then(function() {
-                    return runAppOnPhone(appDeployUtils, target);
-                }, function(error) {
+                    // shouldUpdate = false because we've already uninstalled
+                    return deploymentTool.installAppPackage(package.appx, target, /*shouldLaunch*/ true, /*shouldUpdate*/ false);
+                }).then(function() { }, function(error) {
                     if (error.indexOf('Error code 2148734208 for command') === 0) {
-                        return installAppToPhone(appDeployUtils, package, target, true);
+                        return deploymentTool.installAppPackage(package.appx, target, /*shouldLaunch*/ true, /*shouldUpdate*/ true);
                     } else if (error.indexOf('Error code -2146233088') === 0) {
                         throw new Error('No Windows Phone device was detected.');
                     } else {
