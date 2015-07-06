@@ -43,7 +43,7 @@ module.exports.run = function (argv) {
     // parse arg
     var args  = nopt({'debug': Boolean, 'release': Boolean, 'nobuild': Boolean,
         'device': Boolean, 'emulator': Boolean, 'target': String, 'archs': String,
-        'phone': Boolean, 'win': Boolean, 'appx': String}, {'r' : '--release'}, argv);
+        'phone': Boolean, 'win': Boolean, 'appx': String, 'win10tools': Boolean }, {'r' : '--release'}, argv);
 
     // Validate args
     if (args.debug && args.release) {
@@ -113,12 +113,12 @@ module.exports.run = function (argv) {
         console.log('\nDeploying ' + pkg.type + ' package to ' + deployTarget + ':\n' + pkg.appx);
         switch (pkg.type) {
             case 'phone':
-                return packages.deployToPhone(pkg, deployTarget, false).catch(function(e) {
+                return packages.deployToPhone(pkg, deployTarget, args.win10tools).catch(function(e) {
                     if (args.target || args.emulator || args.device) {
                         throw e; // Explicit target, carry on
                     }
                     // 'device' was inferred initially, because no target was specified
-                    return packages.deployToPhone(pkg, 'emulator', false);
+                    return packages.deployToPhone(pkg, 'emulator', args.win10tools);
                 });
             case 'windows10':
                 if (args.phone) {
@@ -128,7 +128,7 @@ module.exports.run = function (argv) {
                         console.warn('If you want to deploy to emulator, please use Visual Studio instead.');
                         console.warn('Attempting to deploy to device...');
                     }
-                    return packages.deployToPhone(pkg, 'device', true);
+                    return packages.deployToPhone(pkg, deployTarget, true);
                 }
                 else {
                     return packages.deployToDesktop(pkg, deployTarget, projectType);
@@ -155,7 +155,8 @@ module.exports.help = function () {
     console.log('    --appx=<8.1-win|8.1-phone|uap>');
     console.log('                  : Overrides windows-target-version to build Windows 8.1, ');
     console.log('                              Windows Phone 8.1, or Windows 10.');
-    console.log('');
+    console.log('    --win10tools  : Uses Windows 10 deployment tools (used for a Windows 8.1 app when');
+    console.log('                         being deployed to a Windows 10 device)');
     console.log('Examples:');
     console.log('    run');
     console.log('    run --emulator');
