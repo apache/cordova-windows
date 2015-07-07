@@ -44,20 +44,23 @@ try {
 var VS2013_UPDATE2_RC = new Version(12, 0, 30324);
 var REQUIRED_VERSIONS = {
     '8.0': {
-        os: '6.1',
+        os: '6.2',
         msbuild: '11.0',
         visualstudio: '11.0',
         windowssdk: '8.0'
     },
     '8.1': {
-        os: '6.2',
+        os: '6.3',
         msbuild: '12.0',
         visualstudio: '12.0',
         windowssdk: '8.1',
         phonesdk: '8.1'
     },
     '10.0': {
-        os: '6.2',
+        // Note that Windows 10 target is also supported on Windows 7, so this should look
+        // like '6.1 || >=6.3', but due to Version module restricted functionality we handle
+        // this case separately in checkOS function below.
+        os: '6.3',
         msbuild: '14.0',
         visualstudio: '14.0',
         windowssdk: '10.0',
@@ -65,8 +68,9 @@ var REQUIRED_VERSIONS = {
     }
 };
 
+var config = new ConfigParser(path.join(__dirname, '..', '..', 'config.xml'));
+
 function getMinimalRequiredVersionFor (requirement) {
-    var config = new ConfigParser(path.join(__dirname, '..', '..', 'config.xml'));
 
     var windowsTargetVersion = config.getWindowsTargetVersion();
     var windowsPhoneTargetVersion = config.getWindowsPhoneTargetVersion();
@@ -233,9 +237,9 @@ function mapWindowsVersionToName(version) {
 
 function mapVSVersionToName(version) {
     var map = {
-        '11.0': '2012',
-        '12.0': '2013',
-        '14.0': '2015'
+        '11.0': '2012 Express for Windows',
+        '12.0': '2013 Express for Windows Update2',
+        '14.0': '2015 Community'
     };
     var majorMinor = shortenVersion(version);
     return map[majorMinor];
@@ -253,12 +257,14 @@ var checkOS = function () {
 
     return getWindowsVersion().then(function (actualVersion) {
         var requiredOsVersion = getMinimalRequiredVersionFor('os');
-        if (requiredOsVersion.gte(actualVersion)) {
-            return Q.reject('Current Windows version doesn\'t support building this project. ' +
-                'Consider upgrading your OS to ' + mapWindowsVersionToName(requiredOsVersion));
+        if (actualVersion.gte(requiredOsVersion) ||
+            // Special case for Windows 10/Phone 10  targets which can be built on Windows 7 (version 6.1)
+            actualVersion.major === 6 && actualVersion.minor === 1 && config.getWindowsTargetVersion() === '10.0') {
+            return mapWindowsVersionToName(actualVersion);
         }
 
-        return mapWindowsVersionToName(actualVersion);
+        return Q.reject('Current Windows version doesn\'t support building this project. ' +
+            'Consider upgrading your OS to ' + mapWindowsVersionToName(requiredOsVersion));
     });
 };
 

@@ -52,20 +52,17 @@ describe('Version parse functions work as expected.', function() {
     expect(version.build).toBe(4);
     expect(version.qfe).toBe(7);
 
+    it('should parse incomplete version string.', function() {
+        var version = Version.fromString('1.5.3');
+        expect(version.major).toBe(1);
+        expect(version.minor).toBe(5);
+        expect(version.build).toBe(3);
+        expect(version.qfe).toBe(0);
+    });
+
     it('should produce an error as the version string is invalid', function() {
         try {
             Version.fromString('This is invalid.');
-
-            expect(false).toBe(true);
-        }
-        catch (ex) {
-            expect(ex.constructor).toBe(RangeError);
-        }
-    });
-
-    it('should produce an error as the string is incomplete.', function() {
-        try {
-            Version.fromString('1.5.3');
 
             expect(false).toBe(true);
         }
