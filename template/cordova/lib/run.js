@@ -150,6 +150,8 @@ module.exports.help = function () {
     console.log('    --release     : Builds project in release mode.');
     console.log('    --nobuild     : Uses pre-built package, or errors if project is not built.');
     console.log('    --archs       : Specific chip architectures (`anycpu`, `arm`, `x86`, `x64`).');
+    console.log('                        Separate multiple choices with a space and, if choosing');
+    console.log('                        multiple choices, enclose in quotes (").');
     console.log('    --phone, --win');
     console.log('                  : Specifies project type to deploy');
     console.log('    --appx=<8.1-win|8.1-phone|uap>');
@@ -164,6 +166,7 @@ module.exports.help = function () {
     console.log('    run --device --release');
     console.log('    run --emulator --debug');
     console.log('    run --device --appx=phone-8.1');
+    console.log('    run --device --archs="x64 x86 arm"');
     console.log('');
 
     process.exit(0);

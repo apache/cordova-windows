@@ -72,6 +72,8 @@ module.exports.help = function help() {
     console.log('    -r                          : (shortcut) Builds project in release mode.');
     console.log('    --archs                     : Builds project binaries for specific chip');
     console.log('                                  architectures (`anycpu`, `arm`, `x86`, `x64`).');
+    console.log('                                  Separate multiple choices with spaces and if');
+    console.log('                                  passing multiple choices, enclose with " ".');
     console.log('    --phone, --win');
     console.log('                                : Specifies, what type of project to build.');
     console.log('    --appx=<8.1-win|8.1-phone|uap>');
