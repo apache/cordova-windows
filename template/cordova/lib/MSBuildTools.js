@@ -29,7 +29,7 @@ function MSBuildTools (version, path) {
     this.path = path;
 }
 
-MSBuildTools.prototype.buildProject = function(projFile, buildType, buildarch) {
+MSBuildTools.prototype.buildProject = function(projFile, buildType, buildarch, otherConfigProperties) {
     console.log('Building project: ' + projFile);
     console.log('\tConfiguration : ' + buildType);
     console.log('\tPlatform      : ' + buildarch);
@@ -37,6 +37,13 @@ MSBuildTools.prototype.buildProject = function(projFile, buildType, buildarch) {
     var args = ['/clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal', '/nologo',
     '/p:Configuration=' + buildType,
     '/p:Platform=' + buildarch];
+
+    if (otherConfigProperties) {
+        var keys = Object.keys(otherConfigProperties);
+        keys.forEach(function(key) {
+            args.push('/p:' + key + '=' + otherConfigProperties[key]);
+        });
+    }
 
     return spawn(path.join(this.path, 'msbuild'), [projFile].concat(args));
 };
@@ -50,6 +57,16 @@ module.exports.findAvailableVersion = function () {
         var msbuildTools = versions[0] || versions[1] || versions[2];
 
         return msbuildTools ? Q.resolve(msbuildTools) : Q.reject('MSBuild tools not found');
+    });
+};
+
+module.exports.findAllAvailableVersions = function () {
+    var versions = ['14.0', '12.0', '4.0'];
+
+    return Q.all(versions.map(checkMSBuildVersion)).then(function(unprocessedResults) {
+        return unprocessedResults.filter(function(item) {
+            return !!item;
+        });
     });
 };
 

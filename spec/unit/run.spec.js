@@ -29,7 +29,8 @@ describe('run method', function() {
         buildRunOriginal,
         getPackageOriginal,
         deployToPhoneOriginal,
-        deployToDesktopOriginal;
+        deployToDesktopOriginal,
+        execSyncOriginal;
 
     var isCordovaProjectFalse = function () {
         return false;
@@ -49,6 +50,11 @@ describe('run method', function() {
         getPackageOriginal = run.__get__('packages.getPackage');
         deployToPhoneOriginal = run.__get__('packages.deployToPhone');
         deployToDesktopOriginal = run.__get__('packages.deployToDesktop');
+        execSyncOriginal = run.__get__('execSync');
+        run.__set__('execSync', function(cmd) {
+            if (cmd === 'net session') { throw new Error('fails in normal usage.'); }
+            console.warn('Invalid usage of execSync in run.js; correct the spec to account.');
+        });
     });
 
     afterEach(function() {
@@ -58,6 +64,7 @@ describe('run method', function() {
         run.__set__('packages.getPackage', getPackageOriginal);
         run.__set__('packages.deployToPhone', deployToPhoneOriginal);
         run.__set__('packages.deployToDesktop', deployToDesktopOriginal);
+        run.__set__('execSync', execSyncOriginal);
     });
 
     it('spec.1 should not run if not launched from project directory', function(done) {
@@ -127,12 +134,22 @@ describe('run method', function() {
     it('spec.5 should build and deploy on phone if --phone arg specified', function(done) {
         var build = jasmine.createSpy(),
             deployToPhone = jasmine.createSpy(),
-            deployToDesktop = jasmine.createSpy();
+            deployToDesktop = jasmine.createSpy(),
+            failed = jasmine.createSpy();
 
         run.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         run.__set__('build.run', function () {
             build();
-            return Q();
+            var buildResult = {
+                type      : 'phone',
+                arch      : 'arm',
+                archs     : ['arm'],
+                buildtype : 'release',
+                appx      : 'testfile',
+                script    : 'testfile.ps1',
+                phoneId   : 'undefined'
+            };
+            return Q(buildResult);
         });
         run.__set__('packages.getPackage', function () {
             return Q({
@@ -149,8 +166,10 @@ describe('run method', function() {
             return Q();
         });
 
-        run.run([ 'node', buildPath, '--phone' ])
+        run.run([ 'node', buildPath, '--phone', '--break' ])
+        .catch(failed)
         .finally(function(){
+            expect(failed).not.toHaveBeenCalled();
             expect(build).toHaveBeenCalled();
             expect(deployToPhone).toHaveBeenCalled();
             expect(deployToDesktop).not.toHaveBeenCalled();
@@ -166,7 +185,16 @@ describe('run method', function() {
         run.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         run.__set__('build.run', function () {
             build();
-            return Q();
+            var buildResult = {
+                type      : 'windows80',
+                arch      : 'anycpu',
+                archs     : ['anycpu'],
+                buildtype : 'release',
+                appx      : 'testfile',
+                script    : 'testfile.ps1',
+                phoneId   : 'undefined'
+            };
+            return Q(buildResult);
         });
         run.__set__('packages.getPackage', function () {
             return Q({
