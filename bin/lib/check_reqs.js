@@ -281,7 +281,7 @@ var checkOS = function () {
  *                           or rejected with error message.
  */
 var checkMSBuild = function () {
-    return MSBuildTools.findAvailableVersions()
+    return MSBuildTools.findAllAvailableVersions()
     .then(function (msbuildToolsVersions) {
         var msbuildRequiredVersion = getMinimalRequiredVersionFor('msbuild');
         msbuildToolsVersions = msbuildToolsVersions.map(function (msbuildToolsVersion) {
