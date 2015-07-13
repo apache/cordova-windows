@@ -71,15 +71,14 @@ function checkMSBuildVersion(version) {
     return deferred.promise;
 }
 
-function getProgramFiles32Folder() {
-    /* jshint ignore:start */ /* Wants to use dot syntax for ProgramFiles, leaving as-is for consistency */
-    return process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
-    /* jshint ignore:end */
-}
-
 /// returns an array of available UAP Versions
 function getAvailableUAPVersions() {
-    var uapFolderPath = path.join(getProgramFiles32Folder(), 'Windows Kits', '10', 'Platforms', 'UAP');
+    /*jshint -W069 */
+    var programFilesFolder = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
+    // No Program Files folder found, so we won't be able to find UAP SDK
+    if (!programFilesFolder) return [];
+
+    var uapFolderPath = path.join(programFilesFolder, 'Windows Kits', '10', 'Platforms', 'UAP');
     if (!shell.test('-e', uapFolderPath)) {
         return []; // No UAP SDK exists on this machine
     }
