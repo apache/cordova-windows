@@ -104,12 +104,16 @@ module.exports.run = function (argv) {
         projectType = 'windows80';
     }
 
-    // if --nobuild isn't specified then build app first
-    var buildPackages = args.nobuild ? Q() : build.run(argv);
+    if (projectType === 'windows80') {
+        // Don't enable bundling for Windows 8.
+        argv.push('--no-bundle');
+    }
 
-    return buildPackages.then(function () {
-        return packages.getPackage(projectType, buildType, buildArchs[0]);
-    }).then(function(pkg) {
+    // if --nobuild isn't specified then build app first
+    var buildPackages = args.nobuild ? packages.getPackage(projectType, buildType, buildArchs) : build.run(argv);
+
+    // buildPackages also deploys bundles
+    return buildPackages.then(function(pkg) {
         console.log('\nDeploying ' + pkg.type + ' package to ' + deployTarget + ':\n' + pkg.appx);
         switch (pkg.type) {
             case 'phone':
@@ -142,7 +146,7 @@ module.exports.run = function (argv) {
 
 module.exports.help = function () {
     console.log('\nUsage: run [ --device | --emulator | --target=<id> ] [ --debug | --release | --nobuild ]');
-    console.log('           [ --x86 | --x64 | --arm ] [--phone | --win]');
+    console.log('           [ --x86 | --x64 | --arm | --archs="list" [--no-bundle] ] [--phone | --win]');
     console.log('    --device      : Deploys and runs the project on the connected device.');
     console.log('    --emulator    : Deploys and runs the project on an emulator.');
     console.log('    --target=<id> : Deploys and runs the project on the specified target.');
@@ -150,6 +154,8 @@ module.exports.help = function () {
     console.log('    --release     : Builds project in release mode.');
     console.log('    --nobuild     : Uses pre-built package, or errors if project is not built.');
     console.log('    --archs       : Specific chip architectures (`anycpu`, `arm`, `x86`, `x64`).');
+    console.log('    --no-bundle   : Only applies if --archs is supplied and `anycpu` is not.');
+    console.log('                    Prevents creation of a multi-architecture app bundle.');
     console.log('    --phone, --win');
     console.log('                  : Specifies project type to deploy');
     console.log('    --appx=<8.1-win|8.1-phone|uap>');
@@ -163,6 +169,7 @@ module.exports.help = function () {
     console.log('    run --target=7988B8C3-3ADE-488d-BA3E-D052AC9DC710');
     console.log('    run --device --release');
     console.log('    run --emulator --debug');
+    console.log('    run --archs="x64 x86 arm" --no-bundle');
     console.log('    run --device --appx=phone-8.1');
     console.log('');
 

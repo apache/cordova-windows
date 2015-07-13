@@ -23,6 +23,7 @@ var Q     = require('Q'),
     shell = require('shelljs'),
     utils = require('./utils'),
     prepare = require('./prepare'),
+    package = require('./package'),
     MSBuildTools = require('./MSBuildTools'),
     ConfigParser = require('./ConfigParser'),
     fs = require('fs');
@@ -39,21 +40,22 @@ var projFiles = {
 // builds cordova-windows application with parameters provided.
 // See 'help' function for args list
 module.exports.run = function run (argv) {
-    // MSBuild Tools available on this development machine
-    var msbuild;
 
     if (!utils.isCordovaProject(ROOT)){
         return Q.reject('Could not find project at ' + ROOT);
     }
 
-    return Q.all([parseAndValidateArgs(argv), MSBuildTools.findAvailableVersion()])
+    return Q.all([parseAndValidateArgs(argv), MSBuildTools.findAllAvailableVersions()])
         .spread(function(buildConfig, msbuildTools) {
             // Apply build related configs
             prepare.updateBuildConfig(buildConfig);
+            // bug: Windows 8 build fails on a system with MSBuild 14 on it.
+            // Don't regress, make sure MSBuild 4 is selected for a Windows 8 build.
             cleanIntermediates();
-            msbuild = msbuildTools;
-            console.log('MSBuildToolsPath: ' + msbuild.path);
-            return buildTargets(msbuild, buildConfig);
+            return buildTargets(msbuildTools, buildConfig).then(function(pkg) {
+                console.log(' BUILD OUTPUT: ' + pkg.appx);
+                return pkg;
+            });
         }, function(error) {
             return Q.reject(error);
         });
@@ -62,7 +64,8 @@ module.exports.run = function run (argv) {
 // help/usage function
 module.exports.help = function help() {
     console.log('');
-    console.log('Usage: build [--debug | --release] [--archs="<list of architectures...>"]');
+    console.log('Usage: build [--debug | --release] ');
+    console.log('             [--archs="<list of architectures...>" [--no-bundle]]');
     console.log('             [--phone | --win] [--packageCertificateKeyFile="key path"]');
     console.log('             [--packageThumbprint="thumbprint"] [--publisherId]');
     console.log('             [--buildConfig="file path"]');
@@ -70,8 +73,11 @@ module.exports.help = function help() {
     console.log('    --debug                     : Builds project in debug mode. (Default).');
     console.log('    --release                   : Builds project in release mode.');
     console.log('    -r                          : (shortcut) Builds project in release mode.');
-    console.log('    --archs                     : Builds project binaries for specific chip');
+    console.log('    --archs [--no-bundle]       : Builds project binaries for specific chip');
     console.log('                                  architectures (`anycpu`, `arm`, `x86`, `x64`).');
+    console.log('                                  When building multiple architecutres, a bundle');
+    console.log('                                  is produced unless --no-bundle is passed.');
+    console.log('                                  Bundling is disabled when `anycpu` is built.');
     console.log('    --phone, --win');
     console.log('                                : Specifies, what type of project to build.');
     console.log('    --appx=<8.1-win|8.1-phone|uap>');
@@ -107,6 +113,7 @@ function parseAndValidateArgs(argv) {
             'appx': String,
             'phone': Boolean,
             'win': Boolean,
+            'no-bundle': Boolean,
             'packageCertificateKeyFile': String,
             'packageThumbprint': String,
             'publisherId': String,
@@ -132,6 +139,12 @@ function parseAndValidateArgs(argv) {
         config.phone = args.phone ? true : false;
         config.win = args.win ? true : false;
         config.projVerOverride = args.appx;
+        // only set config.bundle if > 1 architecture none of which is any cpu
+        if (config.buildArchs.length > 1 && config.buildArchs.indexOf('anycpu') === -1 && config.buildArchs.indexOf('any cpu') === -1) {
+            if (!args['no-bundle']) {
+                config.bundle = true;    
+            }
+        }
 
         // if build.json is provided, parse it
         var buildConfigPath = args.buildConfig;
@@ -148,7 +161,6 @@ function parseAndValidateArgs(argv) {
 
         config.packageThumbprint = config.packageThumbprint || args.packageThumbprint;
         config.publisherId = config.publisherId || args.publisherId;
-
         resolve(config);
     });
 }
@@ -200,11 +212,26 @@ function parseBuildConfig(buildConfigPath, config) {
     return result;
 }
 
-function buildTargets(msbuild, config) {
+function buildTargets(allMsBuildVersions, config) {
     // filter targets to make sure they are supported on this development machine
-    var myBuildTargets = filterSupportedTargets(getBuildTargets(config), msbuild);
+    var selectedBuildTargets = getBuildTargets(config);
+    var msbuild = getMsBuildForTargets(selectedBuildTargets, config, allMsBuildVersions); 
+    if (!msbuild) {
+        return Q.reject('No valid MSBuild was detected for the selected target.');
+    }
+    console.log('MSBuildToolsPath: ' + msbuild.path);
+    var myBuildTargets = filterSupportedTargets(selectedBuildTargets, msbuild);
 
     var buildConfigs = [];
+    var bundleTerms = '';
+    var hasAnyCpu = false;
+    var shouldBundle = !!config.bundle;
+    if (myBuildTargets.indexOf(projFiles.win80) > -1) {
+        if (shouldBundle) {
+            console.warn('Warning: Bundling is disabled because a Windows 8 project was detected.');
+        }
+        shouldBundle = false;
+    }
 
     // collect all build configurations (pairs of project to build and target architecture)
     myBuildTargets.forEach(function(buildTarget) {
@@ -213,11 +240,23 @@ function buildTargets(msbuild, config) {
                 target:buildTarget,
                 arch: buildArch
             });
+
+            if (buildArch === 'anycpu' || buildArch === 'any cpu') {
+                hasAnyCpu = true;
+                bundleTerms = '';
+            }
+
+            if (!hasAnyCpu) {
+                if (bundleTerms.length > 0) {
+                    bundleTerms += '|';
+                }
+                bundleTerms += buildArch;
+            }
         });
     });
 
     // run builds serially
-    return buildConfigs.reduce(function (promise, build) {
+    var buildsCompleted = buildConfigs.reduce(function (promise, build, index, configsArray) {
          return promise.then(function () {
             // support for "any cpu" specified with or without space
             if (build.arch == 'any cpu') {
@@ -227,11 +266,66 @@ function buildTargets(msbuild, config) {
             if (msbuild.version == '4.0' && build.target == projFiles.win80) {
                 build.target = 'CordovaApp.vs2012.sln';
             }
-            return msbuild.buildProject(path.join(ROOT, build.target), config.buildType,  build.arch);
+
+            var otherProperties = { };
+            // Only add the CordovaBundlePlatforms argument when on the last build step
+            if (shouldBundle && index === configsArray.length - 1) {
+                otherProperties.CordovaBundlePlatforms = bundleTerms;
+            } else if (shouldBundle) {
+                otherProperties.CordovaBundlePlatforms = build.arch;
+            }
+            return msbuild.buildProject(path.join(ROOT, build.target), config.buildType,  build.arch, otherProperties);
          });
     }, Q());
+
+    if (shouldBundle) {
+        return buildsCompleted.then(function() {
+            // msbuild isn't capable of generating bundles unless you enable bundling for each individual arch
+            // However, that generates intermediate bundles, like "CordovaApp.Windows10_0.0.1.0_x64.appxbundle"
+            // We need to clear the intermediate bundles, or else "cordova run" will fail because of too
+            // many .appxbundle files.
+
+            console.log('Clearing intermediates...');
+            var appPackagesPath = path.join(ROOT, 'AppPackages');
+            var childDirectories = shell.ls(path.join(appPackagesPath, '*')).map(function(pathName) {
+                return { path: pathName, stats: fs.statSync(pathName) };
+            }).filter(function(fileInfo) {
+                return fileInfo.stats.isDirectory();
+            });
+
+            if (childDirectories.length === 0) {
+                throw new Error('Could not find a completed app package directory.');
+            }
+
+            // find the most-recently-modified directory
+            childDirectories.sort(function(a, b) { return b.stats.mtime - a.stats.mtime; });
+            var outputDirectory = childDirectories[0];
+
+            var finalFile = '';
+
+            var archSearchString = bundleTerms.replace(/\|/g, '_') + (config.buildType === 'debug' ? '_debug' : '') + '.appxbundle';
+            var filesToDelete = shell.ls(path.join(outputDirectory.path, '*.appx*')).filter(function(appxbundle) {
+                var isMatch = appxbundle.indexOf(archSearchString) === -1;
+                if (!isMatch) {
+                    finalFile = appxbundle;
+                }
+                return isMatch;
+            });
+            filesToDelete.forEach(function(file) {
+                shell.rm(file);
+            });
+
+            return package.getPackageFileInfo(finalFile);
+        });
+    } else {
+        return buildsCompleted.then(function() {
+            return package.getPackage(config.targetProject, config.buildType, config.buildArchs[0]);
+        });
+    }
 }
 
+// Can update buildConfig in the following ways:
+//  * Sets targetProject property, the project to launch when complete
 function getBuildTargets(buildConfig) {
     var configXML = new ConfigParser(path.join(ROOT, 'config.xml'));
     var targets = [];
@@ -296,7 +390,48 @@ function getBuildTargets(buildConfig) {
         }
     }
 
+    // As part of reworking how build and package determine the winning project, set the 'target type' project
+    // as part of build configuration.  This will be used for determining the binary to 'run' after build is done.
+    if (targets.length > 0) {
+        switch (targets[0]) {
+            case projFiles.win80:
+                buildConfig.targetProject = 'windows80';
+                break;
+            case projFiles.phone:
+                buildConfig.targetProject = 'phone';
+                break;
+            case projFiles.win10:
+                buildConfig.targetProject = 'windows10';
+                break;
+            case projFiles.win:
+                /* falls through */
+            default:
+                buildConfig.targetProject = 'windows';
+                break;
+        }
+    }
+
     return targets;
+}
+
+function getMsBuildForTargets(selectedTargets, buildConfig, allMsBuildVersions) {
+    var availableVersions = allMsBuildVersions.reduce(function(obj, msbuildVersion) {
+        obj[msbuildVersion.version] = msbuildVersion;
+        return obj;
+    }, {});
+
+    var result = null;
+
+    if (selectedTargets.indexOf(projFiles.win80) > -1) {
+        // building Windows 8; prefer 4.0, unless phone is also present, in which case prefer 12
+        // prefer 12.  If not present, can't build this; error in the filterSupportedTargets function
+        result = availableVersions['12.0'] || availableVersions['4.0']; 
+    } else {
+        // 14 can build Windows 10, Windows 8.1, and Windows Phone 8.1, so resolve to 14 if available, else 12
+        result = (availableVersions['14.0'] || availableVersions['12.0']);
+    }
+
+    return result;
 }
 
 // TODO: Fix this so that it outlines supported versions based on version criteria:
