@@ -17,9 +17,11 @@
     under the License.
 */
 var Q = require('q'),
+    shell = require('shelljs'),
     rewire = require('rewire'),
     platformRoot = '../../template',
-    buildTools = rewire(platformRoot + '/cordova/lib/MSBuildTools.js');
+    buildTools = rewire(platformRoot + '/cordova/lib/MSBuildTools.js'),
+    Version = require(platformRoot + '/cordova/lib/Version.js');
 
 var fakeToolsPath = function (version) {
     return 'C:\\Program Files (x86)\\MSBuild\\' + version;
@@ -154,5 +156,37 @@ describe('MSBuildTools object', function(){
         expect(actual.version).toBeDefined();
         expect(actual.version).toBe(version);
         expect(actual.buildProject).toBeDefined();
+    });
+});
+
+describe('getAvailableUAPVersions method', function(){
+    var availableVersions = ['10.0.10030.0', '10.0.10166.0', '10.0.10078.0'];
+    var shellTest, shellLs;
+    beforeEach(function () {
+        shellTest = spyOn(shell, 'test').andReturn(true);
+        shellLs = spyOn(shell, 'ls').andReturn(availableVersions);
+    });
+    it('should return list of available versions', function() {
+        var versions = buildTools.getAvailableUAPVersions();
+        expect(versions).toEqual(jasmine.any(Array));
+        expect(versions.length).toEqual(3);
+    });
+    it('should return empty array if no UAP SDKs installed', function() {
+        shellLs.andReturn([]);
+        expect(buildTools.getAvailableUAPVersions().length).toEqual(0);
+        shellTest.andReturn(false);
+        expect(buildTools.getAvailableUAPVersions().length).toEqual(0);
+    });
+    it('should return sorted list versions with only valid versions', function() {
+        var brokenAvailableVersions = availableVersions.concat('Broken.version');
+        shellLs.andReturn(brokenAvailableVersions);
+
+        var versions = buildTools.getAvailableUAPVersions();
+        expect(versions).toEqual(jasmine.any(Array));
+        expect(versions.length).toEqual(3);
+
+        versions.forEach(function (version) {
+            expect(version).toEqual(jasmine.any(Version));
+        });
     });
 });
