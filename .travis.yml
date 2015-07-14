@@ -1,0 +1,9 @@
+language: objective-c
+sudo: false
+install:
+    - npm install
+script:
+    - node --version
+    - npm --version
+    - npm run jshint
+    - npm run test-unit
