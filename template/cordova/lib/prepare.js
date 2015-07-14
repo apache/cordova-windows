@@ -54,18 +54,17 @@ module.exports.applyPlatformConfig = function() {
     // Apply appxmanifest changes
     [{ fileName: MANIFEST_WINDOWS,   namespacePrefix: 'm2:' },
      { fileName: MANIFEST_WINDOWS8,  namespacePrefix: '' },
+     { fileName: MANIFEST_WINDOWS10, namespacePrefix: 'uap:' },
      { fileName: MANIFEST_PHONE,     namespacePrefix: 'm3:' }].forEach(
         function(manifestFile) {
-            updateManifestFile(config, path.join(ROOT, manifestFile.fileName), manifestFile.namespacePrefix, null);
+            // Break out Windows 10-specific functionality because we also need to
+            // apply UAP versioning to Windows 10 appx-manifests.
+            var isTargetingWin10 = (manifestFile.fileName === MANIFEST_WINDOWS10);
+            updateManifestFile(config, path.join(ROOT, manifestFile.fileName), manifestFile.namespacePrefix, isTargetingWin10);
     });
 
-    // Break out Windows 10-specific functionality because we also need to
-    // apply UAP versioning to Windows 10 appx-manifests.
-    var uapVersionInfo = getUAPVersions();
-
-    if (uapVersionInfo) {
-        updateManifestFile(config, path.join(ROOT, MANIFEST_WINDOWS10), 'uap:', uapVersionInfo);
-        applyUAPVersionToProject(path.join(ROOT, PROJECT_WINDOWS10), uapVersionInfo);
+    if (process.platform === 'win32') {
+        applyUAPVersionToProject(path.join(ROOT, PROJECT_WINDOWS10), getUAPVersions());
     }
 
     copyImages(config);
@@ -127,7 +126,7 @@ module.exports.updateBuildConfig = function(buildConfig) {
     fs.writeFileSync(buildConfigFileName, TEMPLATE + buildConfigXML.write({indent: 2, xml_declaration: false}), 'utf-8');
 };
 
-function updateManifestFile (config, manifestPath, namespacePrefix, uapVersionInfo) {
+function updateManifestFile (config, manifestPath, namespacePrefix, isTargetingWin10) {
     var contents = fs.readFileSync(manifestPath, 'utf-8');
     if(contents) {
         //Windows is the BOM. Skip the Byte Order Mark.
@@ -136,15 +135,15 @@ function updateManifestFile (config, manifestPath, namespacePrefix, uapVersionIn
 
     var manifest =  new et.ElementTree(et.XML(contents));
 
-    applyCoreProperties(config, manifest, manifestPath, namespacePrefix, !!uapVersionInfo);
+    applyCoreProperties(config, manifest, manifestPath, namespacePrefix, isTargetingWin10);
     // sort Capability elements as per CB-5350 Windows8 build fails due to invalid 'Capabilities' definition
     sortCapabilities(manifest);
-    applyAccessRules(config, manifest, !!uapVersionInfo);
+    applyAccessRules(config, manifest, isTargetingWin10);
     applyBackgroundColor(config, manifest, namespacePrefix);
     applyToastCapability(config, manifest, namespacePrefix);
 
-    if (uapVersionInfo) {
-        applyTargetPlatformVersion(config, manifest, uapVersionInfo);
+    if (isTargetingWin10) {
+        applyTargetPlatformVersion(config, manifest);
         checkForRestrictedCapabilities(config, manifest);
         ensureUapPrefixedCapabilities(manifest.find('.//Capabilities'));
     }
@@ -579,6 +578,9 @@ function applyBackgroundColor (config, manifest, xmlnsPrefix) {
 }
 
 function applyUAPVersionToProject(projectFilePath, uapVersionInfo) {
+    // No uapVersionInfo means that there is no UAP SDKs installed and there is nothing to do for us
+    if (!uapVersionInfo) return;
+
     var fileContents = fs.readFileSync(projectFilePath).toString().trim();
     var xml = et.parse(fileContents);
     var tpv = xml.find('./PropertyGroup/TargetPlatformVersion');
@@ -590,7 +592,7 @@ function applyUAPVersionToProject(projectFilePath, uapVersionInfo) {
     fs.writeFileSync(projectFilePath, xml.write({ indent: 4 }), {});
 }
 
-function applyTargetPlatformVersion(config, manifest, uapVersionInfo) {
+function applyTargetPlatformVersion(config, manifest) {
     var dependencies = manifest.find('./Dependencies');
     while (dependencies.len() > 0) {
         dependencies.delItem(0);
