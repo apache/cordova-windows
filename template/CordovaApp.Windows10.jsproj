@@ -60,6 +60,10 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>f9b0ae20-c91c-42b9-9c6e-d3bc28b4509e</ProjectGuid>
   </PropertyGroup>
+  <PropertyGroup Label="CordovaBuildParameters" Condition="'$(CordovaBundlePlatforms)' != ''">
+    <AppxBundle>Always</AppxBundle>
+    <AppxBundlePlatforms>$(CordovaBundlePlatforms)</AppxBundlePlatforms>
+  </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup Condition="'$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0'">
     <VisualStudioVersion>14.0</VisualStudioVersion>
@@ -71,6 +75,7 @@
     <TargetPlatformVersion>10.0.10030.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.10030.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <UapDefaultAssetScale>100</UapDefaultAssetScale>
   </PropertyGroup>
   <!--
     MSBuild\12.0\Bin\Microsoft.Common.CurrentVersion.targets contains a "TargetPlatformVersion" check, which will throw if

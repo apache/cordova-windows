@@ -132,7 +132,16 @@ describe('run method', function() {
         run.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         run.__set__('build.run', function () {
             build();
-            return Q();
+            var buildResult = {
+                type      : 'phone',
+                arch      : 'arm',
+                archs     : ['arm'],
+                buildtype : 'release',
+                appx      : 'testfile',
+                script    : 'testfile.ps1',
+                phoneId   : 'undefined'
+            };
+            return Q(buildResult);
         });
         run.__set__('packages.getPackage', function () {
             return Q({
@@ -166,7 +175,16 @@ describe('run method', function() {
         run.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         run.__set__('build.run', function () {
             build();
-            return Q();
+            var buildResult = {
+                type      : 'windows80',
+                arch      : 'anycpu',
+                archs     : ['anycpu'],
+                buildtype : 'release',
+                appx      : 'testfile',
+                script    : 'testfile.ps1',
+                phoneId   : 'undefined'
+            };
+            return Q(buildResult);
         });
         run.__set__('packages.getPackage', function () {
             return Q({
