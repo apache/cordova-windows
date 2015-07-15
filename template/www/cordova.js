@@ -1140,6 +1140,7 @@ if (!window.console.warn) {
 // Register pause, resume and deviceready channels as events on document.
 channel.onPause = cordova.addDocumentEventHandler('pause');
 channel.onResume = cordova.addDocumentEventHandler('resume');
+channel.onActivated = cordova.addDocumentEventHandler('activated');
 channel.onDeviceReady = cordova.addStickyDocumentEventHandler('deviceready');
 
 // Listen for DOMContentLoaded and notify our channel subscribers.
@@ -1297,6 +1298,7 @@ module.exports = {
             modulemapper = require('cordova/modulemapper');
 
         modulemapper.clobbers('cordova/exec/proxy', 'cordova.commandProxy');
+
         channel.onNativeReady.fire();
 
         var onWinJSReady = function () {
@@ -1309,7 +1311,18 @@ module.exports = {
                 cordova.fireDocumentEvent('resume',null,true);
             };
 
+            // activation args are available via the activated event
+            // OR cordova.require('cordova/platform').activationContext
+            // activationContext:{type: actType, args: args};
+            var activationHandler = function (e) {
+                var args = e.detail.arguments;
+                var actType = e.detail.type;
+                platform.activationContext = { type: actType, args: args };
+                cordova.fireDocumentEvent('activated', platform.activationContext, true);
+            };
+
             app.addEventListener("checkpoint", checkpointHandler);
+            app.addEventListener("activated", activationHandler, false);
             Windows.UI.WebUI.WebUIApplication.addEventListener("resuming", resumingHandler, false);
             app.start();
         };

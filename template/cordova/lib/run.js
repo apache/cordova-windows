@@ -154,6 +154,8 @@ module.exports.help = function () {
     console.log('    --release     : Builds project in release mode.');
     console.log('    --nobuild     : Uses pre-built package, or errors if project is not built.');
     console.log('    --archs       : Specific chip architectures (`anycpu`, `arm`, `x86`, `x64`).');
+    console.log('                        Separate multiple choices with a space and, if choosing');
+    console.log('                        multiple choices, enclose in quotes (").');
     console.log('    --no-bundle   : Only applies if --archs is supplied and `anycpu` is not.');
     console.log('                    Prevents creation of a multi-architecture app bundle.');
     console.log('    --phone, --win');
@@ -171,6 +173,7 @@ module.exports.help = function () {
     console.log('    run --emulator --debug');
     console.log('    run --archs="x64 x86 arm" --no-bundle');
     console.log('    run --device --appx=phone-8.1');
+    console.log('    run --device --archs="x64 x86 arm"');
     console.log('');
 
     process.exit(0);

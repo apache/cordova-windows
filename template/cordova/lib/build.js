@@ -75,7 +75,9 @@ module.exports.help = function help() {
     console.log('    -r                          : (shortcut) Builds project in release mode.');
     console.log('    --archs [--no-bundle]       : Builds project binaries for specific chip');
     console.log('                                  architectures (`anycpu`, `arm`, `x86`, `x64`).');
-    console.log('                                  When building multiple architecutres, a bundle');
+    console.log('                                  Separate multiple choices with spaces and if');
+    console.log('                                  passing multiple choices, enclose with " ".');
+    console.log('                                  When building multiple architectures, a bundle');
     console.log('                                  is produced unless --no-bundle is passed.');
     console.log('                                  Bundling is disabled when `anycpu` is built.');
     console.log('    --phone, --win');
