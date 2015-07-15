@@ -19,8 +19,6 @@
 # appveyor file
 # http://www.appveyor.com/docs/appveyor-yml
 environment:
-  matrix:
-  - nodejs_version: "0.12"
   - nodejs_version: "0.10"
 
 install:
