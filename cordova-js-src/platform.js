@@ -31,10 +31,10 @@ module.exports = {
 
         modulemapper.clobbers('cordova/exec/proxy', 'cordova.commandProxy');
 
-        // we will make sure we get this channel, and remove this once
-        // other platforms catch up.
+        // we will make sure we get this channel
+        // TODO: remove this once other platforms catch up.
         if(!channel.onActivated) {
-            channel.onActivated = cordova.addDocumentEventHandler('activated');)
+            channel.onActivated = cordova.addDocumentEventHandler('activated');
         }
         channel.onNativeReady.fire();
 

@@ -1140,6 +1140,7 @@ if (!window.console.warn) {
 // Register pause, resume and deviceready channels as events on document.
 channel.onPause = cordova.addDocumentEventHandler('pause');
 channel.onResume = cordova.addDocumentEventHandler('resume');
+channel.onActivated = cordova.addDocumentEventHandler('activated');
 channel.onDeviceReady = cordova.addStickyDocumentEventHandler('deviceready');
 
 // Listen for DOMContentLoaded and notify our channel subscribers.
@@ -1298,11 +1299,6 @@ module.exports = {
 
         modulemapper.clobbers('cordova/exec/proxy', 'cordova.commandProxy');
 
-        // we will make sure we get this channel, and remove this once
-        // other platforms catch up.
-        if(!channel.onActivated) {
-            channel.onActivated = cordova.addDocumentEventHandler('activated');)
-        }
         channel.onNativeReady.fire();
 
         var onWinJSReady = function () {
