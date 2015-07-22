@@ -135,7 +135,6 @@ describe('check_reqs module', function () {
         it('that should not run other requirements checks if `fatal` requirement isn\'t installed', function  (done) {
             check_reqs.__set__('requirements', fakeRequirements);
             // The second requirement is fatal, so we're setting up second check to fail
-            // fakeCheckFns[1] = function () { return Q.reject('Error message'); };
             fakeCheckFns[1] = checkSpy.andReturn(Q.reject('Error message'));
             check_reqs.__set__('checkFns', fakeCheckFns);
 

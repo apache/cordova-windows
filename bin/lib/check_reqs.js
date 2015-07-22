@@ -68,12 +68,19 @@ var REQUIRED_VERSIONS = {
     }
 };
 
-var config = new ConfigParser(path.join(__dirname, '..', '..', 'config.xml'));
+function getConfig() {
+    try {
+        return new ConfigParser(path.join(__dirname, '..', '..', 'config.xml'));
+    } catch (e) {
+        throw new Error('Can\'t find config.xml file or it is malformed.');
+    }
+}
+
 
 function getMinimalRequiredVersionFor (requirement) {
 
-    var windowsTargetVersion = config.getWindowsTargetVersion();
-    var windowsPhoneTargetVersion = config.getWindowsPhoneTargetVersion();
+    var windowsTargetVersion = getConfig.getWindowsTargetVersion();
+    var windowsPhoneTargetVersion = getConfig.getWindowsPhoneTargetVersion();
     var windowsReqVersion = Version.tryParse(REQUIRED_VERSIONS[windowsTargetVersion][requirement]);
     var phoneReqVersion = Version.tryParse(REQUIRED_VERSIONS[windowsPhoneTargetVersion][requirement]);
 
@@ -259,7 +266,7 @@ var checkOS = function () {
         var requiredOsVersion = getMinimalRequiredVersionFor('os');
         if (actualVersion.gte(requiredOsVersion) ||
             // Special case for Windows 10/Phone 10  targets which can be built on Windows 7 (version 6.1)
-            actualVersion.major === 6 && actualVersion.minor === 1 && config.getWindowsTargetVersion() === '10.0') {
+            actualVersion.major === 6 && actualVersion.minor === 1 && getConfig.getWindowsTargetVersion() === '10.0') {
             return mapWindowsVersionToName(actualVersion);
         }
 
