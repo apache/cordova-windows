@@ -32,12 +32,10 @@ module.exports.run = function (argv) {
         return Q.reject('Could not find project at ' + ROOT);
     }
 
-    try {
-        // Check if ran from admin prompt and fail quickly if CLI has administrative permissions
-        // http://stackoverflow.com/a/11995662/64949
-        execSync('net session', {'stdio': 'ignore'});
+    // Check if ran from admin prompt and fail quickly if CLI has administrative permissions
+    // http://stackoverflow.com/a/11995662/64949
+    if (ranWithElevatedPermissions())
         return Q.reject('Can not run this platform with administrative permissions. Please run from a non-admin prompt.');
-    } catch (e) {}
 
     // parse arg
     var args  = nopt({'debug': Boolean, 'release': Boolean, 'nobuild': Boolean,
@@ -144,4 +142,21 @@ module.exports.help = function () {
 function projFileToType(projFile) 
 {
     return projFile.replace(/CordovaApp|jsproj|\./gi, '').toLowerCase();
+}
+
+/**
+ * Checks if current process is an with administrative permissions (e.g. from
+ *   elevated command prompt).
+ *
+ * @return  {Boolean}  true if elevated permissions detected, otherwise false
+ */
+function ranWithElevatedPermissions () {
+    try {
+        // Check if ran from admin prompt and fail quickly if CLI has administrative permissions
+        // http://stackoverflow.com/a/11995662/64949
+        execSync('net session', {'stdio': 'ignore'});
+        return true;
+    } catch (e) {
+        return false;
+    }
 }

@@ -29,7 +29,8 @@ describe('run method', function() {
         buildRunOriginal,
         getPackageOriginal,
         deployToPhoneOriginal,
-        deployToDesktopOriginal;
+        deployToDesktopOriginal,
+        ranWithElevatedPermissionsOriginal;
 
     var isCordovaProjectFalse = function () {
         return false;
@@ -49,6 +50,8 @@ describe('run method', function() {
         getPackageOriginal = run.__get__('packages.getPackage');
         deployToPhoneOriginal = run.__get__('packages.deployToPhone');
         deployToDesktopOriginal = run.__get__('packages.deployToDesktop');
+        ranWithElevatedPermissionsOriginal = run.__get__('ranWithElevatedPermissions');
+        run.__set__('ranWithElevatedPermissions', function () { return false; });
     });
 
     afterEach(function() {
@@ -58,6 +61,7 @@ describe('run method', function() {
         run.__set__('packages.getPackage', getPackageOriginal);
         run.__set__('packages.deployToPhone', deployToPhoneOriginal);
         run.__set__('packages.deployToDesktop', deployToDesktopOriginal);
+        run.__set__('ranWithElevatedPermissions', ranWithElevatedPermissionsOriginal);
     });
 
     it('spec.1 should not run if not launched from project directory', function(done) {
