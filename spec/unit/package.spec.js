@@ -48,16 +48,16 @@ describe('getPackage method', function() {
         var rejected = jasmine.createSpy();
 
         pkg.getPackage('windows80', 'debug', 'anycpu')
-        .then(function(pkgInfo) {
-            expect(pkgInfo.type).toBe('windows80');
-            expect(pkgInfo.buildtype).toBe('debug');
-            expect(pkgInfo.arch).toBe('anycpu');
-            expect(pkgInfo.script).toBeDefined();
-        }, rejected)
-        .finally(function() {
-            expect(rejected).not.toHaveBeenCalled();
-            done();
-        });
+            .then(function(pkgInfo) {
+                expect(pkgInfo.type).toBe('windows80');
+                expect(pkgInfo.buildtype).toBe('debug');
+                expect(pkgInfo.arch).toBe('anycpu');
+                expect(pkgInfo.script).toBeDefined();
+            }, rejected)
+            .finally(function() {
+                expect(rejected).not.toHaveBeenCalled();
+                done();
+            });
     });
 
     it('spec.2 should find windows phone anycpu debug package', function(done) {
