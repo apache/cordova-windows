@@ -41,13 +41,16 @@ module.exports.getPackage = function (projectType, buildtype, buildArch) {
         return fs.statSync(pkgDir).isDirectory();
     });
 
-    for (var dir in pkgDirs) {
-        var packageFiles = fs.readdirSync(pkgDirs[dir]).filter(function(e) {
+    for (var dirIndex = 0; dirIndex < pkgDirs.length; dirIndex++) {
+        var dir = pkgDirs[dirIndex];
+        var packageFiles = fs.readdirSync(dir).filter(function(e) {
             return e.match('.*.(appx|appxbundle)$');
         });
 
-        for (var pkgFile in packageFiles) {
-            var packageFile = path.join(pkgDirs[dir], packageFiles[pkgFile]);
+        for (var pkgIndex = 0; pkgIndex < packageFiles.length; pkgIndex++) {
+            var pkgFile = packageFiles[pkgIndex];
+
+            var packageFile = path.join(dir, pkgFile);
             var pkgInfo = module.exports.getPackageFileInfo(packageFile);
 
             if (pkgInfo && pkgInfo.type == projectType &&
@@ -58,6 +61,7 @@ module.exports.getPackage = function (projectType, buildtype, buildArch) {
             }
         }
     }
+
     // reject because seems that no corresponding packages found
     return Q.reject('Package with specified parameters not found in AppPackages folder');
 };
@@ -70,14 +74,18 @@ function getPackagePhoneProductId(packageFile) {
 // returns package info object or null if it is not valid package
 module.exports.getPackageFileInfo = function (packageFile) {
     var pkgName = path.basename(packageFile);
+
     // CordovaApp.Windows_0.0.1.0_anycpu_debug.appx
     // CordovaApp.Phone_0.0.1.0_x86_debug.appxbundle
-    var props = /.*\.(Phone|Windows|Windows80|Windows10)_((?:\d*\.)*\d*)_(AnyCPU|x64|x86|ARM)(?:_(Debug))?.(appx|appxbundle)$/i.exec(pkgName);
+    // CordovaApp.Windows10_0.0.1.0_x64_x86_arm.appxbundle
+
+    var props = /.*\.(Phone|Windows|Windows80|Windows10)_((?:\d*\.)*\d*)*((?:_(AnyCPU|x86|x64|ARM)){1,4})(?:(_Debug))?.(appx|appxbundle)$/i.exec(pkgName);
     if (props) {
         return {
             type      : props[1].toLowerCase(),
-            arch      : props[3].toLowerCase(),
-            buildtype : props[4] ? props[4].toLowerCase() : 'release',
+            arch      : props[3].toLowerCase().substring(1),
+            archs     : props[3].toLowerCase().substring(1).split('_'),
+            buildtype : props[5] ? props[5].substring(1).toLowerCase() : 'release',
             appx      : packageFile,
             script    : path.join(packageFile, '..', 'Add-AppDevPackage.ps1'),
             phoneId   : getPackagePhoneProductId(packageFile)
