@@ -116,9 +116,10 @@ describe('Min/Max UAP versions are correctly read from the config file.', functi
   * Unit tests for validating default ms-appx-web:// URI scheme in Win10
   * (for the function applyCoreProperties) from prepare.js.
   **/
-function createMockConfigAndManifestForApplyCoreProperties(startPage, windowsDefaultUriPrefix, win10) {
+function createMockConfigAndManifestForApplyCoreProperties(startPage, windowsDefaultUriPrefix, win10, winPackageVersion) {
     var config = {
         version: function() { return '1.0.0.0'; },
+        windows_packageVersion: function() { return winPackageVersion; },
         name: function() { return 'HelloCordova'; },
         packageName: function() { return 'org.apache.cordova.HelloCordova'; },
         author: function() { return 'Apache'; },

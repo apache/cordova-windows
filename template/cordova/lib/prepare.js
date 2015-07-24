@@ -154,7 +154,7 @@ function updateManifestFile (config, manifestPath, namespacePrefix, uapVersionIn
 }
 
 function applyCoreProperties(config, manifest, manifestPath, xmlnsPrefix, targetWin10) {
-    var version = fixConfigVersion(config.version());
+    var version = fixConfigVersion(config.windows_packageVersion() || config.version());
     var name = config.name();
     var pkgName = config.packageName();
     var author = config.author();
