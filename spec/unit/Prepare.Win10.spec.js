@@ -116,7 +116,20 @@ describe('Min/Max UAP versions are correctly read from the config file.', functi
   * Unit tests for validating default ms-appx-web:// URI scheme in Win10
   * (for the function applyCoreProperties) from prepare.js.
   **/
-function createMockConfigAndManifestForApplyCoreProperties(startPage, windowsDefaultUriPrefix, win10, winPackageVersion) {
+
+var PreferencesBaseline = {
+    Orientation: null,
+    WindowsDefaultUriPrefix: null,
+    WindowsStoreDisplayName: null,
+    WindowsStorePublisherName: null
+};
+function createMockConfigAndManifestForApplyCoreProperties(startPage, preferences, win10, winPackageVersion) {
+    if (!preferences) {
+        preferences = { };
+    }
+    /* jshint proto: true */
+    preferences.__proto__ = PreferencesBaseline;
+    /* jshint proto: false */
     var config = {
         version: function() { return '1.0.0.0'; },
         windows_packageVersion: function() { return winPackageVersion; },
@@ -125,13 +138,9 @@ function createMockConfigAndManifestForApplyCoreProperties(startPage, windowsDef
         author: function() { return 'Apache'; },
         startPage: function() { return startPage; },
         getPreference: function(preferenceName) {
-            if (preferenceName === 'WindowsDefaultUriPrefix') {
-                return windowsDefaultUriPrefix;
-            }
-            else if (preferenceName === 'Orientation') {
-                return null;
-            }
-            else {
+            if (typeof preferences[preferenceName] !== 'undefined') {
+                return preferences[preferenceName];
+            } else {
                 throw new RangeError('Unexpected call to config.getPreference with "' + preferenceName + '" in unit test.');
             }
         }
@@ -154,7 +163,7 @@ function addCapabilityDeclarationToMockManifest(manifest, capability) {
 describe('A Windows 8.1 project should not have an HTTP or HTTPS scheme for its startup URI.', function() {
 
     // arrange
-    var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', 'http://', false);
+    var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { 'WindowsDefaultUriPrefix': 'http://' }, false);
 
     // act
     applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'm2:', false);
@@ -166,7 +175,7 @@ describe('A Windows 8.1 project should not have an HTTP or HTTPS scheme for its 
 describe('A Windows 8.1 project should not have any scheme for its startup URI.', function() {
 
     // arrange
-    var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', 'ms-appx://', false);
+    var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { 'WindowsDefaultUriPrefix': 'ms-appx://' }, false);
 
     // act
     applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'm2:', false);
@@ -178,7 +187,7 @@ describe('A Windows 8.1 project should not have any scheme for its startup URI.'
 describe('A Windows 10 project default to ms-appx-web for its startup URI.', function() {
 
     // arrange
-    var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', null, true);
+    var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { }, true);
 
     // act
     applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'uap:', true);
@@ -190,7 +199,7 @@ describe('A Windows 10 project default to ms-appx-web for its startup URI.', fun
 describe('A Windows 10 project should allow ms-appx as its startup URI, and it gets removed from the final output.', function() {
 
     // arrange
-    var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', 'ms-appx://', true);
+    var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { 'WindowsDefaultUriPrefix': 'ms-appx://' }, true);
 
     // act
     applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'uap:', true);
@@ -202,13 +211,37 @@ describe('A Windows 10 project should allow ms-appx as its startup URI, and it g
 describe('A Windows 10 project should allow an HTTP or HTTPS scheme for its startup URI.', function() {
 
     // arrange
-    var mockConfig = createMockConfigAndManifestForApplyCoreProperties('www.contoso.com/', 'http://', true);
+    var mockConfig = createMockConfigAndManifestForApplyCoreProperties('www.contoso.com/', { 'WindowsDefaultUriPrefix': 'http://' }, true);
 
     // act
     applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'uap:', true);
 
     var app = mockConfig.manifest.find('.//Application');
     expect(app.attrib.StartPage).toBe('http://www.contoso.com/');
+});
+
+describe('An app specifying a Store DisplayName in its config.xml should have it reflected in the manifest.', function() {
+
+    // arrange
+    var mockConfig = createMockConfigAndManifestForApplyCoreProperties('www.contoso.com/', { 'WindowsDefaultUriPrefix': 'http://', 'WindowsStoreDisplayName': 'ContosoApp' }, true);
+
+    // act
+    applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'uap:', true);
+
+    var app = mockConfig.manifest.find('.//Properties/DisplayName');
+    expect(app.text).toBe('ContosoApp');
+});
+
+describe('An app specifying a Store PublisherName in its config.xml should have it reflected in the manifest.', function() {
+
+    // arrange
+    var mockConfig = createMockConfigAndManifestForApplyCoreProperties('www.contoso.com/', { 'WindowsDefaultUriPrefix': 'http://', 'WindowsStorePublisherName': 'Contoso Inc' }, true);
+
+    // act
+    applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'uap:', true);
+
+    var app = mockConfig.manifest.find('.//Properties/PublisherDisplayName');
+    expect(app.text).toBe('Contoso Inc');
 });
 
 describe('A Windows 10 project should warn if it supports remote mode and restricted capabilities.', function() {
