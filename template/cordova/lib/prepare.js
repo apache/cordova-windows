@@ -200,17 +200,24 @@ function applyCoreProperties(config, manifest, manifestPath, xmlnsPrefix, target
         (visualElems.attrib.DisplayName = name);
     }
 
+    // CB-9410: Get a display name and publisher display name.  In the Windows Store, certain
+    // strings which are typically used in Cordova aren't valid for Store ingestion.
+    // Here, we check for Windows-specific preferences, and if we find it, prefer that over
+    // the Cordova <widget> areas.
+    var displayName = config.getPreference('WindowsStoreDisplayName') || name;
+    var publisherName = config.getPreference('WindowsStorePublisherName') || author;
+
     // Update properties
     var properties = manifest.find('.//Properties');
     if (properties && properties.find) {
         var displayNameElement = properties.find('.//DisplayName');
-        if (displayNameElement && name) {
-            displayNameElement.text = name;
+        if (displayNameElement && displayName) {
+            displayNameElement.text = displayName;
         }
 
         var publisherNameElement = properties.find('.//PublisherDisplayName');
-        if (publisherNameElement && author) {
-            publisherNameElement.text = author;
+        if (publisherNameElement && publisherName) {
+            publisherNameElement.text = publisherName;
         }
     }
 
