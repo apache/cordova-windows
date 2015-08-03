@@ -58,12 +58,13 @@ module.exports.run = function (argv) {
         console.log('\tCustomTemplatePath : ' + templateOverrides);
     }
 
-    // Copy cordova-js-src directory
-    shell.cp('-rf', path.join(root, 'cordova-js-src'), path.join(projectPath, 'platform_www'));
 
     // Copy the template source files to the new destination
     console.log('Copying template to ' + projectPath);
     shell.cp('-rf', path.join(root, 'template', '*'), projectPath);
+
+    // Copy cordova-js-src directory
+    shell.cp('-rf', path.join(root, 'cordova-js-src'), path.join(projectPath, 'platform_www'));
 
     // Copy our unique VERSION file, so peeps can tell what version this project was created from.
     shell.cp('-rf', path.join(root, 'VERSION'), projectPath);
