@@ -22,6 +22,7 @@ var Q     = require('Q'),
     nopt  = require('nopt'),
     shell = require('shelljs'),
     utils = require('./utils'),
+    et    = require('elementtree'),
     prepare = require('./prepare'),
     package = require('./package'),
     MSBuildTools = require('./MSBuildTools'),
@@ -36,6 +37,12 @@ var projFiles = {
     win80: 'CordovaApp.Windows80.jsproj',
     win10: 'CordovaApp.Windows10.jsproj'
 };
+var projFilesToManifests = {
+    'CordovaApp.Phone.jsproj': 'package.phone.appxmanifest',
+    'CordovaApp.Windows.jsproj': 'package.windows.appxmanifest',
+    'CordovaApp.Windows80.jsproj': 'package.windows80.appxmanifest',
+    'CordovaApp.Windows10.jsproj': 'package.windows10.appxmanifest'
+};
 
 // builds cordova-windows application with parameters provided.
 // See 'help' function for args list
@@ -49,6 +56,9 @@ module.exports.run = function run (argv) {
         .spread(function(buildConfig, msbuildTools) {
             // Apply build related configs
             prepare.updateBuildConfig(buildConfig);
+            if (buildConfig.publisherId) {
+                updateManifestWithPublisher(msbuildTools, buildConfig);
+            }
             // bug: Windows 8 build fails on a system with MSBuild 14 on it.
             // Don't regress, make sure MSBuild 4 is selected for a Windows 8 build.
             cleanIntermediates();
@@ -279,6 +289,33 @@ function parseBuildConfig(buildConfigPath, config) {
     }
 
     return result;
+}
+
+// Note: This function is very narrow and only writes to the app manifest if an update is done.  See CB-9450 for the 
+// reasoning of why this is the case.
+function updateManifestWithPublisher(allMsBuildVersions, config) {
+    var selectedBuildTargets = getBuildTargets(config);
+    var msbuild = getMsBuildForTargets(selectedBuildTargets, config, allMsBuildVersions);
+    var myBuildTargets = filterSupportedTargets(selectedBuildTargets, msbuild);
+    var manifestFiles = myBuildTargets.map(function(proj) {
+        return projFilesToManifests[proj];
+    });
+    manifestFiles.forEach(function(file) {
+        var manifestPath = path.join(ROOT, file);
+        var contents = fs.readFileSync(manifestPath, 'utf-8');
+        if (!contents) {
+            return;
+        }
+
+        // Skip BOM
+        contents = contents.substring(contents.indexOf('<'));
+        var manifest =  new et.ElementTree(et.XML(contents));
+        var identityNode = manifest.find('.//Identity');
+        if (config.publisherId && config.publisherId !== identityNode.attrib.Publisher) {
+            identityNode.attrib.Publisher = config.publisherId;
+            fs.writeFileSync(manifestPath, manifest.write({indent: 4}), 'utf-8');
+        }
+    });
 }
 
 function buildTargets(allMsBuildVersions, config) {
