@@ -79,8 +79,9 @@ function getConfig() {
 
 function getMinimalRequiredVersionFor (requirement) {
 
-    var windowsTargetVersion = getConfig.getWindowsTargetVersion();
-    var windowsPhoneTargetVersion = getConfig.getWindowsPhoneTargetVersion();
+    var config = getConfig();
+    var windowsTargetVersion = config.getWindowsTargetVersion();
+    var windowsPhoneTargetVersion = config.getWindowsPhoneTargetVersion();
     var windowsReqVersion = Version.tryParse(REQUIRED_VERSIONS[windowsTargetVersion][requirement]);
     var phoneReqVersion = Version.tryParse(REQUIRED_VERSIONS[windowsPhoneTargetVersion][requirement]);
 
