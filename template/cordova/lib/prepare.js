@@ -155,7 +155,10 @@ function updateManifestFile (config, manifestPath, namespacePrefix, isTargetingW
 function applyCoreProperties(config, manifest, manifestPath, xmlnsPrefix, targetWin10) {
     var version = fixConfigVersion(config.windows_packageVersion() || config.version());
     var name = config.name();
-    var pkgName = config.packageName();
+    // CB-9450: iOS/Android and Windows Store have an incompatibility here; Windows Store assigns the 
+    // package name that should be used for upload to the store.  However, this can't be set for typical
+    // Cordova apps.  So, we have to create a Windows-specific preference here.
+    var pkgName = config.getPreference('WindowsStoreIdentityName') || config.packageName();
     var author = config.author();
 
     var identityNode = manifest.find('.//Identity');
@@ -181,10 +184,11 @@ function applyCoreProperties(config, manifest, manifestPath, xmlnsPrefix, target
         throw new Error('Invalid manifest file (no <Application> node): ' + manifestPath);
     }
 
-    if (pkgName) {
+    var baselinePackageName = config.packageName();
+    if (baselinePackageName) {
         // 64 symbols restriction goes from manifest schema definition
         // http://msdn.microsoft.com/en-us/library/windows/apps/br211415.aspx
-        var appId = pkgName.length <= 64 ? pkgName : pkgName.substr(0, 64);
+        var appId = baselinePackageName.length <= 64 ? baselinePackageName : baselinePackageName.substr(0, 64);
         app.attrib.Id = appId;
     }
 

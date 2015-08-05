@@ -121,7 +121,8 @@ var PreferencesBaseline = {
     Orientation: null,
     WindowsDefaultUriPrefix: null,
     WindowsStoreDisplayName: null,
-    WindowsStorePublisherName: null
+    WindowsStorePublisherName: null,
+    WindowsStoreIdentityName: null
 };
 function createMockConfigAndManifestForApplyCoreProperties(startPage, preferences, win10, winPackageVersion) {
     if (!preferences) {
