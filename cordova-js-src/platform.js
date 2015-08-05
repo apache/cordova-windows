@@ -27,6 +27,7 @@ module.exports = {
         var cordova = require('cordova'),
             exec = require('cordova/exec'),
             channel = cordova.require('cordova/channel'),
+            platform = require('cordova/platform'),
             modulemapper = require('cordova/modulemapper');
 
         modulemapper.clobbers('cordova/exec/proxy', 'cordova.commandProxy');
