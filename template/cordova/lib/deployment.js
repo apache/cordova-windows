@@ -204,7 +204,13 @@ AppDeployCmdTool.prototype.installAppPackage = function(pathToAppxPackage, targe
 };
 
 AppDeployCmdTool.prototype.uninstallAppPackage = function(packageInfo, targetDevice) {
-    return run(this.path, ['/uninstall', packageInfo, '/targetdevice:' + targetDevice.__shorthand]);
+    // CB-9482: AppDeployCmd reports failure when targeting an emulator, but actually succeeds
+    //  Further calls in the promise chain then are not executed (such as installAppPackage) because
+    //  of the failure reported here.  By ensuring that this function always reports a success
+    //  state, it allows install to proceed.  (Install will fail if there is a legitimate 
+    //  uninstall failure such as due to no device).  
+    var assureSuccess = function() {};
+    return run(this.path, ['/uninstall', packageInfo, '/targetdevice:' + targetDevice.__shorthand]).then(assureSuccess, assureSuccess);
 };
 
 AppDeployCmdTool.prototype.launchApp = function(packageInfo, targetDevice) {
