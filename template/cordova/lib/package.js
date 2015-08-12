@@ -189,6 +189,7 @@ module.exports.deployToPhone = function (package, deployTarget, targetWindows10,
             return uninstallAppFromPhone(deploymentTool, package, target).then(
                 function() {}, function() {}).then(function() {
                     // shouldUpdate = false because we've already uninstalled
+                    console.log('Deploying app package...');
                     return deploymentTool.installAppPackage(package.appx, target, /*shouldLaunch*/ true, /*shouldUpdate*/ false);
                 }).then(function() { }, function(error) {
                     if (error.indexOf('Error code 2148734208 for command') === 0) {
