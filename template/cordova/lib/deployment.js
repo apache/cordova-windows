@@ -35,7 +35,7 @@ function run(cmd, args, opt_cwd) {
         child.stderr.on('data', function(s) { stderr += s; });
         child.on('exit', function(code) {
             if (code) {
-                d.reject(stderr);
+                d.reject({ message: stderr, code: code, toString: function() { return stderr; }});
             } else {
                 d.resolve(stdout);
             }
@@ -194,13 +194,28 @@ AppDeployCmdTool.prototype.enumerateDevices = function() {
     });
 };
 
+// Note: To account for CB-9482, we pass an extra parameter when retrying the call.  Be forwarned to check for that
+// if additional parameters are added in the future.
 AppDeployCmdTool.prototype.installAppPackage = function(pathToAppxPackage, targetDevice, shouldLaunch, shouldUpdate, pin) {
     var command = shouldUpdate ? '/update' : '/install';
     if (shouldLaunch) {
         command += 'launch';
     }
 
-    return run(this.path, [command, pathToAppxPackage, '/targetdevice:' + targetDevice.__shorthand]);
+    var that = this;
+    var result = run(this.path, [command, pathToAppxPackage, '/targetdevice:' + targetDevice.__shorthand]);
+    if (targetDevice.type === 'emulator' && arguments.length < 6) {
+        result = result.then(null, function(e) {
+            // CB-9482: AppDeployCmd also reports E_INVALIDARG during this process.  If so, try to repeat.
+            if (e.code === 2147942487) {
+                return that.installAppPackage(pathToAppxPackage, targetDevice, shouldLaunch, shouldUpdate, pin, true);
+            }
+
+            throw e;
+        });
+    }
+
+    return result;
 };
 
 AppDeployCmdTool.prototype.uninstallAppPackage = function(packageInfo, targetDevice) {
