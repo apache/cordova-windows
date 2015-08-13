@@ -24,22 +24,40 @@ var path    = require('path'),
     shelljs = require('shelljs'),
     ROOT    = path.join(__dirname, '..', '..');
 
-var appTracingLogInitialState = null,
-    adminLogInitialState = null;
+var appTracingInitialState = null,
+    appTracingCurrentState = null,
+    adminInitialState = null,
+    adminCurrentState = null;
 
 /*
  * Gets windows AppHost/ApplicationTracing and AppHost/Admin logs
  * and prints them to console
  */
 module.exports.run = function() {
-    getLogState('Microsoft-Windows-AppHost/ApplicationTracing').then(function (state) {
-        appTracingLogInitialState = state;
-        return getLogState('Microsoft-Windows-AppHost/Admin');
-    }).then(function(state) {
-        adminLogInitialState = state;
-        return enableLogging('Microsoft-Windows-AppHost/Admin');
+    getLogState('Microsoft-Windows-AppHost/Admin').then(function (state) {
+        adminInitialState = adminCurrentState = state;
+        return getLogState('Microsoft-Windows-AppHost/ApplicationTracing');
+    }).then(function (state) {
+        appTracingInitialState = appTracingCurrentState = state;
+        if (!adminCurrentState) {
+            return enableChannel('Microsoft-Windows-AppHost/Admin').then(function () {
+                return getLogState('Microsoft-Windows-AppHost/Admin');
+            }).then(function (state) {
+                adminCurrentState = state;
+            });
+        }
     }).then(function () {
-        return enableLogging('Microsoft-Windows-AppHost/ApplicationTracing');
+        if (!appTracingCurrentState) {
+            return enableChannel('Microsoft-Windows-AppHost/ApplicationTracing').then(function () {
+                return getLogState('Microsoft-Windows-AppHost/ApplicationTracing');
+            }).then(function (state) {
+                appTracingCurrentState = state;
+            });
+        }
+    }).then(function () {
+        if (!adminCurrentState && !appTracingCurrentState) {
+            throw 'No log channels enabled. Exiting...';
+        }
     }).then(function () {
         console.log('Now printing logs. To stop, please press Ctrl+C once.');
         startLogging('Microsoft-Windows-AppHost/Admin');
@@ -50,11 +68,11 @@ module.exports.run = function() {
 
     // Disable logs before exiting
     process.on('exit', function () {
-        if ((appTracingLogInitialState !== null) && !appTracingLogInitialState) {
-            disableLogging('Microsoft-Windows-AppHost/ApplicationTracing');
+        if (appTracingInitialState === false && appTracingCurrentState === true) {
+            disableChannel('Microsoft-Windows-AppHost/ApplicationTracing');
         }
-        if ((adminLogInitialState !== null) && !adminLogInitialState) {
-            disableLogging('Microsoft-Windows-AppHost/Admin');
+        if (adminInitialState === false && adminCurrentState === true) {
+            disableChannel('Microsoft-Windows-AppHost/Admin');
         }
     });
 
@@ -114,32 +132,47 @@ function parseEvents(output) {
     var results = [];
 
     events.forEach(function (event) {
-        // Get only unhandled exceptions from Admin log
-        if (getElementValue(event, './System/Channel') === 'Microsoft-Windows-AppHost/Admin' &&
-            typeof getElementValue(event, './UserData/WWAUnhandledApplicationException') === 'undefined') {
+        // Get only informative logs
+        if ((getElementValue(event, './System/Channel') === 'Microsoft-Windows-AppHost/Admin') &&
+            (typeof getElementValue(event, './UserData/WWAUnhandledApplicationException') === 'undefined') &&
+            (typeof getElementValue(event, './UserData/WWATerminateApplication') === 'undefined')) {
+            return;
+        }
+        if ((getElementValue(event, './System/Channel') === 'Microsoft-Windows-AppHost/ApplicationTracing') &&
+            (typeof getElementValue(event, './UserData/WWADevToolBarLog') === 'undefined')) {
             return;
         }
 
         var result = {
-            channel: getElementValue(event, './System/Channel'),
-            timeCreated: getElementValue(event, './System/TimeCreated', 'SystemTime'),
-            pid: getElementValue(event, './System/Execution', 'ProcessID'),
-            proc: getElementValue(event, './UserData/WWADevToolBarLog/DisplayName'),
-            source: getElementValue(event, './UserData/WWADevToolBarLog/Source'),
-            documentFile: getElementValue(event, './UserData/WWADevToolBarLog/DocumentFile') ||
-                          getElementValue(event, './UserData/WWAUnhandledApplicationException/DocumentFile'),
-            line: getElementValue(event, './UserData/WWADevToolBarLog/Line'),
-            column: getElementValue(event, './UserData/WWADevToolBarLog/Column'),
-            sourceFile: getElementValue(event, './UserData/WWAUnhandledApplicationException/SourceFile'),
-            sourceLine: getElementValue(event, './UserData/WWAUnhandledApplicationException/SourceLine'),
-            sourceColumn: getElementValue(event, './UserData/WWAUnhandledApplicationException/SourceColumn'),
-            message: getElementValue(event, './UserData/WWADevToolBarLog/Message'),
-            displayName: getElementValue(event, './UserData/WWAUnhandledApplicationException/DisplayName'),
-            appName: getElementValue(event, './UserData/WWAUnhandledApplicationException/ApplicationName'),
-            errorType: getElementValue(event, './UserData/WWAUnhandledApplicationException/ErrorType'),
-            errorDescription: getElementValue(event, './UserData/WWAUnhandledApplicationException/ErrorDescription'),
-            stackTrace: getElementValue(event, './UserData/WWAUnhandledApplicationException/StackTrace'),
+            channel:          getElementValue(event, './System/Channel'),
+            timeCreated:      getElementValue(event, './System/TimeCreated', 'SystemTime'),
+            pid:              getElementValue(event, './System/Execution', 'ProcessID'),
+            proc:             getElementValue(event, './UserData/WWADevToolBarLog/DisplayName'),
+            source:           getElementValue(event, './UserData/WWADevToolBarLog/Source'),
+            documentFile:     getElementValue(event, './UserData/WWADevToolBarLog/DocumentFile') ||
+                              getElementValue(event, './UserData/WWAUnhandledApplicationException/DocumentFile') ||
+                              getElementValue(event, './UserData/WWATerminateApplication/DocumentFile'),
+            line:             getElementValue(event, './UserData/WWADevToolBarLog/Line'),
+            column:           getElementValue(event, './UserData/WWADevToolBarLog/Column'),
+            sourceFile:       getElementValue(event, './UserData/WWAUnhandledApplicationException/SourceFile'),
+            sourceLine:       getElementValue(event, './UserData/WWAUnhandledApplicationException/SourceLine'),
+            sourceColumn:     getElementValue(event, './UserData/WWAUnhandledApplicationException/SourceColumn'),
+            message:          getElementValue(event, './UserData/WWADevToolBarLog/Message'),
+            displayName:      getElementValue(event, './UserData/WWAUnhandledApplicationException/DisplayName') ||
+                              getElementValue(event, './UserData/WWATerminateApplication/DisplayName'),
+            appName:          getElementValue(event, './UserData/WWAUnhandledApplicationException/ApplicationName'),
+            errorType:        getElementValue(event, './UserData/WWAUnhandledApplicationException/ErrorType'),
+            errorDescription: getElementValue(event, './UserData/WWAUnhandledApplicationException/ErrorDescription') ||
+                              getElementValue(event, './UserData/WWATerminateApplication/ErrorDescription'),
+            stackTrace:       getElementValue(event, './UserData/WWAUnhandledApplicationException/StackTrace') ||
+                              getElementValue(event, './UserData/WWATerminateApplication/StackTrace'),
         };
+
+        // cut out uninformative fields
+        if ((result.line === 0) && (result.column === 0)) {
+            result.line = undefined;
+            result.column = undefined;
+        }
  
         results.push(result);
     });
@@ -199,7 +232,7 @@ function getLogState(channel) {
     });
 }
 
-function enableLogging(channel) {
+function enableChannel(channel) {
     return exec('wevtutil set-log "' + channel + '" /e:false /q:true').then(function() {
         return exec('wevtutil set-log "' + channel + '" /e:true /rt:true /ms:4194304 /q:true');
     }, function() {
@@ -208,7 +241,7 @@ function enableLogging(channel) {
     });
 }
 
-function disableLogging(channel) {
+function disableChannel(channel) {
     console.log('Disabling channel ' + channel);
     // using shelljs here to execute the command syncronously 
     // async exec doesn't seem to do the trick when the process is exiting
