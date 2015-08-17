@@ -17,17 +17,24 @@
        under the License.
 */
 
-var path    = require('path'),
-    et      = require('elementtree'),
-    Q       = require('q'),
-    cp      = require('child_process'),
-    shelljs = require('shelljs'),
-    ROOT    = path.join(__dirname, '..', '..');
+// requires
+var path         = require('path'),
+    et           = require('elementtree'),
+    Q            = require('q'),
+    cp           = require('child_process'),
+    ConfigParser = require('./ConfigParser.js');
 
+// paths
+var platformRoot = path.join(__dirname, '..', '..'),
+    projectRoot  = path.join(platformRoot, '..', '..'),
+    configPath   = path.join(projectRoot, 'config.xml');
+
+// variables
 var appTracingInitialState = null,
     appTracingCurrentState = null,
     adminInitialState = null,
-    adminCurrentState = null;
+    adminCurrentState = null,
+    appName;
 
 /*
  * Gets windows AppHost/ApplicationTracing and AppHost/Admin logs
@@ -59,6 +66,13 @@ module.exports.run = function() {
             throw 'No log channels enabled. Exiting...';
         }
     }).then(function () {
+        try {
+            var config = new ConfigParser(configPath);
+            appName = config.name();
+        } catch (err) {
+            console.warn('Unable to read app name from config, showing logs for all applications.');
+        }
+    }).then(function () {
         console.log('Now printing logs. To stop, please press Ctrl+C once.');
         startLogging('Microsoft-Windows-AppHost/Admin');
         startLogging('Microsoft-Windows-AppHost/ApplicationTracing');
@@ -66,27 +80,36 @@ module.exports.run = function() {
         console.error(error);
     });
 
-    // Disable logs before exiting
-    process.on('exit', function () {
-        if (appTracingInitialState === false && appTracingCurrentState === true) {
-            disableChannel('Microsoft-Windows-AppHost/ApplicationTracing');
-        }
-        if (adminInitialState === false && adminCurrentState === true) {
-            disableChannel('Microsoft-Windows-AppHost/Admin');
-        }
+    // Catch Ctrl+C message and exit gracefully
+    process.once('SIGINT', function () {
+        exitGracefully(0);
     });
 
-    // Catch Ctrl+C event and exit gracefully
-    process.on('SIGINT', function () {
-        process.exit(2);
+    // Catch SIGTERM message and exit gracefully
+    process.once('SIGTERM', function () {
+        exitGracefully(0);
     });
 
     // Catch uncaught exceptions, print trace, then exit gracefully
-    process.on('uncaughtException', function(e) {
+    process.once('uncaughtException', function(e) {
         console.log(e.stack);
-        process.exit(99);
+        exitGracefully(1);
     });
 };
+
+function exitGracefully(exitCode) {
+    if (appTracingInitialState === false && appTracingCurrentState === true) {
+        disableChannel('Microsoft-Windows-AppHost/ApplicationTracing');
+    }
+    if (adminInitialState === false && adminCurrentState === true) {
+        disableChannel('Microsoft-Windows-AppHost/Admin');
+    }
+    // give async call some time to execute
+    console.log('Exiting in 2 seconds. Please don\'t interrupt the process.');
+    setTimeout(function() {
+        process.exit(exitCode);
+    }, 2000);
+}
 
 function startLogging(channel) {
     var startTime = new Date().toISOString();
@@ -106,7 +129,7 @@ function startLogging(channel) {
 }
 
 module.exports.help = function() {
-    console.log('Usage: ' + path.relative(process.cwd(), path.join(ROOT, 'cordova', 'log')));
+    console.log('Usage: ' + path.relative(process.cwd(), path.join(platformRoot, 'cordova', 'log')));
     console.log('Continuously prints the windows logs output to the command line.');
     process.exit(0);
 };
@@ -147,19 +170,19 @@ function parseEvents(output) {
             channel:          getElementValue(event, './System/Channel'),
             timeCreated:      getElementValue(event, './System/TimeCreated', 'SystemTime'),
             pid:              getElementValue(event, './System/Execution', 'ProcessID'),
-            proc:             getElementValue(event, './UserData/WWADevToolBarLog/DisplayName'),
             source:           getElementValue(event, './UserData/WWADevToolBarLog/Source'),
             documentFile:     getElementValue(event, './UserData/WWADevToolBarLog/DocumentFile') ||
                               getElementValue(event, './UserData/WWAUnhandledApplicationException/DocumentFile') ||
                               getElementValue(event, './UserData/WWATerminateApplication/DocumentFile'),
+            displayName:      getElementValue(event, './UserData/WWADevToolBarLog/DisplayName') ||
+                              getElementValue(event, './UserData/WWAUnhandledApplicationException/DisplayName') ||
+                              getElementValue(event, './UserData/WWATerminateApplication/DisplayName'),
             line:             getElementValue(event, './UserData/WWADevToolBarLog/Line'),
             column:           getElementValue(event, './UserData/WWADevToolBarLog/Column'),
             sourceFile:       getElementValue(event, './UserData/WWAUnhandledApplicationException/SourceFile'),
             sourceLine:       getElementValue(event, './UserData/WWAUnhandledApplicationException/SourceLine'),
             sourceColumn:     getElementValue(event, './UserData/WWAUnhandledApplicationException/SourceColumn'),
             message:          getElementValue(event, './UserData/WWADevToolBarLog/Message'),
-            displayName:      getElementValue(event, './UserData/WWAUnhandledApplicationException/DisplayName') ||
-                              getElementValue(event, './UserData/WWATerminateApplication/DisplayName'),
             appName:          getElementValue(event, './UserData/WWAUnhandledApplicationException/ApplicationName'),
             errorType:        getElementValue(event, './UserData/WWAUnhandledApplicationException/ErrorType'),
             errorDescription: getElementValue(event, './UserData/WWAUnhandledApplicationException/ErrorDescription') ||
@@ -168,15 +191,35 @@ function parseEvents(output) {
                               getElementValue(event, './UserData/WWATerminateApplication/StackTrace'),
         };
 
-        // cut out uninformative fields
-        if ((result.line === 0) && (result.column === 0)) {
+        // filter out events from other applications
+        if (typeof result.displayName !== 'undefined' && typeof appName !== 'undefined' && result.displayName !== appName) {
+            return;
+        }
+
+        // do not show Process ID, App Name and Display Name for filtered events
+        if (typeof appName !== 'undefined') {
+            result.pid = undefined;
+            result.appName = undefined;
+            result.displayName = undefined;
+        }
+
+        // cut out uninformative fields 
+        if ((result.line === '0') && (result.column === '0')) {
             result.line = undefined;
             result.column = undefined;
         }
- 
+
+        // trim whitespace
+        if (typeof result.errorDescription !== 'undefined') {
+            result.errorDescription = result.errorDescription.trim();
+        }
+        if (typeof result.message !== 'undefined') {
+            result.message = result.message.trim();
+        }
+
         results.push(result);
     });
-    
+
     return results;
 }
 
@@ -208,13 +251,12 @@ function stringifyEvent(event) {
     result += formatField(event, 'channel', 'Channel', offset);
     result += formatField(event, 'timeCreated', 'Time Created', offset);
     result += formatField(event, 'pid', 'Process ID', offset);
-    result += formatField(event, 'proc', 'Process', offset);
     result += formatField(event, 'source', 'Source', offset);
     result += formatField(event, 'documentFile', 'Document File', offset);
+    result += formatField(event, 'displayName', 'Display Name', offset);
     result += formatField(event, 'line', 'Line', offset);
     result += formatField(event, 'column', 'Column', offset);
     result += formatField(event, 'message', 'Message', offset);
-    result += formatField(event, 'displayName', 'Display Name', offset);
     result += formatField(event, 'appName', 'App Name', offset);
     result += formatField(event, 'errorType', 'Error Type', offset);
     result += formatField(event, 'errorDescription', 'Error Description', offset);
@@ -243,9 +285,7 @@ function enableChannel(channel) {
 
 function disableChannel(channel) {
     console.log('Disabling channel ' + channel);
-    // using shelljs here to execute the command syncronously 
-    // async exec doesn't seem to do the trick when the process is exiting
-    shelljs.exec('wevtutil set-log "' + channel + '" /e:false /q:true');
+    exec('wevtutil set-log "' + channel + '" /e:false /q:true');
 }
 
 function exec(command) {
