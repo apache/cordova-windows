@@ -216,15 +216,25 @@ module.exports.deployToDesktop = function (package, deployTarget) {
 
     return utils.getAppStoreUtils().then(function(appStoreUtils) {
         return getPackageName(path.join(__dirname, '..', '..')).then(function(pkgname) {
+
+            var oldArch;
             // uninstalls previous application instance (if exists)
             console.log('Attempt to uninstall previous application version...');
             return spawn('powershell', ['-ExecutionPolicy', 'RemoteSigned', 'Import-Module "' + appStoreUtils + '"; Uninstall-App ' + pkgname])
             .then(function() {
                 console.log('Attempt to install application...');
+                oldArch = process.env.PROCESSOR_ARCHITECTURE;
+                if (package.arch === 'x64') {
+                    process.env.PROCESSOR_ARCHITECTURE = 'AMD64';
+                }
                 return spawn('powershell', ['-ExecutionPolicy', 'RemoteSigned', 'Import-Module "' + appStoreUtils + '"; Install-App', utils.quote(package.script)]);
             }).then(function() {
+                process.env.PROCESSOR_ARCHITECTURE = oldArch;
                 console.log('Starting application...');
                 return spawn('powershell', ['-ExecutionPolicy', 'RemoteSigned', 'Import-Module "' + appStoreUtils + '"; Start-Locally', pkgname]);
+            }, function (error) {
+                process.env.PROCESSOR_ARCHITECTURE = oldArch;
+                throw error;
             });
         });
     });
