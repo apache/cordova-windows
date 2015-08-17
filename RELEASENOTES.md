@@ -24,6 +24,40 @@ Update these notes using: git log --pretty=format:'* %s' --topo-order --no-merge
 
 cordova-windows is a library that enables developers to create Windows 8/8.1/10 and WP8.1 application projects that support Cordova APIs.
 
+[4.1.0]
+* CB-9499: Run failure targeting x64 with an x86 version of Node
+* CB-8936: Logs: Stability and formatting improvements
+* CB-8936: Windows logs: Improvements
+* CB-9482: Mobile deployment failure 
+* CB-9482: Mobile emulator deployment failure
+* CB-8936: Added logging functionality
+* CB-9458: Updated the baseline version of Universal Windows to 10240.
+* CB-9456: Fixed windows app crash on startup
+* CB-9450: `WindowsStoreIdentityName` preference for Store publishing
+* CB-9455: Fixed requirements check failure
+* CB-8965: Wait for project creation before adding to it.
+* CB-8965: Copy cordova-js-src directory to platform folder during create
+* CB-9359: Adds support for .appxbundle creation
+* CB-9410: Added preferences for Windows Store ingestion.
+* CB-9408: Added a `windows-packageVersion` attribute to the `<widget>` element 
+* CB-9283: Add support for Windows 10 WinAppDeployCmd for deployment to remote devices.
+* CB-9239: Fixes issue with windows prepare on posix platforms.
+* CB-9235: Adds more checks based on the windows-target-version
+* CB-9159: Fix WP8.1 deploy when 'window-target-version' is 10.0.
+* CB-9335: Windows quality-of-life improvements.  
+* put channel in its proper place, and removed comment. Removed extra )
+* add same activated channel and activationContext for non-browserify workflows
+* add activationContext + activated channel to windows
+* CB-9271: Removed the unnecessary device capabilities from the Windows 10 app manifest. 
+* CB-9252: Migrate WinJS to an NPM dependency
+* Adding .ratignore file.
+* CB-9164 Better error message when deploying to Windows10 phone emulator
+* CB-9097: fail with a more descriptive error if run as admin
+
+** Known Issues with 4.1.0 and Windows 10**
+
+* The Windows 10 SDK includes a tool which can deploy to Windows 10 Phone, but not to a Windows 10 Phone Emulator.  To deploy to an emulator, open your solution file in Visual Studio.
+
 [4.0.0]
 * CB-8954 Adds `requirements` command support to check_reqs module
 * CB-9073 Fixes build error when path to project contains `&` symbol
