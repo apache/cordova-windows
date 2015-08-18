@@ -246,7 +246,7 @@ function WinAppDeployCmdTool(targetOsVersion) {
     /* jshint ignore:end */
 }
 
-WinAppDeployCmdTool.prototype = Object.create(WinAppDeployCmdTool);
+WinAppDeployCmdTool.prototype = Object.create(DeploymentTool.prototype);
 WinAppDeployCmdTool.prototype.constructor = WinAppDeployCmdTool;
 
 WinAppDeployCmdTool.prototype.enumerateDevices = function() {
