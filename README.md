@@ -19,41 +19,46 @@
 #
 -->
 
-Apache Cordova for Windows
-===
+#Apache Cordova for Windows
 
 [![Build status](https://ci.appveyor.com/api/projects/status/19h1fq0lyvwtei05/branch/master)](https://ci.appveyor.com/project/Humbedooh/cordova-windows/branch/master)
 
-Includes a universal app template to build [Apache Cordova](http://cordova.apache.org) applications that target Windows 10, and Windows 8.1, as well as Windows Phone 8.1. An Apache Cordova based applications is, at the core, an application written with web technology: HTML, CSS and JavaScript.
+This repo contains the code for an [Apache Cordova](http://cordova.apache.org) platform that allows you to build applications that target Windows 10, and Windows 8.1, as well as Windows Phone 8.1. An Apache Cordova based applications is written in HTML, CSS and JavaScript.
 
-(Warning: Windows 8 has been deprecated, please update your applications to target Windows 8.1)
+(Warning: Windows 8 has been deprecated, please update your applications to target Windows 8.1 or above)
 
 [Apache Cordova](http://cordova.apache.org) is a project of [The Apache Software Foundation (ASF)](http://apache.org)
 
-Requires
----
-**To build for Windows 10** Platform support is experimental
+#Requirements
+### Windows 10, Windows 8.1, Windows Phone 8.1
 
-**To build for Windows 10** (Windows 10, Windows 8.1, and Windows Phone 8.1)
+Host OS: Windows 8.1 or Windows 10
 
-  Windows 8.1 or Windows 10, along with [Visual Studio 2015 RC](http://www.visualstudio.com/downloads)
+Install the tools: [Visual Studio 2015](http://www.visualstudio.com/downloads)
 
-**To build for Windows 8 or Windows 8.1** (Windows 8, Windows 8.1 and Windows Phone 8.1)
+### Windows 8.1,Windows Phone 8.1
 
-  Windows 8.1 along with [Visual Studio 2013 Express](http://www.visualstudio.com/downloads/download-visual-studio-vs#d-express-windows-8).
+Host OS: Windows 8.1
 
-**To build for Windows 8 only (deprecated!)**
+Install the tools: [Visual Studio 2013 Express](http://www.visualstudio.com/downloads/download-visual-studio-vs#d-express-windows-8).
 
-   Windows 8 or 8.1 along with [Visual Studio 2012 Express](http://www.visualstudio.com/downloads).
+### Windows 8 only (deprecated)
 
-BUGS?
------
+Host OS: Windows 8 or 8.1
 
-- File them at the [Apache Cordova Issue Tracker](https://issues.apache.org/jira/browse/CB)
+Install the tools: [Visual Studio 2012 Express](http://www.visualstudio.com/downloads).
 
+#Getting started
+The best way to use this is to install the [Cordova CLI](https://www.npmjs.com/package/cordova), create a project, add the windows platform, and run the app:
+	
+	npm install -g cordova
+	cordova create test
+	cordova platform add windows
+	cordova run windows
+	
+#Resport Issues
+Report them at the [Apache Cordova Issue Tracker](https://issues.apache.org/jira/browse/CB). Create a user account, use `windows` as the component.
 
-Further Reading
----
-
+#Further Reading
 - [Windows Platform Guide](http://cordova.apache.org/docs/en/edge/guide_platforms_win8_index.md.html#Windows%208%20Platform%20Guide)
 - [Apache Cordova Documentation](http://docs.cordova.io)
