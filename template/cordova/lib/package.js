@@ -192,13 +192,13 @@ module.exports.deployToPhone = function (package, deployTarget, targetWindows10,
                     console.log('Deploying app package...');
                     return deploymentTool.installAppPackage(package.appx, target, /*shouldLaunch*/ true, /*shouldUpdate*/ false);
                 }).then(function() { }, function(error) {
-                    if (error.indexOf('Error code 2148734208 for command') === 0) {
+                    if (error.message.indexOf('Error code 2148734208 for command') === 0) {
                         return deploymentTool.installAppPackage(package.appx, target, /*shouldLaunch*/ true, /*shouldUpdate*/ true);
-                    } else if (error.indexOf('Error code -2146233088') === 0) {
+                    } else if (error.message.indexOf('Error code -2146233088') === 0) {
                         throw new Error('No Windows Phone device was detected.');
                     } else {
                         console.warn('Unexpected error from installation:');
-                        console.warn(error);
+                        console.warn(error.message);
                         console.warn('You may have previously installed the app with an earlier version of cordova-windows.');
                         console.warn('Ensure the app is uninstalled from the phone and then try to run again.');
                         throw error;
