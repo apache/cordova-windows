@@ -1,5 +1,5 @@
 ﻿// Platform: windows
-// 2c29e187e4206a6a77fba940ef6f77aef5c7eb8c
+// 5fdee87b2814bdafb9126f09bdb95f255db25d42
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
  under the License.
 */
 ;(function() {
-var PLATFORM_VERSION_BUILD_LABEL = '4.1.0-dev';
+var PLATFORM_VERSION_BUILD_LABEL = '4.1.0';
 // file: src/scripts/require.js
 
 /*jshint -W079 */
@@ -101,7 +101,9 @@ if (typeof module === "object" && typeof require === "function") {
 // file: src/cordova.js
 define("cordova", function(require, exports, module) {
 
-if(window.cordova){
+// Workaround for Windows 10 in hosted environment case
+// http://www.w3.org/html/wg/drafts/html/master/browsers.html#named-access-on-the-window-object
+if (window.cordova && !(window.cordova instanceof HTMLElement)) {
     throw new Error("cordova already defined");
 }
 
@@ -815,7 +817,7 @@ module.exports = channel;
 
 });
 
-// file: node_modules/cordova-windows/cordova-js-src/exec.js
+// file: D:/cordova/cordova-windows/cordova-js-src/exec.js
 define("cordova/exec", function(require, exports, module) {
 
 /*jslint sloppy:true, plusplus:true*/
@@ -1074,6 +1076,7 @@ define("cordova/init_b", function(require, exports, module) {
 
 var channel = require('cordova/channel');
 var cordova = require('cordova');
+var modulemapper = require('cordova/modulemapper');
 var platform = require('cordova/platform');
 var utils = require('cordova/utils');
 
@@ -1166,6 +1169,7 @@ platform.bootstrap && platform.bootstrap();
  * Create all cordova objects once native side is ready.
  */
 channel.join(function() {
+    modulemapper.mapModules(window);
 
     platform.initialize && platform.initialize();
 
@@ -1284,7 +1288,104 @@ exports.reset();
 
 });
 
-// file: node_modules/cordova-windows/cordova-js-src/platform.js
+// file: src/common/modulemapper_b.js
+define("cordova/modulemapper_b", function(require, exports, module) {
+
+var builder = require('cordova/builder'),
+    symbolList = [],
+    deprecationMap;
+
+exports.reset = function() {
+    symbolList = [];
+    deprecationMap = {};
+};
+
+function addEntry(strategy, moduleName, symbolPath, opt_deprecationMessage) {
+    symbolList.push(strategy, moduleName, symbolPath);
+    if (opt_deprecationMessage) {
+        deprecationMap[symbolPath] = opt_deprecationMessage;
+    }
+}
+
+// Note: Android 2.3 does have Function.bind().
+exports.clobbers = function(moduleName, symbolPath, opt_deprecationMessage) {
+    addEntry('c', moduleName, symbolPath, opt_deprecationMessage);
+};
+
+exports.merges = function(moduleName, symbolPath, opt_deprecationMessage) {
+    addEntry('m', moduleName, symbolPath, opt_deprecationMessage);
+};
+
+exports.defaults = function(moduleName, symbolPath, opt_deprecationMessage) {
+    addEntry('d', moduleName, symbolPath, opt_deprecationMessage);
+};
+
+exports.runs = function(moduleName) {
+    addEntry('r', moduleName, null);
+};
+
+function prepareNamespace(symbolPath, context) {
+    if (!symbolPath) {
+        return context;
+    }
+    var parts = symbolPath.split('.');
+    var cur = context;
+    for (var i = 0, part; part = parts[i]; ++i) {
+        cur = cur[part] = cur[part] || {};
+    }
+    return cur;
+}
+
+exports.mapModules = function(context) {
+    var origSymbols = {};
+    context.CDV_origSymbols = origSymbols;
+    for (var i = 0, len = symbolList.length; i < len; i += 3) {
+        var strategy = symbolList[i];
+        var moduleName = symbolList[i + 1];
+        var module = require(moduleName);
+        // <runs/>
+        if (strategy == 'r') {
+            continue;
+        }
+        var symbolPath = symbolList[i + 2];
+        var lastDot = symbolPath.lastIndexOf('.');
+        var namespace = symbolPath.substr(0, lastDot);
+        var lastName = symbolPath.substr(lastDot + 1);
+
+        var deprecationMsg = symbolPath in deprecationMap ? 'Access made to deprecated symbol: ' + symbolPath + '. ' + deprecationMsg : null;
+        var parentObj = prepareNamespace(namespace, context);
+        var target = parentObj[lastName];
+
+        if (strategy == 'm' && target) {
+            builder.recursiveMerge(target, module);
+        } else if ((strategy == 'd' && !target) || (strategy != 'd')) {
+            if (!(symbolPath in origSymbols)) {
+                origSymbols[symbolPath] = target;
+            }
+            builder.assignOrWrapInDeprecateGetter(parentObj, lastName, module, deprecationMsg);
+        }
+    }
+};
+
+exports.getOriginalSymbol = function(context, symbolPath) {
+    var origSymbols = context.CDV_origSymbols;
+    if (origSymbols && (symbolPath in origSymbols)) {
+        return origSymbols[symbolPath];
+    }
+    var parts = symbolPath.split('.');
+    var obj = context;
+    for (var i = 0; i < parts.length; ++i) {
+        obj = obj && obj[parts[i]];
+    }
+    return obj;
+};
+
+exports.reset();
+
+
+});
+
+// file: D:/cordova/cordova-windows/cordova-js-src/platform.js
 define("cordova/platform", function(require, exports, module) {
 
 module.exports = {
