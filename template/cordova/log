@@ -24,13 +24,14 @@ var log  = require('./lib/log'),
     args = process.argv;
 
 // Usage support for when args are given
-if(args.length > 2) {
-    log.help();
-} else {
-    Q().then(function() {
-        log.run();
-    }, function(err) {
-        console.error('ERROR: ' + err);
-        process.exit(2);
-    });
-}
+Q().then(function() {
+    var argsToPass = [];
+    if (args.length > 2) {
+        argsToPass = args.slice(2);
+    }
+    log.run(argsToPass);
+}, function(err) {
+    console.error('ERROR: ' + err);
+    process.exit(2);
+});
+
