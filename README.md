@@ -22,6 +22,7 @@
 #Apache Cordova for Windows
 
 [![Build status](https://ci.appveyor.com/api/projects/status/19h1fq0lyvwtei05/branch/master)](https://ci.appveyor.com/project/Humbedooh/cordova-windows/branch/master)
+[![Build Status](https://travis-ci.org/apache/cordova-windows.svg?branch=master)](https://travis-ci.org/apache/cordova-windows)
 
 This repo contains the code for an [Apache Cordova](http://cordova.apache.org) platform that allows you to build applications that target Windows 10, and Windows 8.1, as well as Windows Phone 8.1. An Apache Cordova based applications is written in HTML, CSS and JavaScript.
 
