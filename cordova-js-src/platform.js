@@ -38,6 +38,24 @@ module.exports = {
             channel.onActivated = cordova.addDocumentEventHandler('activated');
         }
         channel.onNativeReady.fire();
+        
+        // Only load this code if we're running on Win10 in a non-emulated app frame, otherwise crash \o/
+        if (parseInt(window.clientInformation.userAgent.match(/Windows NT ([0-9.]+)/)[1]) >= 10) {
+            var sysnavman = Windows.UI.Core.SystemNavigationManager.getForCurrentView();
+            // Inject a listener for the backbutton on the document.
+            var backButtonChannel = cordova.addDocumentEventHandler('backbutton');
+            backButtonChannel.onHasSubscribersChange = function() {
+                // If we just attached the first handler or detached the last handler,
+                // let native know we need to override the back button.
+                sysnavman.appViewBackButtonVisibility = (this.numHandlers == 1);
+            };
+            
+            var backRequestedHandler = function backRequestedHandler() {
+                cordova.fireDocumentEvent('backbutton',null,true);
+                return true;
+            };
+            sysnavman.addEventListener("backrequested", backRequestedHandler, false);
+        }
 
         var onWinJSReady = function () {
             var app = WinJS.Application;
