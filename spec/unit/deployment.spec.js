@@ -21,6 +21,7 @@ var rewire     = require('rewire'),
     deployment = rewire('../../template/cordova/lib/deployment'),
     run        = deployment.__get__('run'),
     Q          = require('q'),
+    path       = require('path'),
 
     AppDeployCmdTool = deployment.__get__('AppDeployCmdTool'),
     WinAppDeployCmdTool = deployment.__get__('WinAppDeployCmdTool');
@@ -49,7 +50,7 @@ describe('The correct version of the app deployment tool is obtained.', function
 describe('Windows 10 deployment interacts with the file system as expected.', function() {
 
     function runMock(cmd, args, cwd) {
-        expect(cmd).toBe('c:\\Program Files (x86)\\Windows Kits\\10\\bin\\x86\\WinAppDeployCmd.exe');
+        expect(cmd).toBe(path.join('c:/Program Files (x86)/Windows Kits/10/bin/x86/WinAppDeployCmd.exe'));
         switch (args[0]) {
             case 'devices':
                 var output = 'Windows App Deployment Tool\r\nVersion 10.0.0.0\r\nCopyright (c) Microsoft Corporation. All rights reserved.\r\n\r\nDiscovering devices...\r\nIP Address      GUID                                    Model/Name\r\n127.0.0.1   00000015-b21e-0da9-0000-000000000000    Lumia 1520 (RM-940)\r\n10.120.70.172   00000000-0000-0000-0000-00155d619532    00155D619532\r\n10.120.68.150   00000000-0000-0000-0000-00155d011765    00155D011765\r\nDone.';
@@ -72,7 +73,7 @@ describe('Windows 10 deployment interacts with the file system as expected.', fu
     var mockedProgramFiles = process.env['ProgramFiles(x86)'];
     beforeEach(function() {
         deployment.__set__('run', runMock);    
-        process.env['ProgramFiles(x86)'] = 'c:\\Program Files (x86)';
+        process.env['ProgramFiles(x86)'] = path.join('c:/Program Files (x86)');
     });
     afterEach(function() {
         deployment.__set__('run', run);
@@ -150,7 +151,7 @@ describe('Windows 10 deployment interacts with the file system as expected.', fu
 describe('Windows 8.1 deployment interacts with the file system as expected.', function() {
 
     function runMock(cmd, args, cwd) {
-        expect(cmd).toBe('c:\\Program Files (x86)\\Microsoft SDKs\\Windows Phone\\v8.1\\Tools\\AppDeploy\\AppDeployCmd.exe');
+        expect(cmd).toBe(path.join('c:/Program Files (x86)/Microsoft SDKs/Windows Phone/v8.1/Tools/AppDeploy/AppDeployCmd.exe'));
         switch (args[0]) {
             case '/EnumerateDevices':
                 var output = '\r\nDevice Index    Device Name\r\n------------    -------------------------------\r\n 0              Device\r\n 1              Mobile Emulator 10.0.10150.0 WVGA 4 inch 512MB\r\n 2              Mobile Emulator 10.0.10150.0 WVGA 4 inch 1GB\r\n 3              Mobile Emulator 10.0.10150.0 WXGA 4.5 inch 1GB\r\n 4              Mobile Emulator 10.0.10150.0 720p 5 inch 1GB\r\n 5              Mobile Emulator 10.0.10150.0 1080p 6 inch 2GB\r\n 6              Emulator 8.1 WVGA 4 inch 512MB\r\n 7              Emulator 8.1 WVGA 4 inch\r\n 8              Emulator 8.1 WXGA 4.5 inch\r\n 9              Emulator 8.1 720P 4.7 inch\r\n 10             Emulator 8.1 1080P 5.5 inch\r\n 11             Emulator 8.1 1080P 6 inch\r\nDone.\r\n';
@@ -178,7 +179,7 @@ describe('Windows 8.1 deployment interacts with the file system as expected.', f
     var mockedProgramFiles = process.env['ProgramFiles(x86)'];
     beforeEach(function() {
         deployment.__set__('run', runMock);    
-        process.env['ProgramFiles(x86)'] = 'c:\\Program Files (x86)';
+        process.env['ProgramFiles(x86)'] = path.join('c:/Program Files (x86)');
     });
     afterEach(function() {
         deployment.__set__('run', run);
