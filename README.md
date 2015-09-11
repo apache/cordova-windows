@@ -57,7 +57,7 @@ The best way to use this is to install the [Cordova CLI](https://www.npmjs.com/p
 	cordova platform add windows
 	cordova run windows
 	
-#Resport Issues
+#Report Issues
 Report them at the [Apache Cordova Issue Tracker](https://issues.apache.org/jira/browse/CB). Create a user account, use `windows` as the component.
 
 #Further Reading
