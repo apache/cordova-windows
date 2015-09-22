@@ -77,7 +77,13 @@ function checkMSBuildVersion(version) {
         // fetch msbuild path from 'reg' output
         var path = /MSBuildToolsPath\s+REG_SZ\s+(.*)/i.exec(output);
         if (path) {
-            deferred.resolve(new MSBuildTools(version, path[1]));
+            path = path[1];
+            // CB-9565: Windows 10 invokes .NET Native compiler, which only runs on x86 arch,
+            // so if we're running an x64 Node, make sure to use x86 tools.
+            if (version === '14.0' && path.indexOf('amd64')) {
+                path = require('path').join(path, '..');
+            }
+            deferred.resolve(new MSBuildTools(version, path));
             return;
         }
         deferred.resolve(null); // not found
