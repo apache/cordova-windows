@@ -173,11 +173,6 @@ function applyCoreProperties(config, manifest, manifestPath, xmlnsPrefix, target
         (identityNode.attrib.Version = version);
     }
 
-    // Update publisher id (identity)
-    if (config.publisherId && identityNode.attrib.Publisher !== config.publisherId) {
-        identityNode.attrib.Publisher = config.publisherId;
-    }
-
     // Update name (windows8 has it in the Application[@Id] and Application.VisualElements[@DisplayName])
     var app = manifest.find('.//Application');
     if(!app) {
