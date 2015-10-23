@@ -203,6 +203,10 @@ function applyCoreProperties(config, manifest, manifestPath, xmlnsPrefix, target
     if (name) {
         (visualElems.attrib.DisplayName = name);
     }
+    var description = config.description();
+    if (description) {
+        visualElems.attrib.Description = description;
+    }
 
     // CB-9410: Get a display name and publisher display name.  In the Windows Store, certain
     // strings which are typically used in Cordova aren't valid for Store ingestion.
