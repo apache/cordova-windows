@@ -59,6 +59,30 @@ module.exports = {
                 cordova.fireDocumentEvent('activated', platform.activationContext, true);
             };
 
+            // preserve reference to original backclick implementation
+            var defaultBackButtonHandler = app.onbackclick;
+            // create document event handler for backbutton
+            var backButtonChannel = cordova.addDocumentEventHandler('backbutton');
+
+            // inject new back button handler
+            app.onbackclick = function (e) {
+                // check if listeners are registered, if yes use custom backbutton event
+                // NOTE: backbutton handlers have to throw an exception in order to exit the app
+                if (backButtonChannel.numHandlers >= 1) {
+                    try {
+                        cordova.fireDocumentEvent('backbutton', e, true);
+                        return true;
+                    }
+                    catch (e) {
+                        return false;
+                    }
+                }
+                // if not listeners are active, use default implementation (backwards compatibility)
+                else {
+                    return defaultBackButtonHandler.apply(app, arguments);
+                }
+            };
+
             app.addEventListener("checkpoint", checkpointHandler);
             app.addEventListener("activated", activationHandler, false);
             Windows.UI.WebUI.WebUIApplication.addEventListener("resuming", resumingHandler, false);
