@@ -68,7 +68,7 @@ declared:
 * Pictures Library (`picturesLibrary`)
 * Videos Library (`videosLibrary`)
 * Removable Storage (`removableStorage`)
-* Internet client/server (`internetClientClientServer`) - note that `internetClient` is 
+* Internet client/server (`internetClientServer`) - note that `internetClient` is 
 still permitted
 * Private network client/server (`privateNetworkClientServer`)
 
