@@ -35,7 +35,7 @@ var ROOT = path.join(__dirname, '..', '..'),
     BASE_UAP_VERSION    = new Version(10, 0, 10240, 0),
     UAP_RESTRICTED_CAPS = ['enterpriseAuthentication', 'sharedUserCertificates',
                            'documentsLibrary', 'musicLibrary', 'picturesLibrary',
-                           'videosLibrary', 'removableStorage', 'internetClientClientServer',
+                           'videosLibrary', 'removableStorage', 'internetClientServer',
                            'privateNetworkClientServer'],
     // UAP namespace capabilities come from the XSD type ST_Capability_Uap from AppxManifestTypes.xsd
     CAPS_NEEDING_UAPNS  = ['documentsLibrary', 'picturesLibrary', 'videosLibrary',
