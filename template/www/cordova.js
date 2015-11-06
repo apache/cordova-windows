@@ -1,5 +1,5 @@
 ﻿// Platform: windows
-// 5fdee87b2814bdafb9126f09bdb95f255db25d42
+// 7703d38498920bdcfadd574e475553a26fc490e5
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
  under the License.
 */
 ;(function() {
-var PLATFORM_VERSION_BUILD_LABEL = '4.2.0-dev';
+var PLATFORM_VERSION_BUILD_LABEL = '4.2.0';
 // file: src/scripts/require.js
 
 /*jshint -W079 */
@@ -817,7 +817,7 @@ module.exports = channel;
 
 });
 
-// file: D:/cordova/cordova-windows/cordova-js-src/exec.js
+// file: c:/cordova/cordova-windows/cordova-js-src/exec.js
 define("cordova/exec", function(require, exports, module) {
 
 /*jslint sloppy:true, plusplus:true*/
@@ -1078,9 +1078,10 @@ var channel = require('cordova/channel');
 var cordova = require('cordova');
 var modulemapper = require('cordova/modulemapper');
 var platform = require('cordova/platform');
+var pluginloader = require('cordova/pluginloader');
 var utils = require('cordova/utils');
 
-var platformInitChannelsArray = [channel.onDOMContentLoaded, channel.onNativeReady];
+var platformInitChannelsArray = [channel.onDOMContentLoaded, channel.onNativeReady, channel.onPluginsReady];
 
 // setting exec
 cordova.exec = require('cordova/exec');
@@ -1164,6 +1165,14 @@ if (window._nativeReady) {
 
 // Call the platform-specific initialization.
 platform.bootstrap && platform.bootstrap();
+
+// Wrap in a setTimeout to support the use-case of having plugin JS appended to cordova.js.
+// The delay allows the attached modules to be defined before the plugin loader looks for them.
+setTimeout(function() {
+    pluginloader.load(function() {
+        channel.onPluginsReady.fire();
+    });
+}, 0);
 
 /**
  * Create all cordova objects once native side is ready.
@@ -1385,7 +1394,7 @@ exports.reset();
 
 });
 
-// file: D:/cordova/cordova-windows/cordova-js-src/platform.js
+// file: c:/cordova/cordova-windows/cordova-js-src/platform.js
 define("cordova/platform", function(require, exports, module) {
 
 module.exports = {
@@ -1431,6 +1440,9 @@ module.exports = {
             app.addEventListener("checkpoint", checkpointHandler);
             app.addEventListener("activated", activationHandler, false);
             Windows.UI.WebUI.WebUIApplication.addEventListener("resuming", resumingHandler, false);
+
+            injectBackButtonHandler();
+
             app.start();
         };
 
@@ -1459,14 +1471,59 @@ module.exports = {
     }
 };
 
+function injectBackButtonHandler() {
+
+    var app = WinJS.Application;
+
+    // create document event handler for backbutton
+    var backButtonChannel = cordova.addDocumentEventHandler('backbutton');
+
+    // preserve reference to original backclick implementation
+    // `false` as a result will trigger system default behaviour
+    var defaultBackButtonHandler = app.onbackclick || function () { return false; };
+
+    var backRequestedHandler = function backRequestedHandler(evt) {
+        // check if listeners are registered, if yes use custom backbutton event
+        // NOTE: On Windows Phone 8.1 backbutton handlers have to throw an exception in order to exit the app
+        if (backButtonChannel.numHandlers >= 1) {
+            try {
+                cordova.fireDocumentEvent('backbutton', evt, true);
+                evt.handled = true; // Windows Mobile requires handled to be set as well;
+                return true;
+            }
+            catch (e) {
+                return false;
+            }
+        }
+        // if not listeners are active, use default implementation (backwards compatibility)
+        else {
+            return defaultBackButtonHandler.apply(app, arguments);
+        }
+    };
+
+    // Only load this code if we're running on Win10 in a non-emulated app frame, otherwise crash \o/
+    if (navigator.appVersion.indexOf('MSAppHost/3.0') !== -1) { // Windows 10 UWP (PC/Tablet/Phone)
+        var navigationManager = Windows.UI.Core.SystemNavigationManager.getForCurrentView();
+        // Inject a listener for the backbutton on the document.
+        backButtonChannel.onHasSubscribersChange = function () {
+            // If we just attached the first handler or detached the last handler,
+            // let native know we need to override the back button.
+            navigationManager.appViewBackButtonVisibility = (this.numHandlers > 0) ?
+                Windows.UI.Core.AppViewBackButtonVisibility.visible :
+                Windows.UI.Core.AppViewBackButtonVisibility.collapsed;
+        };
+
+        navigationManager.addEventListener("backrequested", backRequestedHandler, false);
+    } else { // Windows 8.1 Phone
+        // inject new back button handler
+        app.onbackclick = backRequestedHandler;
+    }
+}
+
 });
 
 // file: src/common/pluginloader.js
 define("cordova/pluginloader", function(require, exports, module) {
-
-/*
-    NOTE: this file is NOT used when we use the browserify workflow
-*/
 
 var modulemapper = require('cordova/modulemapper');
 var urlutil = require('cordova/urlutil');
@@ -1572,6 +1629,54 @@ exports.load = function(callback) {
         var moduleList = require("cordova/plugin_list");
         handlePluginsObject(pathPrefix, moduleList, callback);
     }, callback);
+};
+
+
+});
+
+// file: src/common/pluginloader_b.js
+define("cordova/pluginloader_b", function(require, exports, module) {
+
+var modulemapper = require('cordova/modulemapper');
+
+// Handler for the cordova_plugins.js content.
+// See plugman's plugin_loader.js for the details of this object.
+function handlePluginsObject(moduleList) {
+    // if moduleList is not defined or empty, we've nothing to do
+    if (!moduleList || !moduleList.length) {
+        return;
+    }
+
+    // Loop through all the modules and then through their clobbers and merges.
+    for (var i = 0, module; module = moduleList[i]; i++) {
+        if (module.clobbers && module.clobbers.length) {
+            for (var j = 0; j < module.clobbers.length; j++) {
+                modulemapper.clobbers(module.id, module.clobbers[j]);
+            }
+        }
+
+        if (module.merges && module.merges.length) {
+            for (var k = 0; k < module.merges.length; k++) {
+                modulemapper.merges(module.id, module.merges[k]);
+            }
+        }
+
+        // Finally, if runs is truthy we want to simply require() the module.
+        if (module.runs) {
+            modulemapper.runs(module.id);
+        }
+    }
+}
+
+// Loads all plugins' js-modules. Plugin loading is syncronous in browserified bundle
+// but the method accepts callback to be compatible with non-browserify flow.
+// onDeviceReady is blocked on onPluginsReady. onPluginsReady is fired when there are
+// no plugins to load, or they are all done.
+exports.load = function(callback) {
+    var moduleList = require("cordova/plugin_list");
+    handlePluginsObject(moduleList);
+
+    callback();
 };
 
 
