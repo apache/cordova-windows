@@ -24,6 +24,26 @@ Update these notes using: git log --pretty=format:'* %s' --topo-order --no-merge
 
 cordova-windows is a library that enables developers to create Windows 8/8.1/10 and WP8.1 application projects that support Cordova APIs.
 
+[4.2.0]
+
+* CB-8481: Add backbutton support on Windows 10 and Windows Phone 8.1
+* CB-9565: Fixed build failure for Windows 10 when using Node x64.
+* Changed output path of windows platforms to support cumulative build in VS.
+* Created new solution file for dev14 and renaming old to vs2013.sln
+* CB-9870: Updated hello world template
+* Fixed `internetClientServer` capability name in prepare and docs
+* CB-9800: Fixing contribute link.
+* CB-9836: Add .gitattributes to prevent CRLF line endings in repos
+* CB-9632 Fixed tests not to fail on Travis-CI
+* CB-8936 Introduced --dump arg to log script.
+* Fix the case of Q requires.
+* Fixed up "resport" to "report".
+* Adds Travis badge
+
+** Known Issues with 4.2.0 and Windows 10**
+
+* The Windows 10 SDK includes a tool which can deploy to Windows 10 Phone, but not to a Windows 10 Phone Emulator.  To deploy to an emulator, open your solution file in Visual Studio.
+
 [4.1.0]
 * CB-9499: Run failure targeting x64 with an x86 version of Node
 * CB-8936: Logs: Stability and formatting improvements
