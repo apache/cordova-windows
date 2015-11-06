@@ -38,24 +38,6 @@ module.exports = {
             channel.onActivated = cordova.addDocumentEventHandler('activated');
         }
         channel.onNativeReady.fire();
-        
-        // Only load this code if we're running on Win10 in a non-emulated app frame, otherwise crash \o/
-        if (parseInt(window.clientInformation.userAgent.match(/Windows NT ([0-9.]+)/)[1]) >= 10) {
-            var sysnavman = Windows.UI.Core.SystemNavigationManager.getForCurrentView();
-            // Inject a listener for the backbutton on the document.
-            var backButtonChannel = cordova.addDocumentEventHandler('backbutton');
-            backButtonChannel.onHasSubscribersChange = function() {
-                // If we just attached the first handler or detached the last handler,
-                // let native know we need to override the back button.
-                sysnavman.appViewBackButtonVisibility = (this.numHandlers == 1);
-            };
-            
-            var backRequestedHandler = function backRequestedHandler() {
-                cordova.fireDocumentEvent('backbutton',null,true);
-                return true;
-            };
-            sysnavman.addEventListener("backrequested", backRequestedHandler, false);
-        }
 
         var onWinJSReady = function () {
             var app = WinJS.Application;
@@ -77,33 +59,12 @@ module.exports = {
                 cordova.fireDocumentEvent('activated', platform.activationContext, true);
             };
 
-            // preserve reference to original backclick implementation
-            var defaultBackButtonHandler = app.onbackclick;
-            // create document event handler for backbutton
-            var backButtonChannel = cordova.addDocumentEventHandler('backbutton');
-
-            // inject new back button handler
-            app.onbackclick = function (e) {
-                // check if listeners are registered, if yes use custom backbutton event
-                // NOTE: backbutton handlers have to throw an exception in order to exit the app
-                if (backButtonChannel.numHandlers >= 1) {
-                    try {
-                        cordova.fireDocumentEvent('backbutton', e, true);
-                        return true;
-                    }
-                    catch (e) {
-                        return false;
-                    }
-                }
-                // if not listeners are active, use default implementation (backwards compatibility)
-                else {
-                    return defaultBackButtonHandler.apply(app, arguments);
-                }
-            };
-
             app.addEventListener("checkpoint", checkpointHandler);
             app.addEventListener("activated", activationHandler, false);
             Windows.UI.WebUI.WebUIApplication.addEventListener("resuming", resumingHandler, false);
+
+            injectBackButtonHandler();
+
             app.start();
         };
 
@@ -131,3 +92,52 @@ module.exports = {
         }
     }
 };
+
+function injectBackButtonHandler() {
+
+    var app = WinJS.Application;
+
+    // create document event handler for backbutton
+    var backButtonChannel = cordova.addDocumentEventHandler('backbutton');
+
+    // preserve reference to original backclick implementation
+    // `false` as a result will trigger system default behaviour
+    var defaultBackButtonHandler = app.onbackclick || function () { return false; };
+
+    var backRequestedHandler = function backRequestedHandler(evt) {
+        // check if listeners are registered, if yes use custom backbutton event
+        // NOTE: On Windows Phone 8.1 backbutton handlers have to throw an exception in order to exit the app
+        if (backButtonChannel.numHandlers >= 1) {
+            try {
+                cordova.fireDocumentEvent('backbutton', evt, true);
+                evt.handled = true; // Windows Mobile requires handled to be set as well;
+                return true;
+            }
+            catch (e) {
+                return false;
+            }
+        }
+        // if not listeners are active, use default implementation (backwards compatibility)
+        else {
+            return defaultBackButtonHandler.apply(app, arguments);
+        }
+    };
+
+    // Only load this code if we're running on Win10 in a non-emulated app frame, otherwise crash \o/
+    if (navigator.appVersion.indexOf('MSAppHost/3.0') !== -1) { // Windows 10 UWP (PC/Tablet/Phone)
+        var navigationManager = Windows.UI.Core.SystemNavigationManager.getForCurrentView();
+        // Inject a listener for the backbutton on the document.
+        backButtonChannel.onHasSubscribersChange = function () {
+            // If we just attached the first handler or detached the last handler,
+            // let native know we need to override the back button.
+            navigationManager.appViewBackButtonVisibility = (this.numHandlers > 0) ?
+                Windows.UI.Core.AppViewBackButtonVisibility.visible :
+                Windows.UI.Core.AppViewBackButtonVisibility.collapsed;
+        };
+
+        navigationManager.addEventListener("backrequested", backRequestedHandler, false);
+    } else { // Windows 8.1 Phone
+        // inject new back button handler
+        app.onbackclick = backRequestedHandler;
+    }
+}
