@@ -17,59 +17,58 @@
        under the License.
 */
 
-/* jshint sub:true */
-
-var Q     = require('q'),
-    fs    = require('fs'),
-    path  = require('path'),
-    nopt  = require('nopt'),
-    shell = require('shelljs'),
-    uuid  = require('node-uuid');
+var Q     = require('q');
+var fs    = require('fs');
+var path  = require('path');
+var shell = require('shelljs');
+var uuid  = require('node-uuid');
+var CordovaError = require('cordova-common').CordovaError;
+var AppxManifest = require('../../template/cordova/lib/AppxManifest');
 
 // Creates cordova-windows project at specified path with specified namespace, app name and GUID
-module.exports.run = function (argv) {
+// module.exports.run = function (argv) {
+module.exports.create = function (destinationDir, config, options, events) {
+    if(!destinationDir) return Q.reject('No destination directory specified.');
 
-    // Parse args
-    var args = nopt({'guid': String}, {}, argv);
-
-    if(!args.argv.remain.length) {
-        return Q.reject('No path specified.');
+    var projectPath = path.resolve(destinationDir);
+    if (fs.existsSync(projectPath)) {
+        return Q.reject(new CordovaError('Project directory already exists:\n\t' + projectPath));
     }
 
     // Set parameters/defaults for create
-    var projectPath = args.argv.remain[0];
-    if (fs.existsSync(projectPath)){
-        return Q.reject('Project directory already exists:\n\t' + projectPath);
-    }
-    var packageName = args.argv.remain[1] || 'Cordova.Example',
-        appName     = args.argv.remain[2] || 'CordovaAppProj',
+    var packageName = (config && config.packageName()) || 'Cordova.Example';
+    var appName = (config && config.name()) || 'CordovaAppProj';
         // 64 symbols restriction goes from manifest schema definition
         // http://msdn.microsoft.com/en-us/library/windows/apps/br211415.aspx
-        safeAppName = appName.length <= 64 ? appName : appName.substr(0, 64),
-        templateOverrides = args.argv.remain[3],
-        guid        = args['guid'] || uuid.v1(),
-        root        = path.join(__dirname, '..', '..');
+    var safeAppName = appName.length <= 64 ? appName : appName.substr(0, 64);
+    var templateOverrides = options.customTemplate;
+    var guid = options.guid || uuid.v1();
+    var root = path.join(__dirname, '..', '..');
 
-    console.log('Creating Cordova Windows Project:');
-    console.log('\tApp Name  : ' + appName);
-    console.log('\tNamespace : ' + packageName);
-    console.log('\tPath      : ' + projectPath);
+    events.emit('log', 'Creating Cordova Windows Project:');
+    events.emit('log', '\tApp Name  : ' + appName);
+    events.emit('log', '\tNamespace : ' + packageName);
+    events.emit('log', '\tPath      : ' + projectPath);
     if (templateOverrides) {
-        console.log('\tCustomTemplatePath : ' + templateOverrides);
+        events.emit('log', '\tCustomTemplatePath : ' + templateOverrides);
     }
 
-
     // Copy the template source files to the new destination
-    console.log('Copying template to ' + projectPath);
+    events.emit('verbose', 'Copying template to ' + projectPath);
     shell.cp('-rf', path.join(root, 'template', '*'), projectPath);
 
+    // Duplicate cordova.js to platform_www otherwise it will get removed by prepare
+    shell.cp('-rf', path.join(root, 'template/www/cordova.js'), path.join(projectPath, 'platform_www'));
+
     // Copy cordova-js-src directory
+    events.emit('verbose', 'Copying cordova-js sources to platform_www');
     shell.cp('-rf', path.join(root, 'cordova-js-src'), path.join(projectPath, 'platform_www'));
 
     // Copy our unique VERSION file, so peeps can tell what version this project was created from.
     shell.cp('-rf', path.join(root, 'VERSION'), projectPath);
 
     // copy node_modules to cordova directory
+    events.emit('verbose', 'Copying node_modules to ' + projectPath);
     shell.cp('-r', path.join(root, 'node_modules'), path.join(projectPath, 'cordova'));
 
     // copy check_reqs module to cordova directory
@@ -77,7 +76,7 @@ module.exports.run = function (argv) {
     shell.cp('-rf', path.join(root, 'bin', 'lib', 'check_reqs*'), path.join(projectPath, 'cordova', 'lib'));
 
     if (templateOverrides && fs.existsSync(templateOverrides)) {
-        console.log('Copying template overrides from ' + templateOverrides + ' to ' + projectPath);
+        events.emit('verbose', 'Copying template overrides from ' + templateOverrides + ' to ' + projectPath);
         shell.cp('-rf', templateOverrides, projectPath);
     }
 
@@ -89,11 +88,18 @@ module.exports.run = function (argv) {
     shell.cp('-f', srcBaseJsPath, destBaseJsPath);
 
     // replace specific values in manifests' templates
-    ['package.windows.appxmanifest', 'package.windows80.appxmanifest', 'package.phone.appxmanifest', 'package.windows10.appxmanifest'].forEach(function (file) {
-        var fileToReplace = path.join(projectPath, file);
-        shell.sed('-i', /\$guid1\$/g, guid, fileToReplace);
-        shell.sed('-i', /\$packagename\$/g, packageName, fileToReplace);
-        shell.sed('-i', /\$projectname\$/g, safeAppName, fileToReplace);
+    events.emit('verbose', 'Updating manifest files with project configuration.');
+    [ 'package.windows.appxmanifest', 'package.windows80.appxmanifest',
+        'package.phone.appxmanifest', 'package.windows10.appxmanifest' ]
+    .forEach(function (item) {
+        var manifest = AppxManifest.get(path.join(projectPath, item));
+        if (manifest.hasPhoneIdentity) {
+            manifest.getPhoneIdentity().setPhoneProductId(guid);
+        }
+
+        manifest.setPackageName(packageName)
+            .setAppName(safeAppName)
+            .write();
     });
 
     // Delete bld forder and bin folder
@@ -101,11 +107,6 @@ module.exports.run = function (argv) {
         shell.rm('-rf', path.join(projectPath, file));
     });
 
-    // TODO: Name the project according to the arguments
-    // update the solution to include the new project by name
-    // version BS
-    // index.html title set to project name ?
-    
     return Q.resolve();
 };
 
@@ -124,16 +125,3 @@ function recursiveCreateDirectory(targetPath, previousPath) {
 
     fs.mkdirSync(targetPath);
 }
-
-module.exports.help = function () {
-    console.log('Usage: create PathToProject [ PackageName [ AppName [ CustomTemplate ] ] ] [--guid=<GUID string>]');
-    console.log('    PathToProject : The path to where you wish to create the project');
-    console.log('    PackageName   : The namespace for the project (default is Cordova.Example)');
-    console.log('    AppName       : The name of the application (default is CordovaAppProj)');
-    console.log('    CustomTemplate: The path to project template overrides');
-    console.log('                        (will be copied over default platform template files)');
-    console.log('    --guid        : The App\'s GUID (default is random generated)');
-    console.log('examples:');
-    console.log('    create C:\\Users\\anonymous\\Desktop\\MyProject');
-    console.log('    create C:\\Users\\anonymous\\Desktop\\MyProject io.Cordova.Example AnApp');
-};

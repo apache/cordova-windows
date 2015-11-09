@@ -19,98 +19,20 @@
 
 var rewire  = require('rewire'),
     prepare = rewire('../../template/cordova/lib/prepare'),
-    Version = require('../../template/cordova/lib/Version'),
-    et      = require('elementtree'),
+    AppxManifest = require('../../template/cordova/lib/AppxManifest'),
+    ConfigParser = require('../../template/cordova/lib/ConfigParser'),
     fs      = require('fs'),
-    getAllMinMaxUAPVersions         = prepare.__get__('getAllMinMaxUAPVersions'),
+    et      = require('elementtree'),
+    events  = require('cordova-common').events,
+    xml     = require('cordova-common').xmlHelpers,
+    updateManifestFile              = prepare.__get__('updateManifestFile'),
     applyCoreProperties             = prepare.__get__('applyCoreProperties'),
     applyAccessRules                = prepare.__get__('applyAccessRules'),
-    checkForRestrictedCaps          = prepare.__get__('checkForRestrictedCapabilities'),
-    ensureUapPrefixedCapabilities   = prepare.__get__('ensureUapPrefixedCapabilities');
+    applyNavigationWhitelist        = prepare.__get__('applyNavigationWhitelist'),
+    applyStartPage                  = prepare.__get__('applyStartPage');
 
 var Win10ManifestPath = 'template/package.windows10.appxmanifest',
     Win81ManifestPath = 'template/package.windows.appxmanifest';
-
-/***
-  * Unit tests for validating that min/max versions are correctly obtained 
-  * (for the function getAllMinMaxUAPVersions) from prepare.js.
-  **/
-describe('Min/Max UAP versions are correctly read from the config file.', function() {
-
-    var mockConfig = {
-        getMatchingPreferences: function(regexp) {
-            return [
-                { name: 'Windows.Universal-MinVersion', value: '10.0.9910.0' },
-                { name: 'Windows.Universal-MaxVersionTested', value: '10.0.9917.0' },
-                { name: 'Windows.Desktop-MinVersion', value: '10.0.9910.0' },
-                { name: 'Microsoft.Xbox-MaxVersionTested', value: '10.0.9917.0' }
-            ];
-        }
-    };
-
-    it('Should correctly transform all versions as a baseline.', function() {
-        var versionSet = getAllMinMaxUAPVersions(mockConfig);
-        var ver9910 = new Version(10, 0, 9910, 0);
-        var ver9917 = new Version(10, 0, 9917, 0);
-
-        expect(versionSet['Windows.Universal']).toBeDefined();
-        expect(ver9910.eq(versionSet['Windows.Universal'].MinVersion)).toBe(true);
-        expect(ver9917.eq(versionSet['Windows.Universal'].MaxVersionTested)).toBe(true);
-
-        expect(versionSet['Windows.Desktop']).toBeDefined();
-        expect(ver9910.eq(versionSet['Windows.Desktop'].MinVersion)).toBe(true);
-        expect(ver9910.eq(versionSet['Windows.Desktop'].MaxVersionTested)).toBe(true);
-
-        expect(versionSet['Microsoft.Xbox']).toBeDefined();
-        expect(ver9917.eq(versionSet['Microsoft.Xbox'].MinVersion)).toBe(true);
-        expect(ver9917.eq(versionSet['Microsoft.Xbox'].MaxVersionTested)).toBe(true);
-
-        expect(Object.keys(versionSet).length).toBe(3);
-    });
-
-});
-
-describe('Min/Max UAP versions are produced correctly even when the config file has no settings.', function() {
-    var mockConfig = {
-        getMatchingPreferences: function(regexp) {
-            return [];
-        }
-    };
-
-    it('Should correctly transform all versions as a baseline.', function() {
-        var versionSet = getAllMinMaxUAPVersions(mockConfig);
-        var verBaseline = prepare.__get__('BASE_UAP_VERSION');
-
-        expect(versionSet['Windows.Universal']).toBeDefined();
-        expect(verBaseline.eq(versionSet['Windows.Universal'].MinVersion)).toBe(true);
-        expect(verBaseline.eq(versionSet['Windows.Universal'].MaxVersionTested)).toBe(true);
-
-        expect(Object.keys(versionSet).length).toBe(1);
-    });
-});
-
-describe('Min/Max UAP versions are correctly read from the config file.', function() {
-
-    var mockConfig = {
-        getMatchingPreferences: function(regexp) {
-            return [
-                { name: 'Windows.Universal-MinVersion', value: '10.0.9910.f' },
-                { name: 'Windows.Universal-MaxVersionTested', value: '10.0.9917.0' },
-            ];
-        }
-    };
-
-    it('Should fail to produce min/max versions with a RangeError.', function() {
-        try {
-            getAllMinMaxUAPVersions(mockConfig);
-            expect(false).toBe(true);
-        }
-        catch (ex) {
-            expect(ex.constructor).toBe(RangeError);
-        }
-    });
-
-});
 
 /***
   * Unit tests for validating default ms-appx-web:// URI scheme in Win10
@@ -124,6 +46,7 @@ var PreferencesBaseline = {
     WindowsStorePublisherName: null,
     WindowsStoreIdentityName: null
 };
+
 function createMockConfigAndManifestForApplyCoreProperties(startPage, preferences, win10, winPackageVersion) {
     if (!preferences) {
         preferences = { };
@@ -148,128 +71,135 @@ function createMockConfigAndManifestForApplyCoreProperties(startPage, preference
     };
 
     var filePath = win10 ? Win10ManifestPath : Win81ManifestPath;
-    var fileContents = fs.readFileSync(filePath, 'utf-8');
-    var manifest = new et.ElementTree(et.XML(fileContents.trim()));
+    var manifest = AppxManifest.get(filePath);
+    spyOn(fs, 'writeFileSync');
 
     return { config: config, manifest: manifest };
 }
 
 function addCapabilityDeclarationToMockManifest(manifest, capability) {
-    var capRoot = manifest.find('.//Capabilities');
+    var capRoot = manifest.doc.find('.//Capabilities');
     var cap = new et.Element('Capability');
     cap.attrib.Name = capability;
     capRoot.append(cap);
 }
 
-describe('A Windows 8.1 project should not have an HTTP or HTTPS scheme for its startup URI.', function() {
+describe('Windows 8.1 project', function() {
 
-    // arrange
-    var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { 'WindowsDefaultUriPrefix': 'http://' }, false);
+    it('should not have an HTTP or HTTPS scheme for its startup URI.', function() {
 
-    // act
-    applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'm2:', false);
+        // arrange
+        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { 'WindowsDefaultUriPrefix': 'http://' }, false);
 
-    var app = mockConfig.manifest.find('.//Application');
-    expect(app.attrib.StartPage).toBe('www/index.html');
+        // act
+        applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'm2:', false);
+
+        var app = mockConfig.manifest.doc.find('.//Application');
+        expect(app.attrib.StartPage).toBe('www/index.html');
+    });
+
+    it('should not have any scheme for its startup URI.', function() {
+
+        // arrange
+        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { 'WindowsDefaultUriPrefix': 'ms-appx://' }, false);
+
+        // act
+        applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'm2:', false);
+
+        var app = mockConfig.manifest.doc.find('.//Application');
+        expect(app.attrib.StartPage).toBe('www/index.html');
+    });
 });
 
-describe('A Windows 8.1 project should not have any scheme for its startup URI.', function() {
+describe('Windows 10 project', function() {
+    it('should default to ms-appx-web for its startup URI.', function() {
 
-    // arrange
-    var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { 'WindowsDefaultUriPrefix': 'ms-appx://' }, false);
+        // arrange
+        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { }, true);
 
-    // act
-    applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'm2:', false);
+        // act
+        applyStartPage(mockConfig.config, mockConfig.manifest, true);
 
-    var app = mockConfig.manifest.find('.//Application');
-    expect(app.attrib.StartPage).toBe('www/index.html');
+        var app = mockConfig.manifest.doc.find('.//Application');
+        expect(app.attrib.StartPage).toBe('ms-appx-web:///www/index.html');
+    });
+
+    it ('should allow ms-appx as its startup URI, and it gets removed from the final output.', function() {
+
+        // arrange
+        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { 'WindowsDefaultUriPrefix': 'ms-appx://' }, true);
+
+        // act
+        applyStartPage(mockConfig.config, mockConfig.manifest, true);
+
+        var app = mockConfig.manifest.doc.find('.//Application');
+        expect(app.attrib.StartPage).toBe('www/index.html');
+    });
+
+    it('should allow an HTTP or HTTPS scheme for its startup URI.', function() {
+
+        // arrange
+        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('www.contoso.com/', { 'WindowsDefaultUriPrefix': 'http://' }, true);
+
+        // act
+        applyStartPage(mockConfig.config, mockConfig.manifest, true);
+
+        var app = mockConfig.manifest.doc.find('.//Application');
+        expect(app.attrib.StartPage).toBe('http://www.contoso.com/');
+    });
 });
 
-describe('A Windows 10 project default to ms-appx-web for its startup URI.', function() {
 
-    // arrange
-    var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { }, true);
+describe('Windows Store preference', function () {
 
-    // act
-    applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'uap:', true);
+    it('"WindowsStoreDisplayName" should be reflected in the manifest.', function() {
 
-    var app = mockConfig.manifest.find('.//Application');
-    expect(app.attrib.StartPage).toBe('ms-appx-web:///www/index.html');
-});
+        // arrange
+        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('www.contoso.com/', { 'WindowsDefaultUriPrefix': 'http://', 'WindowsStoreDisplayName': 'ContosoApp' }, true);
 
-describe('A Windows 10 project should allow ms-appx as its startup URI, and it gets removed from the final output.', function() {
+        // act
+        applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'uap:', true);
 
-    // arrange
-    var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { 'WindowsDefaultUriPrefix': 'ms-appx://' }, true);
+        var app = mockConfig.manifest.doc.find('.//Properties/DisplayName');
+        expect(app.text).toBe('ContosoApp');
+    });
 
-    // act
-    applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'uap:', true);
+    it('"WindowsStorePublisherName" should be reflected in the manifest.', function() {
 
-    var app = mockConfig.manifest.find('.//Application');
-    expect(app.attrib.StartPage).toBe('www/index.html');
-});
+        // arrange
+        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('www.contoso.com/', { 'WindowsDefaultUriPrefix': 'http://', 'WindowsStorePublisherName': 'Contoso Inc' }, true);
 
-describe('A Windows 10 project should allow an HTTP or HTTPS scheme for its startup URI.', function() {
+        // act
+        applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'uap:', true);
 
-    // arrange
-    var mockConfig = createMockConfigAndManifestForApplyCoreProperties('www.contoso.com/', { 'WindowsDefaultUriPrefix': 'http://' }, true);
-
-    // act
-    applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'uap:', true);
-
-    var app = mockConfig.manifest.find('.//Application');
-    expect(app.attrib.StartPage).toBe('http://www.contoso.com/');
-});
-
-describe('An app specifying a Store DisplayName in its config.xml should have it reflected in the manifest.', function() {
-
-    // arrange
-    var mockConfig = createMockConfigAndManifestForApplyCoreProperties('www.contoso.com/', { 'WindowsDefaultUriPrefix': 'http://', 'WindowsStoreDisplayName': 'ContosoApp' }, true);
-
-    // act
-    applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'uap:', true);
-
-    var app = mockConfig.manifest.find('.//Properties/DisplayName');
-    expect(app.text).toBe('ContosoApp');
-});
-
-describe('An app specifying a Store PublisherName in its config.xml should have it reflected in the manifest.', function() {
-
-    // arrange
-    var mockConfig = createMockConfigAndManifestForApplyCoreProperties('www.contoso.com/', { 'WindowsDefaultUriPrefix': 'http://', 'WindowsStorePublisherName': 'Contoso Inc' }, true);
-
-    // act
-    applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'uap:', true);
-
-    var app = mockConfig.manifest.find('.//Properties/PublisherDisplayName');
-    expect(app.text).toBe('Contoso Inc');
+        var app = mockConfig.manifest.doc.find('.//Properties/PublisherDisplayName');
+        expect(app.text).toBe('Contoso Inc');
+    });
 });
 
 describe('A Windows 10 project should warn if it supports remote mode and restricted capabilities.', function() {
 
     // arrange
-    var mockConfig = createMockConfigAndManifestForApplyAccessRules(true, 'http://www.bing.com/*');
-    addCapabilityDeclarationToMockManifest(mockConfig.manifest, 'documentsLibrary');
-
+    var mockConfig;
     var stringFound     = false,
-        searchStr       = '   documentsLibrary',
-        oldConsoleWarn  = console.warn;
+        searchStr       = 'documentsLibrary';
 
     beforeEach(function() {
+        mockConfig = createMockConfigAndManifestForApplyAccessRules(true, 'http://www.bing.com/*');
+        addCapabilityDeclarationToMockManifest(mockConfig.manifest, 'documentsLibrary');
+
+        spyOn(AppxManifest, 'get').andReturn(mockConfig.manifest);
+
         stringFound = false;
-        spyOn(console, 'warn').andCallFake(function(msg) {
-            if (msg === searchStr)
+        events.on('warn', function (msg) {
+            if (msg.indexOf(searchStr) >= 0)
                 stringFound = true;
         });
     });
-    afterEach(function() {
-        console.warn = oldConsoleWarn;
-    });
 
-    
     it('asserts that the documentsLibrary capability is restricted', function() {
         // act
-        checkForRestrictedCaps(mockConfig.config, mockConfig.manifest);
+        updateManifestFile(mockConfig.config, '/manifest/path');
 
         // assert
         expect(stringFound).toBe(true);
@@ -287,143 +217,158 @@ function createMockConfigAndManifestForApplyAccessRules(isWin10) {
         rules.push(arguments[i]);
     }
 
-    var config = {
-        version: function() { return '1.0.0.0'; },
-        name: function() { return 'HelloCordova'; },
-        packageName: function() { return 'org.apache.cordova.HelloCordova'; },
-        author: function() { return 'Apache'; },
-        startPage: function() { return 'index.html'; },
-        getPreference: function(preferenceName) {
-            if (preferenceName === 'WindowsDefaultUriPrefix') {
-                return isWin10 ? 'ms-appx-web://' : 'ms-appx://';
-            }
-            else {
-                throw new RangeError('Unexpected call to config.getPreference in unit test.');
-            }
-        }, 
-        getAccessRules: function() {
-            if (isWin10) {
-                return [];
-            }
+    var TEST_XML = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<widget xmlns     = "http://www.w3.org/ns/widgets"\n' +
+    '        xmlns:cdv = "http://cordova.apache.org/ns/1.0"\n' +
+    '        id        = "org.apache.cordova.HelloCordova"\n' +
+    '        version   = "1.0.0.0">\n' +
+    '    <name>HelloCordova</name>\n' +
+    '    <author href="http://cordova.io" email="dev@cordova.apache.org">\n' +
+    '        Apache\n' +
+    '    </author>\n' +
+    '    <content src="index.html" />\n' +
+    '</widget>\n';
 
-            return rules;
-        },
-        getNavigationWhitelistRules: function() {
-            if (isWin10) {
-                return rules;
-            }
+    var origParseElementtreeSync = xml.parseElementtreeSync;
+    spyOn(xml, 'parseElementtreeSync').andCallFake(function(path) {
+        if (path ==='config.xml') return new et.ElementTree(et.XML(TEST_XML));
+        return origParseElementtreeSync(path);
+    });
 
+    var config = new ConfigParser('config.xml');
+
+    var origGetPreference = config.getPreference;
+    spyOn(config, 'getPreference').andCallFake(function (prefName) {
+        if (prefName === 'WindowsDefaultUriPrefix') {
+            return isWin10 ? 'ms-appx-web://' : 'ms-appx://';
+        }
+
+        return origGetPreference.call(config, prefName);
+    });
+
+    config.getAccesses = function() {
+        if (isWin10) {
             return [];
         }
+
+        return rules.map(function (rule) {
+            return { 'origin': rule };
+        });
+    };
+
+    config.getAllowNavigations = function() {
+        if (isWin10) {
+            return rules.map(function (rule) {
+                return { 'href': rule };
+            });
+        }
+
+        return [];
     };
 
     var filePath = isWin10 ? Win10ManifestPath : Win81ManifestPath;
-    var fileContents = fs.readFileSync(filePath, 'utf-8');
-    var manifest = new et.ElementTree(et.XML(fileContents.trim()));
+    var manifest = AppxManifest.get(filePath);
+    spyOn(fs, 'writeFileSync');
 
     return { config: config, manifest: manifest };
 }
 
-describe('A Windows 8.1 project should not have WindowsRuntimeAccess attributes in access rules.', function() {
+describe('Access rules management', function () {
+    // body...
+    it('A Windows 8.1 project should not have WindowsRuntimeAccess attributes in access rules.', function() {
 
-    var mockConfig = createMockConfigAndManifestForApplyAccessRules(false, 'https://www.contoso.com');
+        var mockConfig = createMockConfigAndManifestForApplyAccessRules(false, 'https://www.contoso.com');
 
-    applyAccessRules(mockConfig.config, mockConfig.manifest, false);
+        applyAccessRules(mockConfig.config, mockConfig.manifest);
 
-    var app         = mockConfig.manifest.find('.//Application'),
-        accessRules = app.find('.//ApplicationContentUriRules');
+        var app         = mockConfig.manifest.doc.find('.//Application'),
+            accessRules = app.find('.//ApplicationContentUriRules');
 
-    expect(accessRules).toBeDefined();
-    expect(accessRules.len()).toBe(1);
+        expect(accessRules).toBeDefined();
+        expect(accessRules.len()).toBe(1);
 
-    var rule = accessRules.getItem(0);
-    expect(rule).toBeDefined();
-    expect(rule.attrib.WindowsRuntimeAccess).toBeUndefined();
+        var rule = accessRules.getItem(0);
+        expect(rule).toBeDefined();
+        expect(rule.attrib.WindowsRuntimeAccess).toBeUndefined();
 
-});
+    });
 
-describe('A Windows 10 project should have WindowsRuntimeAccess attributes in access rules.', function() {
+    it('A Windows 10 project should have WindowsRuntimeAccess attributes in access rules.', function() {
 
-    var mockConfig = createMockConfigAndManifestForApplyAccessRules(true, 'https://www.contoso.com');
+        var mockConfig = createMockConfigAndManifestForApplyAccessRules(true, 'https://www.contoso.com');
 
-    applyAccessRules(mockConfig.config, mockConfig.manifest, true);
+        applyNavigationWhitelist(mockConfig.config, mockConfig.manifest, true);
 
-    var app         = mockConfig.manifest.find('.//Application'),
-        accessRules = app.find('.//uap:ApplicationContentUriRules');
+        var app         = mockConfig.manifest.doc.find('.//Application'),
+            accessRules = app.find('.//uap:ApplicationContentUriRules');
 
-    expect(accessRules).toBeDefined();
-    expect(accessRules.len()).toBe(2);
+        expect(accessRules).toBeDefined();
+        expect(accessRules.len()).toBe(2);
 
-    var rule = accessRules.getItem(0);
-    expect(rule).toBeDefined();
-    expect(rule.attrib.WindowsRuntimeAccess).toBeDefined();
-    expect(rule.attrib.WindowsRuntimeAccess).toBe('all');
+        var rule = accessRules.getItem(0);
+        expect(rule).toBeDefined();
+        expect(rule.attrib.WindowsRuntimeAccess).toBeDefined();
+        expect(rule.attrib.WindowsRuntimeAccess).toBe('all');
 
-});
+    });
 
-describe('A Windows 8.1 project should reject http:// URI scheme rules.', function() {
-    
-    var stringIndex     = -1,
-        searchStr       = 'Access rules must begin with "https://", the following rule will be ignored: ',
-        oldConsoleWarn  = console.warn;
-    beforeEach(function() {
-        spyOn(console, 'warn').andCallFake(function(msg) {
-            stringIndex = msg.indexOf(searchStr);
+    describe('A Windows 8.1 project should reject http:// URI scheme rules.', function() {
+
+        var stringIndex     = -1,
+            searchStr       = 'Access rules must begin with "https://", the following rule will be ignored: ';
+
+        beforeEach(function() {
+            require('cordova-common').events.on('warn', function (evt) {
+                stringIndex = evt.indexOf(searchStr);
+            });
+        });
+
+        it('applies access rules and verifies at least one was rejected', function() {
+            var mockConfig = createMockConfigAndManifestForApplyAccessRules(false, 'http://www.contoso.com');
+            applyAccessRules(mockConfig.config, mockConfig.manifest, false);
+
+            expect(stringIndex).toBe(0);
         });
     });
-    afterEach(function() {
-        console.warn = oldConsoleWarn;
-    });
-    
-    it('applies access rules and verifies at least one was rejected', function() {
-        var mockConfig = createMockConfigAndManifestForApplyAccessRules(false, 'http://www.contoso.com');
-        applyAccessRules(mockConfig.config, mockConfig.manifest, false);
 
-        expect(stringIndex).toBe(0);
-    });
-});
+    describe('A Windows 10 project should accept http:// URI access rules.', function() {
 
-describe('A Windows 10 project should accept http:// URI access rules.', function() {
+        var stringIndex     = -1,
+            searchStr       = 'The following navigation rule had an invalid URI scheme and is ignored:';
+        beforeEach(function() {
+            require('cordova-common').events.on('warn', function (evt) {
+                stringIndex = evt.indexOf(searchStr);
+            });
+        });
 
-    var stringIndex     = -1,
-        searchStr       = 'The following navigation rule had an invalid URI scheme and is ignored:',
-        oldConsoleWarn  = console.warn;
-    beforeEach(function() {
-        spyOn(console, 'warn').andCallFake(function(msg) {
-            stringIndex = msg.indexOf(searchStr);
+        it('applies access rules and verifies they were accepted', function() {
+            var mockConfig = createMockConfigAndManifestForApplyAccessRules(true, 'http://www.contoso.com');
+            applyAccessRules(mockConfig.config, mockConfig.manifest, true);
+
+            expect(stringIndex).toBe(-1);
         });
     });
-    afterEach(function() {
-        console.warn = oldConsoleWarn;
-    });
-
-    it('applies access rules and verifies they were accepted', function() {
-        var mockConfig = createMockConfigAndManifestForApplyAccessRules(true, 'http://www.contoso.com');
-        applyAccessRules(mockConfig.config, mockConfig.manifest, true);
-
-        expect(stringIndex).toBe(-1);
-    });
-
 });
 
 describe('A Windows 10 project should apply the uap: namespace prefix to certain capabilities.', function() {
-    
-    var element = null;
+
+    var manifest;
 
     beforeEach(function() {
-        element = new et.Element('Capabilities');
+        manifest = createMockConfigAndManifestForApplyAccessRules(true, 'https://www.contoso.com').manifest;
+        var element = manifest.doc.find('.//Capabilities');
         element.append(new et.Element('Capability', { Name: 'internetClient' }));
         element.append(new et.Element('Capability', { Name: 'documentsLibrary' }));
         element.append(new et.Element('DeviceCapability', { Name: 'location' }));
+        manifest.write();
     });
 
     it('Applies the uap: prefix to the documentsLibrary capability.', function() {
-        ensureUapPrefixedCapabilities(element);
-        var children = element.getchildren();
+
         var testResults = {};
         // map capabilities to tag
-        children.forEach(function(child) {
-            testResults[child.attrib.Name] = child.tag;
+        manifest.getCapabilities().forEach(function(child) {
+            testResults[child.name] = child.type;
         });
 
         expect(testResults.internetClient).toBe('Capability');

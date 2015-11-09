@@ -19,10 +19,8 @@
 
 var rewire     = require('rewire'),
     deployment = rewire('../../template/cordova/lib/deployment'),
-    run        = deployment.__get__('run'),
     Q          = require('q'),
     path       = require('path'),
-
     AppDeployCmdTool = deployment.__get__('AppDeployCmdTool'),
     WinAppDeployCmdTool = deployment.__get__('WinAppDeployCmdTool');
 
@@ -44,12 +42,11 @@ describe('The correct version of the app deployment tool is obtained.', function
         expect(tool instanceof WinAppDeployCmdTool).toBe(true);
 
     });
-
 });
 
 describe('Windows 10 deployment interacts with the file system as expected.', function() {
 
-    function runMock(cmd, args, cwd) {
+    function fakeSpawn(cmd, args, cwd) {
         expect(cmd).toBe(path.join('c:/Program Files (x86)/Windows Kits/10/bin/x86/WinAppDeployCmd.exe'));
         switch (args[0]) {
             case 'devices':
@@ -70,13 +67,16 @@ describe('Windows 10 deployment interacts with the file system as expected.', fu
         }
     }
 
+    var mockedSpawn = deployment.__get__('spawn');
     var mockedProgramFiles = process.env['ProgramFiles(x86)'];
+
     beforeEach(function() {
-        deployment.__set__('run', runMock);    
+        deployment.__set__('spawn', fakeSpawn);
         process.env['ProgramFiles(x86)'] = path.join('c:/Program Files (x86)');
     });
+
     afterEach(function() {
-        deployment.__set__('run', run);
+        deployment.__set__('spawn', mockedSpawn);
         if (mockedProgramFiles) {
             process.env['ProgramFiles(x86)'] = mockedProgramFiles;
         } else {
@@ -93,7 +93,7 @@ describe('Windows 10 deployment interacts with the file system as expected.', fu
             expect(deviceList[0].name).toBe('Lumia 1520 (RM-940)');
             expect(deviceList[0].index).toBe(0);
             expect(deviceList[0].type).toBe('device');
-            
+
             done = true;
 
         });
@@ -107,7 +107,7 @@ describe('Windows 10 deployment interacts with the file system as expected.', fu
         deploymentTool.enumerateDevices().then(function(deviceList) {
             deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /*shouldLaunch*/ false, /*shouldUpdate*/ false).then(function() {
 
-                // expect() calls are in the runMock function
+                // expect() calls are in the fakeSpawn function
                 done = true;
 
             });
@@ -122,7 +122,7 @@ describe('Windows 10 deployment interacts with the file system as expected.', fu
         deploymentTool.enumerateDevices().then(function(deviceList) {
             deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /*shouldLaunch*/ false, /*shouldUpdate*/ true).then(function() {
 
-                // expect() calls are in the runMock function
+                // expect() calls are in the fakeSpawn function
                 done = true;
 
             });
@@ -137,7 +137,7 @@ describe('Windows 10 deployment interacts with the file system as expected.', fu
         deploymentTool.enumerateDevices().then(function(deviceList) {
             deploymentTool.uninstallAppPackage(TEST_APP_PACKAGE_ID, deviceList[2]).then(function() {
 
-                // expect() calls are in the runMock function
+                // expect() calls are in the fakeSpawn function
                 done = true;
 
             });
@@ -145,12 +145,11 @@ describe('Windows 10 deployment interacts with the file system as expected.', fu
 
         waitsFor(function() { return done; });
     });
-
 });
 
 describe('Windows 8.1 deployment interacts with the file system as expected.', function() {
 
-    function runMock(cmd, args, cwd) {
+    function fakeSpawn(cmd, args, cwd) {
         expect(cmd).toBe(path.join('c:/Program Files (x86)/Microsoft SDKs/Windows Phone/v8.1/Tools/AppDeploy/AppDeployCmd.exe'));
         switch (args[0]) {
             case '/EnumerateDevices':
@@ -176,13 +175,16 @@ describe('Windows 8.1 deployment interacts with the file system as expected.', f
         }
     }
 
+    var mockedSpawn = deployment.__get__('spawn');
     var mockedProgramFiles = process.env['ProgramFiles(x86)'];
+
     beforeEach(function() {
-        deployment.__set__('run', runMock);    
+        deployment.__set__('spawn', fakeSpawn);
         process.env['ProgramFiles(x86)'] = path.join('c:/Program Files (x86)');
     });
+
     afterEach(function() {
-        deployment.__set__('run', run);
+        deployment.__set__('spawn', mockedSpawn);
         if (mockedProgramFiles) {
             process.env['ProgramFiles(x86)'] = mockedProgramFiles;
         } else {
@@ -216,7 +218,7 @@ describe('Windows 8.1 deployment interacts with the file system as expected.', f
         deploymentTool.enumerateDevices().then(function(deviceList) {
             deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /*shouldLaunch*/ false, /*shouldUpdate*/ false).then(function() {
 
-                // expect() calls are in the runMock function
+                // expect() calls are in the fakeSpawn function
                 done = true;
 
             });
@@ -230,7 +232,7 @@ describe('Windows 8.1 deployment interacts with the file system as expected.', f
         deploymentTool.enumerateDevices().then(function(deviceList) {
             deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /*shouldLaunch*/ false, /*shouldUpdate*/ true).then(function() {
 
-                // expect() calls are in the runMock function
+                // expect() calls are in the fakeSpawn function
                 done = true;
 
             });
@@ -244,7 +246,7 @@ describe('Windows 8.1 deployment interacts with the file system as expected.', f
         deploymentTool.enumerateDevices().then(function(deviceList) {
             deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /*shouldLaunch*/ true, /*shouldUpdate*/ false).then(function() {
 
-                // expect() calls are in the runMock function
+                // expect() calls are in the fakeSpawn function
                 done = true;
 
             });
@@ -258,7 +260,7 @@ describe('Windows 8.1 deployment interacts with the file system as expected.', f
         deploymentTool.enumerateDevices().then(function(deviceList) {
             deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /*shouldLaunch*/ true, /*shouldUpdate*/ true).then(function() {
 
-                // expect() calls are in the runMock function
+                // expect() calls are in the fakeSpawn function
                 done = true;
 
             });
@@ -272,12 +274,11 @@ describe('Windows 8.1 deployment interacts with the file system as expected.', f
         deploymentTool.enumerateDevices().then(function(deviceList) {
             deploymentTool.uninstallAppPackage(TEST_APP_PACKAGE_ID, deviceList[5]).then(function() {
 
-                // expect() calls are in the runMock function
+                // expect() calls are in the fakeSpawn function
                 done = true;
 
             });
         });
         waitsFor(function() { return done; });
     });
-
 });

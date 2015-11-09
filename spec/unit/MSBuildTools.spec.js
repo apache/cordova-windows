@@ -16,12 +16,13 @@
     specific language governing permissions and limitations
     under the License.
 */
-var Q = require('q'),
-    shell = require('shelljs'),
-    rewire = require('rewire'),
-    platformRoot = '../../template',
-    buildTools = rewire(platformRoot + '/cordova/lib/MSBuildTools.js'),
-    Version = require(platformRoot + '/cordova/lib/Version.js');
+var Q = require('q');
+var shell = require('shelljs');
+var rewire = require('rewire');
+var platformRoot = '../../template';
+var buildTools = rewire(platformRoot + '/cordova/lib/MSBuildTools.js');
+var Version = require(platformRoot + '/cordova/lib/Version.js');
+var superspawn = require('cordova-common').superspawn;
 
 var fakeToolsPath = function (version) {
     return 'C:\\Program Files (x86)\\MSBuild\\' + version;
@@ -89,23 +90,16 @@ describe('findAvailableVersion method', function(){
 });
 
 describe('checkMSBuildVersion method', function(){
-    var checkMSBuildVersion = buildTools.__get__('checkMSBuildVersion'),
-        execOriginal;
-
-    beforeEach(function () {
-        execOriginal = buildTools.__get__('exec');
-    });
-
-    afterEach(function () {
-        buildTools.__set__('exec', execOriginal);
-    });
+    var checkMSBuildVersion = buildTools.__get__('checkMSBuildVersion');
 
     it('spec.6 should return valid version and path', function(){
         var version  = '14.0';
 
-        buildTools.__set__('exec', function(cmd) {
-            return Q.resolve('\r\nHKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\12.0\r\n\tMSBuildToolsPath\tREG_SZ\t' + fakeToolsPath(version) + '\r\n\r\n');
-        });
+        spyOn(superspawn, 'spawn')
+            .andReturn(Q.resolve(
+                '\r\nHKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\12.0\r\n\t' +
+                'MSBuildToolsPath\tREG_SZ\t' + fakeToolsPath(version) + '\r\n\r\n')
+            );
 
         checkMSBuildVersion(version).then(function (actual) {
             expect(actual.version).toBe(version);
@@ -114,9 +108,7 @@ describe('checkMSBuildVersion method', function(){
     });
 
     it('spec.7 should return null if no tools found for version', function(){
-        buildTools.__set__('exec', function(cmd) {
-            return Q.resolve('ERROR: The system was unable to find the specified registry key or value.');
-        });
+        spyOn(superspawn, 'spawn').andReturn(Q.resolve('ERROR: The system was unable to find the specified registry key or value.'));
 
         checkMSBuildVersion('14.0').then(function (actual) {
             expect(actual).toBeNull();
@@ -124,10 +116,7 @@ describe('checkMSBuildVersion method', function(){
     });
 
     it('spec.8 should return null on internal error', function(){
-        buildTools.__set__('exec', function(cmd) {
-            return Q.reject();
-        });
-
+        spyOn(superspawn, 'spawn').andReturn(Q.reject());
         checkMSBuildVersion('14.0').then(function (actual) {
             expect(actual).toBeNull();
         });
@@ -135,16 +124,7 @@ describe('checkMSBuildVersion method', function(){
 });
 
 describe('MSBuildTools object', function(){
-    var MSBuildTools = buildTools.__get__('MSBuildTools'),
-        spawnOriginal;
-
-    beforeEach(function () {
-        spawnOriginal = buildTools.__get__('spawn');
-    });
-
-    afterEach(function () {
-        buildTools.__set__('spawn', spawnOriginal);
-    });
+    var MSBuildTools = buildTools.__get__('MSBuildTools');
 
     it('spec.9 should have fields and methods defined', function() {
         var version   = '14.0',

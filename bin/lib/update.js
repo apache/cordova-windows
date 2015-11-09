@@ -17,71 +17,42 @@
        under the License.
 */
 
-var Q      = require('q'),
-    fs     = require('fs'),
-    path   = require('path'),
-    shell   = require('shelljs'),
-    create = require('./create'),
-    ConfigParser = require('../../template/cordova/lib/ConfigParser');
+var Q      = require('q');
+var fs     = require('fs');
+var path   = require('path');
+var shell   = require('shelljs');
+var create = require('./create');
+var ConfigParser = require('cordova-common').ConfigParser;
+var CordovaError = require('cordova-common').CordovaError;
+var AppxManifest = require('../../template/cordova/lib/AppxManifest');
 
-// returns package metadata from config.xml with fields 'namespace' and 'name'
-function extractMetadata(projectPath) {
-    var projectConfig = path.join(projectPath, 'config.xml');
-    if (!fs.existsSync(projectConfig)){
-        return Q.reject('config.xml does not exist');
+// updates the cordova.js in project along with the cordova tooling.
+module.exports.update = function (destinationDir, options, events) {
+    if (!fs.existsSync(destinationDir)){
+        // if specified project path is not valid then reject promise
+        return Q.reject(new CordovaError('The given path to the project does not exist.' +
+            ' Please provide a path to the project you\'d like to update.'));
     }
 
+    var projectConfig = path.join(destinationDir, 'config.xml');
+    if (!fs.existsSync(projectConfig)){
+        return Q.reject(new CordovaError('Can\'t update project at ' + destinationDir +
+            '. config.xml does not exist in destination directory'));
+    }
+
+    var guid;
     var config = new ConfigParser(projectConfig);
-    var meta =  {
-        packageName: config.packageName(),
-        name: config.name(),
-        guid: undefined
-    };
 
     // guid param is used only when adding a platform, and isn't saved anywhere.
     // The only place, where it is being persisted - phone/win10 appxmanifest file,
-    // but since win10 introduced just recently, we're can't rely on its manifest
+    // but since win10 introduced just recently, we can't rely on its manifest
     // for old platform versions.
-    var manifestPath = path.join(projectPath, 'package.phone.appxmanifest');
+    var manifestPath = path.join(destinationDir, 'package.phone.appxmanifest');
     try {
-        var manifest = fs.readFileSync(manifestPath, 'utf-8');
-        var matches = /\bPhoneProductId="(.*?)"/gm.exec(manifest);
-        if (matches) {
-            meta.guid = matches[1];
-        }
+        guid = AppxManifest.get(manifestPath).getPhoneIdentity().getPhoneProductId();
     } catch (e) { /*ignore IO errors */ }
 
-    return Q.resolve(meta);
-}
-
-module.exports.help = function () {
-    console.log('WARNING : Make sure to back up your project before updating!');
-    console.log('Usage: update PathToProject ');
-    console.log('    PathToProject : The path the project you would like to update.');
-    console.log('examples:');
-    console.log('    update C:\\Users\\anonymous\\Desktop\\MyProject');
-};
-
-// updates the cordova.js in project along with the cordova tooling.
-module.exports.run = function (argv) {
-    var projectPath = argv[2];
-    if (!fs.existsSync(projectPath)){
-        // if specified project path is not valid then reject promise
-        Q.reject('The given path to the project does not exist.' +
-            ' Please provide a path to the project you would like to update.');
-    }
-
-    return extractMetadata(projectPath)
-    .then(function (metadata) {
-        shell.rm('-rf', projectPath);
-
-        // setup args for create.run which requires process.argv-like array
-        var createArgs = argv.concat([metadata.packageName, metadata.name]);
-        if (metadata.guid) {
-            createArgs.push('--guid=' + metadata.guid);
-        }
-
-        return create.run(createArgs);
-    });
+    shell.rm('-rf', destinationDir);
+    return create.create(destinationDir, config, {guid: guid}, events);
 };
 

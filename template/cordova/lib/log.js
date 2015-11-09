@@ -20,10 +20,10 @@
 // requires
 var path         = require('path'),
     et           = require('elementtree'),
-    Q            = require('q'),
-    cp           = require('child_process'),
     ConfigParser = require('./ConfigParser.js'),
     nopt         = require('nopt');
+
+var spawn = require('cordova-common').superspawn.spawn;
 
 // paths
 var platformRoot = path.join(__dirname, '..', '..'),
@@ -186,16 +186,12 @@ function dumpLogs(startTime) {
 }
 
 function getEvents(channel, startTime) {
-    var d = Q.defer();
-    var command = 'wevtutil qe ' + channel + ' /q:"*[System [(TimeCreated [@SystemTime>\'' + startTime + '\'])]]" /e:root';
-    cp.exec(command, function (error, stdout, stderr) {
-        if (error) {
-            d.reject('Failed to run wevtutil command. ' + error);
-        } else {
-            d.resolve(parseEvents(stdout));
-        }
+    var command = 'wevtutil';
+    var args = ['qe', channel, '/q:"*[System [(TimeCreated [@SystemTime>\'' + startTime + '\'])]]"', '/e:root'];
+    return spawn(command, args)
+    .then(function(stdout) {
+        return parseEvents(stdout);
     });
-    return d.promise;
 }
 
 function getElementValue(et, element, attribute) {
@@ -206,7 +202,7 @@ function getElementValue(et, element, attribute) {
         if (!!attribute) {
             result = found[0].get(attribute);
         } else {
-            result = found[0].text; 
+            result = found[0].text;
         }
     }
 
@@ -267,7 +263,7 @@ function parseEvents(output) {
             result.displayName = undefined;
         }
 
-        // cut out uninformative fields 
+        // cut out uninformative fields
         if ((result.line === '0') && (result.column === '0')) {
             result.line = undefined;
             result.column = undefined;
@@ -333,14 +329,16 @@ function stringifyEvent(event) {
 }
 
 function getLogState(channel) {
-    return exec('wevtutil get-log "' + channel + '"').then(function(output) {
+    return spawn('wevtutil', ['get-log', channel])
+    .then(function(output) {
         return output.indexOf('enabled: true') != -1;
     });
 }
 
 function enableChannel(channel) {
-    return exec('wevtutil set-log "' + channel + '" /e:false /q:true').then(function() {
-        return exec('wevtutil set-log "' + channel + '" /e:true /rt:true /ms:4194304 /q:true');
+    return spawn('wevtutil', ['set-log', channel, '/e:false', '/q:true'])
+    .then(function() {
+        return spawn('wevtutil', ['set-log', channel, '/e:true', '/rt:true', '/ms:4194304','/q:true']);
     }, function() {
         console.warn('Cannot enable log channel: ' + channel);
         console.warn('Try running the script with administrator privileges.');
@@ -349,16 +347,5 @@ function enableChannel(channel) {
 
 function disableChannel(channel) {
     console.log('Disabling channel ' + channel);
-    exec('wevtutil set-log "' + channel + '" /e:false /q:true');
-}
-
-function exec(command) {
-    var d = Q.defer();
-    cp.exec(command, function (error, stdout) {
-        if (error) {
-            d.reject('An error occured while executing following command:\n' + command + '\n' + error);
-        }
-        d.resolve(stdout);
-    });
-    return d.promise;
+    spawn('wevtutil', ['set-log', channel, '/e:false', '/q:true']);
 }

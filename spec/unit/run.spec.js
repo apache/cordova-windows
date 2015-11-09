@@ -89,7 +89,7 @@ describe('run method', function() {
             return Q.reject(); // rejecting to break run chain
         });
 
-        run.run([ 'node', buildPath, '--release', '--debug' ])
+        run.run({ release: true, debug: true })
         .finally(function() {
             expect(buildRun).not.toHaveBeenCalled();
             done();
@@ -105,7 +105,7 @@ describe('run method', function() {
             return Q.reject(); // rejecting to break run chain
         });
 
-        run.run([ 'node', buildPath, '--device', '--emulator' ])
+        run.run({ device: true, emulator: true })
         .finally(function() {
             expect(buildRun).not.toHaveBeenCalled();
             done();
@@ -121,7 +121,7 @@ describe('run method', function() {
             return Q.reject(); // rejecting to break run chain
         });
 
-        run.run([ 'node', buildPath, '--device', '--target=sometargethere' ])
+        run.run({ device: true, target: 'sometargethere' })
         .finally(function() {
             expect(buildRun).not.toHaveBeenCalled();
             done();
@@ -237,7 +237,7 @@ describe('run method', function() {
             return Q();
         });
 
-        run.run([ 'node', buildPath, '--nobuild' ])
+        run.run({ nobuild: true })
         .finally(function() {
             expect(deployToDesktop).toHaveBeenCalled();
             expect(build).not.toHaveBeenCalled();

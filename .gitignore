@@ -9,5 +9,10 @@ obj
 Thumbs.db
 
 # Skip node_modules
-
 node_modules/
+
+npm-debug.log
+
+# Skip testing stuff
+coverage/*
+testcreate*

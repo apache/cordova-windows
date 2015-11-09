@@ -58,7 +58,7 @@ if (['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(args[0]) > -1) {
     }
 
     if (onlyDevices && onlyEmulators) {
-        console.warn('Error: Cannot specify both --emulators and --devices');
+        console.error('Cannot specify both --emulators and --devices');
         help();
         return;
     }
@@ -76,7 +76,7 @@ if (['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(args[0]) > -1) {
         });
 
         if (deviceList.length === 0) {
-            console.log('No devices found matching the specified criteria.');
+            console.error('No devices found matching the specified criteria.');
         }
     });
 }
