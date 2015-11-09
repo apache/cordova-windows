@@ -17,40 +17,17 @@
        under the License.
 */
 
+/*jshint -W069 */
+
 var Q     = require('q'),
     fs    = require('fs'),
-    /* jshint ignore:start */ // 'path' only used in ignored blocks
-    path  = require('path'),
-    /* jshint ignore:end */
-    proc  = require('child_process');
+    path  = require('path');
+var spawn = require('cordova-common').superspawn.spawn;
+var events = require('cordova-common').events;
 
 var E_INVALIDARG = 2147942487;
 
-// neither 'exec' nor 'spawn' was sufficient because we need to pass arguments via spawn
-// but also need to be able to capture stdout / stderr
-function run(cmd, args, opt_cwd) {
-    var d = Q.defer();
-    try {
-        var child = proc.spawn(cmd, args, {cwd: opt_cwd, maxBuffer: 1024000});
-        var stdout = '', stderr = '';
-        child.stdout.on('data', function(s) { stdout += s; });
-        child.stderr.on('data', function(s) { stderr += s; });
-        child.on('exit', function(code) {
-            if (code) {
-                d.reject({ message: stderr, code: code, toString: function() { return stderr; }});
-            } else {
-                d.resolve(stdout);
-            }
-        });
-    } catch(e) {
-        console.error('error caught: ' + e);
-        d.reject(e);
-    }
-    return d.promise;
-}
-
 function DeploymentTool() {
-
 }
 
 /**
@@ -148,10 +125,8 @@ function AppDeployCmdTool(targetOsVersion) {
     DeploymentTool.call(this);
     this.targetOsVersion = targetOsVersion;
 
-    /* jshint ignore:start */ /* Ignore jshint to use dot notation for 2nd process.env access for consistency */
     var programFilesPath = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
     this.path = path.join(programFilesPath, 'Microsoft SDKs', 'Windows Phone', 'v' + this.targetOsVersion, 'Tools', 'AppDeploy', 'AppDeployCmd.exe');
-    /* jshint ignore:end */
 }
 
 AppDeployCmdTool.prototype = Object.create(DeploymentTool.prototype);
@@ -164,7 +139,7 @@ AppDeployCmdTool.prototype.enumerateDevices = function() {
     // [(line), 9, 'Emulator 8.1 720P 4.7 inch']
     // Expansion is: space, index, spaces, name
     var LINE_TEST = /^\s(\d+?)\s+(.+?)$/m;
-    return run(that.path, ['/EnumerateDevices']).then(function(result) {
+    return spawn(that.path, ['/EnumerateDevices']).then(function(result) {
         var lines = result.split('\n');
         var matchedLines = lines.filter(function(line) {
             return LINE_TEST.test(line);
@@ -205,12 +180,12 @@ AppDeployCmdTool.prototype.installAppPackage = function(pathToAppxPackage, targe
     }
 
     var that = this;
-    var result = run(this.path, [command, pathToAppxPackage, '/targetdevice:' + targetDevice.__shorthand]);
+    var result = spawn(this.path, [command, pathToAppxPackage, '/targetdevice:' + targetDevice.__shorthand]);
     if (targetDevice.type === 'emulator') {
         result = result.then(null, function(e) {
             // CB-9482: AppDeployCmd also reports E_INVALIDARG during this process.  If so, try to repeat.
             if (e.code === E_INVALIDARG) {
-                return run(that.path, [command, pathToAppxPackage, '/targetdevice:' + targetDevice.__shorthand]);
+                return spawn(that.path, [command, pathToAppxPackage, '/targetdevice:' + targetDevice.__shorthand]);
             }
 
             throw e;
@@ -227,11 +202,11 @@ AppDeployCmdTool.prototype.uninstallAppPackage = function(packageInfo, targetDev
     //  state, it allows install to proceed.  (Install will fail if there is a legitimate 
     //  uninstall failure such as due to no device).  
     var assureSuccess = function() {};
-    return run(this.path, ['/uninstall', packageInfo, '/targetdevice:' + targetDevice.__shorthand]).then(assureSuccess, assureSuccess);
+    return spawn(this.path, ['/uninstall', packageInfo, '/targetdevice:' + targetDevice.__shorthand]).then(assureSuccess, assureSuccess);
 };
 
 AppDeployCmdTool.prototype.launchApp = function(packageInfo, targetDevice) {
-    return run(this.path, ['/launch', packageInfo, '/targetdevice:' + targetDevice.__shorthand]);
+    return spawn(this.path, ['/launch', packageInfo, '/targetdevice:' + targetDevice.__shorthand]);
 };
 
 function WinAppDeployCmdTool(targetOsVersion) {
@@ -240,10 +215,8 @@ function WinAppDeployCmdTool(targetOsVersion) {
 
     DeploymentTool.call(this);
     this.targetOsVersion = targetOsVersion;
-    /* jshint ignore:start */ /* Ignore jshint to use dot notation for 2nd process.env access for consistency */
     var programFilesPath = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
     this.path = path.join(programFilesPath, 'Windows Kits', '10', 'bin', 'x86', 'WinAppDeployCmd.exe');
-    /* jshint ignore:end */
 }
 
 WinAppDeployCmdTool.prototype = Object.create(DeploymentTool.prototype);
@@ -257,7 +230,7 @@ WinAppDeployCmdTool.prototype.enumerateDevices = function() {
     // The expansion is: IP address, spaces, GUID, spaces, text name
     var LINE_TEST = /^([\d\.]+?)\s+([\da-fA-F\-]+?)\s+(.+)$/m;
 
-    return run(that.path, ['devices']).then(function(result) {
+    return spawn(that.path, ['devices']).then(function(result) {
         var lines = result.split('\n');
         var matchedLines = lines.filter(function(line) {
             return LINE_TEST.test(line);
@@ -283,8 +256,8 @@ WinAppDeployCmdTool.prototype.enumerateDevices = function() {
 
 WinAppDeployCmdTool.prototype.installAppPackage = function(pathToAppxPackage, targetDevice, shouldLaunch, shouldUpdate, pin) {
     if (shouldLaunch) {
-        console.warn('Warning: Cannot launch app with current version of Windows 10 SDK tools.');
-        console.warn('         You will have to launch the app after installation is completed.');
+        events.emit('warn', 'Cannot launch app with current version of Windows 10 SDK tools. ' +
+            'You will have to launch the app after installation is completed.');
     }
 
     var args = [shouldUpdate ? 'update' : 'install', '-file', pathToAppxPackage, '-ip', targetDevice.__ip];
@@ -293,13 +266,13 @@ WinAppDeployCmdTool.prototype.installAppPackage = function(pathToAppxPackage, ta
         args.push(pin);
     }
 
-    return run(this.path, args).then(function() {
-        console.log('Deployment completed successfully.');
+    return spawn(this.path, args).then(function() {
+        events.emit('log', 'Deployment completed successfully.');
     });
 };
 
 WinAppDeployCmdTool.prototype.uninstallAppPackage = function(packageInfo, targetDevice) {
-    return run(this.path, ['uninstall', '-package', packageInfo, '-ip', targetDevice.__ip]);
+    return spawn(this.path, ['uninstall', '-package', packageInfo, '-ip', targetDevice.__ip]);
 };
 
 // usage: require('deployment').getDeploymentTool('8.1');

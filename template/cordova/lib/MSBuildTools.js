@@ -17,12 +17,12 @@
        under the License.
 */
 
-var Q     = require('q'),
-    path  = require('path'),
-    exec  = require('./exec'),
-    shell = require('shelljs'),
-    spawn  = require('./spawn'),
-    Version = require('./Version');
+var Q     = require('q');
+var path  = require('path');
+var shell = require('shelljs');
+var Version = require('./Version');
+var events = require('cordova-common').events;
+var spawn = require('cordova-common').superspawn.spawn;
 
 function MSBuildTools (version, path) {
     this.version = version;
@@ -30,9 +30,9 @@ function MSBuildTools (version, path) {
 }
 
 MSBuildTools.prototype.buildProject = function(projFile, buildType, buildarch, otherConfigProperties) {
-    console.log('Building project: ' + projFile);
-    console.log('\tConfiguration : ' + buildType);
-    console.log('\tPlatform      : ' + buildarch);
+    events.emit('log', 'Building project: ' + projFile);
+    events.emit('log', '\tConfiguration : ' + buildType);
+    events.emit('log', '\tPlatform      : ' + buildarch);
 
     var args = ['/clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal', '/nologo',
     '/p:Configuration=' + buildType,
@@ -45,7 +45,7 @@ MSBuildTools.prototype.buildProject = function(projFile, buildType, buildarch, o
         });
     }
 
-    return spawn(path.join(this.path, 'msbuild'), [projFile].concat(args));
+    return spawn(path.join(this.path, 'msbuild'), [projFile].concat(args), { stdio: 'inherit' });
 };
 
 // returns full path to msbuild tools required to build the project and tools version
@@ -62,6 +62,7 @@ module.exports.findAvailableVersion = function () {
 
 module.exports.findAllAvailableVersions = function () {
     var versions = ['14.0', '12.0', '4.0'];
+    events.emit('verbose', 'Searching for available MSBuild versions...');
 
     return Q.all(versions.map(checkMSBuildVersion)).then(function(unprocessedResults) {
         return unprocessedResults.filter(function(item) {
@@ -71,27 +72,25 @@ module.exports.findAllAvailableVersions = function () {
 };
 
 function checkMSBuildVersion(version) {
-    var deferred = Q.defer();
-    exec('reg query HKLM\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\' + version + ' /v MSBuildToolsPath')
+    return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\' + version, '/v', 'MSBuildToolsPath'])
     .then(function(output) {
         // fetch msbuild path from 'reg' output
-        var path = /MSBuildToolsPath\s+REG_SZ\s+(.*)/i.exec(output);
-        if (path) {
-            path = path[1];
+        var toolsPath = /MSBuildToolsPath\s+REG_SZ\s+(.*)/i.exec(output);
+        if (toolsPath) {
+            toolsPath = toolsPath[1];
             // CB-9565: Windows 10 invokes .NET Native compiler, which only runs on x86 arch,
             // so if we're running an x64 Node, make sure to use x86 tools.
-            if (version === '14.0' && path.indexOf('amd64') > -1) {
-                path = require('path').join(path, '..');
+            if (version === '14.0' && toolsPath.indexOf('amd64') > -1) {
+                toolsPath = path.resolve(toolsPath, '..');
             }
-            deferred.resolve(new MSBuildTools(version, path));
-            return;
+            events.emit('verbose', 'Found MSBuild v' + version + ' at ' + toolsPath);
+            return new MSBuildTools(version, toolsPath);
         }
-        deferred.resolve(null); // not found
-    }, function (err) {
+    })
+    .catch(function (err) {
         // if 'reg' exits with error, assume that registry key not found
-        deferred.resolve(null);
+        return;
     });
-    return deferred.promise;
 }
 
 /// returns an array of available UAP Versions
@@ -119,4 +118,5 @@ function getAvailableUAPVersions() {
 
     return result;
 }
+
 module.exports.getAvailableUAPVersions = getAvailableUAPVersions;

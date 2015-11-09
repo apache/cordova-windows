@@ -19,16 +19,16 @@
        under the License.
 */
 
-var update = require('./lib/update');
+var Api = require('../template/cordova/Api');
+var args  = require('nopt')({ 'help': Boolean });
 
-// check for help flag
-if (['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(process.argv[2]) > -1) {
-    update.help();
-} else {
-    update.run(process.argv).done(function () {
-        console.log('Successfully updated windows project.');
-    }, function (err) {
-        console.error('Failed to check requirements due to', err);
-        process.exit(2);
-    });
+if (args.help || args.argv.remain.length === 0) {
+    console.log('WARNING : Make sure to back up your project before updating!');
+    console.log('Usage: update PathToProject ');
+    console.log('    PathToProject : The path the project you would like to update.');
+    console.log('examples:');
+    console.log('    update C:\\Users\\anonymous\\Desktop\\MyProject');
+    process.exit(1);
 }
+
+Api.updatePlatform(args.argv.remain[0]).done();

@@ -157,7 +157,7 @@ describe('run method', function() {
         createFindAllAvailableVersionsMock([{version: '14.0', buildProject: buildSpy, path: testPath }]);
         build.__set__('prepare.applyPlatformConfig', function() {} );
 
-        build.run([ 'node', buildPath, '--release' ])
+        build.run({ release: true })
         .finally(function() {
             expect(buildSpy).toHaveBeenCalled();
             done();
@@ -189,7 +189,7 @@ describe('run method', function() {
         createFindAllAvailableVersionsMock([{version: '14.0', buildProject: buildSpy, path: testPath }]);
         build.__set__('prepare.applyPlatformConfig', function() {} );
 
-        build.run([ 'node', buildPath, '--archs=arm' ])
+        build.run({argv: ['--archs=arm'] })
         .finally(function() {
             expect(buildSpy).toHaveBeenCalled();
             done();
@@ -230,7 +230,7 @@ describe('run method', function() {
              }]);
         build.__set__('prepare.applyPlatformConfig', function() {} );
 
-        build.run([ 'node', buildPath, '--archs=arm x86 x64 anycpu', '--phone' ])
+        build.run({ argv: ['--archs=arm x86 x64 anycpu', '--phone'] })
         .finally(function() {
             expect(armBuild).toHaveBeenCalled();
             expect(x86Build).toHaveBeenCalled();
@@ -248,7 +248,7 @@ describe('run method', function() {
         build.__set__('prepare.applyPlatformConfig', function() {} );
         createConfigParserMock('8.0');
 
-        build.run([ 'node', buildPath, '--win' ])
+        build.run({argv: ['--win']})
         .finally(function() {
             expect(buildSpy).toHaveBeenCalled();
             done();
@@ -263,7 +263,7 @@ describe('run method', function() {
         build.__set__('prepare.applyPlatformConfig', function() {} );
         createConfigParserMock('8.1');
 
-        build.run([ 'node', buildPath, '--win' ])
+        build.run({argv: ['--win']})
         .finally(function() {
             expect(buildSpy).toHaveBeenCalled();
             done();
@@ -279,7 +279,7 @@ describe('run method', function() {
         build.__set__('prepare.applyPlatformConfig', function() {} );
         createConfigParserMock('unsupported value here');
 
-        build.run([ 'node', buildPath, '--win' ])
+        build.run({argv: ['--win']})
         .fail(function(error) {
             errorSpy();
             expect(error).toBeDefined();
@@ -299,7 +299,7 @@ describe('run method', function() {
         build.__set__('prepare.applyPlatformConfig', function() {} );
         createConfigParserMock(null, '8.1');
 
-        build.run([ 'node', buildPath, '--phone' ])
+        build.run({argv: ['--phone']})
         .finally(function() {
             expect(buildSpy).toHaveBeenCalled();
             done();
@@ -315,7 +315,7 @@ describe('run method', function() {
         build.__set__('prepare.applyPlatformConfig', function() {} );
         createConfigParserMock(null, 'unsupported value here');
 
-        build.run([ 'node', buildPath, '--phone' ])
+        build.run({argv: ['--phone']})
         .fail(function(error) {
             errorSpy();
             expect(error).toBeDefined();
@@ -339,7 +339,7 @@ describe('run method', function() {
         // provision config to target Windows 8.1
         createConfigParserMock('8.1', '8.1');
         // explicitly specify Windows 10 as target
-        build.run([ 'node', buildPath, '--appx=uap' ])
+        build.run({argv: ['--appx=uap']})
         .finally(function() {
             expect(buildSpy).toHaveBeenCalled();
             done();

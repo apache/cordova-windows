@@ -23,19 +23,19 @@ var Q     = require('q');
 var os    = require('os');
 var path  = require('path');
 var shell = require('shelljs');
+var spawn = require('cordova-common').superspawn.spawn;
+var CordovaError = require('cordova-common').CordovaError;
 
-var ConfigParser, MSBuildTools, Version, exec;
+var ConfigParser, MSBuildTools, Version;
 try {
     ConfigParser = require('../../template/cordova/lib/ConfigParser');
     MSBuildTools = require('../../template/cordova/lib/MSBuildTools');
-    exec = require('../../template/cordova/lib/exec');
     Version = require('../../template/cordova/lib/Version');
 } catch (ex) {
     // If previous import fails, we're probably running this script
     // from installed platform and the module location is different.
     ConfigParser = require('./ConfigParser');
     MSBuildTools = require('./MSBuildTools');
-    exec = require('./exec');
     Version = require('./Version');
 }
 
@@ -70,9 +70,10 @@ var REQUIRED_VERSIONS = {
 
 function getConfig() {
     try {
-        return new ConfigParser(path.join(__dirname, '..', '..', 'config.xml'));
+        return new ConfigParser(path.join(__dirname, '../../config.xml'));
     } catch (e) {
-        throw new Error('Can\'t find config.xml file or it is malformed.');
+        throw new CordovaError('Can\'t check requirements for Windows platform.' +
+            'The config.xml file is either missing or malformed.');
     }
 }
 
@@ -118,7 +119,7 @@ function getHighestAppropriateVersion (versions, requiredVersion) {
  * @return  {Version}  Version information for current OS.
  */
 function getWindowsVersion() {
-    return exec('ver').then(function (output) {
+    return spawn('ver').then(function (output) {
         var match = /\[Version (.*)\]\s*$/.exec(output);
         return Version.fromString(match[1]);
     }).fail(function () {
@@ -135,7 +136,7 @@ function getWindowsVersion() {
 function getInstalledVSVersions() {
     // Query all keys with Install value equal to 1, then filter out
     // those, which are not related to VS itself
-    return exec('reg query HKLM\\SOFTWARE\\Microsoft\\DevDiv\\vs\\Servicing /s /v Install /f 1 /d /e /reg:32')
+    return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\DevDiv\\vs\\Servicing', '/s', '/v', 'Install', '/f', '1', '/d', '/e', '/reg:32'])
     .fail(function () { return ''; })
     .then(function (output) {
         return output.split('\n')
@@ -151,8 +152,7 @@ function getInstalledVSVersions() {
         if (installedVersions.indexOf('12.0') === -1) return installedVersions;
 
         // special case for VS 2013. We need to check if VS2013 update 2 is installed
-        return exec('reg query "HKLM\\SOFTWARE\\Microsoft\\Updates\\Microsoft Visual Studio' +
-            ' 2013\\vsupdate_KB2829760" /v PackageVersion /reg:32')
+        return spawn('reg', ['query','HKLM\\SOFTWARE\\Microsoft\\Updates\\Microsoft Visual Studio 2013\\vsupdate_KB2829760','/v','PackageVersion','/reg:32'])
         .then(function (output) {
             var updateVer = Version.fromString(/PackageVersion\s+REG_SZ\s+(.*)/i.exec(output)[1]);
             // if update version is lover than Update2, reject the promise
@@ -175,7 +175,7 @@ function getInstalledVSVersions() {
  */
 function getInstalledWindowsSdks () {
     var installedSdks = [];
-    return exec('reg query "HKLM\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows" /s /v InstallationFolder /reg:32')
+    return spawn('reg', ['query','HKLM\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows','/s','/v','InstallationFolder','/reg:32'])
     .fail(function () { return ''; })
     .then(function (output) {
         var re = /\\Microsoft SDKs\\Windows\\v(\d+\.\d+)\s*InstallationFolder\s+REG_SZ\s+(.*)/gim;
@@ -200,7 +200,7 @@ function getInstalledWindowsSdks () {
  */
 function getInstalledPhoneSdks () {
     var installedSdks = [];
-    return exec('reg query "HKLM\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows Phone\\v8.1" /v InstallationFolder /reg:32')
+    return spawn('reg', ['query','HKLM\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows Phone\\v8.1','/v','InstallationFolder','/reg:32'])
     .fail(function () { return ''; })
     .then(function (output) {
         var match = /\\Microsoft SDKs\\Windows Phone\\v(\d+\.\d+)\s*InstallationFolder\s+REG_SZ\s+(.*)/gim.exec(output);
@@ -209,7 +209,7 @@ function getInstalledPhoneSdks () {
         }
     })
     .then(function () {
-        return exec('reg query "HKLM\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v10.0" /v InstallationFolder /reg:32');
+        return spawn('reg', ['query','HKLM\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v10.0','/v','InstallationFolder','/reg:32']);
     })
     .fail(function () { return ''; })
     .then(function (output) {
@@ -267,7 +267,7 @@ var checkOS = function () {
         var requiredOsVersion = getMinimalRequiredVersionFor('os');
         if (actualVersion.gte(requiredOsVersion) ||
             // Special case for Windows 10/Phone 10  targets which can be built on Windows 7 (version 6.1)
-            actualVersion.major === 6 && actualVersion.minor === 1 && getConfig.getWindowsTargetVersion() === '10.0') {
+            actualVersion.major === 6 && actualVersion.minor === 1 && getConfig().getWindowsTargetVersion() === '10.0') {
             return mapWindowsVersionToName(actualVersion);
         }
 

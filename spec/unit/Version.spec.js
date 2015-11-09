@@ -19,29 +19,30 @@
 
 var Version = require('../../template/cordova/lib/Version.js');
 
-describe('Version constructors behave correctly.', function() {
+describe('Version constructor', function () {
 
-    var v1 = new Version(1);
-    expect(v1.major).toBe(1);
-    expect(v1.minor).toBe(0);
-    expect(v1.build).toBe(0);
-    expect(v1.qfe).toBe(0);
-    var v2 = new Version(1, 2);
-    expect(v2.major).toBe(1);
-    expect(v2.minor).toBe(2);
-    expect(v2.build).toBe(0);
-    expect(v2.qfe).toBe(0);
-    var v3 = new Version(1, 2, 4);
-    expect(v3.major).toBe(1);
-    expect(v3.minor).toBe(2);
-    expect(v3.build).toBe(4);
-    expect(v3.qfe).toBe(0);
-    var v4 = new Version(1, 2, 4, 7);
-    expect(v4.major).toBe(1);
-    expect(v4.minor).toBe(2);
-    expect(v4.build).toBe(4);
-    expect(v4.qfe).toBe(7);
-
+    it('should behave correctly', function () {
+        var v1 = new Version(1);
+        expect(v1.major).toBe(1);
+        expect(v1.minor).toBe(0);
+        expect(v1.build).toBe(0);
+        expect(v1.qfe).toBe(0);
+        var v2 = new Version(1, 2);
+        expect(v2.major).toBe(1);
+        expect(v2.minor).toBe(2);
+        expect(v2.build).toBe(0);
+        expect(v2.qfe).toBe(0);
+        var v3 = new Version(1, 2, 4);
+        expect(v3.major).toBe(1);
+        expect(v3.minor).toBe(2);
+        expect(v3.build).toBe(4);
+        expect(v3.qfe).toBe(0);
+        var v4 = new Version(1, 2, 4, 7);
+        expect(v4.major).toBe(1);
+        expect(v4.minor).toBe(2);
+        expect(v4.build).toBe(4);
+        expect(v4.qfe).toBe(7);
+    });
 });
 
 describe('Version parse functions work as expected.', function() {

@@ -19,20 +19,37 @@
        under the License.
 */
 
-/*
- * create a cordova/windows8 project
- * USAGE
- *  ./create [path package activity]
- *  ./bin/create.bat C:\Users\Me\MyTestProj "test.proj" "TestProject"
- */
+var path = require('path');
+var ConfigParser = require('cordova-common').ConfigParser;
+var Api = require('../template/cordova/Api');
 
-var create = require('./lib/create');
+var argv = require('nopt')({
+    'help' : Boolean,
+    'guid': String
+});
 
-if (['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(process.argv[2]) > -1) {
-    create.help();
-} else {
-    create.run(process.argv).done(null, function (err) {
-        console.error('Failed to create project due to', err);
-        process.exit(2);
-    });
+if (argv.help || argv.argv.remain.length === 0) {
+    console.log('Usage: create PathToProject [ PackageName [ AppName [ CustomTemplate ] ] ] [--guid=<GUID string>]');
+    console.log('    PathToProject : The path to where you wish to create the project');
+    console.log('    PackageName   : The namespace for the project (default is Cordova.Example)');
+    console.log('    AppName       : The name of the application (default is CordovaAppProj)');
+    console.log('    CustomTemplate: The path to project template overrides');
+    console.log('                        (will be copied over default platform template files)');
+    console.log('    --guid        : The App\'s GUID (default is random generated)');
+    console.log('examples:');
+    console.log('    create C:\\Users\\anonymous\\Desktop\\MyProject');
+    console.log('    create C:\\Users\\anonymous\\Desktop\\MyProject io.Cordova.Example AnApp');
+    process.exit(1);
 }
+
+var config = new ConfigParser(path.resolve(__dirname, '../template/config.xml'));
+
+if (argv.argv.remain[1]) config.setPackageName(argv.argv.remain[1]);
+if (argv.argv.remain[2]) config.setName(argv.argv.remain[2]);
+
+var options = {
+    guid: argv.guid,
+    customTemplate: argv.argv.remain[3]
+};
+
+Api.createPlatform(argv.argv.remain[0], config, options).done();
