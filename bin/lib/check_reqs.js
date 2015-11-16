@@ -209,7 +209,7 @@ function getInstalledPhoneSdks () {
         }
     })
     .then(function () {
-        return spawn('reg','query','HKLM\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v10.0','/v','InstallationFolder','/reg:32');
+        return spawn('reg', ['query','HKLM\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v10.0','/v','InstallationFolder','/reg:32']);
     })
     .fail(function () { return ''; })
     .then(function (output) {
