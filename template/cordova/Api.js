@@ -319,12 +319,14 @@ Api.prototype.removePlugin = function (plugin, uninstallOptions) {
  *   there could be multiple items in output array, e.g. when multiple
  *   arhcitectures is specified.
  */
-// Api.prototype.build = function(buildOptions) {
-//     var command = path.join(this.root, 'cordova', 'build');
-//     var commandArguments = getBuildArgs(buildOptions);
-//     return superspawn.spawn(command, commandArguments, {
-//         printCommand: true, stdio: 'inherit', chmod: true });
-// };
+Api.prototype.build = function(buildOptions) {
+    // TODO: Should we run check_reqs first? Android does this, but Windows appears doesn't.
+    return require('./lib/build').run.call(this, buildOptions)
+    .then(function (result) {
+        // Wrap result into array according to PlatformApi spec
+        return [result];
+    });
+};
 
 /**
  * Builds an application package for current platform and runs it on
@@ -338,12 +340,10 @@ Api.prototype.removePlugin = function (plugin, uninstallOptions) {
  * @return {Promise} A promise either fulfilled if package was built and ran
  *   successfully, or rejected with CordovaError.
  */
-// Api.prototype.run = function(runOptions) {
-//     var command = path.join(this.root, 'cordova', 'run');
-//     var commandArguments = getBuildArgs(runOptions);
-//     return superspawn.spawn(command, commandArguments, {
-//         printCommand: true, stdio: 'inherit', chmod: true });
-// };
+Api.prototype.run = function(runOptions) {
+    // TODO: Should we run check_reqs first? Android does this, but Windows appears doesn't.
+    return require('./lib/run').run.call(this, runOptions);
+};
 
 /**
  * Cleans out the build artifacts from platform's directory.
@@ -351,10 +351,9 @@ Api.prototype.removePlugin = function (plugin, uninstallOptions) {
  * @return  {Promise}  Return a promise either fulfilled, or rejected with
  *   CordovaError.
  */
-// Api.prototype.clean = function() {
-//     var cmd = path.join(this.root, 'cordova', 'clean');
-//     return superspawn.spawn(cmd, [], { printCommand: true, stdio: 'inherit', chmod: true });
-// };
+Api.prototype.clean = function(cleanOpts) {
+    return require('./lib/build').clean.call(this, cleanOpts);
+};
 
 /**
  * Performs a requirements check for current platform. Each platform defines its
@@ -369,50 +368,6 @@ Api.prototype.requirements = function() {
 };
 
 module.exports = Api;
-
-/**
- * Reconstructs the buildOptions tat will be passed along to platform scripts.
- *   This is an ugly temporary fix. The code spawning or otherwise calling into
- *   platform code should be dealing with this based on the parsed args object.
- *
- * @param   {Object}  options  A build options set, passed to `build` method
- *
- * @return  {String[]}         An array or arguments which can be passed to
- *   `create` build script.
- */
-// function getBuildArgs(options) {
-//     // if no options passed, empty object will be returned
-//     if (!options) return [];
-
-//     var downstreamArgs = [];
-//     var argNames =[
-//         'debug',
-//         'release',
-//         'device',
-//         'emulator',
-//         'nobuild',
-//         'list'
-//     ];
-
-//     argNames.forEach(function(flag) {
-//         if (options[flag]) {
-//             downstreamArgs.push('--' + flag);
-//         }
-//     });
-
-//     if (options.buildConfig) {
-//         downstreamArgs.push('--buildConfig=' + options.buildConfig);
-//     }
-//     if (options.target) {
-//         downstreamArgs.push('--target=' + options.target);
-//     }
-//     if (options.archs) {
-//         downstreamArgs.push('--archs=' + options.archs);
-//     }
-
-//     var unparsedArgs = options.argv || [];
-//     return downstreamArgs.concat(unparsedArgs);
-// }
 
 /**
  * Removes the specified modules from list of installed modules and updates
@@ -513,29 +468,3 @@ Api.prototype._writePluginModules = function (targetDir) {
     shell.mkdir('-p', targetDir);
     fs.writeFileSync(path.join(targetDir, 'cordova_plugins.js'), final_contents, 'utf-8');
 };
-
-/**
- * Copies cordova.js itself and cordova-js source into installed/updated
- *   platform's `platform_www` directory.
- *
- * @param   {String}  sourceLib    Path to platform library. Required to acquire
- *   cordova-js sources.
- * @param   {PlatformInfo}  platformInfo  PlatformInfo structure, required for
- *   detecting copied files destination.
- */
-// function copyCordovaSrc(sourceLib, platformInfo) {
-//     // Copy the cordova.js file to platforms/<platform>/platform_www/
-//     // The www dir is nuked on each prepare so we keep cordova.js in platform_www
-//     shell.mkdir('-p', platformInfo.locations.platformWww);
-//     shell.cp('-f', path.join(platformInfo.locations.www, 'cordova.js'),
-//         path.join(platformInfo.locations.platformWww, 'cordova.js'));
-
-//     // Copy cordova-js-src directory into platform_www directory.
-//     // We need these files to build cordova.js if using browserify method.
-//     var cordovaJsSrcPath = path.resolve(sourceLib, platformInfo.locations.cordovaJsSrc);
-
-//     //only exists for platforms that have shipped cordova-js-src directory
-//     if(fs.existsSync(cordovaJsSrcPath)) {
-//         shell.cp('-rf', cordovaJsSrcPath, platformInfo.locations.platformWww);
-//     }
-// }

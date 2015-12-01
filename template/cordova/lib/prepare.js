@@ -230,6 +230,8 @@ function applyAccessRules (config, manifest) {
 
         events.emit('warn', 'Access rules must begin with "https://", the following rule will be ignored: ' + rule.origin);
         return false;
+    }).map(function (rule) {
+        return rule.origin;
     });
 
     // If * is specified, emit no access rules.
