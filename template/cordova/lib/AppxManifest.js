@@ -61,7 +61,7 @@ function AppxManifest(path, prefix) {
     this.path = path;
     // Append ':' to prefix if needed
     prefix = prefix || '';
-    this.prefix = (prefix === '' || prefix.endsWith(':')) ? prefix : prefix + ':';
+    this.prefix = (prefix.indexOf(':') === prefix.length - 1) ? prefix : prefix + ':';
     this.doc = xml.parseElementtreeSync(path);
     if (this.doc.getroot().tag !== 'Package') {
         // Some basic validation
@@ -91,7 +91,7 @@ AppxManifest.get = function (fileName) {
     var root = xml.parseElementtreeSync(fileName).getroot();
     var prefixes = Object.keys(root.attrib)
     .reduce(function (result, attrib) {
-        if (attrib.indexOf('xmlns') === 0 && !attrib.endsWith(':mp')) {
+        if (attrib.indexOf('xmlns') === 0 && attrib !== 'xmlns:mp') {
             result.push(attrib.replace('xmlns', '').replace(':', ''));
         }
 
@@ -586,7 +586,7 @@ Win10AppxManifest.prototype.write = function(destPath) {
 function ensureUapPrefixedCapabilities(capabilities) {
     capabilities.getchildren()
     .forEach(function(el) {
-        if (CAPS_NEEDING_UAPNS.indexOf(el.attrib.Name) > -1 && !el.tag.startsWith('uap:')) {
+        if (CAPS_NEEDING_UAPNS.indexOf(el.attrib.Name) > -1 && el.tag.indexOf('uap:') !== 0) {
             el.tag = 'uap:' + el.tag;
         }
     });

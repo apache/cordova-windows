@@ -357,6 +357,7 @@ describe('A Windows 10 project should apply the uap: namespace prefix to certain
     beforeEach(function() {
         manifest = createMockConfigAndManifestForApplyAccessRules(true, 'https://www.contoso.com').manifest;
         var element = manifest.doc.find('.//Capabilities');
+        element.clear();
         element.append(new et.Element('Capability', { Name: 'internetClient' }));
         element.append(new et.Element('Capability', { Name: 'documentsLibrary' }));
         element.append(new et.Element('DeviceCapability', { Name: 'location' }));
@@ -364,7 +365,6 @@ describe('A Windows 10 project should apply the uap: namespace prefix to certain
     });
 
     it('Applies the uap: prefix to the documentsLibrary capability.', function() {
-
         var testResults = {};
         // map capabilities to tag
         manifest.getCapabilities().forEach(function(child) {

@@ -153,7 +153,7 @@ module.exports.getInstaller = function (type) {
         return handlers[type].install;
     }
 
-    events.emit('verbose', '<' + type + '> is not supported for android plugins');
+    events.emit('verbose', '<' + type + '> is not supported for Windows plugins');
 };
 
 module.exports.getUninstaller = function(type) {
@@ -161,7 +161,7 @@ module.exports.getUninstaller = function(type) {
         return handlers[type].uninstall;
     }
 
-    events.emit('verbose', '<' + type + '> is not supported for android plugins');
+    events.emit('verbose', '<' + type + '> is not supported for Windows plugins');
 };
 
 function getTargetConditions(obj) {

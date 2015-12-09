@@ -535,7 +535,7 @@ function updateWwwFrom(cordovaProject, destinations) {
 }
 
 /**
- * Updates project structure and AndroidManifest according to project's configuration.
+ * Updates project structure and AppxManifest according to project's configuration.
  *
  * @param   {ConfigParser}  projectConfig  A project's configuration that will
  *   be used to update project

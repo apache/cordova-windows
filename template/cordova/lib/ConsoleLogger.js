@@ -26,9 +26,9 @@ var CordovaError = require('cordova-common').CordovaError;
  * @class ConsoleLogger
  * @extends EventEmitter
  *
- * Implementing basic logging for platform. Inherits regular NodeJS
- *   EventEmitter. All events, emitted on this class instance are immediately
- *   logged to console.
+ * Implements basic logging for platform. Inherits regular NodeJS EventEmitter.
+ *   All events, emitted on this class instance are immediately logged to
+ *   console.
  *
  * Also attaches handler to process' uncaught exceptions, so these exceptions
  *   logged to console similar to regular error events.
