@@ -22,6 +22,7 @@ var Q = require('q'),
     platformRoot = '../../template',
     testPath = 'testpath',
     buildPath = path.join(platformRoot, 'cordova', 'build'),
+    prepare = require(platformRoot + '/cordova/lib/prepare.js'),
     build = rewire(platformRoot + '/cordova/lib/build.js');
 
 function createFindAvailableVersionMock(version, path, buildSpy) {
@@ -90,6 +91,14 @@ describe('run method', function() {
         findAvailableVersionOriginal = build.__get__('MSBuildTools.findAvailableVersion');
         applyPlatformConfigOriginal = build.__get__('prepare.applyPlatformConfig');
         configParserOriginal = build.__get__('ConfigParser');
+
+        var originalBuildMethod = build.run;
+        spyOn(build, 'run').andCallFake(function () {
+            // Bind original build to custom 'this' object to mock platform's locations property
+            return originalBuildMethod.apply({locations: {www: 'some/path'}}, arguments);
+        });
+
+        spyOn(prepare, 'addBOMSignature');
     });
 
     afterEach(function() {
