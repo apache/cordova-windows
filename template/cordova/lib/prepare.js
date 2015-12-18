@@ -466,9 +466,6 @@ function addBOMSignature(directory) {
  *   configuration is already dumped to appropriate config.xml file.
  */
 function updateConfigFilesFrom(sourceConfig, configMunger, locations) {
-
-    events.emit('verbose', 'Generating config.xml from defaults for platform "windows"');
-
     // First cleanup current config and merge project's one into own
     var defaultConfig = locations.defaultConfigXml;
     var ownConfig = locations.configXml;
@@ -477,7 +474,7 @@ function updateConfigFilesFrom(sourceConfig, configMunger, locations) {
     // Otherwise save whatever is there as defaults so it can be
     // restored or copy project config into platform if none exists.
     if (fs.existsSync(defaultConfig)) {
-        events.emit('verbose', 'Generating config.xml from defaults for platform "' + this.platform + '"');
+        events.emit('verbose', 'Generating config.xml from defaults for platform "windows"');
         shell.cp('-f', defaultConfig, ownConfig);
     } else if (fs.existsSync(ownConfig)) {
         shell.cp('-f', ownConfig, defaultConfig);
