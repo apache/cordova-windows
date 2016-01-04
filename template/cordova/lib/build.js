@@ -502,8 +502,8 @@ function getMsBuildForTargets(selectedTargets, buildConfig, allMsBuildVersions) 
         // prefer 12.  If not present, can't build this; error in the filterSupportedTargets function
         result = availableVersions['12.0'] || availableVersions['4.0'];
     } else {
-        // 14 can build Windows 10, Windows 8.1, and Windows Phone 8.1, so resolve to 14 if available, else 12
-        result = (availableVersions['14.0'] || availableVersions['12.0']);
+        // 15 and 14 can build Windows 10, Windows 8.1, and Windows Phone 8.1, so resolve to those if available, else 12
+        result = (availableVersions['15.0'] || availableVersions['14.0'] || availableVersions['12.0']);
     }
 
     return result;
@@ -525,6 +525,10 @@ function msBuild14TargetsFilter(target) {
     return target === projFiles.win || target === projFiles.phone || target === projFiles.win10;
 }
 
+function msBuild15TargetsFilter(target) {
+    return target === projFiles.win || target === projFiles.phone || target === projFiles.win10;
+}
+
 function filterSupportedTargets (targets, msbuild) {
     if (!targets || targets.length === 0) {
         events.emit('warn', 'No build targets are specified.');
@@ -534,7 +538,8 @@ function filterSupportedTargets (targets, msbuild) {
     var targetFilters = {
         '4.0': msBuild4TargetsFilter,
         '12.0': msBuild12TargetsFilter,
-        '14.0': msBuild14TargetsFilter
+        '14.0': msBuild14TargetsFilter,
+        '15.0': msBuild15TargetsFilter
     };
 
     var filter = targetFilters[msbuild.version];

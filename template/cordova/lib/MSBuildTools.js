@@ -50,18 +50,18 @@ MSBuildTools.prototype.buildProject = function(projFile, buildType, buildarch, o
 
 // returns full path to msbuild tools required to build the project and tools version
 module.exports.findAvailableVersion = function () {
-    var versions = ['14.0', '12.0', '4.0'];
+    var versions = ['15.0', '14.0', '12.0', '4.0'];
 
     return Q.all(versions.map(checkMSBuildVersion)).then(function (versions) {
         // select first msbuild version available, and resolve promise with it
-        var msbuildTools = versions[0] || versions[1] || versions[2];
+        var msbuildTools = versions[0] || versions[1] || versions[2] || versions[3];
 
         return msbuildTools ? Q.resolve(msbuildTools) : Q.reject('MSBuild tools not found');
     });
 };
 
 module.exports.findAllAvailableVersions = function () {
-    var versions = ['14.0', '12.0', '4.0'];
+    var versions = ['15.0', '14.0', '12.0', '4.0'];
     events.emit('verbose', 'Searching for available MSBuild versions...');
 
     return Q.all(versions.map(checkMSBuildVersion)).then(function(unprocessedResults) {
@@ -80,7 +80,7 @@ function checkMSBuildVersion(version) {
             toolsPath = toolsPath[1];
             // CB-9565: Windows 10 invokes .NET Native compiler, which only runs on x86 arch,
             // so if we're running an x64 Node, make sure to use x86 tools.
-            if (version === '14.0' && toolsPath.indexOf('amd64') > -1) {
+            if ((version === '15.0' || version === '14.0') && toolsPath.indexOf('amd64') > -1) {
                 toolsPath = path.resolve(toolsPath, '..');
             }
             events.emit('verbose', 'Found MSBuild v' + version + ' at ' + toolsPath);
