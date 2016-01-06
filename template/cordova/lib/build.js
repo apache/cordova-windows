@@ -179,7 +179,10 @@ function parseAndValidateArgs(options) {
 
     // get build options/defaults
     config.buildType = options.release ? 'release' : 'debug';
-    config.buildArchs = args.archs ? args.archs.split(' ') : ['anycpu'];
+
+    var archs = options.archs || args.archs;
+    config.buildArchs = archs ? archs.split(' ') : ['anycpu'];
+
     config.phone = args.phone ? true : false;
     config.win = args.win ? true : false;
     config.projVerOverride = args.appx;
@@ -195,7 +198,7 @@ function parseAndValidateArgs(options) {
     }
 
     // if build.json is provided, parse it
-    var buildConfigPath = args.buildConfig;
+    var buildConfigPath = options.buildConfig;
     if (buildConfigPath) {
         buildConfig = parseBuildConfig(buildConfigPath, config.buildType);
         for (var prop in buildConfig) { config[prop] = buildConfig[prop]; }
@@ -273,10 +276,9 @@ function updateManifestWithPublisher(allMsBuildVersions, config) {
         return projFilesToManifests[proj];
     });
     manifestFiles.forEach(function(file) {
-        var manifestPath = path.join(ROOT, file);
-        AppxManifest.get(manifestPath)
-            .getIdentity().setPublisher(config.publisherId)
-            .write();
+        var manifest = AppxManifest.get(path.join(ROOT, file));
+        manifest.getIdentity().setPublisher(config.publisherId);
+        manifest.write();
     });
 }
 
