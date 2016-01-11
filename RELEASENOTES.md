@@ -24,6 +24,13 @@ Update these notes using: git log --pretty=format:'* %s' --topo-order --no-merge
 
 cordova-windows is a library that enables developers to create Windows 8/8.1/10 and WP8.1 application projects that support Cordova APIs.
 
+[4.3.0]
+* CB-10193 Add BOM to www files at build stage instead of prepare
+* CB-10303 Fixes build arguments parsing
+* CB-10292: Windows platform support for next version of VS/MSBuild
+* CB-10224 Removes duplicated/incorrect console line
+* CB-9828 Implement and expose PlatformApi for Windows
+
 [4.2.0]
 
 * CB-8481: Add backbutton support on Windows 10 and Windows Phone 8.1
