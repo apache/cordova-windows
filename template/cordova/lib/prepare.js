@@ -355,7 +355,7 @@ function copyImages(config, platformRoot) {
         return null;
     }
 
-    var images = config.getIcons().concat(config.getSplashScreens());
+    var images = config.getIcons('windows').concat(config.getSplashScreens('windows'));
 
     images.forEach(function (img) {
         if (img.target) {
