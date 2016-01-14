@@ -102,15 +102,7 @@
   </ItemGroup>
   <Import Project="CordovaApp.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />
-  <!-- To modify your build process, add your task inside one of the targets below then uncomment
-       that target and the DisableFastUpToDateCheck PropertyGroup.
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  <PropertyGroup>
-    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
-  </PropertyGroup>
-  -->
+  <Target AfterTargets="ResolveAssemblyReferences" BeforeTargets="AfterResolveReferences" Condition="'$(Platform)' == 'AnyCPU'" Name="DetectMangedWinMDWithAnyCpu">
+    <Error Condition="'%(_ResolveAssemblyReferenceResolvedFiles.WinMDFile)' == 'true' AND '%(_ResolveAssemblyReferenceResolvedFiles.WinMDFileType)' == 'Managed'" Text="The following component requires .NET Native compilation which is not available when targeting 'Windows10' and 'AnyCPU'. Please consider changing the targeted processor architecture to one of the following: 'x86, x64, ARM' (if you are using command line this could be done by adding '--archs' parameter, for example: 'cordova build windows --archs=x64'). %(_ResolveAssemblyReferenceResolvedFiles.Identity)" />
+    </Target>
 </Project>
