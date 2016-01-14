@@ -8,8 +8,12 @@ Debug
 obj
 Thumbs.db
 
-# Skip node_modules
-node_modules/
+# Skip node_modules .bin folder and dev dependencies
+node_modules/.bin
+node_modules/istanbul/
+node_modules/jasmine-node/
+node_modules/jshint/
+node_modules/rewire/
 
 npm-debug.log
 
