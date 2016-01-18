@@ -89,7 +89,7 @@ var handlers = {
             var type = obj.type;
 
             if(type === 'projectReference') {
-                project.removeProjectReference(plugin.dir, getTargetConditions(obj));
+                project.removeProjectReference(path.join(plugin.dir, src), getTargetConditions(obj));
             }
             else {
                 var targetPath = path.join('plugins', plugin.id);
