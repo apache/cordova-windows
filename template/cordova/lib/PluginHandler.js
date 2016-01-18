@@ -42,13 +42,20 @@ var handlers = {
     },
     'resource-file':{
         install:function(obj, plugin, project, options) {
-            // as per specification resource-file target is specified relative to platform root
-            copyFile(plugin.dir, obj.src, project.root, obj.target);
-            project.addResourceFileToProject(obj.target, getTargetConditions(obj));
+            // do not copy, but reference the file in the plugin folder. This allows to 
+            // have multiple source files map to the same target and select the appropriate
+            // one based on the current build settings, e.g. architecture.
+            // also, we don't check for existence. This allows to insert build variables 
+            // into the source file name, e.g.
+            // <resource-file src="$(Platform)/My.dll" target="My.dll" />
+
+            var src = path.resolve(plugin.dir, obj.src);
+            console.log(src);
+            project.addResourceFileToProject(src, obj.target, getTargetConditions(obj));
         },
         uninstall:function(obj, plugin, project, options) {
-            removeFile(project.root, obj.target);
-            project.removeResourceFileFromProject(obj.target, getTargetConditions(obj));
+            var src = path.resolve(plugin.dir, obj.src);
+            project.removeResourceFileFromProject(src, getTargetConditions(obj));
         }
     },
     'lib-file': {
