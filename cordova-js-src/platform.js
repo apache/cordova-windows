@@ -26,7 +26,8 @@ module.exports = {
             exec = require('cordova/exec'),
             channel = cordova.require('cordova/channel'),
             platform = require('cordova/platform'),
-            modulemapper = require('cordova/modulemapper');
+            modulemapper = require('cordova/modulemapper'),
+            configHelper = require('cordova/confighelper');
 
         modulemapper.clobbers('cordova/exec/proxy', 'cordova.commandProxy');
 
@@ -38,7 +39,11 @@ module.exports = {
         channel.onNativeReady.fire();
 
         var onWinJSReady = function () {
-            var app = WinJS.Application;
+            var app = WinJS.Application,
+                splashscreen = require('cordova/splashscreen');
+
+            modulemapper.clobbers('cordova/splashscreen', 'navigator.splashscreen');
+
             var checkpointHandler = function checkpointHandler() {
                 cordova.fireDocumentEvent('pause',null,true);
             };
@@ -54,7 +59,27 @@ module.exports = {
                 var args = e.detail.arguments;
                 var actType = e.detail.type;
                 platform.activationContext = { type: actType, args: args };
-                cordova.fireDocumentEvent('activated', platform.activationContext, true);
+
+                function makePromise(fn) {
+                    return new WinJS.Promise(function init(completeDispatch, errorDispatch) {
+                        fn(function successCb(results) {
+                            completeDispatch(results);
+                        }, function errorCb(error) {
+                            errorDispatch(error);
+                        });
+                    });
+                }
+
+                e.setPromise(makePromise(configHelper.readConfig).then(function (config) {
+                    if (e.detail.previousExecutionState !== Windows.ApplicationModel.Activation.ApplicationExecutionState.running) {
+                        splashscreen.firstShow(config, e);
+                    }
+                }).then(function () {
+                    // Avoids splashimage flicker on Windows Phone 8.1/10
+                    return WinJS.Promise.timeout();
+                }).then(function () {
+                    cordova.fireDocumentEvent('activated', platform.activationContext, true);
+                }));
             };
 
             app.addEventListener("checkpoint", checkpointHandler);
@@ -65,6 +90,11 @@ module.exports = {
 
             app.start();
         };
+
+        function appendScript(scriptElem, loadedCb) {
+            scriptElem.addEventListener("load", loadedCb);
+            document.head.appendChild(scriptElem);
+        }
 
         if (!window.WinJS) {
             var scriptElem = document.createElement("script");

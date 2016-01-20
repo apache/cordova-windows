@@ -59,6 +59,10 @@ module.exports.create = function (destinationDir, config, options) {
 
     // Duplicate cordova.js to platform_www otherwise it will get removed by prepare
     shell.cp('-rf', path.join(root, 'template/www/cordova.js'), path.join(projectPath, 'platform_www'));
+    // Duplicate splashscreen.css to platform_www otherwise it will get removed by prepare
+    var cssDirectory = path.join(projectPath, 'platform_www', 'css');
+    recursiveCreateDirectory(cssDirectory);
+    shell.cp('-rf', path.join(root, 'template/www/css/splashscreen.css'), cssDirectory);
 
     // Copy cordova-js-src directory
     events.emit('verbose', 'Copying cordova-js sources to platform_www');
