@@ -50,7 +50,6 @@ var handlers = {
             // <resource-file src="$(Platform)/My.dll" target="My.dll" />
 
             var src = path.resolve(plugin.dir, obj.src);
-            console.log(src);
             project.addResourceFileToProject(src, obj.target, getTargetConditions(obj));
         },
         uninstall:function(obj, plugin, project, options) {
