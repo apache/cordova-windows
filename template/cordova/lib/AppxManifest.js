@@ -382,7 +382,15 @@ AppxManifest.prototype.getCapabilities = function () {
     });
 };
 
+function isCSSColorName(color) {
+    return color.indexOf('0x') === -1 && color.indexOf('#') === -1;
+}
+
 function refineColor(color) {
+    if (isCSSColorName(color)) {
+        return color;
+    }
+
     // return three-byte hexadecimal number preceded by "#" (required for Windows)
     color = color.replace('0x', '').replace('#', '');
     if (color.length == 3) {
