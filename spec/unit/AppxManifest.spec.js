@@ -22,9 +22,11 @@ var et = require('elementtree');
 var xml = require('cordova-common').xmlHelpers;
 var AppxManifest = rewire('../../template/cordova/lib/AppxManifest');
 var Win10AppxManifest = AppxManifest.__get__('Win10AppxManifest');
+var refineColor = AppxManifest.__get__('refineColor');
 
 var WINDOWS_MANIFEST = 'template/package.windows.appxmanifest';
 var WINDOWS_PHONE_MANIFEST = 'template/package.phone.appxmanifest';
+var CSS_COLOR_NAME = 'turquoise';
 
 describe('AppxManifest', function () {
 
@@ -128,6 +130,12 @@ describe('AppxManifest', function () {
                 expect(function () { emptyManifest[method](); }).toThrow();
                 expect(manifest[method]()).toBeDefined();
             });
+        });
+    });
+
+    describe('getVisualElements methods', function () {
+        it('refineColor should leave CSS color name as is', function () {
+            expect(refineColor(CSS_COLOR_NAME)).toEqual(CSS_COLOR_NAME);
         });
     });
 });
