@@ -73,7 +73,9 @@ jsprojManager.prototype = {
     _projects: null,
 
     getPackageName: function() {
-        return AppxManifest.get(path.join(this.root, 'package.windows.appxmanifest'))
+        // CB-10394 Do not cache manifest file while getting package name to avoid problems
+        // with windows.appxmanifest cached twice (here and in ConfigFile module)
+        return AppxManifest.get(path.join(this.root, 'package.windows.appxmanifest'), /*ignoreCache=*/true)
             .getProperties().getDisplayName();
     },
 

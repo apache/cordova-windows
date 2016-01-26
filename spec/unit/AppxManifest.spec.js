@@ -38,6 +38,8 @@ describe('AppxManifest', function () {
         spyOn(xml, 'parseElementtreeSync').andCallFake(function (manifestPath) {
             return XMLS[manifestPath] || parseElementtreeSyncOrig(manifestPath);
         });
+
+        AppxManifest.__set__('manifestCache', {});
     });
 
     describe('constructor', function () {
@@ -79,6 +81,36 @@ describe('AppxManifest', function () {
 
             expect(AppxManifest.get('/uap/prefixed').prefix).toEqual('uap:');
             expect(AppxManifest.get('/uap/prefixed') instanceof Win10AppxManifest).toBe(true);
+        });
+
+        it('should cache AppxManifest instances by default', function () {
+            var manifest  = AppxManifest.get('/no/prefixed');
+            expect(xml.parseElementtreeSync.calls.length).toBe(2);
+
+            var manifest2 = AppxManifest.get('/no/prefixed');
+            expect(xml.parseElementtreeSync.calls.length).toBe(2);
+
+            expect(manifest).toBe(manifest2);
+        });
+
+        it('should not use cache to get AppxManifest instances when "ignoreCache" is specified', function () {
+            var manifest  = AppxManifest.get('/no/prefixed');
+            expect(xml.parseElementtreeSync.calls.length).toBe(2);
+
+            var manifest2 = AppxManifest.get('/no/prefixed', true);
+            expect(xml.parseElementtreeSync.calls.length).toBe(4);
+
+            expect(manifest).not.toBe(manifest2);
+        });
+
+        it('should not cache AppxManifest instances when "ignoreCache" is specified', function () {
+            var manifest  = AppxManifest.get('/no/prefixed', true);
+            expect(xml.parseElementtreeSync.calls.length).toBe(2);
+
+            var manifest2 = AppxManifest.get('/no/prefixed');
+            expect(xml.parseElementtreeSync.calls.length).toBe(4);
+
+            expect(manifest).not.toBe(manifest2);
         });
     });
 
