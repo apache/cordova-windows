@@ -121,7 +121,11 @@ describe('Windows 10 project', function() {
         applyStartPage(mockConfig.config, mockConfig.manifest, true);
 
         var app = mockConfig.manifest.doc.find('.//Application');
-        expect(app.attrib.StartPage).toBe('ms-appx-web:///www/index.html');
+
+        // Workaround to avoid WWAHost.exe bug: https://issues.apache.org/jira/browse/CB-10446
+        var isAppxWebStartupUri = app.attrib.StartPage === 'ms-appx-web:///www/index.html' || 
+            app.attrib.StartPage === 'ms-appx-web://' + mockConfig.config.packageName() + '/www/index.html';
+        expect(isAppxWebStartupUri).toBe(true);
     });
 
     it ('should allow ms-appx as its startup URI, and it gets removed from the final output.', function() {
