@@ -216,7 +216,9 @@ function applyStartPage(config, manifest, targetingWin10) {
         startPagePrefix = '';
     }
     else if (uriPrefix.toLowerCase().substring(0, 7) === 'ms-appx') {
-        uriPrefix += '/'; // add a 3rd trailing forward slash for correct area resolution
+        var pkgName = config.getPreference('WindowsStoreIdentityName') || config.packageName();
+        // Workaround to avoid WWAHost.exe bug: https://issues.apache.org/jira/browse/CB-10446
+        uriPrefix += pkgName + '/'; // add Identity.Name
     }
 
     manifest.getApplication().setStartPage(uriPrefix + startPagePrefix + startPage);
