@@ -25,6 +25,9 @@ var Q = require('q'),
     prepare = require(platformRoot + '/cordova/lib/prepare.js'),
     build = rewire(platformRoot + '/cordova/lib/build.js');
 
+var utils = require(platformRoot + '/cordova/lib/utils');
+var AppxManifest = require(platformRoot + '/cordova/lib/AppxManifest');
+
 function createFindAvailableVersionMock(version, path, buildSpy) {
     build.__set__('MSBuildTools.findAvailableVersion', function() {
         return Q.resolve({
@@ -68,28 +71,11 @@ function createConfigParserMock(winVersion, phoneVersion) {
 }
 
 describe('run method', function() {
-    var consoleLogOriginal,
-        isCordovaProjectOriginal,
-        findAvailableVersionOriginal,
-        applyPlatformConfigOriginal,
+    var findAvailableVersionOriginal,
         configParserOriginal;
 
-    var isCordovaProjectFalse = function () {
-        return false;
-    };
-
-    var isCordovaProjectTrue = function () {
-        return true;
-    };
-
     beforeEach(function () {
-        // console output suppression
-        consoleLogOriginal = build.__get__('console.log');
-        build.__set__('console.log', function () {} );
-
-        isCordovaProjectOriginal = build.__get__('utils.isCordovaProject');
         findAvailableVersionOriginal = build.__get__('MSBuildTools.findAvailableVersion');
-        applyPlatformConfigOriginal = build.__get__('prepare.applyPlatformConfig');
         configParserOriginal = build.__get__('ConfigParser');
 
         var originalBuildMethod = build.run;
@@ -98,14 +84,21 @@ describe('run method', function() {
             return originalBuildMethod.apply({locations: {www: 'some/path'}}, arguments);
         });
 
+        spyOn(utils, 'isCordovaProject').andReturn(true);
+        spyOn(prepare, 'applyPlatformConfig');
         spyOn(prepare, 'addBOMSignature');
+        spyOn(prepare, 'updateBuildConfig');
+
+        spyOn(AppxManifest, 'get').andReturn({
+            getIdentity: function () {
+                return  { setPublisher: function () {} };
+            },
+            write: function () {}
+        });
     });
 
     afterEach(function() {
-        build.__set__('console.log', consoleLogOriginal);
-        build.__set__('utils.isCordovaProject', isCordovaProjectOriginal);
         build.__set__('MSBuildTools.findAvailableVersion', findAvailableVersionOriginal);
-        build.__set__('prepare.applyPlatformConfig', applyPlatformConfigOriginal);
         build.__set__('ConfigParser', configParserOriginal);
     });
 
@@ -113,7 +106,8 @@ describe('run method', function() {
         var rejectSpy = jasmine.createSpy(),
             buildSpy = jasmine.createSpy();
 
-        build.__set__('utils.isCordovaProject', isCordovaProjectFalse);
+        // utils.isCordovaProject is a spy, so we can call andReturn directly on it
+        utils.isCordovaProject.andReturn(false);
         createFindAllAvailableVersionsMock([{version: '14.0', buildProject: buildSpy, path: testPath }]);
 
         build.run([ 'node', buildPath, '--release', '--debug' ])
@@ -129,7 +123,6 @@ describe('run method', function() {
         var rejectSpy = jasmine.createSpy(),
             buildSpy = jasmine.createSpy();
 
-        build.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         createFindAvailableVersionMock('14.0', testPath, buildSpy);
 
         build.run([ 'node', buildPath, '--release', '--debug' ])
@@ -145,7 +138,6 @@ describe('run method', function() {
         var rejectSpy = jasmine.createSpy(),
             buildSpy = jasmine.createSpy();
 
-        build.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         createFindAvailableVersionMock('14.0', testPath, buildSpy);
 
         build.run([ 'node', buildPath, '--phone', '--win' ])
@@ -187,9 +179,7 @@ describe('run method', function() {
             expect(buildType).toBe('release');
         });
 
-        build.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         createFindAllAvailableVersionsMock([{version: '14.0', buildProject: buildSpy, path: testPath }]);
-        build.__set__('prepare.applyPlatformConfig', function() {} );
 
         build.run({ release: true })
         .finally(function() {
@@ -203,9 +193,7 @@ describe('run method', function() {
             expect(buildType).toBe('debug');
         });
 
-        build.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         createFindAllAvailableVersionsMock([{version: '14.0', buildProject: buildSpy, path: testPath }]);
-        build.__set__('prepare.applyPlatformConfig', function() {} );
 
         build.run([ 'node', buildPath ])
         .finally(function() {
@@ -219,9 +207,7 @@ describe('run method', function() {
             expect(buildArch).toBe('arm');
         });
 
-        build.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         createFindAllAvailableVersionsMock([{version: '14.0', buildProject: buildSpy, path: testPath }]);
-        build.__set__('prepare.applyPlatformConfig', function() {} );
 
         build.run({ archs: 'arm' })
         .finally(function() {
@@ -236,7 +222,6 @@ describe('run method', function() {
             x64Build = jasmine.createSpy(),
             anyCpuBuild = jasmine.createSpy();
 
-        build.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         createFindAllAvailableVersionsMock([
             {
                 version: '14.0',
@@ -262,9 +247,8 @@ describe('run method', function() {
                     }
                 }
              }]);
-        build.__set__('prepare.applyPlatformConfig', function() {} );
 
-        build.run({ argv: ['--archs=arm x86 x64 anycpu', '--phone'] })
+        build.run({ archs: 'arm x86 x64 anycpu', argv: ['--phone'] })
         .finally(function() {
             expect(armBuild).toHaveBeenCalled();
             expect(x86Build).toHaveBeenCalled();
@@ -277,9 +261,7 @@ describe('run method', function() {
     it('spec.8 should call buildProject of MSBuildTools if built with MSBuildTools version 4.0', function(done) {
         var buildSpy = jasmine.createSpy();
 
-        build.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         createFindAllAvailableVersionsMock([{version: '4.0', buildProject: buildSpy, path: testPath }]);
-        build.__set__('prepare.applyPlatformConfig', function() {} );
         createConfigParserMock('8.0');
 
         build.run({argv: ['--win']})
@@ -292,9 +274,7 @@ describe('run method', function() {
     it('spec.9 should call buildProject of MSBuildTools if built for windows 8.1', function(done) {
         var buildSpy = jasmine.createSpy();
 
-        build.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         createFindAllAvailableVersionsMock([{version: '14.0', buildProject: buildSpy, path: testPath }]);
-        build.__set__('prepare.applyPlatformConfig', function() {} );
         createConfigParserMock('8.1');
 
         build.run({argv: ['--win']})
@@ -308,9 +288,7 @@ describe('run method', function() {
         var buildSpy = jasmine.createSpy(),
             errorSpy = jasmine.createSpy();
 
-        build.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         createFindAvailableVersionMock('14.0', testPath, buildSpy);
-        build.__set__('prepare.applyPlatformConfig', function() {} );
         createConfigParserMock('unsupported value here');
 
         build.run({argv: ['--win']})
@@ -328,9 +306,7 @@ describe('run method', function() {
     it('spec.11 should call buildProject of MSBuildTools if built for windows phone 8.1', function(done) {
         var buildSpy = jasmine.createSpy();
 
-        build.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         createFindAllAvailableVersionsMock([{version: '14.0', buildProject: buildSpy, path: testPath }]);
-        build.__set__('prepare.applyPlatformConfig', function() {} );
         createConfigParserMock(null, '8.1');
 
         build.run({argv: ['--phone']})
@@ -344,9 +320,7 @@ describe('run method', function() {
         var buildSpy = jasmine.createSpy(),
             errorSpy = jasmine.createSpy();
 
-        build.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         createFindAvailableVersionMock('14.0', testPath, buildSpy);
-        build.__set__('prepare.applyPlatformConfig', function() {} );
         createConfigParserMock(null, 'unsupported value here');
 
         build.run({argv: ['--phone']})
@@ -367,9 +341,7 @@ describe('run method', function() {
                 expect(solutionFile.toLowerCase().indexOf('cordovaapp.windows10.jsproj') >=0).toBe(true);
             });
 
-        build.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         createFindAllAvailableVersionsMock([{version: '14.0', buildProject: buildSpy, path: testPath }]);
-        build.__set__('prepare.applyPlatformConfig', function() {} );
         // provision config to target Windows 8.1
         createConfigParserMock('8.1', '8.1');
         // explicitly specify Windows 10 as target
