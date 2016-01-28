@@ -157,6 +157,31 @@ describe('run method', function() {
         });
     });
 
+    it('should respect build configuration from \'buildConfig\' option', function (done) {
+
+        createFindAllAvailableVersionsMock([{version: '14.0', buildProject: jasmine.createSpy(), path: testPath }]);
+        var buildConfigPath = path.resolve(__dirname, 'fixtures/fakeBuildConfig.json');
+
+        build.run({ buildConfig: buildConfigPath })
+        .finally(function() {
+            expect(prepare.updateBuildConfig).toHaveBeenCalled();
+
+            var buildOpts = prepare.updateBuildConfig.calls[0].args[0];
+            var buildConfig = require(buildConfigPath).windows.debug;
+
+            expect(buildOpts.packageCertificateKeyFile).toBeDefined();
+            expect(buildOpts.packageCertificateKeyFile)
+                .toEqual(path.resolve(path.dirname(buildConfigPath), buildConfig.packageCertificateKeyFile));
+
+            ['packageThumbprint', 'publisherId'].forEach(function (key) {
+                expect(buildOpts[key]).toBeDefined();
+                expect(buildOpts[key]).toEqual(buildConfig[key]);
+            });
+
+            done();
+        });
+    });
+
     it('spec.4 should call buildProject of MSBuildTools with buildType = "release" if called with --release argument', function(done) {
         var buildSpy = jasmine.createSpy().andCallFake(function (solutionFile, buildType, buildArch) {
             expect(buildType).toBe('release');
@@ -198,7 +223,7 @@ describe('run method', function() {
         createFindAllAvailableVersionsMock([{version: '14.0', buildProject: buildSpy, path: testPath }]);
         build.__set__('prepare.applyPlatformConfig', function() {} );
 
-        build.run({argv: ['--archs=arm'] })
+        build.run({ archs: 'arm' })
         .finally(function() {
             expect(buildSpy).toHaveBeenCalled();
             done();
