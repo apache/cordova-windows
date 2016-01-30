@@ -124,7 +124,7 @@ describe('Windows 10 project', function() {
 
         // Workaround to avoid WWAHost.exe bug: https://issues.apache.org/jira/browse/CB-10446
         var isAppxWebStartupUri = app.attrib.StartPage === 'ms-appx-web:///www/index.html' || 
-            app.attrib.StartPage === 'ms-appx-web://' + mockConfig.config.packageName() + '/www/index.html';
+            app.attrib.StartPage === 'ms-appx-web://' + mockConfig.config.packageName().toLowerCase() + '/www/index.html';
         expect(isAppxWebStartupUri).toBe(true);
     });
 
