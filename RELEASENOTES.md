@@ -24,6 +24,17 @@ Update these notes using: git log --pretty=format:'* %s' --topo-order --no-merge
 
 cordova-windows is a library that enables developers to create Windows 8/8.1/10 and WP8.1 application projects that support Cordova APIs.
 
+[4.3.1]
+* CB-10487 WindowsStoreIdentityName should be lowercased in Application.StartPage
+* CB-10446 Windows 10 Cordova Application restart instead of resume
+* CB-10440 Add CSS color names support for BackgroundColor on Windows
+* CB-10394 Do not cache manifest file while getting package name
+* CB-10299 Updated RELEASENOTES for release 4.3.0
+* CB-10381 fix the bug when removing a plugin with a `<frame>` tag
+* CB-10234 Better error message when Windows10 requires 'arch' flag
+* CB-10344 Fixed icons and splashscreens parsing
+* CB-10356 "npm install" fails for cordova-windows
+
 [4.3.0]
 * CB-10193 Add BOM to www files at build stage instead of prepare
 * CB-10303 Fixes build arguments parsing
