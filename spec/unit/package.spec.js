@@ -44,16 +44,19 @@ describe('getPackage method', function() {
         shell.cp('-R', testPkgPath, pkgRoot);
     });
 
-    it('spec.1 should find windows 8.0 anycpu debug package', function(done) {
+    it('spec.1 should find windows anycpu debug package', function(done) {
         var rejected = jasmine.createSpy();
 
-        pkg.getPackage('windows80', 'debug', 'anycpu')
+        pkg.getPackage('windows', 'debug', 'anycpu')
             .then(function(pkgInfo) {
-                expect(pkgInfo.type).toBe('windows80');
+                expect(pkgInfo.type).toBe('windows');
                 expect(pkgInfo.buildtype).toBe('debug');
                 expect(pkgInfo.arch).toBe('anycpu');
                 expect(pkgInfo.script).toBeDefined();
-            }, rejected)
+            }, function(err) {
+                console.error(err);
+                rejected();
+            })
             .finally(function() {
                 expect(rejected).not.toHaveBeenCalled();
                 done();
@@ -76,10 +79,10 @@ describe('getPackage method', function() {
         });
     });
 
-    it('spec.3 should not find windows anycpu debug package', function(done) {
+    it('spec.3 should not find windows 10 anycpu debug package', function(done) {
         var resolved = jasmine.createSpy();
 
-        pkg.getPackage('windows', 'debug', 'anycpu')
+        pkg.getPackage('windows10', 'debug', 'anycpu')
         .then(resolved)
         .finally(function() {
             expect(resolved).not.toHaveBeenCalled();
@@ -87,10 +90,10 @@ describe('getPackage method', function() {
         });
     });
 
-    it('spec.4 should not find windows 8.0 anycpu release package', function(done) {
+    it('spec.4 should not find windows anycpu release package', function(done) {
         var resolved = jasmine.createSpy();
 
-        pkg.getPackage('windows80', 'release', 'anycpu')
+        pkg.getPackage('windows', 'release', 'anycpu')
         .then(resolved)
         .finally(function() {
             expect(resolved).not.toHaveBeenCalled();
@@ -98,10 +101,10 @@ describe('getPackage method', function() {
         });
     });
 
-    it('spec.5 should not find windows 8.0 x86 debug package', function(done) {
+    it('spec.5 should not find windows x86 debug package', function(done) {
         var resolved = jasmine.createSpy();
 
-        pkg.getPackage('windows80', 'debug', 'x86')
+        pkg.getPackage('windows', 'debug', 'x86')
         .then(resolved)
         .finally(function() {
             expect(resolved).not.toHaveBeenCalled();
@@ -124,20 +127,20 @@ describe('getPackageFileInfo method', function() {
         expect(pkgInfo.buildtype).toBe('debug');
     });
 
-    it('spec.7 should get file info correctly for windows 8.0 anycpu debug package', function() {
-        var packageFile = path.join(pkgPath, 'CordovaApp.Windows80_0.0.1.0_anycpu_debug_Test', 'CordovaApp.Windows80_0.0.1.0_anycpu_debug.appx');
+    it('spec.7 should get file info correctly for windows 8.1 anycpu debug package', function() {
+        var packageFile = path.join(pkgPath, 'CordovaApp.Windows_0.0.1.0_anycpu_debug_Test', 'CordovaApp.Windows_0.0.1.0_anycpu_debug.appx');
         var pkgInfo = pkg.getPackageFileInfo(packageFile);
 
-        expect(pkgInfo.type).toBe('windows80');
+        expect(pkgInfo.type).toBe('windows');
         expect(pkgInfo.arch).toBe('anycpu');
         expect(pkgInfo.buildtype).toBe('debug');
     });
 
-    it('spec.8 should get file info correctly for windows 8.0 x64 release package', function() {
-        var packageFile = path.join(pkgPath, 'CordovaApp.Windows80_0.0.1.0_x64_Test', 'CordovaApp.Windows80_0.0.1.0_x64.appx');
+    it('spec.8 should get file info correctly for windows 8.1 x64 release package', function() {
+        var packageFile = path.join(pkgPath, 'CordovaApp.Windows_0.0.1.0_x64_Test', 'CordovaApp.Windows_0.0.1.0_x64.appx');
         var pkgInfo = pkg.getPackageFileInfo(packageFile);
 
-        expect(pkgInfo.type).toBe('windows80');
+        expect(pkgInfo.type).toBe('windows');
         expect(pkgInfo.arch).toBe('x64');
         expect(pkgInfo.buildtype).toBe('release');
     });

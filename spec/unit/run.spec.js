@@ -183,7 +183,7 @@ describe('run method', function() {
         run.__set__('build.run', function () {
             build();
             var buildResult = {
-                type      : 'windows80',
+                type      : 'windows',
                 arch      : 'anycpu',
                 archs     : ['anycpu'],
                 buildtype : 'release',
@@ -195,7 +195,7 @@ describe('run method', function() {
         });
         run.__set__('packages.getPackage', function () {
             return Q({
-                type: 'windows80',
+                type: 'windows',
                 file: 'testfile'
             });
         });
@@ -228,7 +228,7 @@ describe('run method', function() {
         });
         run.__set__('packages.getPackage', function () {
             return Q({
-                type: 'windows80',
+                type: 'windows',
                 file: 'testfile'
             });
         });

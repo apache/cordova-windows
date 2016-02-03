@@ -249,8 +249,9 @@ describe('run method', function() {
         });
     });
 
-    it('spec.8 should call buildProject of MSBuildTools if built with MSBuildTools version 4.0', function(done) {
-        var buildSpy = jasmine.createSpy();
+    it('spec.8 should fail buildProject if built with MSBuildTools version 4.0', function(done) {
+        var buildSpy = jasmine.createSpy(),
+            errorSpy = jasmine.createSpy();
 
         build.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         createFindAllAvailableVersionsMock([{version: '4.0', buildProject: buildSpy, path: testPath }]);
@@ -258,8 +259,13 @@ describe('run method', function() {
         createConfigParserMock('8.0');
 
         build.run({argv: ['--win']})
+        .fail(function(error) {
+            errorSpy();
+            expect(error).toBeDefined();
+        })
         .finally(function() {
-            expect(buildSpy).toHaveBeenCalled();
+            expect(errorSpy).toHaveBeenCalled();
+            expect(buildSpy).not.toHaveBeenCalled();
             done();
         });
     });
