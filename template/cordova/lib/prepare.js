@@ -30,7 +30,6 @@ var events = require('cordova-common').events;
 var xmlHelpers = require('cordova-common').xmlHelpers;
 
 var PROJECT_WINDOWS10   = 'CordovaApp.Windows10.jsproj',
-    MANIFEST_WINDOWS8   = 'package.windows80.appxmanifest',
     MANIFEST_WINDOWS    = 'package.windows.appxmanifest',
     MANIFEST_PHONE      = 'package.phone.appxmanifest',
     MANIFEST_WINDOWS10  = 'package.windows10.appxmanifest';
@@ -492,10 +491,6 @@ function updateConfigFilesFrom(sourceConfig, configMunger, locations) {
     var config = new ConfigParser(ownConfig);
     xmlHelpers.mergeXml(sourceConfig.doc.getroot(),
         config.doc.getroot(), 'windows', /*clobber=*/true);
-    // CB-6976 Windows Universal Apps. For smooth transition and to prevent mass api failures
-    // we allow using windows8 tag for new windows platform
-    xmlHelpers.mergeXml(sourceConfig.doc.getroot(),
-        config.doc.getroot(), 'windows8', /*clobber=*/true);
 
     config.write();
     return config;
@@ -520,17 +515,16 @@ function updateWwwFrom(cordovaProject, destinations) {
     shell.cp('-rf', path.join(destinations.platformWww, '*'), destinations.www);
 
     // If project contains 'merges' for our platform, use them as another overrides
-    // CB-6976 Windows Universal Apps. For smooth transition from 'windows8' platform
-    // we allow using 'windows8' merges for new 'windows' platform
-    ['windows8', 'windows'].forEach(function (platform) {
-        var mergesPath = path.join(cordovaProject.root, 'merges', platform);
-        // if no 'merges' directory found, no further actions needed
-        if (!fs.existsSync(mergesPath)) return;
+    var platform  = 'windows';
+    var mergesPath = path.join(cordovaProject.root, 'merges', platform);
+    // if no 'merges' directory found, no further actions needed
+    if (!fs.existsSync(mergesPath)) {
+        return;
+    }
 
-        events.emit('verbose', 'Found "merges" for ' + platform + ' platform. Copying over existing "www" files.');
-        var overrides = path.join(mergesPath, '*');
-        shell.cp('-rf', overrides, destinations.www);
-    });
+    events.emit('verbose', 'Found "merges" for ' + platform + ' platform. Copying over existing "www" files.');
+    var overrides = path.join(mergesPath, '*');
+    shell.cp('-rf', overrides, destinations.www);
 }
 
 /**
@@ -542,7 +536,7 @@ function updateWwwFrom(cordovaProject, destinations) {
  */
 function updateProjectAccordingTo(projectConfig, locations) {
     // Apply appxmanifest changes
-    [MANIFEST_WINDOWS, MANIFEST_WINDOWS8, MANIFEST_WINDOWS10, MANIFEST_PHONE]
+    [MANIFEST_WINDOWS, MANIFEST_WINDOWS10, MANIFEST_PHONE]
     .forEach(function(manifestFile) {
         updateManifestFile(projectConfig, path.join(locations.root, manifestFile));
     });

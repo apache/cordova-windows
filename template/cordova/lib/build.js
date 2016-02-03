@@ -35,13 +35,11 @@ var CordovaError = require('cordova-common').CordovaError;
 var projFiles = {
     phone: 'CordovaApp.Phone.jsproj',
     win: 'CordovaApp.Windows.jsproj',
-    win80: 'CordovaApp.Windows80.jsproj',
     win10: 'CordovaApp.Windows10.jsproj'
 };
 var projFilesToManifests = {
     'CordovaApp.Phone.jsproj': 'package.phone.appxmanifest',
     'CordovaApp.Windows.jsproj': 'package.windows.appxmanifest',
-    'CordovaApp.Windows80.jsproj': 'package.windows80.appxmanifest',
     'CordovaApp.Windows10.jsproj': 'package.windows10.appxmanifest'
 };
 
@@ -71,8 +69,7 @@ module.exports.run = function run (buildOptions) {
         if (buildConfig.publisherId) {
             updateManifestWithPublisher(msbuildTools, buildConfig);
         }
-        // bug: Windows 8 build fails on a system with MSBuild 14 on it.
-        // Don't regress, make sure MSBuild 4 is selected for a Windows 8 build.
+
         cleanIntermediates();
         return buildTargets(msbuildTools, buildConfig).then(function(pkg) {
             events.emit('verbose', ' BUILD OUTPUT: ' + pkg.appx);
@@ -107,19 +104,18 @@ module.exports.getBuildTargets  = function(isWinSwitch, isPhoneSwitch, projOverr
     if (isWinSwitch || noSwitches) { // if --win or no arg
         var windowsTargetVersion = configXML.getWindowsTargetVersion();
         switch(windowsTargetVersion.toLowerCase()) {
-        case '8':
-        case '8.0':
-            targets.push(projFiles.win80);
-            break;
-        case '8.1':
-            targets.push(projFiles.win);
-            break;
-        case '10.0':
-        case 'uap':
-            targets.push(projFiles.win10);
-            break;
-        default:
-            throw new CordovaError('Unsupported windows-target-version value: ' + windowsTargetVersion);
+            case '8':
+            case '8.0':
+                throw new CordovaError('windows8 platform is deprecated. To use windows-target-version=8.0 you may downgrade to cordova-windows@4.');
+            case '8.1':
+                targets.push(projFiles.win);
+                break;
+            case '10.0':
+            case 'uap':
+                targets.push(projFiles.win10);
+                break;
+            default:
+                throw new CordovaError('Unsupported windows-target-version value: ' + windowsTargetVersion);
         }
     }
 
@@ -127,20 +123,20 @@ module.exports.getBuildTargets  = function(isWinSwitch, isPhoneSwitch, projOverr
     if (isPhoneSwitch || noSwitches) { // if --phone or no arg
         var windowsPhoneTargetVersion = configXML.getWindowsPhoneTargetVersion();
         switch(windowsPhoneTargetVersion.toLowerCase()) {
-        case '8.1':
-            targets.push(projFiles.phone);
-            break;
-        case '10.0':
-        case 'uap':
-            if (targets.indexOf(projFiles.win10) < 0) {
-                // Already built due to --win or no switches
-                // and since the same thing can be run on Phone as Windows,
-                // we can skip this one.
-                targets.push(projFiles.win10);
-            }
-            break;
-        default:
-            throw new Error('Unsupported windows-phone-target-version value: ' + windowsPhoneTargetVersion);
+            case '8.1':
+                targets.push(projFiles.phone);
+                break;
+            case '10.0':
+            case 'uap':
+                if (targets.indexOf(projFiles.win10) < 0) {
+                    // Already built due to --win or no switches
+                    // and since the same thing can be run on Phone as Windows,
+                    // we can skip this one.
+                    targets.push(projFiles.win10);
+                }
+                break;
+            default:
+                throw new Error('Unsupported windows-phone-target-version value: ' + windowsPhoneTargetVersion);
         }
     }
 
@@ -301,12 +297,6 @@ function buildTargets(allMsBuildVersions, config) {
     var bundleTerms = '';
     var hasAnyCpu = false;
     var shouldBundle = !!config.bundle;
-    if (myBuildTargets.indexOf(projFiles.win80) > -1) {
-        if (shouldBundle) {
-            events.emit('warn', 'Bundling is disabled because a Windows 8 project was detected.');
-        }
-        shouldBundle = false;
-    }
 
     // collect all build configurations (pairs of project to build and target architecture)
     myBuildTargets.forEach(function(buildTarget) {
@@ -336,10 +326,6 @@ function buildTargets(allMsBuildVersions, config) {
             // support for "any cpu" specified with or without space
             if (build.arch == 'any cpu') {
                 build.arch = 'anycpu';
-            }
-            // msbuild 4.0 requires .sln file, we can't build jsproj
-            if (msbuild.version == '4.0' && build.target == projFiles.win80) {
-                build.target = 'CordovaApp.vs2012.sln';
             }
 
             var otherProperties = { };
@@ -416,19 +402,18 @@ function getBuildTargets(buildConfig) {
     if (buildConfig.win || noSwitches) { // if --win or no arg
         var windowsTargetVersion = configXML.getWindowsTargetVersion();
         switch(windowsTargetVersion) {
-        case '8':
-        case '8.0':
-            targets.push(projFiles.win80);
-            break;
-        case '8.1':
-            targets.push(projFiles.win);
-            break;
-        case '10.0':
-        case 'UAP':
-            targets.push(projFiles.win10);
-            break;
-        default:
-            throw new Error('Unsupported windows-target-version value: ' + windowsTargetVersion);
+            case '8':
+            case '8.0':
+                throw new CordovaError('windows8 platform is deprecated. To use windows-target-version=8.0 you may downgrade to cordova-windows@4.');
+            case '8.1':
+                targets.push(projFiles.win);
+                break;
+            case '10.0':
+            case 'UAP':
+                targets.push(projFiles.win10);
+                break;
+            default:
+                throw new Error('Unsupported windows-target-version value: ' + windowsTargetVersion);
         }
     }
 
@@ -436,20 +421,20 @@ function getBuildTargets(buildConfig) {
     if (buildConfig.phone || noSwitches) { // if --phone or no arg
         var windowsPhoneTargetVersion = configXML.getWindowsPhoneTargetVersion();
         switch(windowsPhoneTargetVersion) {
-        case '8.1':
-            targets.push(projFiles.phone);
-            break;
-        case '10.0':
-        case 'UAP':
-            if (!buildConfig.win && !noSwitches) {
-                // Already built due to --win or no switches
-                // and since the same thing can be run on Phone as Windows,
-                // we can skip this one.
-                targets.push(projFiles.win10);
-            }
-            break;
-        default:
-            throw new Error('Unsupported windows-phone-target-version value: ' + windowsPhoneTargetVersion);
+            case '8.1':
+                targets.push(projFiles.phone);
+                break;
+            case '10.0':
+            case 'UAP':
+                if (!buildConfig.win && !noSwitches) {
+                    // Already built due to --win or no switches
+                    // and since the same thing can be run on Phone as Windows,
+                    // we can skip this one.
+                    targets.push(projFiles.win10);
+                }
+                break;
+            default:
+                throw new Error('Unsupported windows-phone-target-version value: ' + windowsPhoneTargetVersion);
         }
     }
 
@@ -475,9 +460,6 @@ function getBuildTargets(buildConfig) {
     // as part of build configuration.  This will be used for determining the binary to 'run' after build is done.
     if (targets.length > 0) {
         switch (targets[0]) {
-            case projFiles.win80:
-                buildConfig.targetProject = 'windows80';
-                break;
             case projFiles.phone:
                 buildConfig.targetProject = 'phone';
                 break;
@@ -502,30 +484,14 @@ function getMsBuildForTargets(selectedTargets, buildConfig, allMsBuildVersions) 
         return obj;
     }, {});
 
-    var result = null;
-
-    if (selectedTargets.indexOf(projFiles.win80) > -1) {
-        // building Windows 8; prefer 4.0, unless phone is also present, in which case prefer 12
-        // prefer 12.  If not present, can't build this; error in the filterSupportedTargets function
-        result = availableVersions['12.0'] || availableVersions['4.0'];
-    } else {
-        // 15 and 14 can build Windows 10, Windows 8.1, and Windows Phone 8.1, so resolve to those if available, else 12
-        result = (availableVersions['15.0'] || availableVersions['14.0'] || availableVersions['12.0']);
-    }
-
-    return result;
+    return availableVersions['15.0'] || availableVersions['14.0'] || availableVersions['12.0'];
 }
 
 // TODO: Fix this so that it outlines supported versions based on version criteria:
 // - v14: Windows 8.1, Windows 10
-// - v12: Windows 8.1, Windows 8.0
-// - v4:  Windows 8.0
-function msBuild4TargetsFilter(target) {
-    return target === projFiles.win80;
-}
-
+// - v12: Windows 8.1
 function msBuild12TargetsFilter(target) {
-    return target === projFiles.win80 || target === projFiles.win || target === projFiles.phone;
+    return target === projFiles.win || target === projFiles.phone;
 }
 
 function msBuild14TargetsFilter(target) {
@@ -543,7 +509,6 @@ function filterSupportedTargets (targets, msbuild) {
     }
 
     var targetFilters = {
-        '4.0': msBuild4TargetsFilter,
         '12.0': msBuild12TargetsFilter,
         '14.0': msBuild14TargetsFilter,
         '15.0': msBuild15TargetsFilter
@@ -560,7 +525,7 @@ function filterSupportedTargets (targets, msbuild) {
     if (supportedTargets.length !== targets.length) {
         events.emit('warn', 'Not all desired build targets are compatible with the current build environment. ' +
             'Please install Visual Studio 2015 for Windows 8.1 and Windows 10, ' +
-            'or Visual Studio 2013 Update 2 for Windows 8 and 8.1.');
+            'or Visual Studio 2013 Update 2 for Windows 8.1.');
     }
     return supportedTargets;
 }

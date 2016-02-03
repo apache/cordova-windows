@@ -89,8 +89,8 @@ module.exports.create = function (destinationDir, config, options, events) {
 
     // replace specific values in manifests' templates
     events.emit('verbose', 'Updating manifest files with project configuration.');
-    [ 'package.windows.appxmanifest', 'package.windows80.appxmanifest',
-        'package.phone.appxmanifest', 'package.windows10.appxmanifest' ]
+    [ 'package.windows.appxmanifest', 'package.phone.appxmanifest', 
+      'package.windows10.appxmanifest' ]
     .forEach(function (item) {
         var manifest = AppxManifest.get(path.join(projectPath, item));
         if (manifest.hasPhoneIdentity) {
