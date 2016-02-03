@@ -41,7 +41,7 @@ To develop apps for Windows 10, you require:
 
 ### Web Context and Windows Runtime Access ###
 
-In Windows 8 and 8.1, loading your app into the web context (using `ms-appx-web://`) would allow 
+In Windows 8.1, loading your app into the web context (using `ms-appx-web://`) would allow 
 developers freedom of certain kinds of document manipulation (such as inline script) but would 
 prevent Windows Runtime (WinRT) access.  In Windows 10, many of these restrictions have been lifted; 
 web applications have access to WinRT APIs as long as the page’s origin has been whitelisted in the 
@@ -106,8 +106,6 @@ package to target.
 
 * 10.0, UAP: Builds for Windows 10 Universal Windows Platform
 * 8.1: Builds for Windows 8.1 or Windows Phone 8.1 (the default)
-* 8.0: Build for Windows 8.0. Not valid for Windows Phone (use the wp8 Cordova platform 
-instead)
 
 **Scenarios**
 
@@ -128,7 +126,7 @@ restrictions, you must set this preference to `ms-appx://` and not declare any
 
 **Valid Values**
 
-* `ms-appx://` (Default for Windows 8, 8.1): The start page runs in the local context
+* `ms-appx://` (Default for Windows 8.1): The start page runs in the local context
 * `ms-appx-web://` (Default for Windows 10): The start page runs in the web context
 
 #### {SDK}-MinVersion, {SDK}-MaxVersionTested ####

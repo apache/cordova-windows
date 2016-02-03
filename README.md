@@ -43,12 +43,6 @@ Host OS: Windows 8.1
 
 Install the tools: [Visual Studio 2013 Express](http://www.visualstudio.com/downloads/download-visual-studio-vs#d-express-windows-8).
 
-### Windows 8 only (deprecated)
-
-Host OS: Windows 8 or 8.1
-
-Install the tools: [Visual Studio 2012 Express](http://www.visualstudio.com/downloads).
-
 #Getting started
 The best way to use this is to install the [Cordova CLI](https://www.npmjs.com/package/cordova), create a project, add the windows platform, and run the app:
 	

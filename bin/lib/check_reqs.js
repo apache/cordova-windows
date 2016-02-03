@@ -43,12 +43,6 @@ try {
 // reference: https://msdn.microsoft.com/en-us/library/bb164659(v=vs.120).aspx
 var VS2013_UPDATE2_RC = new Version(12, 0, 30324);
 var REQUIRED_VERSIONS = {
-    '8.0': {
-        os: '6.2',
-        msbuild: '11.0',
-        visualstudio: '11.0',
-        windowssdk: '8.0'
-    },
     '8.1': {
         os: '6.3',
         msbuild: '12.0',
@@ -83,6 +77,15 @@ function getMinimalRequiredVersionFor (requirement) {
     var config = getConfig();
     var windowsTargetVersion = config.getWindowsTargetVersion();
     var windowsPhoneTargetVersion = config.getWindowsPhoneTargetVersion();
+
+    if (windowsTargetVersion === '8' || windowsTargetVersion === '8.0') {
+        throw new CordovaError('windows8 platform is deprecated. To use windows-target-version=8.0 you may downgrade to cordova-windows@4.');
+    }
+
+    if (windowsPhoneTargetVersion === '8' || windowsPhoneTargetVersion === '8.0') {
+        throw new CordovaError('8.0 is not a valid version for windows-phone-target-version (use the wp8 Cordova platform instead)');
+    }
+
     var windowsReqVersion = Version.tryParse(REQUIRED_VERSIONS[windowsTargetVersion][requirement]);
     var phoneReqVersion = Version.tryParse(REQUIRED_VERSIONS[windowsPhoneTargetVersion][requirement]);
 
@@ -128,7 +131,7 @@ function getWindowsVersion() {
 }
 
 /**
- * Lists all Visual Studio versions insalled. For VS 2013 if it present, alao
+ * Lists all Visual Studio versions insalled. For VS 2013 if it present, also
  *   checks if Update 2 is installed.
  *
  * @return  {String[]}  List of installed Visual Studio versions.
