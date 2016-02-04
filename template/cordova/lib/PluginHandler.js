@@ -25,6 +25,13 @@ var shell = require('shelljs');
 var events = require('cordova-common').events;
 var CordovaError = require('cordova-common').CordovaError;
 
+// returns relative file path for a file in the plugin's folder that can be referenced 
+// from a project file. 
+function getPluginFilePath(plugin, pluginFile, targetDir) {
+    var src = path.resolve(plugin.dir, pluginFile);
+    return '$(ProjectDir)' + path.relative(targetDir, src);
+}
+
 var handlers = {
     'source-file': {
         install:function(obj, plugin, project, options) {
@@ -50,11 +57,12 @@ var handlers = {
             // <resource-file src="$(Platform)/My.dll" target="My.dll" />
 
             var src = path.resolve(plugin.dir, obj.src);
-            project.addResourceFileToProject(src, obj.target, getTargetConditions(obj));
+            var relativeSrcPath = getPluginFilePath(plugin, obj.src, project.projectFolder);
+            project.addResourceFileToProject(relativeSrcPath, obj.target, getTargetConditions(obj));
         },
         uninstall:function(obj, plugin, project, options) {
-            var src = path.resolve(plugin.dir, obj.src);
-            project.removeResourceFileFromProject(src, getTargetConditions(obj));
+            var relativeSrcPath = getPluginFilePath(plugin, obj.src, project.projectFolder);
+            project.removeResourceFileFromProject(relativeSrcPath, getTargetConditions(obj));
         }
     },
     'lib-file': {
