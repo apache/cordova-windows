@@ -108,19 +108,19 @@ jsprojManager.prototype = {
         });
     },
 
-    addResourceFileToProject: function (relPath, targetConditions) {
-        events.emit('verbose', 'jsprojManager.addResourceFile(relPath: ' + relPath + ', targetConditions: ' + JSON.stringify(targetConditions) + ')');
+    addResourceFileToProject: function (sourcePath, destPath, targetConditions) {
+        events.emit('verbose', 'jsprojManager.addResourceFile(sourcePath: ' + sourcePath + ', destPath: ' + destPath + ', targetConditions: ' + JSON.stringify(targetConditions) + ')');
 
         // add hint path with full path
         var link = new et.Element('Link');
-        link.text = relPath;
+        link.text = destPath;
         var children = [link];
 
         var copyToOutputDirectory = new et.Element('CopyToOutputDirectory');
         copyToOutputDirectory.text = 'Always';
         children.push(copyToOutputDirectory);
 
-        var item = createItemGroupElement('ItemGroup/Content', relPath, targetConditions, children);
+        var item = createItemGroupElement('ItemGroup/Content', sourcePath, targetConditions, children);
         this._getMatchingProjects(targetConditions).forEach(function (project) {
             project.appendToRoot(item);
         });
@@ -128,7 +128,6 @@ jsprojManager.prototype = {
 
     removeResourceFileFromProject: function (relPath, targetConditions) {
         events.emit('verbose', 'jsprojManager.removeResourceFile(relPath: ' + relPath + ', targetConditions: ' + JSON.stringify(targetConditions) + ')');
-
         this._getMatchingProjects(targetConditions).forEach(function (project) {
             project.removeItemGroupElement('ItemGroup/Content', relPath, targetConditions);
         });
