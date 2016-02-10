@@ -55,8 +55,6 @@ var handlers = {
             // also, we don't check for existence. This allows to insert build variables 
             // into the source file name, e.g.
             // <resource-file src="$(Platform)/My.dll" target="My.dll" />
-
-            var src = path.resolve(plugin.dir, obj.src);
             var relativeSrcPath = getPluginFilePath(plugin, obj.src, project.projectFolder);
             project.addResourceFileToProject(relativeSrcPath, obj.target, getTargetConditions(obj));
         },
