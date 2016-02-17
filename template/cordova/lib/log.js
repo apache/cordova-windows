@@ -18,39 +18,42 @@
 */
 
 // requires
-var path         = require('path'),
-    et           = require('elementtree'),
-    ConfigParser = require('./ConfigParser.js'),
-    nopt         = require('nopt');
+var path         = require('path');
+var et           = require('elementtree');
+var ConfigParser = require('./ConfigParser.js');
+var nopt         = require('nopt');
 
 var spawn = require('cordova-common').superspawn.spawn;
 
 // paths
-var platformRoot = path.join(__dirname, '..', '..'),
-    projectRoot  = path.join(platformRoot, '..', '..'),
-    configPath   = path.join(projectRoot, 'config.xml');
+var platformRoot = path.join(__dirname, '..', '..');
+var projectRoot  = path.join(platformRoot, '..', '..');
+var configPath   = path.join(projectRoot, 'config.xml');
 
 //constants
-var APP_TRACING_LOG = 'Microsoft-Windows-AppHost/ApplicationTracing',
-    ADMIN_LOG       = 'Microsoft-Windows-AppHost/Admin';
+var APP_TRACING_LOG = 'Microsoft-Windows-AppHost/ApplicationTracing';
+var ADMIN_LOG       = 'Microsoft-Windows-AppHost/Admin';
+var ONE_MINUTE      = 60 * 1000;
 
 // variables
-var appTracingInitialState = null,
-    appTracingCurrentState = null,
-    adminInitialState      = null,
-    adminCurrentState      = null,
-    timers                 = [],
-    appName;
+var appTracingInitialState = null;
+var appTracingCurrentState = null;
+var adminInitialState      = null;
+var adminCurrentState      = null;
+var timers                 = [];
+var appName;
+
+
 
 /*
  * Gets windows AppHost/ApplicationTracing and AppHost/Admin logs
  * and prints them to console
  */
 module.exports.run = function(args) {
-    var startTime = new Date(new Date().getTime() - 10 * 60 * 1000).toISOString(), // show last 10 minutes by default
-        knownOpts = { 'minutes' : Number, 'dump' : Boolean, 'help' : Boolean },
-        shortHands = { 'mins' : ['--minutes'], 'h' : ['--help'] },
-        parsedOpts = nopt(knownOpts, shortHands, args, 0);
+    var logFromTime = 10 * ONE_MINUTE; // show last 10 minutes by default
+    var knownOpts   = { 'minutes' : Number, 'dump' : Boolean, 'help' : Boolean };
+    var shortHands  = { 'mins' : ['--minutes'], 'h' : ['--help'] };
+    var parsedOpts  = nopt(knownOpts, shortHands, args, 0);
 
     if (parsedOpts.help) {
         module.exports.help();
@@ -58,9 +61,9 @@ module.exports.run = function(args) {
     }
     if (parsedOpts.dump) {
         if (parsedOpts.minutes) {
-            startTime = new Date(new Date().getTime() - parsedOpts.minutes * 60 * 1000).toISOString();
+            logFromTime = parsedOpts.minutes * ONE_MINUTE;
         }
-        dumpLogs(startTime);
+        dumpLogs(logFromTime);
         return;
     }
 
@@ -151,23 +154,23 @@ function exitGracefully(exitCode) {
 }
 
 function startLogging(channel) {
-    var startTime = new Date().toISOString();
+    var logFromTime = 10 * ONE_MINUTE;
     timers.push(setInterval(function() {
-        getEvents(channel, startTime).then(function(events) {
+        getEvents(channel, logFromTime).then(function(events) {
             events.forEach(function (evt) {
-                startTime = evt.timeCreated;
+                logFromTime = evt.timeCreated;
                 console.log(stringifyEvent(evt));
             });
         });
     }, 1000));
 }
 
-function dumpLogs(startTime) {
-    console.log('Dumping logs starting from ' + startTime);
+function dumpLogs(logFromTime) {
+    console.log('Dumping logs starting from ' + logFromTime);
     var appTracingEvents, adminEvents;
-    getEvents(APP_TRACING_LOG, startTime).then(function (evts) {
+    getEvents(APP_TRACING_LOG, logFromTime).then(function (evts) {
         appTracingEvents = evts;
-        return getEvents(ADMIN_LOG, startTime);
+        return getEvents(ADMIN_LOG, logFromTime);
     }).then(function(evts) {
         adminEvents = evts;
         appTracingEvents.concat(adminEvents)
@@ -185,9 +188,11 @@ function dumpLogs(startTime) {
     });
 }
 
-function getEvents(channel, startTime) {
+function getEvents(channel, logFromTime) {
     var command = 'wevtutil';
-    var args = ['qe', channel, '/q:"*[System [(TimeCreated [@SystemTime>\'' + startTime + '\'])]]"', '/e:root'];
+    var args = ['qe', channel, '/q:"*[System [TimeCreated[timediff(@SystemTime)<=' + logFromTime + ']]]"', '/e:root'];
+    console.log('Running command: ');
+    console.log(command + ' ' + args.join(' '));
     return spawn(command, args)
     .then(function(stdout) {
         return parseEvents(stdout);
