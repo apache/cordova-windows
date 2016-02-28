@@ -207,7 +207,7 @@ function copyFile (plugin_dir, src, project_dir, dest, link) {
         shell.cp('-f', src, dest);
     }
 }
-
+/*
 // Same as copy file but throws error if target exists
 function copyNewFile (plugin_dir, src, project_dir, dest, link) {
     var target_path = path.resolve(project_dir, dest);
@@ -216,7 +216,7 @@ function copyNewFile (plugin_dir, src, project_dir, dest, link) {
 
     copyFile(plugin_dir, src, project_dir, dest, !!link);
 }
-
+*/
 // checks if file exists and then deletes. Error if doesn't exist
 function removeFile (project_dir, src) {
     var file = path.resolve(project_dir, src);
