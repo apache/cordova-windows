@@ -24,7 +24,8 @@ var xml = require('cordova-common').xmlHelpers;
 var AppxManifest = require('../../template/cordova/lib/AppxManifest');
 var JsprojManager = rewire('../../template/cordova/lib/JsprojManager');
 
-var PROJECT_PATH = 'spec/unit/fixtures/EmptyProject';
+var PROJECT_PATH = 'spec/unit/fixtures/DummyProject';
+var INVALID_PROJECT_PATH = 'spec/unit/fixtures/FakeProject';
 var FAKE_MANIFEST = new et.ElementTree(et.XML(
     '<?xml version="1.0" encoding="UTF-8"?>' +
     '<Package>' +
@@ -42,7 +43,7 @@ describe('JsprojManager', function () {
 
         JsprojManager.__set__('proj', jasmine.createSpy('proj'));
 
-        spyOn(shell, 'ls').andReturn([PROJECT_PATH + '/EmptyProject.projitems']);
+        spyOn(shell, 'ls').andReturn([PROJECT_PATH + '/CordovaApp.projitems']);
         spyOn(xml, 'parseElementtreeSync').andReturn(FAKE_MANIFEST);
         spyOn(AppxManifest, 'get').andCallThrough();
 
@@ -53,6 +54,13 @@ describe('JsprojManager', function () {
         JsprojManager.__set__('proj', origProj);
     });
 
+    it('should throw if project is not an windows project', function () {
+        shell.ls.andCallThrough();
+        expect(function () {
+            JsprojManager.getProject(INVALID_PROJECT_PATH);
+        }).toThrow();
+    });
+
     it('should use AppxManifest class to get package name', function () {
         expect(project.getPackageName()).toBe('HelloCordova');
         expect(AppxManifest.get).toHaveBeenCalled();
@@ -60,4 +68,3 @@ describe('JsprojManager', function () {
         expect(AppxManifest.get.calls[0].args[1]).toBe(true);
     });
 });
-

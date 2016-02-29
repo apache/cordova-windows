@@ -23,7 +23,7 @@ var path = require('path'),
     platformRoot = '../../template',
     pkgRoot = './template/',
     pkgPath = path.join(pkgRoot, 'AppPackages'),
-    testPkgPath = './spec/unit/fixtures/EmptyProject/AppPackages',
+    testPkgPath = './spec/unit/fixtures/DummyProject/AppPackages',
     pkg = rewire(platformRoot + '/cordova/lib/package.js');
 
 var consoleLogOriginal;
