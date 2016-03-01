@@ -186,7 +186,7 @@ function parseAndValidateArgs(options) {
     config.buildType = options.release ? 'release' : 'debug';
 
     var archs = options.archs || args.archs;
-    config.buildArchs = archs ? archs.split(' ') : ['anycpu'];
+    config.buildArchs = archs ? archs.toLowerCase().split(' ') : ['anycpu'];
 
     config.phone = args.phone ? true : false;
     config.win = args.win ? true : false;
