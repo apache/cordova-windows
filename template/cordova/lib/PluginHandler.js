@@ -36,7 +36,11 @@ var handlers = {
     'source-file': {
         install:function(obj, plugin, project, options) {
             var dest = path.join('plugins', plugin.id, obj.targetDir || '', path.basename(obj.src));
-            copyFile(plugin.dir, obj.src, project.root, dest);
+            if (options && options.forceCopyingSrc) {
+                copyFile(plugin.dir, obj.src, project.root, dest);
+            } else {
+                copyNewFile(plugin.dir, obj.src, project.root, dest);
+            }
             // add reference to this file to jsproj.
             project.addSourceFile(dest);
         },
@@ -207,7 +211,7 @@ function copyFile (plugin_dir, src, project_dir, dest, link) {
         shell.cp('-f', src, dest);
     }
 }
-/*
+
 // Same as copy file but throws error if target exists
 function copyNewFile (plugin_dir, src, project_dir, dest, link) {
     var target_path = path.resolve(project_dir, dest);
@@ -216,7 +220,7 @@ function copyNewFile (plugin_dir, src, project_dir, dest, link) {
 
     copyFile(plugin_dir, src, project_dir, dest, !!link);
 }
-*/
+
 // checks if file exists and then deletes. Error if doesn't exist
 function removeFile (project_dir, src) {
     var file = path.resolve(project_dir, src);
