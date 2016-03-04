@@ -36,7 +36,7 @@ var handlers = {
     'source-file': {
         install:function(obj, plugin, project, options) {
             var dest = path.join('plugins', plugin.id, obj.targetDir || '', path.basename(obj.src));
-            if (options && options.forceCopyingSrc) {
+            if (options && options.force) {
                 copyFile(plugin.dir, obj.src, project.root, dest);
             } else {
                 copyNewFile(plugin.dir, obj.src, project.root, dest);
