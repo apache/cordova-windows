@@ -25,8 +25,10 @@ var Api = require('../template/cordova/Api');
 
 var argv = require('nopt')({
     'help' : Boolean,
-    'guid': String
-});
+    'guid': String,
+    'silent': Boolean,
+    'verbose': Boolean
+}, { 'd' : '--verbose' });
 
 if (argv.help || argv.argv.remain.length === 0) {
     console.log('Usage: create PathToProject [ PackageName [ AppName [ CustomTemplate ] ] ] [--guid=<GUID string>]');
@@ -51,5 +53,7 @@ var options = {
     guid: argv.guid,
     customTemplate: argv.argv.remain[3]
 };
+
+require('../template/cordova/lib/loggingHelper').adjustLoggerLevel(options);
 
 Api.createPlatform(argv.argv.remain[0], config, options).done();

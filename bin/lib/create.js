@@ -22,12 +22,12 @@ var fs    = require('fs');
 var path  = require('path');
 var shell = require('shelljs');
 var uuid  = require('node-uuid');
+var events = require('cordova-common').events;
 var CordovaError = require('cordova-common').CordovaError;
 var AppxManifest = require('../../template/cordova/lib/AppxManifest');
 
 // Creates cordova-windows project at specified path with specified namespace, app name and GUID
-// module.exports.run = function (argv) {
-module.exports.create = function (destinationDir, config, options, events) {
+module.exports.create = function (destinationDir, config, options) {
     if(!destinationDir) return Q.reject('No destination directory specified.');
 
     var projectPath = path.resolve(destinationDir);
@@ -89,7 +89,7 @@ module.exports.create = function (destinationDir, config, options, events) {
 
     // replace specific values in manifests' templates
     events.emit('verbose', 'Updating manifest files with project configuration.');
-    [ 'package.windows.appxmanifest', 'package.phone.appxmanifest', 
+    [ 'package.windows.appxmanifest', 'package.phone.appxmanifest',
       'package.windows10.appxmanifest' ]
     .forEach(function (item) {
         var manifest = AppxManifest.get(path.join(projectPath, item));

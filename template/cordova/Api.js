@@ -24,14 +24,27 @@ var shell = require('shelljs');
 
 var JsprojManager = require('./lib/JsprojManager');
 var PluginHandler = require('./lib/PluginHandler');
-var ConsoleLogger = require('./lib/ConsoleLogger');
+var events = require('cordova-common').events;
 var ActionStack = require('cordova-common').ActionStack;
 var CordovaError = require('cordova-common').CordovaError;
+var CordovaLogger = require('cordova-common').CordovaLogger;
 var PlatformJson = require('cordova-common').PlatformJson;
 var PlatformMunger = require('cordova-common').ConfigChanges.PlatformMunger;
 var PluginInfoProvider = require('cordova-common').PluginInfoProvider;
 
 var PLATFORM = 'windows';
+
+function setupEvents(externalEventEmitter) {
+    if (externalEventEmitter) {
+        // This will make the platform internal events visible outside
+        events.forwardEventsTo(externalEventEmitter);
+        return;
+    }
+
+    // There is no logger if external emitter is not present,
+    // so attach a console logger
+    CordovaLogger.get().subscribe(events);
+}
 
 /**
  * Class, that acts as abstraction over particular platform. Encapsulates the
@@ -44,12 +57,11 @@ var PLATFORM = 'windows';
  *
  * * platform: String that defines a platform name.
  */
-function Api(platform, platformRootDir, events) {
+function Api(platform, platformRootDir, eventEmitter) {
     this.platform = PLATFORM;
     this.root = path.resolve(__dirname, '..');
-    this.events = events || ConsoleLogger.get();
-    // NOTE: trick to share one EventEmitter instance across all js code
-    require('cordova-common').events = this.events;
+
+    setupEvents(eventEmitter);
 
     this._platformJson = PlatformJson.load(this.root, platform);
     this._pluginInfoProvider = new PluginInfoProvider();
@@ -88,12 +100,13 @@ function Api(platform, platformRootDir, events) {
  * @return {Promise<PlatformApi>} Promise either fulfilled with PlatformApi
  *   instance or rejected with CordovaError.
  */
-Api.createPlatform = function (destinationDir, projectConfig, options, events) {
+Api.createPlatform = function (destinationDir, projectConfig, options, eventEmitter) {
+    setupEvents(eventEmitter);
     return require('../../bin/lib/create')
-    .create(destinationDir, projectConfig, options, events || ConsoleLogger.get())
+    .create(destinationDir, projectConfig, options)
     .then(function () {
         var PlatformApi = require(path.resolve(destinationDir, 'cordova/Api'));
-        return new PlatformApi(PLATFORM, destinationDir, events);
+        return new PlatformApi(PLATFORM, destinationDir, eventEmitter);
     });
 };
 
@@ -107,16 +120,18 @@ Api.createPlatform = function (destinationDir, projectConfig, options, events) {
  *   should override the default one from platform.
  * @param  {Boolean}  [options.link=false]  Flag that indicates that platform's sources
  *   will be linked to installed platform instead of copying.
+ * @param {EventEmitter} [eventEmitter] The emitter that will be used for logging
  *
  * @return {Promise<PlatformApi>} Promise either fulfilled with PlatformApi
  *   instance or rejected with CordovaError.
  */
-Api.updatePlatform = function (destinationDir, options, events) {
+Api.updatePlatform = function (destinationDir, options, eventEmitter) {
+    setupEvents(eventEmitter);
     return require('../../bin/lib/update')
-    .update(destinationDir, options, events || ConsoleLogger.get())
+    .update(destinationDir, options)
     .then(function () {
         var PlatformApi = require(path.resolve(destinationDir, 'cordova/Api'));
-        return new PlatformApi(PLATFORM, destinationDir, events);
+        return new PlatformApi(PLATFORM, destinationDir, eventEmitter);
     });
 };
 

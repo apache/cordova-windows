@@ -419,7 +419,7 @@ module.exports.prepare = function (cordovaProject) {
         copyImages(cordovaProject.projectConfig, self.root);
     })
     .then(function () {
-        self.events.emit('verbose', 'Updated project successfully');
+        events.emit('verbose', 'Updated project successfully');
     });
 };
 

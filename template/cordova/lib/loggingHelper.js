@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
        Licensed to the Apache Software Foundation (ASF) under one
        or more contributor license agreements.  See the NOTICE file
@@ -19,15 +17,21 @@
        under the License.
 */
 
-var Api = require('./Api');
+var CordovaLogger = require('cordova-common').CordovaLogger;
 
-// Support basic help commands
-if(['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(process.argv[2]) >= 0) {
-    console.log('Usage: \n    clean\n');
-    console.log('Cleans the project directory.');
-    process.exit(0);
-}
+module.exports = {
+    adjustLoggerLevel: function (opts) {
+        if (opts instanceof Array) {
+            opts.silent = opts.indexOf('--silent') !== -1;
+            opts.verbose = opts.indexOf('--verbose') !== -1 || opts.indexOf('-d') !== -1;
+        }
 
-require('./lib/loggingHelper').adjustLoggerLevel(process.argv);
+        if (opts.verbose) {
+            CordovaLogger.get().setLevel('verbose');
+        }
 
-new Api().clean().done();
+        if (opts.silent) {
+            CordovaLogger.get().setLevel('error');
+        }
+    }
+};

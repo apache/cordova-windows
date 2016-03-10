@@ -22,12 +22,13 @@ var fs     = require('fs');
 var path   = require('path');
 var shell   = require('shelljs');
 var create = require('./create');
+var events = require('cordova-common').events;
 var ConfigParser = require('cordova-common').ConfigParser;
 var CordovaError = require('cordova-common').CordovaError;
 var AppxManifest = require('../../template/cordova/lib/AppxManifest');
 
 // updates the cordova.js in project along with the cordova tooling.
-module.exports.update = function (destinationDir, options, events) {
+module.exports.update = function (destinationDir, options) {
     if (!fs.existsSync(destinationDir)){
         // if specified project path is not valid then reject promise
         return Q.reject(new CordovaError('The given path to the project does not exist.' +
