@@ -17,6 +17,9 @@
     under the License.
 */
 
+var path = require('path');
+var shell = require('shelljs');
+
 var rewire  = require('rewire'),
     prepare = rewire('../../template/cordova/lib/prepare'),
     AppxManifest = require('../../template/cordova/lib/AppxManifest'),
@@ -123,7 +126,7 @@ describe('Windows 10 project', function() {
         var app = mockConfig.manifest.doc.find('.//Application');
 
         // Workaround to avoid WWAHost.exe bug: https://issues.apache.org/jira/browse/CB-10446
-        var isAppxWebStartupUri = app.attrib.StartPage === 'ms-appx-web:///www/index.html' || 
+        var isAppxWebStartupUri = app.attrib.StartPage === 'ms-appx-web:///www/index.html' ||
             app.attrib.StartPage === 'ms-appx-web://' + mockConfig.config.packageName().toLowerCase() + '/www/index.html';
         expect(isAppxWebStartupUri).toBe(true);
     });
@@ -378,5 +381,81 @@ describe('A Windows 10 project should apply the uap: namespace prefix to certain
         expect(testResults.internetClient).toBe('Capability');
         expect(testResults.documentsLibrary).toBe('uap:Capability');
         expect(testResults.location).toBe('DeviceCapability');
+    });
+});
+
+describe('copyIcons method', function () {
+    var copyImages = prepare.__get__('copyImages');
+
+    var PROJECT = '/some/path';
+
+    function createMockConfig(images) {
+        var result = jasmine.createSpyObj('config', ['getIcons', 'getSplashScreens']);
+        result.getIcons.andReturn(images);
+        result.getSplashScreens.andReturn([]);
+
+        return result;
+    }
+
+    beforeEach(function () {
+        spyOn(shell, 'cp');
+    });
+
+    it('should guess target filename based on icon size', function () {
+        var images = [
+            {src: 'res/Windows/Square44x44Logo_100.png', width: '44', height: '44' },
+            {src: 'res/Windows/Square44x44Logo_240.png', width: '106', height: '106' }
+        ];
+
+        var config = createMockConfig(images);
+
+        copyImages(config, PROJECT);
+
+        expect(shell.cp).toHaveBeenCalledWith('-f', path.normalize('res/Windows/Square44x44Logo_100.png'), path.join(PROJECT, 'images/Square44x44Logo.scale-100.png'));
+        expect(shell.cp).toHaveBeenCalledWith('-f', path.normalize('res/Windows/Square44x44Logo_240.png'), path.join(PROJECT, 'images/Square44x44Logo.scale-240.png'));
+    });
+
+    it('should ignore unknown icon sizes and emit a warning', function () {
+        var config = createMockConfig([
+            {src: 'res/Windows/UnknownImage.png', width: '999', height: '999' },
+        ]);
+
+        var warnSpy = jasmine.createSpy('warn');
+        events.on('warn', warnSpy);
+        copyImages(config, PROJECT);
+        expect(shell.cp).not.toHaveBeenCalled();
+        expect(warnSpy.calls[0].args[0]).toMatch('image is skipped');
+    });
+
+    describe('when "target" attribute is specified for the image', function () {
+        it('should copy all images with the same base name and extension to destination dir', function () {
+            var matchingFiles = [
+                'res/Windows/Square44x44.scale-100.png',
+                'res/Windows/Square44x44.targetsize-16.png',
+                'res/Windows/Square44x44.scale-150_targetsize-16.png',
+                'res/Windows/Square44x44.targetsize-16_scale-200.png',
+                'res/Windows/Square44x44.targetsize-16_altform-unplated_scale-200.png'
+            ];
+
+            var nonMatchingFiles = [
+                'res/Windows/Square55x55.scale-100.png',
+                'res/Windows/Square44x44.targetsize-16.jpg'
+            ];
+
+            spyOn(fs, 'readdirSync').andReturn(matchingFiles.concat(nonMatchingFiles));
+
+            var images = [{src: 'res/Windows/Square44x44.png', target: 'SmallIcon' }];
+            var config = createMockConfig(images);
+
+            copyImages(config, PROJECT);
+
+            expect(shell.cp.calls.length).toBe(5);
+            matchingFiles.forEach(function (filename) {
+                expect(shell.cp).toHaveBeenCalledWith('-f', path.normalize(filename), jasmine.any(String));
+            });
+            shell.cp.calls.forEach(function (call) {
+                expect(path.basename(call.args[2])).toMatch(/^SmallIcon.*\.png$/);
+            });
+        });
     });
 });

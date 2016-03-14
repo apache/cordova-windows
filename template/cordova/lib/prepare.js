@@ -23,6 +23,7 @@ var path = require('path');
 var shell = require('shelljs');
 var et = require('elementtree');
 var Version = require('./Version');
+var MRTImage = require('./MRTImage');
 var AppxManifest = require('./AppxManifest');
 var MSBuildTools = require('./MSBuildTools');
 var ConfigParser = require('./ConfigParser');
@@ -292,30 +293,22 @@ function copyImages(config, platformRoot) {
     }
 
     function copyMrtImage(src, dest) {
-        var srcDir = path.dirname(src),
-            srcExt = path.extname(src),
-            srcFileName = path.basename(src, srcExt);
+        // Parse source path into new MRTImage
+        var imageToCopy = new MRTImage(src);
 
-        var destExt = path.extname(dest),
-            destFileName = path.basename(dest, destExt);
+        // then get all matching MRT images in source directory
+        var candidates = fs.readdirSync(imageToCopy.location)
+        .map(function (file) { return new MRTImage(file); })
+        .filter(imageToCopy.matchesTo, imageToCopy);
 
-        // all MRT images: logo.png, logo.scale-100.png, logo.scale-200.png, etc
-        var images = fs.readdirSync(srcDir).filter(function(e) {
-            return e.match('^'+srcFileName + '(.scale-[0-9]+)?' + srcExt);
+        candidates.forEach(function(mrtImage) {
+            // copy images with new base name but keeping qualifier
+            copyImage(mrtImage.path, mrtImage.generateFilenameFrom(dest));
         });
-        // warn if no images found
-        if (images.length === 0) {
-            events.emit('warn', 'No images found for target: ' + destFileName);
-            return;
-        }
-        // copy images with new name but keeping scale suffix
-        images.forEach(function(img) {
-            var scale = path.extname(path.basename(img, srcExt));
-            if (scale === '') {
-                scale = '.scale-100';
-            }
-            copyImage(path.join(srcDir, img), destFileName+scale+destExt);
-        });
+
+        // Warn user if no images were copied
+        if (candidates.length === 0)
+            events.emit('warn', 'No images found for target: ' + dest);
     }
 
     // Platform default images
@@ -360,7 +353,7 @@ function copyImages(config, platformRoot) {
 
     images.forEach(function (img) {
         if (img.target) {
-            copyMrtImage(img.src, img.target + '.png');
+            copyMrtImage(img.src, img.target);
         } else {
             // find target image by size
             var targetImg = findPlatformImage (img.width, img.height);
