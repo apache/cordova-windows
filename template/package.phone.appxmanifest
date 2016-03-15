@@ -40,11 +40,9 @@
                          Description="CordovaApp"
                          ForegroundText="light"
                          BackgroundColor="transparent">
-        <m3:DefaultTile Wide310x150Logo="images\Wide310x150Logo.png"
-                        Square71x71Logo="images\Square71x71Logo.png">
+        <m3:DefaultTile  Square71x71Logo="images\Square71x71Logo.png">
           <m3:ShowNameOnTiles>
             <m3:ShowOn Tile="square150x150Logo" />
-            <m3:ShowOn Tile="wide310x150Logo" />
           </m3:ShowNameOnTiles>
         </m3:DefaultTile>
         <m3:SplashScreen Image="images\SplashScreenPhone.png" />
