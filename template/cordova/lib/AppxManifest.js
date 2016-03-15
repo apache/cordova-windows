@@ -211,7 +211,29 @@ AppxManifest.prototype.getProperties = function () {
             publisher.text = name;
 
             return this;
-        }
+        },
+        getDescription: function () {
+            var description = properties.find('./Description');
+            return description && description.text;
+        },
+        setDescription: function (text) {
+
+            var description = properties.find('./Description');
+
+            if (!text || text.length === 0) {
+                if (description) properties.remove(description);
+                return this;
+            }
+
+            if (!description) {
+                description = new et.Element('Description');
+                properties.append(description);
+            }
+
+            description.text = processDescription(text);
+
+            return this;
+        },
     };
 };
 
@@ -368,7 +390,17 @@ AppxManifest.prototype.getVisualElements = function () {
             }
 
             return this;
-        }
+        },
+        getDescription: function () {
+            return visualElements.attrib.Description;
+        },
+        setDescription: function (description) {
+            if (!description || description.length === 0)
+                throw new TypeError('VisualElements.Description attribute must be defined and non-empty');
+
+            visualElements.attrib.Description = processDescription(description);
+            return this;
+        },
     };
 };
 
@@ -401,6 +433,19 @@ function refineColor(color) {
         color = color.slice(2);
     }
     return '#' + color;
+}
+
+function processDescription(text) {
+    var result = text;
+
+    // Description value limitations: https://msdn.microsoft.com/en-us/library/windows/apps/br211429.aspx
+    // value should be no longer than 2048 characters
+    if (text.length > 2048) {
+        result = text.substr(0, 2048);
+    }
+
+    // value should not contain newlines and tabs
+    return result.replace(/(\n|\r)/g, ' ').replace(/\t/g, '    ');
 }
 
 // Shortcut for getIdentity.setName
