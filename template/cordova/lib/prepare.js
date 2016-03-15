@@ -172,6 +172,15 @@ function applyCoreProperties(config, manifest) {
         manifest.getVisualElements().setDisplayName(name);
     }
 
+    var description = config.description();
+    manifest.getProperties().setDescription(description);
+    if (description) {
+        // description attribute is required for VisualElements node (see
+        // https://msdn.microsoft.com/en-us/library/windows/apps/br211471.aspx),
+        // so we set it only when '<description>' exists in config.xml
+        manifest.getVisualElements().setDescription(description);
+    }
+
     // CB-9410: Get a display name and publisher display name.  In the Windows Store, certain
     // strings which are typically used in Cordova aren't valid for Store ingestion.
     // Here, we check for Windows-specific preferences, and if we find it, prefer that over
