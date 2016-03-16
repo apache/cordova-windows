@@ -421,7 +421,7 @@ describe('Package description', function () {
         expect(desc).toBe(null);
 
         desc = mockConfig.manifest.doc.find('.//Application/m2:VisualElements');
-        expect(desc.attrib.Description).toEqual(jasmine.any(String));
+        expect(desc.attrib.Description).toEqual(prepare.__get__('DEFAULT_DESCRIPTION'));
     });
 
     it('should be stripped to 2048 symbols before adding to manifest', function () {

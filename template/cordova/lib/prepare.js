@@ -29,6 +29,10 @@ var ConfigParser = require('./ConfigParser');
 var events = require('cordova-common').events;
 var xmlHelpers = require('cordova-common').xmlHelpers;
 
+// Default value for VisualElements' Description attribute.
+// This is equal to the value that comes with default App template
+var DEFAULT_DESCRIPTION = 'CordovaApp';
+
 var PROJECT_WINDOWS10   = 'CordovaApp.Windows10.jsproj',
     MANIFEST_WINDOWS    = 'package.windows.appxmanifest',
     MANIFEST_PHONE      = 'package.phone.appxmanifest',
@@ -174,12 +178,10 @@ function applyCoreProperties(config, manifest) {
 
     var description = config.description();
     manifest.getProperties().setDescription(description);
-    if (description) {
-        // description attribute is required for VisualElements node (see
-        // https://msdn.microsoft.com/en-us/library/windows/apps/br211471.aspx),
-        // so we set it only when '<description>' exists in config.xml
-        manifest.getVisualElements().setDescription(description);
-    }
+    // 'Description' attribute is required for VisualElements node (see
+    // https://msdn.microsoft.com/en-us/library/windows/apps/br211471.aspx),
+    // so we set it to '<description>' from config.xml or default value
+    manifest.getVisualElements().setDescription(description || DEFAULT_DESCRIPTION);
 
     // CB-9410: Get a display name and publisher display name.  In the Windows Store, certain
     // strings which are typically used in Cordova aren't valid for Store ingestion.
