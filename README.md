@@ -7,9 +7,9 @@
 # to you under the Apache License, Version 2.0 (the
 # "License"); you may not use this file except in compliance
 # with the License.  You may obtain a copy of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/19h1fq0lyvwtei05/branch/master)](https://ci.appveyor.com/project/Humbedooh/cordova-windows/branch/master)
 [![Build Status](https://travis-ci.org/apache/cordova-windows.svg?branch=master)](https://travis-ci.org/apache/cordova-windows)
+[![codecov.io](https://codecov.io/github/apache/cordova-windows/coverage.svg?branch=master)](https://codecov.io/github/apache/cordova-windows?branch=master)
 
 This repo contains the code for an [Apache Cordova](http://cordova.apache.org) platform that allows you to build applications that target Windows 10, and Windows 8.1, as well as Windows Phone 8.1. An Apache Cordova based applications is written in HTML, CSS and JavaScript.
 
@@ -45,12 +46,12 @@ Install the tools: [Visual Studio 2013 Express](http://www.visualstudio.com/down
 
 #Getting started
 The best way to use this is to install the [Cordova CLI](https://www.npmjs.com/package/cordova), create a project, add the windows platform, and run the app:
-	
+
 	npm install -g cordova
 	cordova create test
 	cordova platform add windows
 	cordova run windows
-	
+
 #Report Issues
 Report them at the [Apache Cordova Issue Tracker](https://issues.apache.org/jira/browse/CB). Create a user account, use `windows` as the component.
 
