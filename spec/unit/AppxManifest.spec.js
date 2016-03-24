@@ -65,6 +65,42 @@ describe('AppxManifest', function () {
         });
     });
 
+    describe('purgeCache method', function () {
+        beforeEach(function () {
+            AppxManifest.__set__('manifestCache', { a: 'foo/a', b: 'foo/b', c: 'foo/c' });
+        });
+
+        it('should remove all entries when no parameter is specified', function () {
+            AppxManifest.purgeCache();
+            var cache = AppxManifest.__get__('manifestCache');
+            expect(Object.keys(cache).length).toBe(0);
+        });
+
+        it('should remove an entry when parameter is a string key', function () {
+            AppxManifest.purgeCache('a');
+            var cache = AppxManifest.__get__('manifestCache');
+            expect(Object.keys(cache).length).toBe(2);
+            expect(cache.a).not.toBeDefined();
+        });
+
+        it('should remove multiple entries when parameter is an array of keys', function () {
+            AppxManifest.purgeCache(['a', 'b']);
+            var cache = AppxManifest.__get__('manifestCache');
+            expect(Object.keys(cache).length).toBe(1);
+            expect(cache.a).not.toBeDefined();
+            expect(cache.b).not.toBeDefined();
+        });
+
+        it('should not remove anything if there is no such key', function () {
+            AppxManifest.purgeCache(['bar']);
+            var cache = AppxManifest.__get__('manifestCache');
+            expect(Object.keys(cache).length).toBe(3);
+            expect(cache.a).toBeDefined();
+            expect(cache.b).toBeDefined();
+            expect(cache.c).toBeDefined();
+        });
+    });
+
     describe('static get() method', function () {
 
         it('should return an AppxManifest instance', function () {

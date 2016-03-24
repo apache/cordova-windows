@@ -410,6 +410,11 @@ module.exports.prepare = function (cordovaProject) {
     this._config = updateConfigFilesFrom(cordovaProject.projectConfig,
         this._munger, this.locations);
 
+    // CB-10845 avoid using cached appxmanifests since they could be
+    // previously modififed outside of AppxManifest class
+    // TODO: invalidate only entries that were affected by config munge
+    AppxManifest.purgeCache();
+
     // Update own www dir with project's www assets and plugins' assets and js-files
     return Q.when(updateWwwFrom(cordovaProject, this.locations))
     .then(function () {
