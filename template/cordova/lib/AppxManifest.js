@@ -112,6 +112,25 @@ AppxManifest.get = function (fileName, ignoreCache) {
     return result;
 };
 
+/**
+ * Removes manifests from cache to prevent using stale entries
+ *
+ * @param {String|String[]} [cacheKeys] The keys to delete from cache. If not
+ *   specified, the whole cache will be purged
+ */
+AppxManifest.purgeCache = function (cacheKeys) {
+    if (!cacheKeys) {
+        // if no arguments passed, remove all entries
+        manifestCache = {};
+        return;
+    }
+
+    var keys = Array.isArray(cacheKeys) ? cacheKeys : [cacheKeys];
+    keys.forEach(function (key) {
+        delete manifestCache[key];
+    });
+};
+
 AppxManifest.prototype.getPhoneIdentity = function () {
     var phoneIdentity = this.doc.getroot().find('./mp:PhoneIdentity');
     if (!phoneIdentity)
