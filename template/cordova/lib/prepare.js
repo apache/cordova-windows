@@ -312,7 +312,7 @@ function copyImages(config, platformRoot) {
 
         // all MRT images: logo.png, logo.scale-100.png, logo.scale-200.png, etc
         var images = fs.readdirSync(srcDir).filter(function(e) {
-            return e.match('^'+srcFileName + '(.scale-[0-9]+)?' + srcExt);
+            return e.match('^'+srcFileName + '(.(scale|targetsize)-[0-9]+)?' + srcExt);
         });
         // warn if no images found
         if (images.length === 0) {
