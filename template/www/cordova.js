@@ -1,5 +1,5 @@
 ﻿// Platform: windows
-// 533e1bfdbc57d54106ca39a02b21a1909f84fda7
+// 2fd4bcb84048415922d13d80d35b8d1668e8e150
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -817,7 +817,7 @@ module.exports = channel;
 
 });
 
-// file: d:/coho/cordova-windows/cordova-js-src/exec.js
+// file: d:/cordova/cordova-windows/cordova-js-src/exec.js
 define("cordova/exec", function(require, exports, module) {
 
 /*jslint sloppy:true, plusplus:true*/
@@ -1394,7 +1394,7 @@ exports.reset();
 
 });
 
-// file: d:/coho/cordova-windows/cordova-js-src/platform.js
+// file: d:/cordova/cordova-windows/cordova-js-src/platform.js
 define("cordova/platform", function(require, exports, module) {
 
 module.exports = {
