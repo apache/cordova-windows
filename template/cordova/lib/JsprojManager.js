@@ -182,7 +182,7 @@ jsprojManager.prototype = {
         // relative_path is the actual path to the file in the current OS, where-as inserted_path is what we write in
         // the project file, and is always in Windows format.
         relative_path = path.normalize(relative_path);
-        var inserted_path = relative_path.split('/').join('\\');
+        var inserted_path = path.join('..', '..', relative_path).split('/').join('\\');
 
         var pluginProjectXML = xml_helpers.parseElementtreeSync(relative_path);
 

@@ -69,12 +69,12 @@ var handlers = {
             var src = obj.src;
             var dest = src;
             var type = obj.type;
+            var targetDir = obj.targetDir || '';
 
             if(type === 'projectReference') {
-                project.addProjectReference(path.join(plugin.dir,src), getTargetConditions(obj));
-            }
-            else {
-                var targetDir = obj.targetDir || '';
+                dest = path.join('plugins', plugin.id, targetDir, src);
+                project.addProjectReference(dest, getTargetConditions(obj));
+            } else {
                 // path.join ignores empty paths passed so we don't check whether targetDir is not empty
                 dest = path.join('plugins', plugin.id, targetDir, path.basename(src));
                 copyFile(plugin.dir, src, project.root, dest);
