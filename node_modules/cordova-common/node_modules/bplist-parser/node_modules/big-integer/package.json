@@ -1,0 +1,74 @@
+{
+  "name": "big-integer",
+  "version": "1.6.13",
+  "author": {
+    "name": "Peter Olson",
+    "email": "peter.e.c.olson+npm@gmail.com"
+  },
+  "description": "An arbitrary length integer library for Javascript",
+  "contributors": [],
+  "bin": {},
+  "scripts": {
+    "test": "karma start my.conf.js"
+  },
+  "main": "./BigInteger",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/peterolson/BigInteger.js.git"
+  },
+  "keywords": [
+    "math",
+    "big",
+    "bignum",
+    "bigint",
+    "biginteger",
+    "integer",
+    "arbitrary",
+    "precision",
+    "arithmetic"
+  ],
+  "devDependencies": {
+    "coveralls": "^2.11.4",
+    "jasmine": "2.1.x",
+    "jasmine-core": "^2.3.4",
+    "karma": "^0.13.3",
+    "karma-coverage": "^0.4.2",
+    "karma-jasmine": "^0.3.6",
+    "karma-phantomjs-launcher": "~0.1"
+  },
+  "license": "Unlicense",
+  "engines": {
+    "node": ">=0.6"
+  },
+  "gitHead": "e642ff89337dc922dd5a5eec01358c5b9a0de8c2",
+  "bugs": {
+    "url": "https://github.com/peterolson/BigInteger.js/issues"
+  },
+  "homepage": "https://github.com/peterolson/BigInteger.js#readme",
+  "_id": "big-integer@1.6.13",
+  "_shasum": "1d207ff8ccc6c79d3dd555bc447ec1ef7778e8d5",
+  "_from": "big-integer@>=1.6.7 <2.0.0",
+  "_npmVersion": "2.9.1",
+  "_nodeVersion": "0.12.3",
+  "_npmUser": {
+    "name": "peterolson",
+    "email": "peter.e.c.olson+npm@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "peterolson",
+      "email": "peter.e.c.olson+npm@gmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "1d207ff8ccc6c79d3dd555bc447ec1ef7778e8d5",
+    "tarball": "http://registry.npmjs.org/big-integer/-/big-integer-1.6.13.tgz"
+  },
+  "_npmOperationalInternal": {
+    "host": "packages-12-west.internal.npmjs.com",
+    "tmp": "tmp/big-integer-1.6.13.tgz_1459301238165_0.4259801849257201"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/big-integer/-/big-integer-1.6.13.tgz",
+  "readme": "ERROR: No README data found!"
+}
