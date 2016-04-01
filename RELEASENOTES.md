@@ -25,7 +25,8 @@ Update these notes using: git log --pretty=format:'* %s' --topo-order --no-merge
 cordova-windows is a library that enables developers to create Windows 8/8.1/10 and WP8.1 application projects that support Cordova APIs.
 
 ### 4.3.2 (Mar 31, 2016)
-* CB-10927 - Framework references in plugin.xml file prevent Windows Universal projects from being used on other machines
+* CB-10622 Upgrade cordova-common to work with 'target'-defined icons
+* CB-10927 Framework references in plugin.xml file prevent Windows Universal projects from being used on other machines
 * CB-10845 Invalidate manifest cache in prepare
 * CB-10714 Ignore case for --archs
 * CB-10138 Adds missing plugin metadata to plugin_list module for Windows
