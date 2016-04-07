@@ -393,7 +393,7 @@ function applyUAPVersionToProject(projectFilePath, uapVersionInfo) {
 }
 
 // returns {minUAPVersion: Version, targetUAPVersion: Version} | false
-function getUAPVersions() {
+function getUAPVersions(config) {
     var baselineVersions = MSBuildTools.getAvailableUAPVersions();
     if (!baselineVersions || baselineVersions.length === 0) {
         return false;
@@ -401,9 +401,11 @@ function getUAPVersions() {
 
     baselineVersions.sort(Version.comparer);
 
+    var uapTargetMinPreference = config.getUAPTargetMinVersion();
+
     return {
-        minUAPVersion: baselineVersions[0],
-        targetUAPVersion: baselineVersions[baselineVersions.length - 1]
+        minUAPVersion: uapTargetMinPreference,
+        targetUAPVersion: baselineVersions[baselineVersions.length - 1] /* The highest available SDK on the system */
     };
 }
 
@@ -551,6 +553,6 @@ function updateProjectAccordingTo(projectConfig, locations) {
     });
 
     if (process.platform === 'win32') {
-        applyUAPVersionToProject(path.join(locations.root, PROJECT_WINDOWS10), getUAPVersions());
+        applyUAPVersionToProject(path.join(locations.root, PROJECT_WINDOWS10), getUAPVersions(projectConfig));
     }
 }
