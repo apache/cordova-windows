@@ -222,7 +222,7 @@ function parseBuildConfig(buildConfigPath, buildType) {
     events.emit('verbose', 'Reading build config file: '+ buildConfigPath);
     try {
         var contents = fs.readFileSync(buildConfigPath, 'utf8');
-        buildConfig = JSON.parse(contents);
+        buildConfig = JSON.parse(contents.replace(/^\ufeff/, '')); // Remove BOM
     } catch (e) {
         if (e.code === 'ENOENT') {
             throw new CordovaError('Specified build config file does not exist: ' + buildConfigPath);
