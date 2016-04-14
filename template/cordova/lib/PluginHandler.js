@@ -25,8 +25,8 @@ var shell = require('shelljs');
 var events = require('cordova-common').events;
 var CordovaError = require('cordova-common').CordovaError;
 
-// returns relative file path for a file in the plugin's folder that can be referenced 
-// from a project file. 
+// returns relative file path for a file in the plugin's folder that can be referenced
+// from a project file.
 function getPluginFilePath(plugin, pluginFile, targetDir) {
     var src = path.resolve(plugin.dir, pluginFile);
     return '$(ProjectDir)' + path.relative(targetDir, src);
@@ -53,10 +53,10 @@ var handlers = {
     },
     'resource-file':{
         install:function(obj, plugin, project, options) {
-            // do not copy, but reference the file in the plugin folder. This allows to 
+            // do not copy, but reference the file in the plugin folder. This allows to
             // have multiple source files map to the same target and select the appropriate
             // one based on the current build settings, e.g. architecture.
-            // also, we don't check for existence. This allows to insert build variables 
+            // also, we don't check for existence. This allows to insert build variables
             // into the source file name, e.g.
             // <resource-file src="$(Platform)/My.dll" target="My.dll" />
             var relativeSrcPath = getPluginFilePath(plugin, obj.src, project.projectFolder);
@@ -123,24 +123,27 @@ var handlers = {
                 throw new CordovaError('<asset> tag without required "target" attribute');
             }
 
-            var www = options.usePlatformWww ? project.platformWww : project.www;
-            copyFile(plugin.dir, obj.src, www, obj.target);
+            copyFile(plugin.dir, obj.src, project.www, obj.target);
+            if (options && options.usePlatformWww) copyFile(plugin.dir, obj.src, project.platformWww, obj.target);
         },
         uninstall:function(obj, plugin, project, options) {
             var target = obj.target || obj.src;
 
             if (!target) throw new CordovaError('<asset> tag without required "target" attribute');
 
-            var www = options.usePlatformWww ? project.platformWww : project.www;
-            removeFile(www, target);
-            shell.rm('-Rf', path.resolve(www, 'plugins', plugin.id));
+            removeFile(project.www, target);
+            removeFile(project.www, path.join('plugins', plugin.id));
+            if (options && options.usePlatformWww) {
+                removeFile(project.platformWww, target);
+                removeFile(project.platformWww, path.join('plugins', plugin.id));
+            }
         }
     },
     'js-module': {
         install: function (obj, plugin, project, options) {
             // Copy the plugin's files into the www directory.
             var moduleSource = path.resolve(plugin.dir, obj.src);
-            var moduleName = plugin.id + '.' + (obj.name || path.parse(obj.src).name);
+            var moduleName = plugin.id + '.' + (obj.name || path.basename(obj.src, path.extname (obj.src)));
 
             // Read in the file, prepend the cordova.define, and write it back out.
             var scriptContent = fs.readFileSync(moduleSource, 'utf-8').replace(/^\ufeff/, ''); // Window BOM
@@ -149,15 +152,19 @@ var handlers = {
             }
             scriptContent = 'cordova.define("' + moduleName + '", function(require, exports, module) {\n' + scriptContent + '\n});\n';
 
-            var www = options.usePlatformWww ? project.platformWww : project.www;
-            var moduleDestination = path.resolve(www, 'plugins', plugin.id, obj.src);
+            var moduleDestination = path.resolve(project.www, 'plugins', plugin.id, obj.src);
             shell.mkdir('-p', path.dirname(moduleDestination));
             fs.writeFileSync(moduleDestination, scriptContent, 'utf-8');
+            if (options && options.usePlatformWww) {
+                var platformWwwDestination = path.resolve(project.platformWww, 'plugins', plugin.id, obj.src);
+                shell.mkdir('-p', path.dirname(platformWwwDestination));
+                fs.writeFileSync(platformWwwDestination, scriptContent, 'utf-8');
+            }
         },
         uninstall: function (obj, plugin, project, options) {
             var pluginRelativePath = path.join('plugins', plugin.id, obj.src);
-            var www = options.usePlatformWww ? project.platformWww : project.www;
-            removeFileAndParents(www, pluginRelativePath);
+            removeFileAndParents(project.www, pluginRelativePath);
+            if (options && options.usePlatformWww) removeFileAndParents(project.platformWww, pluginRelativePath);
         }
     }
 };
