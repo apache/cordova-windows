@@ -29,7 +29,7 @@ var ActionStack = require('cordova-common').ActionStack;
 var CordovaError = require('cordova-common').CordovaError;
 var CordovaLogger = require('cordova-common').CordovaLogger;
 var PlatformJson = require('cordova-common').PlatformJson;
-var PlatformMunger = require('cordova-common').ConfigChanges.PlatformMunger;
+var PlatformMunger = require('./lib/ConfigChanges').PlatformMunger;
 var PluginInfoProvider = require('cordova-common').PluginInfoProvider;
 
 var PLATFORM = 'windows';
