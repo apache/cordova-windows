@@ -30,6 +30,7 @@ var util = require('util');
 var semver = require('semver');
 var shell = require('shelljs');
 var AppxManifest = require('./AppxManifest');
+var PluginHandler = require('./PluginHandler');
 var events = require('cordova-common').events;
 var CordovaError = require('cordova-common').CordovaError;
 var xml_helpers = require('cordova-common').xmlHelpers;
@@ -341,6 +342,14 @@ jsprojManager.prototype = {
 
         return projects;
     }
+};
+
+jsprojManager.prototype.getInstaller = function (type) {
+    return PluginHandler.getInstaller(type);
+};
+
+jsprojManager.prototype.getUninstaller = function (type) {
+    return PluginHandler.getUninstaller(type);
 };
 
 function getProjectReferencePreInsertRegExp(projectGuid) {

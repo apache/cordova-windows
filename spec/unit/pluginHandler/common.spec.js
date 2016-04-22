@@ -41,8 +41,8 @@ var removeFileAndParents = common.__get__('removeFileAndParents');
 describe('common platform handler', function() {
     describe('copyFile', function() {
         it('should throw if source path not found', function(){
-            expect(function(){copyFile('/some/dir', src, project_dir, dest);})
-                .toThrow(new Error('"' + src + '" not found!'));
+            expect(function(){copyFile('/some/dir', 'foo', project_dir, dest);})
+                .toThrow(new Error('"' + path.resolve('/some/dir', 'foo') + '" not found!'));
         });
 
         it('should throw if src not in plugin directory', function(){

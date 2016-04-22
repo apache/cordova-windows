@@ -29,6 +29,9 @@ var MSBuildTools = require('./MSBuildTools');
 var ConfigParser = require('./ConfigParser');
 var events = require('cordova-common').events;
 var xmlHelpers = require('cordova-common').xmlHelpers;
+var PlatformJson = require('cordova-common').PlatformJson;
+var PlatformMunger = require('cordova-common').ConfigChanges.PlatformMunger;
+var PluginInfoProvider = require('cordova-common').PluginInfoProvider;
 
 // Default value for VisualElements' Description attribute.
 // This is equal to the value that comes with default App template
@@ -412,8 +415,9 @@ function getUAPVersions(config) {
 module.exports.prepare = function (cordovaProject) {
     var self = this;
 
-    this._config = updateConfigFilesFrom(cordovaProject.projectConfig,
-        this._munger, this.locations);
+    var platformJson = PlatformJson.load(this.root, this.platform);
+    var munger = new PlatformMunger(this.platform, this.root, platformJson, new PluginInfoProvider());
+    this._config = updateConfigFilesFrom(cordovaProject.projectConfig, munger, this.locations);
 
     // CB-10845 avoid using cached appxmanifests since they could be
     // previously modififed outside of AppxManifest class
