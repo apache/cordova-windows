@@ -65,7 +65,7 @@ function readConfig(success, error) {
     xhr.addEventListener("load", xhrStatusChangeHandler);
 
     try {
-        xhr.open("get", "../config.xml", true);
+        xhr.open("get", "/config.xml", true);
         xhr.send();
     } catch (e) {
         fail('[Windows][cordova.js][readConfig] Could not XHR config.xml: ' + JSON.stringify(e));

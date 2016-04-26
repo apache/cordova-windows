@@ -817,7 +817,7 @@ module.exports = channel;
 
 });
 
-// file: f:/coho/splash/cordova-windows/cordova-js-src/confighelper.js
+// file: f:/coho/cordova-windows/cordova-js-src/confighelper.js
 define("cordova/confighelper", function(require, exports, module) {
 
 // config.xml wrapper (non-node ConfigParser analogue)
@@ -866,7 +866,7 @@ function readConfig(success, error) {
     xhr.addEventListener("load", xhrStatusChangeHandler);
 
     try {
-        xhr.open("get", "../config.xml", true);
+        xhr.open("get", "/config.xml", true);
         xhr.send();
     } catch (e) {
         fail('[Windows][cordova.js][readConfig] Could not XHR config.xml: ' + JSON.stringify(e));
@@ -891,7 +891,7 @@ exports.readConfig = readConfig;
 
 });
 
-// file: f:/coho/splash/cordova-windows/cordova-js-src/exec.js
+// file: f:/coho/cordova-windows/cordova-js-src/exec.js
 define("cordova/exec", function(require, exports, module) {
 
 /*jslint sloppy:true, plusplus:true*/
@@ -1468,7 +1468,7 @@ exports.reset();
 
 });
 
-// file: f:/coho/splash/cordova-windows/cordova-js-src/platform.js
+// file: f:/coho/cordova-windows/cordova-js-src/platform.js
 define("cordova/platform", function(require, exports, module) {
 
 module.exports = {
@@ -1781,7 +1781,7 @@ exports.load = function(callback) {
 
 });
 
-// file: f:/coho/splash/cordova-windows/cordova-js-src/splashscreen.js
+// file: f:/coho/cordova-windows/cordova-js-src/splashscreen.js
 define("cordova/splashscreen", function(require, exports, module) {
 
 var isPhone = (cordova.platformId == 'windows') && WinJS.Utilities.isPhone;
