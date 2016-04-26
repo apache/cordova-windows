@@ -31,6 +31,7 @@ var splashElement = null, extendedSplashImage = null, extendedSplashProgress = n
 
 //// <Config and initialization>
 var DEFAULT_SPLASHSCREEN_DURATION = 3000, // in milliseconds
+    DEFAULT_FADE_DURATION = 500, // in milliseconds
     FPS = 60, // frames per second used by requestAnimationFrame
     PROGRESSRING_HEIGHT = 40,
     PROGRESSRING_BOTTOM_MARGIN = 10; // needed for windows 10 min height window
@@ -39,7 +40,7 @@ var bgColor = "#464646",
     autoHideSplashScreen = true,
     splashScreenDelay = DEFAULT_SPLASHSCREEN_DURATION,
     fadeSplashScreen = true,
-    fadeSplashScreenDuration = DEFAULT_SPLASHSCREEN_DURATION,
+    fadeSplashScreenDuration = DEFAULT_FADE_DURATION,
     showSplashScreenSpinner = true,
     splashScreenSpinnerColor; // defaults to system accent color
 
