@@ -1479,7 +1479,8 @@ module.exports = {
             channel = cordova.require('cordova/channel'),
             platform = require('cordova/platform'),
             modulemapper = require('cordova/modulemapper'),
-            configHelper = require('cordova/confighelper');
+            configHelper = require('cordova/confighelper'),
+            utils = require('cordova/utils');
 
         modulemapper.clobbers('cordova/exec/proxy', 'cordova.commandProxy');
 
@@ -1508,9 +1509,9 @@ module.exports = {
             // OR cordova.require('cordova/platform').activationContext
             // activationContext:{type: actType, args: args};
             var activationHandler = function (e) {
-                var args = e.detail.arguments;
-                var actType = e.detail.type;
-                platform.activationContext = { type: actType, args: args };
+                // Making all the details available as activationContext
+                platform.activationContext = utils.clone(e.detail); 
+                platform.activationContext.args = e.detail.arguments;       /* for backwards compatibility */
 
                 function makePromise(fn) {
                     return new WinJS.Promise(function init(completeDispatch, errorDispatch) {
