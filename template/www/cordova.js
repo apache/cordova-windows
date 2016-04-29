@@ -19,7 +19,7 @@
  under the License.
 */
 ;(function() {
-var PLATFORM_VERSION_BUILD_LABEL = '5.0.0';
+var PLATFORM_VERSION_BUILD_LABEL = '4.4.0-dev';
 // file: src/scripts/require.js
 
 /*jshint -W079 */
@@ -915,6 +915,20 @@ var execProxy = require('cordova/exec/proxy');
  * @param {String[]} [args]     Zero or more arguments to pass to the method
  */
 module.exports = function (success, fail, service, action, args) {
+
+    // Handle the case when we have an old version of splashscreen plugin to avoid the API calls failures
+    if (service === 'SplashScreen') {
+        var pluginsVersions = require("cordova/plugin_list").metadata;
+        var splashscreenVersion = pluginsVersions['cordova-plugin-splashscreen'];
+        var MIN_SPLASHSCREEN_SUPPORTED_VER = 4;
+        if (splashscreenVersion && ((parseInt(splashscreenVersion.split('.')[0], 10) || 0) < MIN_SPLASHSCREEN_SUPPORTED_VER)) {
+            console.log('Warning: A more recent version of cordova-plugin-splashscreen has been hooked into for compatibility reasons. Update the plugin to version >= 4.');
+
+            var platformSplashscreen = require('cordova/splashscreen');
+            // Replace old plugin proxy with the platform's one
+            require('cordova/exec/proxy').add(service, platformSplashscreen);
+        }
+    }
 
     var proxy = execProxy.get(service, action),
         callbackId,
