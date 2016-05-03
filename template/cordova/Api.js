@@ -153,8 +153,8 @@ Api.prototype.getPlatformInfo = function () {
  * @return  {Promise}  Return a promise either fulfilled, or rejected with
  *   CordovaError instance.
  */
-Api.prototype.prepare = function (cordovaProject) {
-    return require('./lib/prepare').prepare.call(this, cordovaProject);
+Api.prototype.prepare = function (cordovaProject, prepareOptions) {
+    return require('./lib/prepare').prepare.call(this, cordovaProject, prepareOptions);
 };
 
 /**
@@ -294,7 +294,11 @@ Api.prototype.run = function(runOptions) {
  *   CordovaError.
  */
 Api.prototype.clean = function(cleanOpts) {
-    return require('./lib/build').clean.call(this, cleanOpts);
+    var self = this;
+    return require('./lib/build').clean.call(this, cleanOpts)
+    .then(function () {
+        return require('./lib/prepare').clean.call(self, cleanOpts);
+    });
 };
 
 /**
