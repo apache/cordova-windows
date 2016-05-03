@@ -29,6 +29,7 @@ var MSBuildTools = require('./MSBuildTools');
 var ConfigParser = require('./ConfigParser');
 var events = require('cordova-common').events;
 var xmlHelpers = require('cordova-common').xmlHelpers;
+var FileUpdater = require('cordova-common').FileUpdater;
 var PlatformJson = require('cordova-common').PlatformJson;
 var PlatformMunger = require('cordova-common').ConfigChanges.PlatformMunger;
 var PluginInfoProvider = require('cordova-common').PluginInfoProvider;
@@ -295,35 +296,8 @@ function applyNavigationWhitelist(config, manifest) {
     manifest.getApplication().setAccessRules(whitelistRules);
 }
 
-function copyImages(config, platformRoot) {
-
-    var appRoot = path.dirname(config.path);
-
-    function copyImage(src, dest) {
-        src = path.join(appRoot, src);
-        dest = path.join(platformRoot, 'images', dest);
-        events.emit('verbose', 'Copying image from ' + src + ' to ' + dest);
-        shell.cp('-f', src, dest);
-    }
-
-    function copyMrtImage(src, dest) {
-        // Parse source path into new MRTImage
-        var imageToCopy = new MRTImage(src);
-
-        // then get all matching MRT images in source directory
-        var candidates = fs.readdirSync(imageToCopy.location)
-        .map(function (file) { return new MRTImage(file); })
-        .filter(imageToCopy.matchesTo, imageToCopy);
-
-        candidates.forEach(function(mrtImage) {
-            // copy images with new base name but keeping qualifier
-            copyImage(mrtImage.path, mrtImage.generateFilenameFrom(dest));
-        });
-
-        // Warn user if no images were copied
-        if (candidates.length === 0)
-            events.emit('warn', 'No images found for target: ' + dest);
-    }
+function mapImageResources(images, imagesDir) {
+    var pathMap = {};
 
     // Platform default images
     var platformImages = [
@@ -363,21 +337,73 @@ function copyImages(config, platformRoot) {
         return null;
     }
 
-    var images = config.getIcons('windows').concat(config.getSplashScreens('windows'));
-
     images.forEach(function (img) {
         if (img.target) {
-            copyMrtImage(img.src, img.target);
+            // Parse source path into new MRTImage
+            var imageToCopy = new MRTImage(img.src);
+
+            // then get all matching MRT images in source directory
+            var candidates = fs.readdirSync(imageToCopy.location)
+            .map(function (file) { return new MRTImage(file); })
+            .filter(imageToCopy.matchesTo, imageToCopy);
+
+            // Warn user if no images were copied
+            if (candidates.length === 0) {
+                events.emit('warn', 'No images found for target: ' + img.target);
+            } else {
+                candidates.forEach(function(mrtImage) {
+                    // copy images with new base name but keeping qualifier
+                    var targetPath = path.join(imagesDir, mrtImage.generateFilenameFrom(img.target));
+                    pathMap[targetPath] = mrtImage.path;
+                });
+            }
         } else {
             // find target image by size
-            var targetImg = findPlatformImage (img.width, img.height);
+            var targetImg = findPlatformImage(img.width, img.height);
             if (targetImg) {
-                copyImage(img.src, targetImg.dest);
+                var targetPath = path.join(imagesDir, targetImg.dest);
+                pathMap[targetPath] = img.src;
             } else {
                 events.emit('warn', 'The following image was skipped because it has an unsupported size (' + img.width + 'x' + img.height + '): ' + img.src);
             }
         }
     });
+
+    return pathMap;
+}
+
+function copyImages(cordovaProject, locations) {
+    var images = cordovaProject.projectConfig.getIcons('windows')
+        .concat(cordovaProject.projectConfig.getSplashScreens('windows'));
+
+    if (images.length === 0) {
+        events.emit('verbose', 'This app does not have any icons or splash screens defined');
+        return;
+    }
+
+    var imagesDir = path.join(path.relative(cordovaProject.root, locations.root), 'images');
+    var resourceMap = mapImageResources(images, imagesDir);
+    events.emit('verbose', 'Updating icons and splash screens at ' + imagesDir);
+    FileUpdater.updatePaths(
+        resourceMap, { rootDir: cordovaProject.root }, logFileOp);
+}
+
+function cleanImages(projectRoot, projectConfig, locations) {
+    var images = projectConfig.getIcons('windows')
+        .concat(projectConfig.getSplashScreens('windows'));
+
+    if (images.length > 0) {
+        var imagesDir = path.join(path.relative(projectRoot, locations.root), 'images');
+        var resourceMap = mapImageResources(images, imagesDir);
+        Object.keys(resourceMap).forEach(function (targetImagePath) {
+            resourceMap[targetImagePath] = null;
+        });
+        events.emit('verbose', 'Cleaning icons and splash screens at ' + imagesDir);
+
+        // Source paths are removed from the map, so updatePaths() will delete the target files.
+        FileUpdater.updatePaths(
+            resourceMap, { rootDir: projectRoot, all: true }, logFileOp);
+    }
 }
 
 function applyUAPVersionToProject(projectFilePath, uapVersionInfo) {
@@ -412,7 +438,7 @@ function getUAPVersions(config) {
     };
 }
 
-module.exports.prepare = function (cordovaProject) {
+module.exports.prepare = function (cordovaProject, options) {
     var self = this;
 
     var platformJson = PlatformJson.load(this.root, this.platform);
@@ -425,16 +451,36 @@ module.exports.prepare = function (cordovaProject) {
     AppxManifest.purgeCache();
 
     // Update own www dir with project's www assets and plugins' assets and js-files
-    return Q.when(updateWwwFrom(cordovaProject, this.locations))
+    return Q.when(updateWww(cordovaProject, this.locations))
     .then(function () {
         // update project according to config.xml changes.
         return updateProjectAccordingTo(self._config, self.locations);
     })
     .then(function () {
-        copyImages(cordovaProject.projectConfig, self.root);
+        copyImages(cordovaProject, self.locations);
     })
     .then(function () {
         events.emit('verbose', 'Prepared windows project successfully');
+    });
+};
+
+module.exports.clean = function (options) {
+    // A cordovaProject isn't passed into the clean() function, because it might have
+    // been called from the platform shell script rather than the CLI. Check for the
+    // noPrepare option passed in by the non-CLI clean script. If that's present, or if
+    // there's no config.xml found at the project root, then don't clean prepared files.
+    var projectRoot = path.resolve(this.root, '../..');
+    var projectConfigFile = path.join(projectRoot, 'config.xml');
+    if ((options && options.noPrepare) || !fs.existsSync(projectConfigFile)) {
+        return Q();
+    }
+
+    var projectConfig = new ConfigParser(projectConfigFile);
+
+    var self = this;
+    return Q().then(function () {
+        cleanWww(projectRoot, self.locations);
+        cleanImages(projectRoot, projectConfig);
     });
 };
 
@@ -513,6 +559,13 @@ function updateConfigFilesFrom(sourceConfig, configMunger, locations) {
 }
 
 /**
+ * Logs all file operations via the verbose event stream, indented.
+ */
+function logFileOp(message) {
+    events.emit('verbose', '  ' + message);
+}
+
+/**
  * Updates platform 'www' directory by replacing it with contents of
  *   'platform_www' and app www. Also copies project's overrides' folder into
  *   the platform 'www' folder
@@ -521,26 +574,36 @@ function updateConfigFilesFrom(sourceConfig, configMunger, locations) {
  * @param   {Object}  destinations      An object that contains destination
  *   paths for www files.
  */
-function updateWwwFrom(cordovaProject, destinations) {
-
-    shell.rm('-rf', destinations.www);
-    shell.mkdir('-p', destinations.www);
-    // Copy source files from project's www directory
-    shell.cp('-rf', path.join(cordovaProject.locations.www, '*'), destinations.www);
-    // Override www sources by files in 'platform_www' directory
-    shell.cp('-rf', path.join(destinations.platformWww, '*'), destinations.www);
+function updateWww(cordovaProject, destinations) {
+    var sourceDirs = [
+        path.relative(cordovaProject.root, cordovaProject.locations.www),
+        path.relative(cordovaProject.root, destinations.platformWww)
+    ];
 
     // If project contains 'merges' for our platform, use them as another overrides
-    var platform  = 'windows';
-    var mergesPath = path.join(cordovaProject.root, 'merges', platform);
-    // if no 'merges' directory found, no further actions needed
-    if (!fs.existsSync(mergesPath)) {
-        return;
+    var merges_path = path.join(cordovaProject.root, 'merges', 'windows');
+    if (fs.existsSync(merges_path)) {
+        events.emit('verbose', 'Found "merges/windows" folder. Copying its contents into the windows project.');
+        sourceDirs.push(path.join('merges', 'windows'));
     }
 
-    events.emit('verbose', 'Found "merges/windows" folder. Copying its contents into the windows project.');
-    var overrides = path.join(mergesPath, '*');
-    shell.cp('-rf', overrides, destinations.www);
+    var targetDir = path.relative(cordovaProject.root, destinations.www);
+    events.emit(
+        'verbose', 'Merging and updating files from [' + sourceDirs.join(', ') + '] to ' + targetDir);
+    FileUpdater.mergeAndUpdateDir(
+        sourceDirs, targetDir, { rootDir: cordovaProject.root }, logFileOp);
+}
+
+/**
+ * Cleans all files from the platform 'www' directory.
+ */
+function cleanWww(projectRoot, locations) {
+    var targetDir = path.relative(projectRoot, locations.www);
+    events.emit('verbose', 'Cleaning ' + targetDir);
+
+    // No source paths are specified, so mergeAndUpdateDir() will clear the target directory.
+    FileUpdater.mergeAndUpdateDir(
+        [], targetDir, { rootDir: projectRoot, all: true }, logFileOp);
 }
 
 /**

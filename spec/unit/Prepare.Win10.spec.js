@@ -17,9 +17,6 @@
     under the License.
 */
 
-var path = require('path');
-var shell = require('shelljs');
-
 var rewire  = require('rewire'),
     prepare = rewire('../../template/cordova/lib/prepare'),
     AppxManifest = require('../../template/cordova/lib/AppxManifest'),
@@ -28,6 +25,7 @@ var rewire  = require('rewire'),
     et      = require('elementtree'),
     events  = require('cordova-common').events,
     xml     = require('cordova-common').xmlHelpers,
+    FileUpdater = require('cordova-common').FileUpdater,
     updateManifestFile              = prepare.__get__('updateManifestFile'),
     applyCoreProperties             = prepare.__get__('applyCoreProperties'),
     applyAccessRules                = prepare.__get__('applyAccessRules'),
@@ -458,6 +456,7 @@ describe('Package description', function () {
 
 describe('copyIcons method', function () {
     var copyImages = prepare.__get__('copyImages');
+    var logFileOp = prepare.__get__('logFileOp');
 
     var PROJECT = '/some/path';
 
@@ -470,7 +469,7 @@ describe('copyIcons method', function () {
     }
 
     beforeEach(function () {
-        spyOn(shell, 'cp');
+        spyOn(FileUpdater, 'updatePaths');
     });
 
     it('should guess target filename based on icon size', function () {
@@ -479,23 +478,28 @@ describe('copyIcons method', function () {
             {src: 'res/Windows/Square44x44Logo_240.png', width: '106', height: '106' }
         ];
 
-        var config = createMockConfig(images);
+        var project = { projectConfig: createMockConfig(images), root: PROJECT };
+        var locations = { root: PROJECT };
 
-        copyImages(config, PROJECT);
+        copyImages(project, locations);
 
-        expect(shell.cp).toHaveBeenCalledWith('-f', path.normalize('res/Windows/Square44x44Logo_100.png'), path.join(PROJECT, 'images/Square44x44Logo.scale-100.png'));
-        expect(shell.cp).toHaveBeenCalledWith('-f', path.normalize('res/Windows/Square44x44Logo_240.png'), path.join(PROJECT, 'images/Square44x44Logo.scale-240.png'));
+        expect(FileUpdater.updatePaths).toHaveBeenCalledWith({
+                'images\\Square44x44Logo.scale-100.png': 'res/Windows/Square44x44Logo_100.png',
+                'images\\Square44x44Logo.scale-240.png': 'res/Windows/Square44x44Logo_240.png',
+            }, { rootDir: PROJECT }, logFileOp);
     });
 
     it('should ignore unknown icon sizes and emit a warning', function () {
         var config = createMockConfig([
             {src: 'res/Windows/UnknownImage.png', width: '999', height: '999' },
         ]);
+        var project = { projectConfig: config, root: PROJECT };
+        var locations = { root: PROJECT };
 
         var warnSpy = jasmine.createSpy('warn');
         events.on('warn', warnSpy);
-        copyImages(config, PROJECT);
-        expect(shell.cp).not.toHaveBeenCalled();
+        copyImages(project, locations);
+        expect(FileUpdater.updatePaths).toHaveBeenCalledWith({}, { rootDir: PROJECT }, logFileOp);
         expect(warnSpy.calls[0].args[0]).toMatch('image was skipped');
     });
 
@@ -517,17 +521,21 @@ describe('copyIcons method', function () {
             spyOn(fs, 'readdirSync').andReturn(matchingFiles.concat(nonMatchingFiles));
 
             var images = [{src: 'res/Windows/Square44x44.png', target: 'SmallIcon' }];
-            var config = createMockConfig(images);
+            var project = { projectConfig: createMockConfig(images), root: PROJECT };
+            var locations = { root: PROJECT };
 
-            copyImages(config, PROJECT);
+            copyImages(project, locations);
 
-            expect(shell.cp.calls.length).toBe(5);
-            matchingFiles.forEach(function (filename) {
-                expect(shell.cp).toHaveBeenCalledWith('-f', path.normalize(filename), jasmine.any(String));
-            });
-            shell.cp.calls.forEach(function (call) {
-                expect(path.basename(call.args[2])).toMatch(/^SmallIcon.*\.png$/);
-            });
+        expect(FileUpdater.updatePaths).toHaveBeenCalledWith({
+                'images\\SmallIcon.scale-100.png' : 'res/Windows/Square44x44.scale-100.png',
+                'images\\SmallIcon.targetsize-16.png' : 'res/Windows/Square44x44.targetsize-16.png',
+                'images\\SmallIcon.scale-150_targetsize-16.png' :
+                    'res/Windows/Square44x44.scale-150_targetsize-16.png',
+                'images\\SmallIcon.targetsize-16_scale-200.png' :
+                    'res/Windows/Square44x44.targetsize-16_scale-200.png',
+                'images\\SmallIcon.targetsize-16_altform-unplated_scale-200.png' :
+                    'res/Windows/Square44x44.targetsize-16_altform-unplated_scale-200.png',
+            }, { rootDir: PROJECT }, logFileOp);
         });
     });
 });
