@@ -349,11 +349,11 @@ function mapImageResources(images, imagesDir) {
 
             // Warn user if no images were copied
             if (candidates.length === 0) {
-                events.emit('warn', 'No images found for target: ' + img.dest);
+                events.emit('warn', 'No images found for target: ' + img.target);
             } else {
                 candidates.forEach(function(mrtImage) {
                     // copy images with new base name but keeping qualifier
-                    var targetPath = path.join(imagesDir, mrtImage.generateFilenameFrom(img.dest));
+                    var targetPath = path.join(imagesDir, mrtImage.generateFilenameFrom(img.target));
                     pathMap[targetPath] = mrtImage.path;
                 });
             }
