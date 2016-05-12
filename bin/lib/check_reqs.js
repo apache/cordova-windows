@@ -308,7 +308,7 @@ var checkWinSdk = function (windowsTargetVersion, windowsPhoneTargetVersion) {
             return installedSdk.eq(requiredVersion);
         });
         if (!hasSdkInstalled) {
-            return Q.reject('Windows SDK not found. Please ensure that you have installed ' +
+            return Q.reject('Windows SDK not found. Ensure that you have installed ' +
                 'Windows ' + shortenVersion(requiredVersion) + ' SDK along with Visual Studio or install ' +
                 'Windows ' + shortenVersion(requiredVersion) + ' SDK separately from ' +
                 'https://dev.windows.com/en-us/downloads');
@@ -331,7 +331,7 @@ var checkPhoneSdk = function (windowsTargetVersion, windowsPhoneTargetVersion) {
             Q.reject();
     })
     .fail(function () {
-        return Q.reject('Windows Phone SDK not found. Please ensure that you have installed ' +
+        return Q.reject('Windows Phone SDK not found. Ensure that you have installed ' +
             'Windows Phone ' + shortenVersion(requiredVersion) + ' SDK along with Visual Studio or install ' +
             'Windows Phone ' + shortenVersion(requiredVersion) + ' SDK separately from ' +
             'https://dev.windows.com/develop/download-phone-sdk');

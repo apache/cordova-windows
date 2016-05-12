@@ -25,6 +25,7 @@ var uuid  = require('node-uuid');
 var events = require('cordova-common').events;
 var CordovaError = require('cordova-common').CordovaError;
 var AppxManifest = require('../../template/cordova/lib/AppxManifest');
+var pkg = require('../../package');
 
 // Creates cordova-windows project at specified path with specified namespace, app name and GUID
 module.exports.create = function (destinationDir, config, options) {
@@ -46,15 +47,15 @@ module.exports.create = function (destinationDir, config, options) {
     var root = path.join(__dirname, '..', '..');
 
     events.emit('log', 'Creating Cordova Windows Project:');
-    events.emit('log', '\tApp Name  : ' + appName);
-    events.emit('log', '\tNamespace : ' + packageName);
-    events.emit('log', '\tPath      : ' + projectPath);
+    events.emit('log', '\tPath: ' + path.relative(process.cwd(), projectPath));
+    events.emit('log', '\tNamespace: ' + packageName);
+    events.emit('log', '\tName: ' + appName);
     if (templateOverrides) {
-        events.emit('log', '\tCustomTemplatePath : ' + templateOverrides);
+        events.emit('log', '\tCustomTemplatePath: ' + templateOverrides);
     }
 
     // Copy the template source files to the new destination
-    events.emit('verbose', 'Copying template to ' + projectPath);
+    events.emit('verbose', 'Copying windows template project to ' + projectPath);
     shell.cp('-rf', path.join(root, 'template', '*'), projectPath);
 
     // Duplicate cordova.js to platform_www otherwise it will get removed by prepare
@@ -80,7 +81,7 @@ module.exports.create = function (destinationDir, config, options) {
     shell.cp('-rf', path.join(root, 'bin', 'lib', 'check_reqs*'), path.join(projectPath, 'cordova', 'lib'));
 
     if (templateOverrides && fs.existsSync(templateOverrides)) {
-        events.emit('verbose', 'Copying template overrides from ' + templateOverrides + ' to ' + projectPath);
+        events.emit('verbose', 'Copying windows template overrides from ' + templateOverrides + ' to ' + projectPath);
         shell.cp('-rf', templateOverrides, projectPath);
     }
 
@@ -111,6 +112,7 @@ module.exports.create = function (destinationDir, config, options) {
         shell.rm('-rf', path.join(projectPath, file));
     });
 
+    events.emit('log', 'Windows project created with ' + pkg.name + '@' + pkg.version);
     return Q.resolve();
 };
 

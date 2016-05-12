@@ -132,7 +132,7 @@ WindowsConfigParser.prototype.getAllMinMaxUAPVersions = function () {
 
         var versionTest = Version.tryParse(verPref.value);
         if (!versionTest) {
-            throw new RangeError('Could not comprehend a valid version from the string "' + verPref.value + '" of platform-boundary "' + verPref.name + '".');
+            throw new RangeError('Could not parse a valid version from the string "' + verPref.value + '" of platform-boundary "' + verPref.name + '".');
         }
 
         platformVersionSet[versionPropertyName] = versionTest;

@@ -91,7 +91,7 @@ module.exports.getBuildTargets  = function(isWinSwitch, isPhoneSwitch, projOverr
             case 'uap':
                 return [projFiles.win10];
             default:
-                events.emit('warn', 'Unrecognized --appx parameter passed to build: "' + projOverride + '", ignoring.');
+                events.emit('warn', 'Ignoring unrecognized --appx parameter passed to build: "' + projOverride + '"');
                 break;
         }
     }
@@ -106,7 +106,7 @@ module.exports.getBuildTargets  = function(isWinSwitch, isPhoneSwitch, projOverr
         switch(windowsTargetVersion.toLowerCase()) {
             case '8':
             case '8.0':
-                throw new CordovaError('windows8 platform is deprecated. To use windows-target-version=8.0 you may downgrade to cordova-windows@4.');
+                throw new CordovaError('windows8 platform is deprecated. To use windows-target-version=8.0 you must downgrade to cordova-windows@4.');
             case '8.1':
                 targets.push(projFiles.win);
                 break;
@@ -171,11 +171,11 @@ function parseAndValidateArgs(options) {
 
     // Validate args
     if (options.debug && options.release) {
-        throw new CordovaError('Only one of "debug"/"release" options should be specified');
+        throw new CordovaError('Cannot specify "debug" and "release" options together.');
     }
 
     if (args.phone && args.win) {
-        throw new CordovaError('Only one of "phone"/"win" options should be specified');
+        throw new CordovaError('Cannot specify "phone" and "win" options together.');
     }
 
     // get build options/defaults
@@ -404,7 +404,7 @@ function getBuildTargets(buildConfig) {
         switch(windowsTargetVersion) {
             case '8':
             case '8.0':
-                throw new CordovaError('windows8 platform is deprecated. To use windows-target-version=8.0 you may downgrade to cordova-windows@4.');
+                throw new CordovaError('windows8 platform is deprecated. To use windows-target-version=8.0 you must downgrade to cordova-windows@4.');
             case '8.1':
                 targets.push(projFiles.win);
                 break;
@@ -451,7 +451,7 @@ function getBuildTargets(buildConfig) {
                 targets = [projFiles.win10];
                 break;
             default:
-                events.emit('warn', 'Unrecognized --appx parameter passed to build: "' + buildConfig.projVerOverride + '", ignoring.');
+                events.emit('warn', 'Ignoring unrecognized --appx parameter passed to build: "' + buildConfig.projVerOverride + '"');
                 break;
         }
     }
@@ -504,7 +504,7 @@ function msBuild15TargetsFilter(target) {
 
 function filterSupportedTargets (targets, msbuild) {
     if (!targets || targets.length === 0) {
-        events.emit('warn', 'No build targets are specified.');
+        events.emit('warn', 'No build targets specified');
         return [];
     }
 
@@ -516,7 +516,7 @@ function filterSupportedTargets (targets, msbuild) {
 
     var filter = targetFilters[msbuild.version];
     if (!filter) {
-        events.emit('warn', 'Unsupported msbuild version "' + msbuild.version + '", aborting.');
+        events.emit('warn', 'MSBuild v' + msbuild.version + ' is not supported, aborting.');
         return [];
     }
 

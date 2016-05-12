@@ -99,7 +99,7 @@ module.exports.run = function(args) {
             console.warn('Unable to read app name from config, showing logs for all applications.');
         }
     }).then(function () {
-        console.log('Now printing logs. To stop, please press Ctrl+C once.');
+        console.log('Now printing logs. To stop, press Ctrl+C once.');
         startLogging(ADMIN_LOG);
         startLogging(APP_TRACING_LOG);
     }).catch(function (error) {
@@ -147,7 +147,7 @@ function exitGracefully(exitCode) {
         clearInterval(timer);
     });
     // give async call some time to execute
-    console.log('Exiting in 2 seconds. Please don\'t interrupt the process.');
+    console.log('Exiting in 2 seconds. Do not interrupt the process!');
     setTimeout(function() {
         process.exit(exitCode);
     }, 2000);
