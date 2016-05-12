@@ -171,11 +171,11 @@ function parseAndValidateArgs(options) {
 
     // Validate args
     if (options.debug && options.release) {
-        throw new CordovaError('Cannot specify "debug" and "release" options together. Please only use one');
+        throw new CordovaError('Cannot specify "debug" and "release" options together.');
     }
 
     if (args.phone && args.win) {
-        throw new CordovaError('Cannot specify "phone" and "win" options together. Please only use one');
+        throw new CordovaError('Cannot specify "phone" and "win" options together.');
     }
 
     // get build options/defaults

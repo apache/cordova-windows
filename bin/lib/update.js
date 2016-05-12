@@ -31,8 +31,7 @@ var AppxManifest = require('../../template/cordova/lib/AppxManifest');
 module.exports.update = function (destinationDir, options) {
     if (!fs.existsSync(destinationDir)){
         // if specified project path is not valid then reject promise
-        return Q.reject(new CordovaError('The given path to the project does not exist.' +
-            ' Please provide a path to the project you\'d like to update.'));
+        return Q.reject(new CordovaError('The given path to the project does not exist: ' + destinationDir));
     }
 
     var projectConfig = path.join(destinationDir, 'config.xml');
