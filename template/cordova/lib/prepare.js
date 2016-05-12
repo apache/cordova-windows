@@ -275,7 +275,7 @@ function applyNavigationWhitelist(config, manifest) {
     .filter(function(rule) {
         if (UriSchemeTest.test(rule.href)) return true;
 
-        events.emit('warn', 'The following navigation rule had an invalid URI scheme and is ignored: "' + rule.href + '".');
+        events.emit('warn', 'The following navigation rule had an invalid URI scheme and will be ignored: "' + rule.href + '".');
         return false;
     })
     .map(function (rule) {
@@ -374,7 +374,7 @@ function copyImages(config, platformRoot) {
             if (targetImg) {
                 copyImage(img.src, targetImg.dest);
             } else {
-                events.emit('warn', 'The following image is skipped due to unsupported size: ' + img.src);
+                events.emit('warn', 'The following image was skipped because it has an unsupported size (' + img.width + 'x' + img.height + '): ' + img.src);
             }
         }
     });
@@ -434,7 +434,7 @@ module.exports.prepare = function (cordovaProject) {
         copyImages(cordovaProject.projectConfig, self.root);
     })
     .then(function () {
-        events.emit('verbose', 'Updated project successfully');
+        events.emit('verbose', 'Prepared windows project successfully');
     });
 };
 
@@ -490,7 +490,7 @@ function updateConfigFilesFrom(sourceConfig, configMunger, locations) {
     // Otherwise save whatever is there as defaults so it can be
     // restored or copy project config into platform if none exists.
     if (fs.existsSync(defaultConfig)) {
-        events.emit('verbose', 'Generating config.xml from defaults for platform "windows"');
+        events.emit('verbose', 'Generating platform-specific config.xml from defaults for windows at ' + ownConfig);
         shell.cp('-f', defaultConfig, ownConfig);
     } else if (fs.existsSync(ownConfig)) {
         shell.cp('-f', ownConfig, defaultConfig);
@@ -502,6 +502,7 @@ function updateConfigFilesFrom(sourceConfig, configMunger, locations) {
     // in project (including project's config)
     configMunger.reapply_global_munge().save_all();
 
+    events.emit('verbose', 'Merging project\'s config.xml into platform-specific windows config.xml');
     // Merge changes from app's config.xml into platform's one
     var config = new ConfigParser(ownConfig);
     xmlHelpers.mergeXml(sourceConfig.doc.getroot(),
@@ -537,7 +538,7 @@ function updateWwwFrom(cordovaProject, destinations) {
         return;
     }
 
-    events.emit('verbose', 'Found "merges" for ' + platform + ' platform. Copying over existing "www" files.');
+    events.emit('verbose', 'Found "merges/windows" folder. Copying its contents into the windows project.');
     var overrides = path.join(mergesPath, '*');
     shell.cp('-rf', overrides, destinations.www);
 }

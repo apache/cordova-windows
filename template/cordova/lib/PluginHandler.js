@@ -117,10 +117,10 @@ var handlers = {
     asset:{
         install:function(obj, plugin, project, options) {
             if (!obj.src) {
-                throw new CordovaError('<asset> tag without required "src" attribute. plugin=' + plugin.dir);
+                throw new CordovaError(generateAttributeError('src', 'asset', plugin.id));
             }
             if (!obj.target) {
-                throw new CordovaError('<asset> tag without required "target" attribute');
+                throw new CordovaError(generateAttributeError('target', 'asset', plugin.id));
             }
 
             copyFile(plugin.dir, obj.src, project.www, obj.target);
@@ -129,7 +129,7 @@ var handlers = {
         uninstall:function(obj, plugin, project, options) {
             var target = obj.target || obj.src;
 
-            if (!target) throw new CordovaError('<asset> tag without required "target" attribute');
+            if (!target) throw new CordovaError(generateAttributeError('target', 'asset', plugin.id));
 
             removeFile(project.www, target);
             removeFile(project.www, path.join('plugins', plugin.id));
@@ -253,4 +253,8 @@ function removeFileAndParents (baseDir, destFile, stopper) {
             break;
         }
     }
+}
+
+function generateAttributeError(attribute, element, id) {
+    return 'Required attribute "' + attribute + '" not specified in <' + element + '> element from plugin: ' + id;
 }

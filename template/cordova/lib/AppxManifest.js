@@ -134,14 +134,14 @@ AppxManifest.purgeCache = function (cacheKeys) {
 AppxManifest.prototype.getPhoneIdentity = function () {
     var phoneIdentity = this.doc.getroot().find('./mp:PhoneIdentity');
     if (!phoneIdentity)
-        throw new Error('Failed to find PhoneIdentity element.');
+        throw new Error('Failed to find PhoneIdentity element in appxmanifest at ' + this.path);
 
     return {
         getPhoneProductId: function () {
             return phoneIdentity.attrib.PhoneProductId;
         },
         setPhoneProductId: function (id) {
-            if (!id) throw new Error('Argument for "setPhoneProductId" must be defined');
+            if (!id) throw new Error('Argument for "setPhoneProductId" must be defined in appxmanifest at ' + this.path);
             phoneIdentity.attrib.PhoneProductId = id;
             return this;
         }
@@ -158,7 +158,7 @@ AppxManifest.prototype.getIdentity = function () {
             return identity.attrib.Name;
         },
         setName: function (name) {
-            if (!name) throw new TypeError('Identity.Name attribute must be non-empty');
+            if (!name) throw new TypeError('Identity.Name attribute must be non-empty in appxmanifest at ' + this.path);
             identity.attrib.Name = name;
             return this;
         },
@@ -166,7 +166,7 @@ AppxManifest.prototype.getIdentity = function () {
             return identity.attrib.Publisher;
         },
         setPublisher: function (publisherId) {
-            if (!publisherId) throw new TypeError('Identity.Publisher attribute must be non-empty');
+            if (!publisherId) throw new TypeError('Identity.Publisher attribute must be non-empty in appxmanifest at ' + this.path);
             identity.attrib.Publisher = publisherId;
             return this;
         },
@@ -174,7 +174,7 @@ AppxManifest.prototype.getIdentity = function () {
             return identity.attrib.Version;
         },
         setVersion: function (version) {
-            if (!version) throw new TypeError('Identity.Version attribute must be non-empty');
+            if (!version) throw new TypeError('Identity.Version attribute must be non-empty in appxmanifest at ' + this.path );
 
             // Adjust version number as per CB-5337 Windows8 build fails due to invalid app version
             if(version && version.match(/\.\d/g)) {
@@ -202,7 +202,7 @@ AppxManifest.prototype.getProperties = function () {
             return displayName && displayName.text;
         },
         setDisplayName: function (name) {
-            if (!name) throw new TypeError('Properties.DisplayName elements must be non-empty');
+            if (!name) throw new TypeError('Properties.DisplayName elements must be non-empty in appxmanifest at ' + this.path);
             var displayName = properties.find('./DisplayName');
 
             if (!displayName) {
@@ -219,7 +219,7 @@ AppxManifest.prototype.getProperties = function () {
             return publisher && publisher.text;
         },
         setPublisherDisplayName: function (name) {
-            if (!name) throw new TypeError('Properties.PublisherDisplayName elements must be non-empty');
+            if (!name) throw new TypeError('Properties.PublisherDisplayName elements must be non-empty in appxmanifest at ' + this.path);
             var publisher = properties.find('./PublisherDisplayName');
 
             if (!publisher) {
@@ -259,7 +259,7 @@ AppxManifest.prototype.getProperties = function () {
 AppxManifest.prototype.getApplication = function () {
     var application = this.doc.getroot().find('./Applications/Application');
     if (!application)
-        throw new Error('Failed to find "Application" element. The appxmanifest is invalid');
+        throw new Error('Failed to find "Application" element. The appxmanifest at ' + this.path + ' is invalid');
 
     var self = this;
 
@@ -272,7 +272,7 @@ AppxManifest.prototype.getApplication = function () {
             return application.attrib.Id;
         },
         setId: function (id) {
-            if (!id) throw new TypeError('Application.Id attribute must be defined');
+            if (!id) throw new TypeError('Application.Id attribute must be defined in appxmanifest at ' + this.path);
             // 64 symbols restriction goes from manifest schema definition
             // http://msdn.microsoft.com/en-us/library/windows/apps/br211415.aspx
             var appId = id.length <= 64 ? id : id.substr(0, 64);
@@ -323,7 +323,7 @@ AppxManifest.prototype.getVisualElements = function () {
         this.prefix  + 'VisualElements');
 
     if (!visualElements)
-        throw new Error('Failed to find "VisualElements" node. The appxmanifest is invalid');
+        throw new Error('Failed to find "VisualElements" node. The appxmanifest at ' + this.path + ' is invalid');
 
     return {
         _node: visualElements,
@@ -331,7 +331,7 @@ AppxManifest.prototype.getVisualElements = function () {
             return visualElements.attrib.DisplayName;
         },
         setDisplayName: function (name) {
-            if (!name) throw new TypeError('VisualElements.DisplayName attribute must be defined');
+            if (!name) throw new TypeError('VisualElements.DisplayName attribute must be defined in appxmanifest at ' + this.path);
             visualElements.attrib.DisplayName = name;
             return this;
         },
@@ -375,7 +375,7 @@ AppxManifest.prototype.getVisualElements = function () {
         },
         setBackgroundColor: function (color) {
             if (!color)
-                throw new TypeError('VisualElements.BackgroundColor attribute must be defined');
+                throw new TypeError('VisualElements.BackgroundColor attribute must be defined in appxmanifest at ' + this.path);
 
             visualElements.attrib.BackgroundColor = refineColor(color);
             return this;
@@ -415,7 +415,7 @@ AppxManifest.prototype.getVisualElements = function () {
         },
         setDescription: function (description) {
             if (!description || description.length === 0)
-                throw new TypeError('VisualElements.Description attribute must be defined and non-empty');
+                throw new TypeError('VisualElements.Description attribute must be defined and non-empty in appxmanifest at ' + this.path);
 
             visualElements.attrib.Description = processDescription(description);
             return this;
@@ -578,7 +578,7 @@ Win10AppxManifest.prototype.getVisualElements = function () {
                 return defaultTitle.attrib.ShortName;
             },
             setShortName: function (name) {
-                if (!name) throw new TypeError('Argument for "setDisplayName" must be defined');
+                if (!name) throw new TypeError('Argument for "setDisplayName" must be defined in appxmanifest at ' + this.path);
                 defaultTitle.attrib.ShortName = name;
                 return this;
             }

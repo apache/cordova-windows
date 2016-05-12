@@ -496,7 +496,7 @@ describe('copyIcons method', function () {
         events.on('warn', warnSpy);
         copyImages(config, PROJECT);
         expect(shell.cp).not.toHaveBeenCalled();
-        expect(warnSpy.calls[0].args[0]).toMatch('image is skipped');
+        expect(warnSpy.calls[0].args[0]).toMatch('image was skipped');
     });
 
     describe('when "target" attribute is specified for the image', function () {

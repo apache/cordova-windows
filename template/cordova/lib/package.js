@@ -164,7 +164,7 @@ module.exports.listDevices = function (deploymentTool) {
         });
 
     }, function(e) {
-        events.emit('error', new Error('Failed to enumerate devices: ' + e));
+        events.emit('error', new Error('Failed to list devices: ' + e));
     });
 };
 

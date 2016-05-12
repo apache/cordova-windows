@@ -65,7 +65,7 @@ jsprojManager.getProject = function (directory) {
     var projectFiles = shell.ls(path.join(directory, '*.projitems'));
     if (projectFiles.length === 0) {
         throw (new CordovaError('The directory ' + directory +
-            ' does not appear to be a Unified Windows Store project (no .projitems file)'));
+            ' does not appear to be a Unified Windows Store project (no .projitems file found)'));
     }
     return new jsprojManager(path.normalize(projectFiles[0]));
 };
@@ -193,7 +193,7 @@ jsprojManager.prototype = {
         // get the project type
         var projectTypeGuid = getProjectTypeGuid(relative_path);
         if (!projectTypeGuid) {
-            throw new CordovaError("unrecognized project type");
+            throw new CordovaError("Unrecognized project type at " + relative_path + " (not .csproj or .vcxproj)");
         }
 
         var preInsertText = "\tProjectSection(ProjectDependencies) = postProject\r\n" +
@@ -225,7 +225,7 @@ jsprojManager.prototype = {
                 });
 
                 if (!jsProjectFound) {
-                    throw new CordovaError("no jsproj found in solution");
+                    throw new CordovaError("No jsproj found in solution");
                 }
             } else {
                 // Insert a project dependency only for projects that match specified target and version
@@ -240,7 +240,7 @@ jsprojManager.prototype = {
             // EndProject in the file should actually be an EndProject (and not an EndProjectSection, for example).
             var pos = solText.lastIndexOf("EndProject");
             if (pos === -1) {
-                throw new Error("no EndProject found in solution");
+                throw new Error("No EndProject found in solution");
             }
             pos += 10; // Move pos to the end of EndProject text
             solText = solText.slice(0, pos) + postInsertText + solText.slice(pos);
@@ -272,7 +272,7 @@ jsprojManager.prototype = {
         // get the project type
         var projectTypeGuid = getProjectTypeGuid(relative_path);
         if (!projectTypeGuid) {
-            throw new Error("unrecognized project type");
+            throw new Error("Unrecognized project type at " + relative_path + " (not .csproj or .vcxproj)");
         }
 
         var preInsertTextRegExp = getProjectReferencePreInsertRegExp(projectGuid);
