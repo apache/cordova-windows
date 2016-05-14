@@ -21,7 +21,10 @@ var Q = require('q');
 var path = require('path');
 var rewire = require('rewire');
 var binPath = '../../bin';
-
+var et = require('elementtree');
+var xml = require('cordova-common').xmlHelpers;
+var TEST_XML = '<?xml version="1.0" encoding="UTF-8"?><widget/>';
+var ConfigParser = require('../../template/cordova/lib/ConfigParser');
 var check_reqs = rewire(path.join(binPath, 'lib/check_reqs.js'));
 
 describe('check_reqs module', function () {
@@ -53,14 +56,15 @@ describe('check_reqs module', function () {
         // var consoleLogOriginal;
 
         var Requirement,
-            originalrequirements, originalcheckFns,
-            fakeRequirements, fakeCheckFns,
+            originalrequirements, originalcheckFns, originalconfig,
+            fakeRequirements, fakeCheckFns, fakeConfig,
             checkSpy;
 
         beforeEach(function () {
             Requirement = check_reqs.__get__('Requirement');
             originalrequirements = check_reqs.__get__('requirements');
             originalcheckFns = check_reqs.__get__('checkFns');
+            originalconfig = check_reqs.__get__('config');
 
             fakeRequirements = [
                 new Requirement('1', 'First requirement'),
@@ -75,17 +79,20 @@ describe('check_reqs module', function () {
                 checkSpy.andReturn(Q('2.0')),
                 checkSpy.andReturn(Q('3.0'))
             ];
+            spyOn(xml, 'parseElementtreeSync').andReturn(new et.ElementTree(et.XML(TEST_XML)));
+            fakeConfig = new ConfigParser('/some/file');
         });
 
         afterEach(function() {
             check_reqs.__set__('requirements', originalrequirements);
             check_reqs.__set__('checkFns', originalcheckFns);
+            check_reqs.__set__('config', originalconfig);
         });
 
         it('that should return a promise, fulfilled with an array of Requirements', function (done) {
             check_reqs.__set__('requirements', fakeRequirements);
             check_reqs.__set__('checkFns', fakeCheckFns);
-
+            check_reqs.__set__('config', fakeConfig);
             var checkResult = check_reqs.check_all();
             expect(Q.isPromise(checkResult)).toBeTruthy();
             checkResult.then(function (result) {
@@ -103,6 +110,7 @@ describe('check_reqs module', function () {
             check_reqs.__set__('requirements', fakeRequirements);
             fakeCheckFns[0] = function () { return Q.reject('Error message'); };
             check_reqs.__set__('checkFns', fakeCheckFns);
+            check_reqs.__set__('config', fakeConfig);
 
             check_reqs.check_all()
             .then(function (requirements) {
@@ -120,6 +128,7 @@ describe('check_reqs module', function () {
             check_reqs.__set__('requirements', fakeRequirements);
             fakeCheckFns[0] = checkSpy.andThrow('Fatal error');
             check_reqs.__set__('checkFns', fakeCheckFns);
+            check_reqs.__set__('config', fakeConfig);
 
             check_reqs.check_all()
             .then(function (requirements) {
@@ -137,6 +146,7 @@ describe('check_reqs module', function () {
             // The second requirement is fatal, so we're setting up second check to fail
             fakeCheckFns[1] = checkSpy.andReturn(Q.reject('Error message'));
             check_reqs.__set__('checkFns', fakeCheckFns);
+            check_reqs.__set__('config', fakeConfig);
 
             check_reqs.check_all()
             .then(function (requirements) {
