@@ -33,6 +33,14 @@ MSBuildTools.prototype.buildProject = function(projFile, buildType, buildarch, o
     events.emit('log', 'Building project: ' + projFile);
     events.emit('log', '\tConfiguration : ' + buildType);
     events.emit('log', '\tPlatform      : ' + buildarch);
+    
+    var checkWinSDK = function (target_platform) {
+        return require('./check_reqs').isWinSDKPresent(target_platform);
+    };
+
+    var checkPhoneSDK = function () {
+        return require('./check_reqs').isPhoneSDKPresent();
+    };
 
     var args = ['/clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal', '/nologo',
     '/p:Configuration=' + buildType,
@@ -45,7 +53,23 @@ MSBuildTools.prototype.buildProject = function(projFile, buildType, buildarch, o
         });
     }
 
-    return spawn(path.join(this.path, 'msbuild'), [projFile].concat(args), { stdio: 'inherit' });
+    var that = this;
+    var promise;
+
+    // Check if SDK required to build the respective platform is present. If not present, return with corresponding error, else call msbuild.
+    if (projFile.indexOf('CordovaApp.Phone.jsproj') > -1) {
+        promise = checkPhoneSDK();
+    }
+    else if (projFile.indexOf('CordovaApp.Windows.jsproj') > -1) {
+        promise = checkWinSDK('8.1');
+    }
+    else {
+        promise = checkWinSDK('10.0');
+    }
+
+    return promise.then(function () {
+        return spawn(path.join(that.path, 'msbuild'), [projFile].concat(args), { stdio: 'inherit' });
+    });
 };
 
 // returns full path to msbuild tools required to build the project and tools version
