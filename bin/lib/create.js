@@ -47,7 +47,7 @@ module.exports.create = function (destinationDir, config, options) {
     var root = path.join(__dirname, '..', '..');
 
     events.emit('log', 'Creating Cordova Windows Project:');
-    events.emit('log', '\tPath: ' + path.relative(process.cwd(), (projectPath || 'CordovaExample')));
+    events.emit('log', '\tPath: ' + path.relative(process.cwd(), project_path));
     events.emit('log', '\tNamespace: ' + packageName);
     events.emit('log', '\tName: ' + appName);
     if (templateOverrides) {
