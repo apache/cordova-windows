@@ -24,6 +24,7 @@ var rewire  = require('rewire'),
     fs      = require('fs'),
     et      = require('elementtree'),
     events  = require('cordova-common').events,
+    path    = require('path'),
     xml     = require('cordova-common').xmlHelpers,
     FileUpdater = require('cordova-common').FileUpdater,
     updateManifestFile              = prepare.__get__('updateManifestFile'),
@@ -483,10 +484,10 @@ describe('copyIcons method', function () {
 
         copyImages(project, locations);
 
-        expect(FileUpdater.updatePaths).toHaveBeenCalledWith({
-                'images\\Square44x44Logo.scale-100.png': 'res/Windows/Square44x44Logo_100.png',
-                'images\\Square44x44Logo.scale-240.png': 'res/Windows/Square44x44Logo_240.png',
-            }, { rootDir: PROJECT }, logFileOp);
+        var expectedPathMap = {};
+        expectedPathMap['images' + path.sep + 'Square44x44Logo.scale-100.png'] = 'res/Windows/Square44x44Logo_100.png';
+        expectedPathMap['images' + path.sep + 'Square44x44Logo.scale-240.png'] = 'res/Windows/Square44x44Logo_240.png';
+        expect(FileUpdater.updatePaths).toHaveBeenCalledWith(expectedPathMap, { rootDir: PROJECT }, logFileOp);
     });
 
     it('should ignore unknown icon sizes and emit a warning', function () {
@@ -526,16 +527,18 @@ describe('copyIcons method', function () {
 
             copyImages(project, locations);
 
-        expect(FileUpdater.updatePaths).toHaveBeenCalledWith({
-                'images\\SmallIcon.scale-100.png' : 'res/Windows/Square44x44.scale-100.png',
-                'images\\SmallIcon.targetsize-16.png' : 'res/Windows/Square44x44.targetsize-16.png',
-                'images\\SmallIcon.scale-150_targetsize-16.png' :
-                    'res/Windows/Square44x44.scale-150_targetsize-16.png',
-                'images\\SmallIcon.targetsize-16_scale-200.png' :
-                    'res/Windows/Square44x44.targetsize-16_scale-200.png',
-                'images\\SmallIcon.targetsize-16_altform-unplated_scale-200.png' :
-                    'res/Windows/Square44x44.targetsize-16_altform-unplated_scale-200.png',
-            }, { rootDir: PROJECT }, logFileOp);
+            var expectedPathMap = {};
+            expectedPathMap['images' + path.sep + 'SmallIcon.scale-100.png'] =
+                    'res/Windows/Square44x44.scale-100.png';
+            expectedPathMap['images' + path.sep + 'SmallIcon.targetsize-16.png'] =
+                    'res/Windows/Square44x44.targetsize-16.png';
+            expectedPathMap['images' + path.sep + 'SmallIcon.scale-150_targetsize-16.png'] =
+                    'res/Windows/Square44x44.scale-150_targetsize-16.png';
+            expectedPathMap['images' + path.sep + 'SmallIcon.targetsize-16_scale-200.png'] =
+                    'res/Windows/Square44x44.targetsize-16_scale-200.png';
+            expectedPathMap['images' + path.sep + 'SmallIcon.targetsize-16_altform-unplated_scale-200.png'] =
+                    'res/Windows/Square44x44.targetsize-16_altform-unplated_scale-200.png';
+            expect(FileUpdater.updatePaths).toHaveBeenCalledWith(expectedPathMap, { rootDir: PROJECT }, logFileOp);
         });
     });
 });
