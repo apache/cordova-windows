@@ -43,9 +43,9 @@ describe('MRTImage class', function () {
             expect(new MRTImage('some/path/Basename.scale-240.png').matchesTo(testImage)).toBe(true);
             expect(new MRTImage('some/path/Basename.targetsize-20_scale-240.png').matchesTo(testImage)).toBe(true);
 
-            expect(new MRTImage(testImage).matchesTo('')).toBe(false);
-            expect(new MRTImage(testImage).matchesTo({})).toBe(false);
-            expect(new MRTImage(testImage).matchesTo(undefined)).toBe(false);
+            expect(testImage.matchesTo('')).toBe(false);
+            expect(testImage.matchesTo({})).toBe(false);
+            expect(testImage.matchesTo(undefined)).toBe(false);
 
             expect(new MRTImage('some/path/Basename.jpg').matchesTo(testImage)).toBe(false);
             expect(new MRTImage('some/path/Basename.with.dots.scale-240.png').matchesTo(testImage)).toBe(false);
