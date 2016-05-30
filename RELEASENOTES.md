@@ -24,6 +24,22 @@ Update these notes using: git log --pretty=format:'* %s' --topo-order --no-merge
 
 cordova-windows is a library that enables developers to create Windows 8/8.1/10 and WP8.1 application projects that support Cordova APIs.
 
+### 4.4.0 (May 30, 2016)
+CB-11117: Optimize prepare for windows platform, clean prepared files
+CB-11259: Improving build output
+CB-11204: Catch when SDK not present on build and give appropriate error message
+CB-11156 Change default FadeSplashScreenDuration value
+CB-11176 Fix windows-splashscreen compatibility with older plugin versions
+CB-11139 Use PluginManager from common to install/uninstall plugins
+CB-10653 Making the windows activation context complete
+CB-11150 CI Error - Windows Platform - Could not find XHR config file
+CB-8056 Implement splashscreen for Windows platform
+CB-11066 Remove uap prefixed capabilities along with regular ones
+CB-11022 Duplicate www files on plugin installation
+CB-10964 Handle build.json file starting with a BOM. This closes #166
+CB-11024: Add preference to set the min UAP target version in the JSProj File
+
+
 ### 4.3.2 (Mar 31, 2016)
 * CB-10622 Upgrade cordova-common to work with 'target'-defined icons
 * CB-10927 Framework references in plugin.xml file prevent Windows Universal projects from being used on other machines
