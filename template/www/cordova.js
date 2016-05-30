@@ -19,7 +19,7 @@
  under the License.
 */
 ;(function() {
-var PLATFORM_VERSION_BUILD_LABEL = '4.4.0-dev';
+var PLATFORM_VERSION_BUILD_LABEL = '4.4.0';
 // file: src/scripts/require.js
 
 /*jshint -W079 */
@@ -817,7 +817,7 @@ module.exports = channel;
 
 });
 
-// file: f:/coho/cordova-windows/cordova-js-src/confighelper.js
+// file: D:/cordova/cordova-windows/cordova-js-src/confighelper.js
 define("cordova/confighelper", function(require, exports, module) {
 
 // config.xml wrapper (non-node ConfigParser analogue)
@@ -891,7 +891,7 @@ exports.readConfig = readConfig;
 
 });
 
-// file: f:/coho/cordova-windows/cordova-js-src/exec.js
+// file: D:/cordova/cordova-windows/cordova-js-src/exec.js
 define("cordova/exec", function(require, exports, module) {
 
 /*jslint sloppy:true, plusplus:true*/
@@ -1482,7 +1482,7 @@ exports.reset();
 
 });
 
-// file: f:/coho/cordova-windows/cordova-js-src/platform.js
+// file: D:/cordova/cordova-windows/cordova-js-src/platform.js
 define("cordova/platform", function(require, exports, module) {
 
 module.exports = {
@@ -1796,7 +1796,7 @@ exports.load = function(callback) {
 
 });
 
-// file: f:/coho/cordova-windows/cordova-js-src/splashscreen.js
+// file: D:/cordova/cordova-windows/cordova-js-src/splashscreen.js
 define("cordova/splashscreen", function(require, exports, module) {
 
 var isPhone = (cordova.platformId == 'windows') && WinJS.Utilities.isPhone;
