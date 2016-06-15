@@ -71,10 +71,14 @@ module.exports = {
                     });
                 }
 
+                if (e.detail.previousExecutionState === Windows.ApplicationModel.Activation.ApplicationExecutionState.running
+                        || e.detail.previousExecutionState === Windows.ApplicationModel.Activation.ApplicationExecutionState.suspended) {
+                    cordova.fireDocumentEvent('activated', platform.activationContext, true);
+                    return;
+                }
+
                 e.setPromise(makePromise(configHelper.readConfig).then(function (config) {
-                    if (e.detail.previousExecutionState !== Windows.ApplicationModel.Activation.ApplicationExecutionState.running) {
-                        splashscreen.firstShow(config, e);
-                    }
+                    splashscreen.firstShow(config, e);
                 }).then(function () {
                     // Avoids splashimage flicker on Windows Phone 8.1/10
                     return WinJS.Promise.timeout();
