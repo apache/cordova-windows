@@ -21,6 +21,7 @@ var shell = require('shelljs');
 var rewire = require('rewire');
 var platformRoot = '../../template';
 var buildTools = rewire(platformRoot + '/cordova/lib/MSBuildTools.js');
+var MSBuildTools = buildTools.__get__('MSBuildTools');
 var Version = require(platformRoot + '/cordova/lib/Version.js');
 
 var fakeToolsPath = function (version) {
@@ -134,8 +135,6 @@ describe('checkMSBuildVersion method', function(){
 });
 
 describe('MSBuildTools object', function(){
-    var MSBuildTools = buildTools.__get__('MSBuildTools');
-
     it('spec.9 should have fields and methods defined', function() {
         var version   = '14.0',
             toolsPath = fakeToolsPath(version),
@@ -197,6 +196,54 @@ describe('getAvailableUAPVersions method', function(){
 
         versions.forEach(function (version) {
             expect(version).toEqual(jasmine.any(Version));
+        });
+    });
+});
+
+describe('getMSBuildToolsAt method', function () {
+
+    var fakePath = '/some/fake/path';
+    var messyPath = '/another/fake/path';
+    var fakeVersion = '22.0.12635.5';
+    var fakeVersionParsed = '22.0';
+
+    var fail = jasmine.createSpy('fail');
+    var success = jasmine.createSpy('success');
+
+    var spawnOriginal = buildTools.__get__('spawn');
+    var spawnSpy = jasmine.createSpy('spawn');
+
+    beforeEach(function () {
+        buildTools.__set__('spawn', spawnSpy);
+    });
+
+    afterEach(function () {
+        buildTools.__set__('spawn', spawnOriginal);
+    });
+
+    it('should return MSBuildTools instance', function (done) {
+        spawnSpy.andReturn(Q(fakeVersion));
+
+        buildTools.getMSBuildToolsAt(fakePath)
+        .then(function (tools) {
+            expect(tools).toEqual(jasmine.any(MSBuildTools));
+            expect(tools.version).toBe(fakeVersionParsed);
+            expect(tools.path).toBe(fakePath);
+        }, fail)
+        .done(function () {
+            expect(fail).not.toHaveBeenCalled();
+            done();
+        });
+    });
+
+    it('should reject promise if no msbuild found', function (done) {
+        spawnSpy.andReturn(Q.reject());
+
+        buildTools.getMSBuildToolsAt(messyPath)
+        .then(success, fail)
+        .done(function () {
+            expect(success).not.toHaveBeenCalled();
+            done();
         });
     });
 });

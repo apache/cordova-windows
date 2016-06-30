@@ -58,7 +58,23 @@ module.exports.run = function run (buildOptions) {
 
     var buildConfig = parseAndValidateArgs(buildOptions);
 
-    return MSBuildTools.findAllAvailableVersions()
+    return Q().then(function () {
+        // CB-something use VSINSTALLDIR environment if defined to find MSBuild
+        // If VSINSTALLDIR is not specified use default discovery mechanism
+        if (!process.env.VSINSTALLDIR) {
+            return MSBuildTools.findAllAvailableVersions();
+        }
+
+        events.emit('log', 'Found VSINSTALLDIR environment variable. Attempting to build project using that version of MSBuild');
+
+        return MSBuildTools.getMSBuildToolsAt(process.env.VSINSTALLDIR)
+        .then(function (tools) { return [tools]; })
+        .catch(function (err) {
+            // If we failed to find msbuild at VSINSTALLDIR
+            // location we fall back to default discovery
+            return MSBuildTools.findAllAvailableVersions();
+        });
+    })
     .then(function(msbuildTools) {
         // Apply build related configs
         prepare.updateBuildConfig(buildConfig);
@@ -71,10 +87,11 @@ module.exports.run = function run (buildOptions) {
         }
 
         cleanIntermediates();
-        return buildTargets(msbuildTools, buildConfig).then(function(pkg) {
-            events.emit('verbose', ' BUILD OUTPUT: ' + pkg.appx);
-            return pkg;
-        });
+        return buildTargets(msbuildTools, buildConfig);
+    })
+    .then(function(pkg) {
+        events.emit('verbose', ' BUILD OUTPUT: ' + pkg.appx);
+        return pkg;
     });
 };
 

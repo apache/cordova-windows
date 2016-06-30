@@ -26,7 +26,9 @@ var Q = require('q'),
     build = rewire(platformRoot + '/cordova/lib/build.js');
 
 var utils = require(platformRoot + '/cordova/lib/utils');
+var package = require(platformRoot + '/cordova/lib/package');
 var AppxManifest = require(platformRoot + '/cordova/lib/AppxManifest');
+var MSBuildTools = require(platformRoot + '/cordova/lib/MSBuildTools');
 
 function createFindAvailableVersionMock(version, path, buildSpy) {
     build.__set__('MSBuildTools.findAvailableVersion', function() {
@@ -88,6 +90,7 @@ describe('run method', function() {
         spyOn(prepare, 'applyPlatformConfig');
         spyOn(prepare, 'addBOMSignature');
         spyOn(prepare, 'updateBuildConfig');
+        spyOn(package, 'getPackage').andReturn(Q({}));
 
         spyOn(AppxManifest, 'get').andReturn({
             getIdentity: function () {
@@ -119,34 +122,24 @@ describe('run method', function() {
         });
     });
 
-    it('spec.2 should reject if both debug and release args specified', function(done) {
-        var rejectSpy = jasmine.createSpy(),
-            buildSpy = jasmine.createSpy();
+    it('spec.2 should throw if both debug and release args specified', function() {
+        var buildSpy = jasmine.createSpy();
 
         createFindAvailableVersionMock('14.0', testPath, buildSpy);
 
-        build.run([ 'node', buildPath, '--release', '--debug' ])
-        .fail(rejectSpy)
-        .finally(function() {
-            expect(buildSpy).not.toHaveBeenCalled();
-            expect(rejectSpy).toHaveBeenCalled();
-            done();
-        });
+        expect(function () {
+            build.run({release: true, debug: true});
+        }).toThrow();
     });
 
-    it('spec.3 should reject if both phone and win args specified', function(done) {
-        var rejectSpy = jasmine.createSpy(),
-            buildSpy = jasmine.createSpy();
+    it('spec.3 should throw if both phone and win args specified', function() {
+        var buildSpy = jasmine.createSpy();
 
         createFindAvailableVersionMock('14.0', testPath, buildSpy);
 
-        build.run([ 'node', buildPath, '--phone', '--win' ])
-        .fail(rejectSpy)
-        .finally(function() {
-            expect(buildSpy).not.toHaveBeenCalled();
-            expect(rejectSpy).toHaveBeenCalled();
-            done();
-        });
+        expect(function () {
+            build.run({argv: [ '--phone', '--win' ]});
+        }).toThrow();
     });
 
     it('should respect build configuration from \'buildConfig\' option', function (done) {
@@ -354,6 +347,30 @@ describe('run method', function() {
         build.run({argv: ['--appx=uap']})
         .finally(function() {
             expect(buildSpy).toHaveBeenCalled();
+            done();
+        });
+    });
+
+    it('spec.14 should use user-specified msbuild if VSINSTALLDIR variable is set', function (done) {
+        var customMSBuildPath = '/some/path';
+        var customMSBuildVersion = '15.0';
+        process.env.VSINSTALLDIR = customMSBuildPath;
+
+        spyOn(MSBuildTools, 'getMSBuildToolsAt')
+            .andReturn(Q({
+                path: customMSBuildPath,
+                version: customMSBuildVersion,
+                buildProject: jasmine.createSpy('buildProject').andReturn(Q())
+            }));
+
+        var fail = jasmine.createSpy('fail');
+
+        build.run({})
+        .fail(fail)
+        .finally(function() {
+            expect(fail).not.toHaveBeenCalled();
+            expect(MSBuildTools.getMSBuildToolsAt).toHaveBeenCalledWith(customMSBuildPath);
+            delete process.env.VSINSTALLDIR;
             done();
         });
     });

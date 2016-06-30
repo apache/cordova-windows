@@ -33,7 +33,7 @@ MSBuildTools.prototype.buildProject = function(projFile, buildType, buildarch, o
     events.emit('log', 'Building project: ' + projFile);
     events.emit('log', '\tConfiguration : ' + buildType);
     events.emit('log', '\tPlatform      : ' + buildarch);
-    
+
     var checkWinSDK = function (target_platform) {
         return require('./check_reqs').isWinSDKPresent(target_platform);
     };
@@ -94,6 +94,26 @@ module.exports.findAllAvailableVersions = function () {
         });
     });
 };
+
+/**
+ * Gets MSBuildTools instance for user-specified location
+ *
+ * @param {String}  location  FS location where to search for MSBuild
+ * @returns  Promise<MSBuildTools>  The MSBuildTools instance at specified location
+ */
+function getMSBuildToolsAt(location) {
+    var msbuildExe = path.resolve(location, 'msbuild');
+
+    // TODO: can we account on these params availability and printed version format?
+    return spawn(msbuildExe, ['-version', '-nologo'])
+    .then(function (output) {
+        // MSBuild prints its' version as 14.0.25123.0, so we pick only first 2 segments
+        var version = output.match(/^(\d+\.\d+)/)[1];
+        return new MSBuildTools(version, location);
+    });
+}
+
+module.exports.getMSBuildToolsAt = getMSBuildToolsAt;
 
 function checkMSBuildVersion(version) {
     return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\' + version, '/v', 'MSBuildToolsPath'])
