@@ -286,20 +286,18 @@ var splash = null; // Variable to hold the splash screen object.
 var coordinates = { x: 0, y: 0, width: 0, height: 0 }; // Object to store splash screen image coordinates. It will be initialized during activation. 
 
 function activated(eventObject) {
-    if (eventObject.detail.kind === Windows.ApplicationModel.Activation.ActivationKind.launch) {
-        // Retrieve splash screen object 
-        splash = eventObject.detail.splashScreen;
+    // Retrieve splash screen object 
+    splash = eventObject.detail.splashScreen;
 
-        // Retrieve the window coordinates of the splash screen image. 
-        coordinates = splash.imageLocation;
+    // Retrieve the window coordinates of the splash screen image. 
+    coordinates = splash.imageLocation;
 
-        // Register an event handler to be executed when the splash screen has been dismissed. 
-        splash.addEventListener('dismissed', onSplashScreenDismissed, false);
+    // Register an event handler to be executed when the splash screen has been dismissed. 
+    splash.addEventListener('dismissed', onSplashScreenDismissed, false);
 
-        // Listen for window resize events to reposition the extended splash screen image accordingly. 
-        // This is important to ensure that the extended splash screen is formatted properly in response to snapping, unsnapping, rotation, etc... 
-        window.addEventListener('resize', onResize, false);
-    }
+    // Listen for window resize events to reposition the extended splash screen image accordingly. 
+    // This is important to ensure that the extended splash screen is formatted properly in response to snapping, unsnapping, rotation, etc... 
+    window.addEventListener('resize', onResize, false);
 }
 
 function onSplashScreenDismissed() {
