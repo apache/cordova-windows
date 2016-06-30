@@ -344,7 +344,7 @@ function mapImageResources(images, imagesDir) {
 
             // then get all matching MRT images in source directory
             var candidates = fs.readdirSync(imageToCopy.location)
-            .map(function (file) { return new MRTImage(file); })
+            .map(function (file) { return new MRTImage(path.join(imageToCopy.location, file)); })
             .filter(imageToCopy.matchesTo, imageToCopy);
 
             // Warn user if no images were copied
