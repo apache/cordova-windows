@@ -507,16 +507,16 @@ describe('copyIcons method', function () {
     describe('when "target" attribute is specified for the image', function () {
         it('should copy all images with the same base name and extension to destination dir', function () {
             var matchingFiles = [
-                'res/Windows/Square44x44.scale-100.png',
-                'res/Windows/Square44x44.targetsize-16.png',
-                'res/Windows/Square44x44.scale-150_targetsize-16.png',
-                'res/Windows/Square44x44.targetsize-16_scale-200.png',
-                'res/Windows/Square44x44.targetsize-16_altform-unplated_scale-200.png'
+                'Square44x44.scale-100.png',
+                'Square44x44.targetsize-16.png',
+                'Square44x44.scale-150_targetsize-16.png',
+                'Square44x44.targetsize-16_scale-200.png',
+                'Square44x44.targetsize-16_altform-unplated_scale-200.png'
             ];
 
             var nonMatchingFiles = [
-                'res/Windows/Square55x55.scale-100.png',
-                'res/Windows/Square44x44.targetsize-16.jpg'
+                'Square55x55.scale-100.png',
+                'Square44x44.targetsize-16.jpg'
             ];
 
             spyOn(fs, 'readdirSync').andReturn(matchingFiles.concat(nonMatchingFiles));
@@ -528,16 +528,16 @@ describe('copyIcons method', function () {
             copyImages(project, locations);
 
             var expectedPathMap = {};
-            expectedPathMap['images' + path.sep + 'SmallIcon.scale-100.png'] =
-                    'res/Windows/Square44x44.scale-100.png';
-            expectedPathMap['images' + path.sep + 'SmallIcon.targetsize-16.png'] =
-                    'res/Windows/Square44x44.targetsize-16.png';
-            expectedPathMap['images' + path.sep + 'SmallIcon.scale-150_targetsize-16.png'] =
-                    'res/Windows/Square44x44.scale-150_targetsize-16.png';
-            expectedPathMap['images' + path.sep + 'SmallIcon.targetsize-16_scale-200.png'] =
-                    'res/Windows/Square44x44.targetsize-16_scale-200.png';
-            expectedPathMap['images' + path.sep + 'SmallIcon.targetsize-16_altform-unplated_scale-200.png'] =
-                    'res/Windows/Square44x44.targetsize-16_altform-unplated_scale-200.png';
+            expectedPathMap[path.join('images', 'SmallIcon.scale-100.png')] =
+                    path.join('res', 'Windows', 'Square44x44.scale-100.png');
+            expectedPathMap[path.join('images','SmallIcon.targetsize-16.png')] =
+                    path.join('res', 'Windows', 'Square44x44.targetsize-16.png');
+            expectedPathMap[path.join('images', 'SmallIcon.scale-150_targetsize-16.png')] =
+                    path.join('res', 'Windows', 'Square44x44.scale-150_targetsize-16.png');
+            expectedPathMap[path.join('images', 'SmallIcon.targetsize-16_scale-200.png')] =
+                    path.join('res', 'Windows', 'Square44x44.targetsize-16_scale-200.png');
+            expectedPathMap[path.join('images', 'SmallIcon.targetsize-16_altform-unplated_scale-200.png')] =
+                    path.join('res', 'Windows', 'Square44x44.targetsize-16_altform-unplated_scale-200.png');
             expect(FileUpdater.updatePaths).toHaveBeenCalledWith(expectedPathMap, { rootDir: PROJECT }, logFileOp);
         });
     });
