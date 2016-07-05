@@ -52,6 +52,19 @@ The best way to use this is to install the [Cordova CLI](https://www.npmjs.com/p
 	cordova platform add windows
 	cordova run windows
 
+#Getting logs from Windows Store applications
+You can get your JavaScript logs as well as Windows logs related to your Windows Store application by running the following command from your app directory:
+
+	platforms\windows\cordova\log
+
+In most cases, this command requires administrator privileges. However, if you want to gather logs without admin privileges, you may need to manually enable logging channel via Event Viewer:
+
+	Start -> Run -> eventvwr
+	View -> Show Analytic and Debug Logs
+	Applications and Services Logs -> Microsoft -> Windows -> AppHost -> AppTracing -> Enable Log
+
+Please note that the log command is supported only for Windows Store applications and cannot get logs from Windows Phone application.
+
 #Report Issues
 Report them at the [Apache Cordova Issue Tracker](https://issues.apache.org/jira/browse/CB). Create a user account, use `windows` as the component.
 
