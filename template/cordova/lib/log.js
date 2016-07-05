@@ -42,9 +42,8 @@ var appTracingCurrentState = null;
 var adminInitialState      = null;
 var adminCurrentState      = null;
 var timers                 = [];
-var logFromTime            = 10 * ONE_MINUTE; // show last 10 minutes by default
+var timeDiff               = 10 * ONE_MINUTE; // show last 10 minutes by default
 var appName;
-
 
 /*
  * Gets windows AppHost/ApplicationTracing and AppHost/Admin logs
@@ -61,9 +60,9 @@ module.exports.run = function(args) {
     }
     if (parsedOpts.dump) {
         if (parsedOpts.minutes) {
-            logFromTime = parsedOpts.minutes * ONE_MINUTE;
+            timeDiff = parsedOpts.minutes * ONE_MINUTE;
         }
-        dumpLogs(logFromTime);
+        dumpLogs(timeDiff);
         return;
     }
 
@@ -91,7 +90,6 @@ module.exports.run = function(args) {
         if (!adminCurrentState && !appTracingCurrentState) {
             throw 'No log channels enabled. Exiting...';
         }
-    }).then(function () {
         try {
             var config = new ConfigParser(configPath);
             appName = config.name();
@@ -127,6 +125,7 @@ module.exports.help = function() {
     console.log();
     console.log('Usage: ' + path.relative(process.cwd(), path.join(platformRoot, 'cordova', 'log [options]')));
     console.log('Continuously prints your app logs to the command line.');
+    console.log('Please run with Administrator privileges or manually enable Microsoft-Windows-AppHost/ApplicationTracing channel in Event Viewer.');
     console.log();
     console.log('Options:');
     console.log('  --dump: Dumps logs to console instead of continuous output.');
@@ -154,18 +153,21 @@ function exitGracefully(exitCode) {
 }
 
 function startLogging(channel) {
+    var lastPollDate = new Date();
     timers.push(setInterval(function() {
-        var events = getEvents(channel, logFromTime);
+        timeDiff = (new Date()).getTime() - lastPollDate.getTime();
+        var events = getEvents(channel, timeDiff);
         events.forEach(function (evt) {
             console.log(stringifyEvent(evt));
         });
+        lastPollDate = new Date();
     }, 1000));
 }
 
-function dumpLogs(logFromTime) {
-    console.log('Dumping logs starting from ' + logFromTime);
-    var appTracingEvents = getEvents(APP_TRACING_LOG, logFromTime);
-    var adminEvents = getEvents(ADMIN_LOG, logFromTime);
+function dumpLogs(timeDiff) {
+    console.log('Dumping logs dating back ' + msToHumanReadable(timeDiff));
+    var appTracingEvents = getEvents(APP_TRACING_LOG, timeDiff);
+    var adminEvents = getEvents(ADMIN_LOG, timeDiff);
     appTracingEvents.concat(adminEvents)
         .sort(function(evt1, evt2) {
             if (evt1.timeCreated < evt2.timeCreated) {
@@ -180,12 +182,10 @@ function dumpLogs(logFromTime) {
         });
 }
 
-function getEvents(channel, logFromTime) {
+function getEvents(channel, timeDiff) {
     var command = 'wevtutil';
-    var args    = ['qe', channel, '/q:"*[System [TimeCreated[timediff(@SystemTime)<=' + logFromTime + ']]]"', '/e:root'];
+    var args    = ['qe', channel, '/q:"*[System [TimeCreated[timediff(@SystemTime)<=' + timeDiff + ']]]"', '/e:root'];
     command     = command + ' ' + args.join(' ');
-    console.log('Running command: ');
-    console.log('  ' + command);
     var events  = execSync(command);
     return parseEvents(events.toString());
 }
@@ -332,6 +332,7 @@ function getLogState(channel) {
 }
 
 function enableChannel(channel) {
+    console.log('Enabling channel ' + channel);
     return spawn('wevtutil', ['set-log', channel, '/e:false', '/q:true'])
     .then(function() {
         return spawn('wevtutil', ['set-log', channel, '/e:true', '/rt:true', '/ms:4194304','/q:true']);
@@ -344,4 +345,11 @@ function enableChannel(channel) {
 function disableChannel(channel) {
     console.log('Disabling channel ' + channel);
     spawn('wevtutil', ['set-log', channel, '/e:false', '/q:true']);
+}
+
+function msToHumanReadable(ms) {
+    var m = Math.floor(ms / 60000);
+    ms -= m * 60000;
+    var s = ms / 1000;
+    return m + 'm ' + s + 's';
 }
