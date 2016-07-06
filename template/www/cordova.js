@@ -1,5 +1,5 @@
 ﻿// Platform: windows
-// 2fd4bcb84048415922d13d80d35b8d1668e8e150
+// 886843febcc34d7248dfd968fde2e00a34c9be29
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -817,7 +817,7 @@ module.exports = channel;
 
 });
 
-// file: D:/cordova/cordova-windows/cordova-js-src/confighelper.js
+// file: F:/coho/cordova-windows/cordova-js-src/confighelper.js
 define("cordova/confighelper", function(require, exports, module) {
 
 // config.xml wrapper (non-node ConfigParser analogue)
@@ -891,7 +891,7 @@ exports.readConfig = readConfig;
 
 });
 
-// file: D:/cordova/cordova-windows/cordova-js-src/exec.js
+// file: F:/coho/cordova-windows/cordova-js-src/exec.js
 define("cordova/exec", function(require, exports, module) {
 
 /*jslint sloppy:true, plusplus:true*/
@@ -1482,7 +1482,7 @@ exports.reset();
 
 });
 
-// file: D:/cordova/cordova-windows/cordova-js-src/platform.js
+// file: F:/coho/cordova-windows/cordova-js-src/platform.js
 define("cordova/platform", function(require, exports, module) {
 
 module.exports = {
@@ -1524,7 +1524,8 @@ module.exports = {
             // activationContext:{type: actType, args: args};
             var activationHandler = function (e) {
                 // Making all the details available as activationContext
-                platform.activationContext = utils.clone(e.detail); 
+                platform.activationContext = utils.clone(e.detail);         /* CB-10653 to avoid losing detail properties for some activation kinds */
+                platform.activationContext.raw = e.detail;                  /* CB-11522 to preserve types */
                 platform.activationContext.args = e.detail.arguments;       /* for backwards compatibility */
 
                 function makePromise(fn) {
@@ -1800,7 +1801,7 @@ exports.load = function(callback) {
 
 });
 
-// file: D:/cordova/cordova-windows/cordova-js-src/splashscreen.js
+// file: F:/coho/cordova-windows/cordova-js-src/splashscreen.js
 define("cordova/splashscreen", function(require, exports, module) {
 
 var isPhone = (cordova.platformId == 'windows') && WinJS.Utilities.isPhone;
@@ -2233,7 +2234,7 @@ utils.clone = function(obj) {
 
     retVal = {};
     for(i in obj){
-        if(!(i in retVal) || retVal[i] != obj[i]) {
+        if((!(i in retVal) || retVal[i] != obj[i]) && typeof obj[i] != 'undefined') {
             retVal[i] = utils.clone(obj[i]);
         }
     }
