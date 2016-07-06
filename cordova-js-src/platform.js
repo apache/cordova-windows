@@ -58,7 +58,8 @@ module.exports = {
             // activationContext:{type: actType, args: args};
             var activationHandler = function (e) {
                 // Making all the details available as activationContext
-                platform.activationContext = utils.clone(e.detail); 
+                platform.activationContext = utils.clone(e.detail);         /* CB-10653 to avoid losing detail properties for some activation kinds */
+                platform.activationContext.raw = e.detail;                  /* CB-11522 to preserve types */
                 platform.activationContext.args = e.detail.arguments;       /* for backwards compatibility */
 
                 function makePromise(fn) {
