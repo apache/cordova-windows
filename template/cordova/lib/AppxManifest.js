@@ -655,6 +655,7 @@ Win10AppxManifest.prototype.setDependencies = function (dependencies) {
  */
 Win10AppxManifest.prototype.write = function(destPath) {
     ensureUapPrefixedCapabilities(this.doc.find('.//Capabilities'));
+    ensureUniqueCapabilities(this.doc.find('.//Capabilities'));
     // sort Capability elements as per CB-5350 Windows8 build fails due to invalid 'Capabilities' definition
     sortCapabilities(this.doc);
     fs.writeFileSync(destPath || this.path, this.doc.write({indent: 4}), 'utf-8');
@@ -670,6 +671,20 @@ function ensureUapPrefixedCapabilities(capabilities) {
         if (CAPS_NEEDING_UAPNS.indexOf(el.attrib.Name) > -1 && el.tag.indexOf('uap:') !== 0) {
             el.tag = 'uap:' + el.tag;
         }
+    });
+}
+
+/**
+ * Cleans up duplicate capability declarations that were generated during the prepare process
+ * @param capabilities {ElementTree.Element} The appx manifest element for <capabilities>
+ */
+function ensureUniqueCapabilities(capabilities) {
+    function isDuplicateCapability(value, index, self) { 
+        return self.findIndex(function(capability) { return capability.attrib.Name === value.attrib.Name }) !== index;
+    };
+
+    capabilities.getchildren().filter(isDuplicateCapability).forEach(function(value) {
+        capabilities.remove(value);
     });
 }
 
