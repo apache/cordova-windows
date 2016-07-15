@@ -25,6 +25,7 @@ var Win10AppxManifest = AppxManifest.__get__('Win10AppxManifest');
 var refineColor = AppxManifest.__get__('refineColor');
 
 var WINDOWS_MANIFEST = 'template/package.windows.appxmanifest';
+var WINDOWS_10_MANIFEST = 'template/package.windows10.appxmanifest';
 var WINDOWS_PHONE_MANIFEST = 'template/package.phone.appxmanifest';
 var CSS_COLOR_NAME = 'turquoise';
 
@@ -166,6 +167,19 @@ describe('AppxManifest', function () {
                 expect(function () { emptyManifest[method](); }).toThrow();
                 expect(manifest[method]()).toBeDefined();
             });
+        });
+    });
+
+    describe('instance write method', function () {
+        it('should not write duplicate UAP capability declarations', function () {
+            var manifest = AppxManifest.get(WINDOWS_10_MANIFEST);
+            var capabilities = manifest.doc.find('.//Capabilities');
+            capabilities.append(new et.Element('uap:Capability', { 'Name': 'enterpriseAuthentication' }));
+            capabilities.append(new et.Element('uap:Capability', { 'Name': 'enterpriseAuthentication' }));
+            
+            var xml = manifest.writeToString();
+
+            expect((xml.match(/enterpriseAuthentication/g) || []).length).toBe(1);
         });
     });
 
