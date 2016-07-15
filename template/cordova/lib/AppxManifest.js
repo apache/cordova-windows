@@ -680,8 +680,8 @@ function ensureUapPrefixedCapabilities(capabilities) {
  */
 function ensureUniqueCapabilities(capabilities) {
     function isDuplicateCapability(value, index, self) { 
-        return self.findIndex(function(capability) { return capability.attrib.Name === value.attrib.Name }) !== index;
-    };
+        return self.findIndex(function(capability) { return capability.attrib.Name === value.attrib.Name; }) !== index;
+    }
 
     capabilities.getchildren().filter(isDuplicateCapability).forEach(function(value) {
         capabilities.remove(value);
