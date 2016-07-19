@@ -88,7 +88,6 @@ describe('run method', function() {
 
         spyOn(utils, 'isCordovaProject').andReturn(true);
         spyOn(prepare, 'applyPlatformConfig');
-        spyOn(prepare, 'addBOMSignature');
         spyOn(prepare, 'updateBuildConfig');
         spyOn(package, 'getPackage').andReturn(Q({}));
 

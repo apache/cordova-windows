@@ -49,7 +49,6 @@ var ROOT = path.resolve(__dirname, '../..');
 // See 'help' function for args list
 module.exports.run = function run (buildOptions) {
 
-    var that = this;
     ROOT = this.root || ROOT;
 
     if (!utils.isCordovaProject(this.root)){
@@ -78,9 +77,6 @@ module.exports.run = function run (buildOptions) {
     .then(function(msbuildTools) {
         // Apply build related configs
         prepare.updateBuildConfig(buildConfig);
-        // CB-5421 Add BOM to all html, js, css files
-        // to ensure app can pass Windows Store Certification
-        prepare.addBOMSignature(that.locations.www);
 
         if (buildConfig.publisherId) {
             updateManifestWithPublisher(msbuildTools, buildConfig);

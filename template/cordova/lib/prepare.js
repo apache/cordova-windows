@@ -458,6 +458,9 @@ module.exports.prepare = function (cordovaProject, options) {
     })
     .then(function () {
         copyImages(cordovaProject, self.locations);
+        // CB-5421 Add BOM to all html, js, css files
+        // to ensure app can pass Windows Store Certification
+        addBOMSignature(self.locations.www);
     })
     .then(function () {
         events.emit('verbose', 'Prepared windows project successfully');
@@ -495,7 +498,7 @@ module.exports.clean = function (options) {
 function addBOMSignature(directory) {
     shell.ls('-R', directory)
     .forEach(function (file) {
-        if (!file.match(/\.(js|html|css|json)$/i)) {
+        if (!file.match(/\.(js|htm|html|css|json)$/i)) {
             return;
         }
 
@@ -511,8 +514,6 @@ function addBOMSignature(directory) {
         }
     });
 }
-
-module.exports.addBOMSignature = addBOMSignature;
 
 /**
  * Updates config files in project based on app's config.xml and config munge,
