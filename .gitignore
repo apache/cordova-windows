@@ -7,6 +7,7 @@ bld
 Debug
 obj
 Thumbs.db
+/.idea/
 
 # Skip node_modules .bin folder and dev dependencies
 node_modules/.bin
