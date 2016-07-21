@@ -97,7 +97,7 @@ function findAllAvailableVersionsFallBack() {
 
 module.exports.findAllAvailableVersions = function () {
     // CB-11548 use VSINSTALLDIR environment if defined to find MSBuild. If VSINSTALLDIR
-    // is not specified or incorrect - fall back to default discovery mechanism.
+    // is not specified or doesn't contain the MSBuild path we are looking for - fall back to default discovery mechanism.
     if (process.env.VSINSTALLDIR) {
         var msBuildPath = path.join(process.env.VSINSTALLDIR, 'MSBuild/15.0/Bin');
         return module.exports.getMSBuildToolsAt(msBuildPath)
