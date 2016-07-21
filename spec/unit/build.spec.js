@@ -74,10 +74,12 @@ function createConfigParserMock(winVersion, phoneVersion) {
 
 describe('run method', function() {
     var findAvailableVersionOriginal,
+        findAllAvailableVersionsOriginal,
         configParserOriginal;
 
     beforeEach(function () {
         findAvailableVersionOriginal = build.__get__('MSBuildTools.findAvailableVersion');
+        findAllAvailableVersionsOriginal = build.__get__('MSBuildTools.findAllAvailableVersions');
         configParserOriginal = build.__get__('ConfigParser');
 
         var originalBuildMethod = build.run;
@@ -101,6 +103,7 @@ describe('run method', function() {
 
     afterEach(function() {
         build.__set__('MSBuildTools.findAvailableVersion', findAvailableVersionOriginal);
+        build.__set__('MSBuildTools.findAllAvailableVersions', findAllAvailableVersionsOriginal);
         build.__set__('ConfigParser', configParserOriginal);
     });
 
@@ -336,7 +339,7 @@ describe('run method', function() {
     it('spec.13 should be able to override target via --appx parameter', function(done) {
         var buildSpy = jasmine.createSpy().andCallFake(function(solutionFile, buildType, buildArch) {
                 // check that we build Windows 10 and not Windows 8.1
-                expect(solutionFile.toLowerCase().indexOf('cordovaapp.windows10.jsproj') >=0).toBe(true);
+                expect(solutionFile.toLowerCase()).toMatch('cordovaapp.windows10.jsproj');
             });
 
         createFindAllAvailableVersionsMock([{version: '14.0', buildProject: buildSpy, path: testPath }]);
@@ -352,6 +355,7 @@ describe('run method', function() {
 
     it('spec.14 should use user-specified msbuild if VSINSTALLDIR variable is set', function (done) {
         var customMSBuildPath = '/some/path';
+        var msBuildBinPath = path.join(customMSBuildPath, 'MSBuild/15.0/Bin');
         var customMSBuildVersion = '15.0';
         process.env.VSINSTALLDIR = customMSBuildPath;
 
@@ -368,8 +372,25 @@ describe('run method', function() {
         .fail(fail)
         .finally(function() {
             expect(fail).not.toHaveBeenCalled();
-            expect(MSBuildTools.getMSBuildToolsAt).toHaveBeenCalledWith(customMSBuildPath);
+            expect(MSBuildTools.getMSBuildToolsAt).toHaveBeenCalledWith(msBuildBinPath);
             delete process.env.VSINSTALLDIR;
+            done();
+        });
+    });
+
+    it('spec.15 should choose latest version if there are multiple versions available with minor version difference', function(done) {
+        var fail = jasmine.createSpy('fail');
+        var buildTools14 = {version: '14.0', buildProject: jasmine.createSpy('buildTools14'), path: testPath };
+        var buildTools15 = {version: '15.0', buildProject: jasmine.createSpy('buildTools15'), path: testPath };
+        var buildTools151 = {version: '15.1', buildProject: jasmine.createSpy('buildTools151'), path: testPath };
+
+        createFindAllAvailableVersionsMock([buildTools14, buildTools15, buildTools151]);
+        // explicitly specify Windows 10 as target
+        build.run({argv: ['--appx=uap']})
+        .fail(fail)
+        .finally(function() {
+            expect(fail).not.toHaveBeenCalled();
+            expect(buildTools151.buildProject).toHaveBeenCalled();
             done();
         });
     });
