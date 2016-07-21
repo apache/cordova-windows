@@ -84,7 +84,7 @@ module.exports.findAvailableVersion = function () {
     });
 };
 
-module.exports.findAllAvailableVersions = function () {
+function findAllAvailableVersionsFallBack() {
     var versions = ['15.0', '14.0', '12.0', '4.0'];
     events.emit('verbose', 'Searching for available MSBuild versions...');
 
@@ -93,6 +93,21 @@ module.exports.findAllAvailableVersions = function () {
             return !!item;
         });
     });
+}
+
+module.exports.findAllAvailableVersions = function () {
+    // CB-11548 use VSINSTALLDIR environment if defined to find MSBuild. If VSINSTALLDIR
+    // is not specified or doesn't contain the MSBuild path we are looking for - fall back
+    // to default discovery mechanism.
+    if (process.env.VSINSTALLDIR) {
+        var msBuildPath = path.join(process.env.VSINSTALLDIR, 'MSBuild/15.0/Bin');
+        return module.exports.getMSBuildToolsAt(msBuildPath)
+        .then(function (msBuildTools) {
+            return [msBuildTools];
+        }).catch(findAllAvailableVersionsFallBack);
+    }
+
+    return findAllAvailableVersionsFallBack();
 };
 
 /**
@@ -101,7 +116,7 @@ module.exports.findAllAvailableVersions = function () {
  * @param {String}  location  FS location where to search for MSBuild
  * @returns  Promise<MSBuildTools>  The MSBuildTools instance at specified location
  */
-function getMSBuildToolsAt(location) {
+module.exports.getMSBuildToolsAt = function (location) {
     var msbuildExe = path.resolve(location, 'msbuild');
 
     // TODO: can we account on these params availability and printed version format?
@@ -111,9 +126,7 @@ function getMSBuildToolsAt(location) {
         var version = output.match(/^(\d+\.\d+)/)[1];
         return new MSBuildTools(version, location);
     });
-}
-
-module.exports.getMSBuildToolsAt = getMSBuildToolsAt;
+};
 
 function checkMSBuildVersion(version) {
     return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\' + version, '/v', 'MSBuildToolsPath'])
