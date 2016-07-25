@@ -24,6 +24,11 @@ Update these notes using: git log --pretty=format:'* %s' --topo-order --no-merge
 
 cordova-windows is a library that enables developers to create Windows 8/8.1/10 and WP8.1 application projects that support Cordova APIs.
 
+### 4.4.2 (Jul 25, 2016)
+* [CB-11548](https://issues.apache.org/jira/browse/CB-11548) Fix issues where MSBuild cannot be found
+* [CB-11241](https://issues.apache.org/jira/browse/CB-11241) Return adding BOM to www back to prepare
+* [CB-11582](https://issues.apache.org/jira/browse/CB-11582) Remove duplicate capabilities when writing the appxmanifest
+
 ### 4.4.1 (Jul 11, 2016)
 * [CB-11522](https://issues.apache.org/jira/browse/CB-11522) Save raw 'detail' object to activation context
 * [CB-11538](https://issues.apache.org/jira/browse/CB-11538) Update README with information about logging
