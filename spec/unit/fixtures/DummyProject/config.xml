@@ -9,6 +9,7 @@
     <author email="dev@cordova.apache.org" href="http://cordova.io">
         Apache Cordova Team
     </author>
+    <icon src="images/SplashScreen.scale-100.png" width="620" height="300"></icon>
     <content src="index.html" />
     <access origin="*" />
 </widget>

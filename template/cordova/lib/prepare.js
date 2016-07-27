@@ -484,7 +484,7 @@ module.exports.clean = function (options) {
     var self = this;
     return Q().then(function () {
         cleanWww(projectRoot, self.locations);
-        cleanImages(projectRoot, projectConfig);
+        cleanImages(projectRoot, projectConfig, self.locations);
     });
 };
 
