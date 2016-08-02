@@ -16,12 +16,16 @@
     specific language governing permissions and limitations
     under the License.
 */
+
 var Q = require('q'),
     path = require('path'),
     rewire = require('rewire'),
     platformRoot = '../../template',
     buildPath = path.join(platformRoot, 'cordova', 'build'),
     run = rewire(platformRoot + '/cordova/lib/run.js');
+
+var utils = require(path.join(platformRoot, 'cordova/lib/utils'));
+var packages = require(path.join(platformRoot, 'cordova/lib/package'));
 
 describe('run method', function() {
     var consoleLogOriginal,
@@ -241,6 +245,62 @@ describe('run method', function() {
         .finally(function() {
             expect(deployToDesktop).toHaveBeenCalled();
             expect(build).not.toHaveBeenCalled();
+            done();
+        });
+    });
+
+    it('spec.8 should accept --archs parameter either as cli or as platform arg', function(done) {
+
+        spyOn(utils, 'isCordovaProject').andReturn(true);
+        spyOn(packages, 'getPackage').andReturn(Q({ arch: 'arm' }));
+        spyOn(packages, 'deployToDesktop').andReturn(Q());
+
+        var anyString = jasmine.any(String);
+        var expectedDeployOptions = jasmine.objectContaining({arch: 'arm'});
+
+        var fail = jasmine.createSpy('fail')
+        .andCallFake(function (err) {
+            console.error(err);
+        });
+
+        run.run({nobuild: true, argv: ['--archs=arm'] })
+        .then(function () {
+            expect(packages.getPackage).toHaveBeenCalledWith(anyString, anyString, 'arm');
+            expect(packages.deployToDesktop).toHaveBeenCalledWith(expectedDeployOptions, anyString, anyString);
+        })
+        .then(function () {
+            return run.run({nobuild: true, archs: 'arm' });
+        })
+        .then(function () {
+            expect(packages.getPackage).toHaveBeenCalledWith(anyString, anyString, 'arm');
+            expect(packages.deployToDesktop).toHaveBeenCalledWith(expectedDeployOptions, anyString, anyString);
+        })
+        .catch(fail)
+        .finally(function() {
+            expect(fail).not.toHaveBeenCalled();
+            done();
+        });
+    });
+
+    it('spec.9 should fall back to anycpu if --archs parameter is not specified', function(done) {
+
+        spyOn(utils, 'isCordovaProject').andReturn(true);
+        spyOn(packages, 'getPackage').andReturn(Q({ arch: 'anycpu' }));
+        spyOn(packages, 'deployToDesktop').andReturn(Q());
+
+        var anyString = jasmine.any(String);
+        var expectedDeployOptions = jasmine.objectContaining({arch: 'anycpu'});
+
+        var fail = jasmine.createSpy('fail');
+
+        run.run({nobuild: true})
+        .then(function () {
+            expect(packages.getPackage).toHaveBeenCalledWith(anyString, anyString, 'anycpu');
+            expect(packages.deployToDesktop).toHaveBeenCalledWith(expectedDeployOptions, anyString, anyString);
+        })
+        .catch(fail)
+        .finally(function() {
+            expect(fail).not.toHaveBeenCalled();
             done();
         });
     });
