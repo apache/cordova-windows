@@ -65,7 +65,8 @@ beforeEach(function () {
             };
 
             return xml.find(xpath) !== null;
-        }    });
+        }
+    });
 });
 
 var getPluginFilePath = PluginHandler.__get__('getPluginFilePath');
@@ -88,6 +89,10 @@ describe('windows project handler', function () {
         shell.cp('-rf', path.join(__dirname, '../fixtures/DummyProject/*'), cordovaProjectWindowsPlatformDir);
         dummyProject = JsprojManager.getProject(cordovaProjectWindowsPlatformDir);
         shell.mkdir('-p', cordovaProjectPluginsDir);
+        shell.cp('-rf', dummyplugin, cordovaProjectPluginsDir);
+        // CB-11558 Reinitialize plugin.dir to become project_root/plugins/plugin.id to avoid 
+        // different drives issue resulting in absolute path in projectReferences.
+        dummyPluginInfo = new PluginInfo(path.join(cordovaProjectPluginsDir, dummyPluginInfo.id));
     });
 
     afterEach(function () {
@@ -182,7 +187,7 @@ describe('windows project handler', function () {
             it('should copy stuff from one location to another by calling common.copyFile', function () {
                 var source = copyArray(valid_source);
                 install(source[0], dummyPluginInfo, dummyProject);
-                expect(copyFileSpy).toHaveBeenCalledWith(dummyplugin, 'src/windows/dummer.js', cordovaProjectWindowsPlatformDir, path.join('plugins', 'org.test.plugins.dummyplugin', 'dummer.js'), false);
+                expect(copyFileSpy).toHaveBeenCalledWith(dummyPluginInfo.dir, 'src/windows/dummer.js', cordovaProjectWindowsPlatformDir, path.join('plugins', 'org.test.plugins.dummyplugin', 'dummer.js'), false);
             });
             it('should throw if source-file src cannot be found', function () {
                 var source = copyArray(invalid_source);
@@ -556,19 +561,19 @@ describe('windows project handler', function () {
                 });
 
                 var xmlPath = 'ItemGroup/ProjectReference';
-                var incText = winJoin(dummyPluginInfo.dir, frameworks[6].src);
+                var incText = winJoin('..', '..', 'plugins', dummyPluginInfo.id, frameworks[6].src);
                 var targetConditions = {versions: undefined, deviceTarget: undefined, arch: 'x64'};
                 validateUninstalledProjects('framework', frameworks[6], xmlPath, incText, targetConditions, ['all']);
 
-                incText = winJoin(dummyPluginInfo.dir, frameworks[7].src);
+                incText = winJoin('..', '..', 'plugins', dummyPluginInfo.id, frameworks[7].src);
                 targetConditions = {versions: '<8.1', deviceTarget: undefined, arch: undefined};
                 validateUninstalledProjects('framework', frameworks[7], xmlPath, incText, targetConditions, ['windows8']);
 
-                incText = winJoin(dummyPluginInfo.dir, frameworks[8].src);
+                incText = winJoin('..', '..', 'plugins', dummyPluginInfo.id, frameworks[8].src);
                 targetConditions = {versions: undefined, deviceTarget: 'win', arch: undefined};
                 validateUninstalledProjects('framework', frameworks[8], xmlPath, incText, targetConditions, ['windows', 'windows8', 'windows10']);
 
-                incText = winJoin(dummyPluginInfo.dir, frameworks[9].src);
+                incText = winJoin('..', '..', 'plugins', dummyPluginInfo.id, frameworks[9].src);
                 targetConditions = {versions: '8.1', deviceTarget: 'all', arch: 'x86'};
                 validateUninstalledProjects('framework', frameworks[9], xmlPath, incText, targetConditions, ['windows', 'phone']);
 
