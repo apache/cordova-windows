@@ -179,6 +179,8 @@ Api.prototype.prepare = function (cordovaProject, prepareOptions) {
  */
 Api.prototype.addPlugin = function (plugin, installOptions) {
 
+    var self = this;
+
     var jsProject = JsprojManager.getProject(this.root);
     installOptions = installOptions || {};
     installOptions.variables = installOptions.variables || {};
@@ -189,6 +191,11 @@ Api.prototype.addPlugin = function (plugin, installOptions) {
 
     return PluginManager.get(this.platform, this.locations, jsProject)
         .addPlugin(plugin, installOptions)
+        .then(function () {
+            // CB-11657 Add BOM to www files here because files added by plugin
+            // probably don't have it. Prepare would add BOM but it might not be called
+            return require('./lib/prepare').addBOMSignature(self.locations.www);
+        })
         // CB-11022 return non-falsy value to indicate
         // that there is no need to run prepare after
         .thenResolve(true);
@@ -208,9 +215,15 @@ Api.prototype.addPlugin = function (plugin, installOptions) {
  *   CordovaError instance.
  */
 Api.prototype.removePlugin = function (plugin, uninstallOptions) {
+    var self = this;
     var jsProject = JsprojManager.getProject(this.root);
     return PluginManager.get(this.platform, this.locations, jsProject)
         .removePlugin(plugin, uninstallOptions)
+        .then(function () {
+            // CB-11657 Add BOM to cordova_plugins, since it is was
+            // regenerated after plugin uninstallation and does not have BOM
+            return require('./lib/prepare').addBOMToFile(path.resolve(self.locations.www, 'cordova_plugins.js'));
+        })
         // CB-11022 return non-falsy value to indicate
         // that there is no need to run prepare after
         .thenResolve(true);
