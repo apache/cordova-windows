@@ -385,6 +385,21 @@ AppxManifest.prototype.getVisualElements = function () {
                 return this.setBackgroundColor(color);
             } catch (e) { return this; }
         },
+        getForegroundText: function () {
+            return visualElements.attrib.ForegroundText;
+        },
+        setForegroundText: function (color) {
+            if (color) {
+                // Foreground color can either be dark or light, light is the default
+                if (color !== "dark") {
+                    color = "light";
+                }
+
+                visualElements.attrib.ForegroundText = color;
+            }
+            
+            return this;
+        },
         getSplashBackgroundColor: function () {
             var splashNode = visualElements.find('./' + self.prefix + 'SplashScreen');
             return splashNode && splashNode.attrib.BackgroundColor;

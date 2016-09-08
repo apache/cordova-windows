@@ -131,6 +131,7 @@ function updateManifestFile (config, manifestPath) {
     // Apply background color, splashscreen background color, etc.
     manifest.getVisualElements()
         .trySetBackgroundColor(config.getPreference('BackgroundColor'))
+        .setForegroundText(config.getPreference('ForegroundText'))
         .setSplashBackgroundColor(config.getPreference('SplashScreenBackgroundColor'))
         .setToastCapable(config.getPreference('WindowsToastCapable'))
         .setOrientation(config.getPreference('Orientation'));
