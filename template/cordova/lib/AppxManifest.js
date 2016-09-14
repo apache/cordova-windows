@@ -407,10 +407,12 @@ AppxManifest.prototype.getVisualElements = function () {
         },
         setSplashBackgroundColor: function (color) {
             var splashNode = visualElements.find('./' + self.prefix + 'SplashScreen');
-            if (color && splashNode) {
-                splashNode.attrib.BackgroundColor = refineColor(color);
-            } else if (!color) {
-                delete splashNode.attrib.BackgroundColor;
+            if (splashNode) {
+                if (color) {
+                    splashNode.attrib.BackgroundColor = refineColor(color);
+                } else {
+                    delete splashNode.attrib.BackgroundColor;
+                }
             }
             return this;
         },
