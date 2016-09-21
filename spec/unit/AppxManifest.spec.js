@@ -194,6 +194,7 @@ describe('AppxManifest', function () {
             
             var foregroundTextLight = 'light';
             var foregroundTextDark = 'dark';
+            var foregroundTextDefault = foregroundTextLight;
             
             // Set to 'light'
             visualElementsWindows.setForegroundText(foregroundTextLight);
@@ -202,6 +203,10 @@ describe('AppxManifest', function () {
             // Set to 'dark'
             visualElementsWindows.setForegroundText(foregroundTextDark);
             expect(visualElementsWindows.getForegroundText()).toEqual(foregroundTextDark);
+            
+            // Simulate removal of preference, should change back to default vlaue 'light'
+            visualElementsWindows.setForegroundText(undefined);
+            expect(visualElementsWindows.getForegroundText()).toEqual(foregroundTextDefault);
             
             // Returns nothing on Windows 10
             visualElementsWindows10.setForegroundText(foregroundTextLight);
