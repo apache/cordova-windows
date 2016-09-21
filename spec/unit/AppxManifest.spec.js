@@ -187,6 +187,32 @@ describe('AppxManifest', function () {
         it('refineColor should leave CSS color name as is', function () {
             expect(refineColor(CSS_COLOR_NAME)).toEqual(CSS_COLOR_NAME);
         });
+        
+        it('setForegroundText should change the ForegroundText property on non-Windows 10 platforms', function () {
+            var visualElementsWindows = AppxManifest.get(WINDOWS_MANIFEST).getVisualElements();
+            var visualElementsWindows10 = AppxManifest.get(WINDOWS_10_MANIFEST).getVisualElements();
+            
+            var foregroundTextLight = 'light';
+            var foregroundTextDark = 'dark';
+            var foregroundTextDefault = foregroundTextLight;
+            
+            // Set to 'light'
+            visualElementsWindows.setForegroundText(foregroundTextLight);
+            expect(visualElementsWindows.getForegroundText()).toEqual(foregroundTextLight);
+            
+            // Set to 'dark'
+            visualElementsWindows.setForegroundText(foregroundTextDark);
+            expect(visualElementsWindows.getForegroundText()).toEqual(foregroundTextDark);
+            
+            // Simulate removal of preference, should change back to default vlaue 'light'
+            visualElementsWindows.setForegroundText(undefined);
+            expect(visualElementsWindows.getForegroundText()).toEqual(foregroundTextDefault);
+            
+            // Returns nothing on Windows 10
+            visualElementsWindows10.setForegroundText(foregroundTextLight);
+            expect(visualElementsWindows10.getForegroundText()).toEqual(undefined);
+        });
+        
     });
 });
 
