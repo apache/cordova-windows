@@ -389,9 +389,8 @@ AppxManifest.prototype.getVisualElements = function () {
             return visualElements.attrib.ForegroundText;
         },
         setForegroundText: function (color) {
-            if (color) {
-                visualElements.attrib.ForegroundText = color;
-            }
+            // If color is not set, fall back to 'light' by default
+            visualElements.attrib.ForegroundText = color || 'light'; 
             
             return this;
         },
