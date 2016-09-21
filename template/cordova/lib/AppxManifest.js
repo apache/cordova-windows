@@ -604,6 +604,10 @@ Win10AppxManifest.prototype.getVisualElements = function () {
     // See https://msdn.microsoft.com/ru-ru/library/windows/apps/dn423310.aspx
     result.getToastCapable = function () {};
     result.setToastCapable = function () { return this; };
+    
+    // ForegroundText was removed in Windows 10 as well
+    result.getForegroundText = function () {};
+    result.setForegroundText = function () { return this; };
 
     return result;
 };
