@@ -390,11 +390,6 @@ AppxManifest.prototype.getVisualElements = function () {
         },
         setForegroundText: function (color) {
             if (color) {
-                // Foreground color can either be dark or light, light is the default
-                if (color !== 'dark') {
-                    color = 'light';
-                }
-
                 visualElements.attrib.ForegroundText = color;
             }
             
