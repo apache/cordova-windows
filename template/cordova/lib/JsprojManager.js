@@ -121,7 +121,7 @@ jsprojManager.prototype = {
         copyToOutputDirectory.text = 'Always';
         children.push(copyToOutputDirectory);
 
-        var item = createItemGroupElement('ItemGroup/Content', sourcePath, targetConditions, children);
+        var item = createItemGroupElement('ItemGroup/None', sourcePath, targetConditions, children);
         this._getMatchingProjects(targetConditions).forEach(function (project) {
             project.appendToRoot(item);
         });
@@ -130,7 +130,7 @@ jsprojManager.prototype = {
     removeResourceFileFromProject: function (relPath, targetConditions) {
         events.emit('verbose', 'jsprojManager.removeResourceFile(relPath: ' + relPath + ', targetConditions: ' + JSON.stringify(targetConditions) + ')');
         this._getMatchingProjects(targetConditions).forEach(function (project) {
-            project.removeItemGroupElement('ItemGroup/Content', relPath, targetConditions);
+            project.removeItemGroupElement('ItemGroup/None', relPath, targetConditions);
         });
     },
 
