@@ -86,14 +86,24 @@ function Api(platform, platformRootDir, eventEmitter) {
  * @return {Promise<PlatformApi>} Promise either fulfilled with PlatformApi
  *   instance or rejected with CordovaError.
  */
-Api.createPlatform = function (destinationDir, projectConfig, options, eventEmitter) {
-    setupEvents(eventEmitter);
-    return require('../../bin/lib/create')
-    .create(destinationDir, projectConfig, options)
-    .then(function () {
-        var PlatformApi = require(path.resolve(destinationDir, 'cordova/Api'));
-        return new PlatformApi(PLATFORM, destinationDir, eventEmitter);
-    });
+Api.createPlatform = function (destinationDir, projectConfig, options, events) {
+    setupEvents(events);
+    var result;
+
+    try {
+        result = require('../../bin/lib/create')
+        .create(destinationDir, projectConfig, options)
+        .then(function () {
+            var PlatformApi = require(path.resolve(destinationDir, 'cordova/Api'));
+            return new PlatformApi(PLATFORM, destinationDir, events);
+        });
+    }
+    catch(e) {
+        events.emit('error','createPlatform is not callable from the windows project API.');
+        throw(e);
+    }
+
+    return result;
 };
 
 /**
@@ -106,19 +116,25 @@ Api.createPlatform = function (destinationDir, projectConfig, options, eventEmit
  *   should override the default one from platform.
  * @param  {Boolean}  [options.link=false]  Flag that indicates that platform's sources
  *   will be linked to installed platform instead of copying.
- * @param {EventEmitter} [eventEmitter] The emitter that will be used for logging
+ * @param {EventEmitter} [events] The emitter that will be used for logging
  *
  * @return {Promise<PlatformApi>} Promise either fulfilled with PlatformApi
  *   instance or rejected with CordovaError.
  */
-Api.updatePlatform = function (destinationDir, options, eventEmitter) {
-    setupEvents(eventEmitter);
-    return require('../../bin/lib/update')
-    .update(destinationDir, options)
-    .then(function () {
-        var PlatformApi = require(path.resolve(destinationDir, 'cordova/Api'));
-        return new PlatformApi(PLATFORM, destinationDir, eventEmitter);
-    });
+Api.updatePlatform = function (destinationDir, options, events) {
+    setupEvents(events);
+    try {
+        return require('../../bin/lib/update')
+        .update(destinationDir, options)
+        .then(function () {
+            var PlatformApi = require(path.resolve(destinationDir, 'cordova/Api'));
+            return new PlatformApi(PLATFORM, destinationDir, events);
+        });
+    }
+    catch(e) {
+        events.emit('error','updatePlatform is not callable from the windows project API.');
+        throw(e);
+    }
 };
 
 /**
