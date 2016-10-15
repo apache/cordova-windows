@@ -29,6 +29,20 @@ var TEST_APP_PACKAGE_NAME = '"c:\\testapppackage.appx"',
 
 describe('The correct version of the app deployment tool is obtained.', function() {
 
+    var mockedProgramFiles = process.env['ProgramFiles(x86)'];
+
+    beforeEach(function() {
+        process.env['ProgramFiles(x86)'] = path.join('c:/Program Files (x86)');
+    });
+
+    afterEach(function() {
+        if (mockedProgramFiles) {
+            process.env['ProgramFiles(x86)'] = mockedProgramFiles;
+        } else {
+            delete process.env['ProgramFiles(x86)'];
+        }
+    });
+
     it('Provides an AppDeployCmdTool when 8.1 is requested.', function() {
 
         var tool = deployment.getDeploymentTool('8.1');
