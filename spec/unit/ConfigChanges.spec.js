@@ -19,6 +19,9 @@
 
 var BaseMunger = require('cordova-common').ConfigChanges.PlatformMunger;
 var PlatformMunger = require('../../template/cordova/lib/ConfigChanges').PlatformMunger;
+var PluginInfo = require('cordova-common').PluginInfo;
+var Api = require('../../template/cordova/Api');
+var AppxManifest = require('../../template/cordova/lib/AppxManifest');
 
 var os = require('os');
 var path = require('path');
@@ -27,6 +30,12 @@ var shell = require('shelljs');
 var tempDir = path.join(os.tmpdir(), 'windows');
 var WINDOWS_MANIFEST = 'package.windows.appxmanifest';
 var WINDOWS10_MANIFEST = 'package.windows10.appxmanifest';
+var FIXTURES = path.join(__dirname, 'fixtures');
+var DUMMY_PLUGIN = 'org.test.plugins.capabilityplugin';
+
+var dummyPlugin = path.join(FIXTURES, DUMMY_PLUGIN);
+var dummyProjName = 'testProj';
+var windowsProject = path.join(FIXTURES, dummyProjName);
 
 describe('PlatformMunger', function () {
     var munge, munger;
@@ -71,6 +80,58 @@ describe('PlatformMunger', function () {
 
             munger.apply_file_munge('package.windows10.appxmanifest', baseMunge, /*remove=*/true);
             expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalledWith(WINDOWS10_MANIFEST, capabilitiesMunge, true);
+        });
+    });
+});
+
+describe('Capabilities within package.windows.appxmanifest', function() {
+    var testDir;
+
+    beforeEach(function() {
+        testDir = path.join(__dirname, 'testDir');
+        shell.mkdir('-p', testDir);
+        shell.cp('-rf', windowsProject + '/*', testDir);
+    });
+
+    afterEach(function() {
+        shell.rm('-rf', testDir);
+    });
+
+    it('should be removed using overriden PlatformMunger', function(done) {
+        var windowsPlatform = path.join(testDir, 'platforms/windows');
+        var windowsManifest = path.join(windowsPlatform, WINDOWS_MANIFEST);
+        var api = new Api();
+        api.root = windowsPlatform;
+        api.locations.root = windowsPlatform;
+        api.locations.www = path.join(windowsPlatform, 'www');
+        var dummyPluginInfo = new PluginInfo(dummyPlugin);
+
+        var fail = jasmine.createSpy('fail')
+        .andCallFake(function (err) {
+            console.error(err);
+        });
+
+        function getPluginCapabilities() {
+            return dummyPluginInfo.getConfigFiles()[0].xmls;
+        }
+
+        function getManifestCapabilities() {
+            var appxmanifest = AppxManifest.get(windowsManifest, true);
+            return appxmanifest.getCapabilities();
+        }
+        api.addPlugin(dummyPluginInfo)
+        .then(function() {
+            //  There is the one default capability in manifest with 'internetClient' name
+            expect(getManifestCapabilities().length).toBe(getPluginCapabilities().length + 1); 
+            api.removePlugin(dummyPluginInfo);
+        })
+        .then(function() {
+            expect(getManifestCapabilities().length).toBe(1);
+        })
+        .catch(fail)
+        .finally(function() {
+            expect(fail).not.toHaveBeenCalled();
+            done();
         });
     });
 });

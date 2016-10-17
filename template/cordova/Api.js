@@ -22,6 +22,9 @@ var events = require('cordova-common').events;
 var JsprojManager = require('./lib/JsprojManager');
 var PluginManager = require('cordova-common').PluginManager;
 var CordovaLogger = require('cordova-common').CordovaLogger;
+var PlatformMunger = require('./lib/ConfigChanges.js').PlatformMunger;
+var PlatformJson = require('cordova-common').PlatformJson;
+var PluginInfoProvider = require('cordova-common').PluginInfoProvider;
 
 var PLATFORM = 'windows';
 
@@ -233,7 +236,12 @@ Api.prototype.addPlugin = function (plugin, installOptions) {
 Api.prototype.removePlugin = function (plugin, uninstallOptions) {
     var self = this;
     var jsProject = JsprojManager.getProject(this.root);
-    return PluginManager.get(this.platform, this.locations, jsProject)
+    var platformJson = PlatformJson.load(this.root, this.platform);
+    var pluginManager = PluginManager.get(this.platform, this.locations, jsProject);
+    //  CB-11933 We override this field by windows specific one because windows has special logic
+    //  for appxmanifest's capabilities removal (see also https://issues.apache.org/jira/browse/CB-11066)
+    pluginManager.munger = new PlatformMunger(this.platform, this.locations.root, platformJson, new PluginInfoProvider());
+    return pluginManager
         .removePlugin(plugin, uninstallOptions)
         .then(function () {
             // CB-11657 Add BOM to cordova_plugins, since it is was
