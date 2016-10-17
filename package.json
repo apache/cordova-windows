@@ -21,7 +21,7 @@
     "jshint": "jshint bin && jshint template && jshint spec"
   },
   "dependencies": {
-    "cordova-common": "^1.4.1",
+    "cordova-common": "^1.5.1",
     "elementtree": "^0.1.6",
     "node-uuid": "^1.4.3",
     "nopt": "^3.0.4",
