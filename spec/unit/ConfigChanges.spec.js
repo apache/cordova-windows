@@ -57,24 +57,28 @@ describe('PlatformMunger', function () {
 
         it('should call parent\'s method with the same parameters', function () {
             munger.apply_file_munge(WINDOWS_MANIFEST, munge, false);
-            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalled();
+            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalledWith(WINDOWS_MANIFEST, munge, false);
         });
 
         it('should additionally call parent\'s method with another munge if removing changes from windows 10 appxmanifest', function () {
             munger.apply_file_munge(WINDOWS10_MANIFEST, munge, /*remove=*/true);
-            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalled();
-            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalled();
+            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalledWith(WINDOWS10_MANIFEST, munge, true);
+            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalledWith(WINDOWS10_MANIFEST, jasmine.any(Object), true);
         });
 
         it('should remove uap: capabilities added by windows prepare step', function () {
             // Generate a munge that contain non-prefixed capabilities changes
-            var baseMunge = { parents: { 'package.windows10.appxmanifest': [
+            var baseMunge = { parents: { '/Package/Capabilities': [
                 // Emulate capability that was initially added with uap prefix
                 { before: undefined, count: 1, xml: '<uap:Capability Name=\"privateNetworkClientServer\">'},
                 { before: undefined, count: 1, xml: '<Capability Name=\"enterpriseAuthentication\">'}
             ]}};
+
+            var capabilitiesMunge = { parents: { '/Package/Capabilities': [
+                { before: undefined, count: 1, xml: '<uap:Capability Name=\"enterpriseAuthentication\">'}
+            ]}};
             munger.apply_file_munge(WINDOWS10_MANIFEST, baseMunge, /*remove=*/true);
-            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalled();
+            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalledWith(WINDOWS10_MANIFEST, capabilitiesMunge, true);
         });
     });
 });
@@ -140,9 +144,9 @@ describe('Capabilities within package.windows.appxmanifest', function() {
             expect(manifestCapabilities.length).toBe(getPluginCapabilities(dummyPluginInfo).length + 1);
 
             //  Count 'uap' prefixed capabilities
-            var uapPrefixedCapsCount = manifestCapabilities.reduce(function(prefixedCount, currCap) {
-                return (currCap.type === 'uap:Capability') ? ++prefixedCount : prefixedCount;
-            }, 0);
+            var uapPrefixedCapsCount = manifestCapabilities.filter(function(capability) {
+                return capability.type === 'uap:Capability';
+            }).length;
 
             expect(uapPrefixedCapsCount).toBe(2);
             api.removePlugin(dummyPluginInfo);

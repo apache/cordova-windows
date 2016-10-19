@@ -44,16 +44,21 @@ PlatformMunger.prototype.apply_file_munge = function (file, munge, remove) {
     var mungeCopy = cloneObject(munge);
     var capabilities = mungeCopy.parents[CAPS_SELECTOR];
 
-    // Add 'uap' prefixes for windows 10 manifest
-    if (file === WINDOWS10_MANIFEST)
-        capabilities = generateUapCapabilities(capabilities);
+    if (capabilities) {
+        // Add 'uap' prefixes for windows 10 manifest
+        if (file === WINDOWS10_MANIFEST) {
+            capabilities = generateUapCapabilities(capabilities);
+        }
 
-    // Remove duplicates and sort capabilities when installing plugin
-    if (!remove)
-        capabilities = getUniqueCapabilities(capabilities).sort(compareCapabilities);
+        // Remove duplicates and sort capabilities when installing plugin
+        if (!remove) {
+            capabilities = getUniqueCapabilities(capabilities).sort(compareCapabilities);
+        }
 
-    // Put back capabilities into munge's copy
-    mungeCopy.parents[CAPS_SELECTOR] = capabilities;
+        // Put back capabilities into munge's copy
+        mungeCopy.parents[CAPS_SELECTOR] = capabilities;
+    }
+
     PlatformMunger.super_.prototype.apply_file_munge.call(this, file, mungeCopy, remove);
 };
 
@@ -87,7 +92,6 @@ function getCapabilityName(capability) {
  * @return {Object} an unique array of capabilities
  */
 function getUniqueCapabilities(capabilities) {
-    capabilities = capabilities || [];
     return capabilities.reduce(function(uniqueCaps, currCap) {
 
         var isRepeated = uniqueCaps.some(function(cap) {
@@ -147,7 +151,6 @@ function generateUapCapabilities(capabilities) {
         };
     }
 
-    capabilities = capabilities || [];
     return capabilities
      // For every xml change check if it adds a <Capability> element ...
     .filter(hasCapabilityChange)
