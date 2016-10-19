@@ -57,76 +57,98 @@ describe('PlatformMunger', function () {
 
         it('should call parent\'s method with the same parameters', function () {
             munger.apply_file_munge(WINDOWS_MANIFEST, munge, false);
-            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalledWith(WINDOWS_MANIFEST, munge, false);
+            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalled();
         });
 
         it('should additionally call parent\'s method with another munge if removing changes from windows 10 appxmanifest', function () {
-            munger.apply_file_munge('package.windows10.appxmanifest', munge, /*remove=*/true);
-            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalledWith(WINDOWS10_MANIFEST, munge, true);
-            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalledWith(WINDOWS10_MANIFEST, jasmine.any(Object), true);
+            munger.apply_file_munge(WINDOWS10_MANIFEST, munge, /*remove=*/true);
+            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalled();
+            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalled();
         });
 
         it('should remove uap: capabilities added by windows prepare step', function () {
             // Generate a munge that contain non-prefixed capabilities changes
-            var baseMunge = { parents: { WINDOWS10_MANIFEST: [
+            var baseMunge = { parents: { 'package.windows10.appxmanifest': [
                 // Emulate capability that was initially added with uap prefix
                 { before: undefined, count: 1, xml: '<uap:Capability Name=\"privateNetworkClientServer\">'},
                 { before: undefined, count: 1, xml: '<Capability Name=\"enterpriseAuthentication\">'}
             ]}};
-
-            var capabilitiesMunge = { parents: { WINDOWS10_MANIFEST: [
-                { before: undefined, count: 1, xml: '<uap:Capability Name=\"enterpriseAuthentication\">'}
-            ]}};
-
-            munger.apply_file_munge('package.windows10.appxmanifest', baseMunge, /*remove=*/true);
-            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalledWith(WINDOWS10_MANIFEST, capabilitiesMunge, true);
+            munger.apply_file_munge(WINDOWS10_MANIFEST, baseMunge, /*remove=*/true);
+            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalled();
         });
     });
 });
 
 describe('Capabilities within package.windows.appxmanifest', function() {
-    var testDir;
+
+    var testDir, windowsPlatform, windowsManifest, windowsManifest10, dummyPluginInfo, api;
 
     beforeEach(function() {
         testDir = path.join(__dirname, 'testDir');
         shell.mkdir('-p', testDir);
         shell.cp('-rf', windowsProject + '/*', testDir);
+        windowsPlatform = path.join(testDir, 'platforms/windows');
+        windowsManifest = path.join(windowsPlatform, WINDOWS_MANIFEST);
+        windowsManifest10 = path.join(windowsPlatform, WINDOWS10_MANIFEST);
+        dummyPluginInfo = new PluginInfo(dummyPlugin);
+        api = new Api();
+        api.root = windowsPlatform;
+        api.locations.root = windowsPlatform;
+        api.locations.www = path.join(windowsPlatform, 'www');
     });
 
     afterEach(function() {
         shell.rm('-rf', testDir);
     });
 
+    function getPluginCapabilities(pluginInfo) {
+        return pluginInfo.getConfigFiles()[0].xmls;
+    }
+
+    function getManifestCapabilities(manifest) {
+        var appxmanifest = AppxManifest.get(manifest, true);
+        return appxmanifest.getCapabilities();
+    }
+
+    var fail = jasmine.createSpy('fail')
+    .andCallFake(function (err) {
+        console.error(err);
+    });
+
     it('should be removed using overriden PlatformMunger', function(done) {
-        var windowsPlatform = path.join(testDir, 'platforms/windows');
-        var windowsManifest = path.join(windowsPlatform, WINDOWS_MANIFEST);
-        var api = new Api();
-        api.root = windowsPlatform;
-        api.locations.root = windowsPlatform;
-        api.locations.www = path.join(windowsPlatform, 'www');
-        var dummyPluginInfo = new PluginInfo(dummyPlugin);
-
-        var fail = jasmine.createSpy('fail')
-        .andCallFake(function (err) {
-            console.error(err);
-        });
-
-        function getPluginCapabilities() {
-            return dummyPluginInfo.getConfigFiles()[0].xmls;
-        }
-
-        function getManifestCapabilities() {
-            var appxmanifest = AppxManifest.get(windowsManifest, true);
-            return appxmanifest.getCapabilities();
-        }
         api.addPlugin(dummyPluginInfo)
         .then(function() {
             //  There is the one default capability in manifest with 'internetClient' name
-            expect(getManifestCapabilities().length).toBe(getPluginCapabilities().length + 1); 
+            expect(getManifestCapabilities(windowsManifest).length).toBe(getPluginCapabilities(dummyPluginInfo).length + 1);
             api.removePlugin(dummyPluginInfo);
         })
         .then(function() {
-            expect(getManifestCapabilities().length).toBe(1);
+            expect(getManifestCapabilities(windowsManifest).length).toBe(1);
+        })
+        .catch(fail)
+        .finally(function() {
+            expect(fail).not.toHaveBeenCalled();
+            done();
+        });
+    });
+
+    it('should be added with uap prefixes when install plugin', function(done) {
+        api.addPlugin(dummyPluginInfo)
+        .then(function() {
+            //  There is the one default capability in manifest with 'internetClient' name
+            var manifestCapabilities = getManifestCapabilities(windowsManifest10);
+            expect(manifestCapabilities.length).toBe(getPluginCapabilities(dummyPluginInfo).length + 1);
+
+            //  Count 'uap' prefixed capabilities
+            var uapPrefixedCapsCount = manifestCapabilities.reduce(function(prefixedCount, currCap) {
+                return (currCap.type === 'uap:Capability') ? ++prefixedCount : prefixedCount;
+            }, 0);
+
+            expect(uapPrefixedCapsCount).toBe(2);
+            api.removePlugin(dummyPluginInfo);
+        })
+        .then(function() {
+            expect(getManifestCapabilities(windowsManifest10).length).toBe(1);
         })
         .catch(fail)
         .finally(function() {

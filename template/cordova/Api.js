@@ -208,7 +208,10 @@ Api.prototype.addPlugin = function (plugin, installOptions) {
         installOptions.variables.PACKAGE_NAME = jsProject.getPackageName();
     }
 
-    return PluginManager.get(this.platform, this.locations, jsProject)
+    var platformJson = PlatformJson.load(this.root, this.platform);
+    var pluginManager = PluginManager.get(this.platform, this.locations, jsProject);
+    pluginManager.munger = new PlatformMunger(this.platform, this.locations.root, platformJson, new PluginInfoProvider());
+    return pluginManager
         .addPlugin(plugin, installOptions)
         .then(function () {
             // CB-11657 Add BOM to www files here because files added by plugin
