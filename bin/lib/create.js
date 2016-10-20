@@ -92,6 +92,10 @@ module.exports.create = function (destinationDir, config, options) {
     recursiveCreateDirectory(destinationDirectory);
     shell.cp('-f', srcBaseJsPath, destBaseJsPath);
 
+    // CB-12042 Also copy base.js to www directory
+    shell.mkdir('-p', path.join(projectPath, 'www/WinJS/js'));
+    shell.cp('-f', srcBaseJsPath, path.join(projectPath, 'www/WinJS/js/base.js'));
+
     // replace specific values in manifests' templates
     events.emit('verbose', 'Updating manifest files with project configuration.');
     [ 'package.windows.appxmanifest', 'package.phone.appxmanifest',
