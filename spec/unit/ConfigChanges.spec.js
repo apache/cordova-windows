@@ -63,7 +63,6 @@ describe('PlatformMunger', function () {
         it('should additionally call parent\'s method with another munge if removing changes from windows 10 appxmanifest', function () {
             munger.apply_file_munge(WINDOWS10_MANIFEST, munge, /*remove=*/true);
             expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalledWith(WINDOWS10_MANIFEST, munge, true);
-            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalledWith(WINDOWS10_MANIFEST, jasmine.any(Object), true);
         });
 
         it('should remove uap: capabilities added by windows prepare step', function () {
