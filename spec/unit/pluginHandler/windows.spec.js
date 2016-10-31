@@ -216,16 +216,16 @@ describe('windows project handler', function () {
             // project files, which is not needed.
             it('should write to correct project files when conditions are specified', function () {
 
-                var xpath = 'None[@Include="' + computeResourcePath(resourceFiles[0]) + '"][@Condition="\'$(Platform)\'==\'x86\'"]';
+                var xpath = 'Content[@Include="' + computeResourcePath(resourceFiles[0]) + '"][@Condition="\'$(Platform)\'==\'x86\'"]';
                 validateInstalledProjects('resource-file', resourceFiles[0], xpath, ['all']);
 
-                xpath = 'None[@Include="' + computeResourcePath(resourceFiles[1]) + '"]';
+                xpath = 'Content[@Include="' + computeResourcePath(resourceFiles[1]) + '"]';
                 validateInstalledProjects('resource-file', resourceFiles[1], xpath, ['windows', 'phone', 'windows10']);
 
-                xpath = 'None[@Include="' + computeResourcePath(resourceFiles[2]) + '"]';
+                xpath = 'Content[@Include="' + computeResourcePath(resourceFiles[2]) + '"]';
                 validateInstalledProjects('resource-file', resourceFiles[2], xpath, ['phone']);
 
-                xpath = 'None[@Include="' + computeResourcePath(resourceFiles[3]) + '"][@Condition="\'$(Platform)\'==\'x64\'"]';
+                xpath = 'Content[@Include="' + computeResourcePath(resourceFiles[3]) + '"][@Condition="\'$(Platform)\'==\'x64\'"]';
                 validateInstalledProjects('resource-file', resourceFiles[3], xpath, ['windows8']);
             });
 
@@ -454,7 +454,7 @@ describe('windows project handler', function () {
                 resourcefiles.forEach(function(resourceFile) {
                     install(resourceFile, dummyPluginInfo, dummyProject);
                 });
-                var path = 'ItemGroup/None';
+                var path = 'ItemGroup/Content';
                 var incText = computeResourcePath(resourcefiles[0]);
                 var targetConditions = {versions: undefined, deviceTarget: undefined, arch: 'x86'};
                 validateUninstalledProjects('resource-file', resourcefiles[0], path, incText, targetConditions, ['all']);
