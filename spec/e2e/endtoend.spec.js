@@ -20,6 +20,14 @@ var shell = require('shelljs'),
     fs = require('fs'),
     path = require('path');
 
+var FIXTURES = path.join(__dirname, '../unit/fixtures');
+var EXTENSIONS_PLUGIN = 'org.test.plugins.extensionsplugin';
+var extensionsPlugin = path.join(FIXTURES, EXTENSIONS_PLUGIN);
+
+var templateFolder = path.join(__dirname, '../../template');
+var Api = require(path.join(templateFolder, 'cordova/Api'));
+var PluginInfo = require('cordova-common').PluginInfo;
+
 describe('Cordova create and build', function(){
 
     var projectFolder     = 'testcreate 応用',
@@ -65,5 +73,33 @@ describe('Cordova create and build', function(){
         expect(packages.filter(function(file) { return file.match(/.*Windows.*x86.*\.appx.*/); }).length).toBe(1);
         expect(packages.filter(function(file) { return file.match(/.*Windows.*arm.*\.appx.*/); }).length).toBe(1);
         expect(packages.filter(function(file) { return file.match(/.*Windows.*anycpu.*\.appx.*/); }).length).toBe(1);
+    });
+
+    it('spec.5 should build project containing plugin with InProcessServer extension', function(done){
+        var extensionsPluginInfo, api;
+
+        extensionsPluginInfo = new PluginInfo(extensionsPlugin);
+        api = new Api();
+        api.root = projectFolder;
+        api.locations.root = projectFolder;
+        api.locations.www = path.join(projectFolder, 'www');
+
+        var fail = jasmine.createSpy('fail')
+        .andCallFake(function (err) {
+            console.error(err);
+        });
+
+        api.addPlugin(extensionsPluginInfo)
+        .then(function() {
+            shell.exec(buildScriptPath, {silent:true});
+            var packages = shell.ls(appPackagesFolder);
+            expect(packages.filter(function(file) { return file.match(/.*Phone.*\.appx.*/); }).length).toBe(1);
+            expect(packages.filter(function(file) { return file.match(/.*Windows.*\.appx.*/); }).length).toBe(1);
+        })
+        .catch(fail)
+        .finally(function() {
+            expect(fail).not.toHaveBeenCalled();
+            done();
+        });
     });
 });
