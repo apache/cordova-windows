@@ -136,7 +136,7 @@ function compareCapabilities(firstCap, secondCap) {
 function generateUapCapabilities(capabilities) {
 
     function hasCapabilityChange(change) {
-        return /^\s*<Capability\s/.test(change.xml);
+        return /^\s*<(Device)?Capability\s/.test(change.xml);
     }
 
     function createPrefixedCapabilityChange(change) {

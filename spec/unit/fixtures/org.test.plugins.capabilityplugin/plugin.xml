@@ -8,5 +8,6 @@
         <Capability Name="enterpriseAuthentication" />
         <Capability Name="privateNetworkClientServer" />
         <Capability Name="sharedUserCertificates" />
+        <DeviceCapability Name="webcam"/>
     </config-file>
 </plugin>

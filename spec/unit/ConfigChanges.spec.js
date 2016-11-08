@@ -159,5 +159,43 @@ describe('Capabilities within package.windows.appxmanifest', function() {
             done();
         });
     });
+
+    it('should be added as DeviceCapabilities when install plugin', function(done) {
+        function isDeviceCapability(capability) {
+            return capability.type === 'DeviceCapability';
+        }
+
+        function checkCapabilitiesAfterInstall(manifest) {
+            //  There is the one default capability in manifest with 'internetClient' name
+            var manifestCapabilities = getManifestCapabilities(manifest);
+            var pluginCapabilities = getPluginCapabilities(dummyPluginInfo);
+
+            expect(manifestCapabilities.length).toBe(pluginCapabilities.length + 1);
+
+            var manifestDeviceCapabilties = manifestCapabilities.filter(isDeviceCapability);
+            expect(manifestDeviceCapabilties.length).toBe(1);
+        }
+
+        function checkCapabilitiesAfterRemove(manifest) {
+            var manifestCapabilities = getManifestCapabilities(manifest);
+            expect(manifestCapabilities.length).toBe(1);
+        }
+
+        api.addPlugin(dummyPluginInfo)
+        .then(function() {
+            checkCapabilitiesAfterInstall(windowsManifest);
+            checkCapabilitiesAfterInstall(windowsManifest10);
+            api.removePlugin(dummyPluginInfo);
+        })
+        .then(function() {
+            checkCapabilitiesAfterRemove(windowsManifest);
+            checkCapabilitiesAfterRemove(windowsManifest10);
+        })
+        .catch(fail)
+        .finally(function() {
+            expect(fail).not.toHaveBeenCalled();
+            done();
+        });
+    });
 });
 
