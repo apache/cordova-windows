@@ -288,7 +288,7 @@ function buildTargets(allMsBuildVersions, config) {
     if (!msbuild) {
         return Q.reject(new CordovaError('No valid MSBuild was detected for the selected target.'));
     }
-    events.emit('vebose', 'Using MSBuild v' + msbuild.version + ' from ' + msbuild.path);
+    events.emit('verbose', 'Using MSBuild v' + msbuild.version + ' from ' + msbuild.path);
     var myBuildTargets = filterSupportedTargets(selectedBuildTargets, msbuild);
 
     var buildConfigs = [];
