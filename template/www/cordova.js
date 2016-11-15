@@ -2066,7 +2066,7 @@ function show() {
     positionControls();
 
     // Once the extended splash screen is setup, apply the CSS style that will make the extended splash screen visible.
-    WinJS.Utilities.removeClass(extendedSplashScreen, 'hidden');
+    WinJS.Utilities.removeClass(splashElement, 'hidden');
 }
 
 function positionControls() {
@@ -2109,7 +2109,7 @@ function updateImageLocation() {
 
 // Checks whether the extended splash screen is visible and returns a boolean.
 function isVisible() {
-    return !(WinJS.Utilities.hasClass(extendedSplashScreen, 'hidden'));
+    return !(WinJS.Utilities.hasClass(splashElement, 'hidden'));
 }
 
 function fadeOut(el, duration, finishCb) {
@@ -2129,13 +2129,21 @@ function fadeOut(el, duration, finishCb) {
 function hide() {
     if (isVisible()) {
         var hideFinishCb = function () {
-            WinJS.Utilities.addClass(extendedSplashScreen, 'hidden');
-            extendedSplashScreen.style.opacity = 1;
+            WinJS.Utilities.addClass(splashElement, 'hidden');
+            splashElement.style.opacity = 1;
             enableUserInteraction();
         }
 
+        // https://issues.apache.org/jira/browse/CB-11751
+        // This can occur when we directly replace whole document.body f.e. in a router.
+        // Note that you should disable the splashscreen in this case or update a container element instead.
+        if (document.getElementById(splashElement.id) == null) {
+            hideFinishCb();
+            return;
+        }
+
         if (fadeSplashScreen) {
-            fadeOut(extendedSplashScreen, fadeSplashScreenDuration, hideFinishCb);
+            fadeOut(splashElement, fadeSplashScreenDuration, hideFinishCb);
         } else {
             hideFinishCb();
         }
