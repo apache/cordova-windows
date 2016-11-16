@@ -24,6 +24,7 @@ var PluginManager = require('cordova-common').PluginManager;
 var CordovaLogger = require('cordova-common').CordovaLogger;
 var PlatformMunger = require('./lib/ConfigChanges.js').PlatformMunger;
 var PlatformJson = require('cordova-common').PlatformJson;
+var PluginInfo = require('./lib/PluginInfo').PluginInfo;
 var PluginInfoProvider = require('cordova-common').PluginInfoProvider;
 
 var PLATFORM = 'windows';
@@ -200,6 +201,9 @@ Api.prototype.addPlugin = function (plugin, installOptions) {
 
     var self = this;
 
+    // We need to use custom PluginInfo to trigger windows-specific processing
+    // of changes in .appxmanifest files. See PluginInfo.js for details
+    var pluginInfo = new PluginInfo(plugin.dir);
     var jsProject = JsprojManager.getProject(this.root);
     installOptions = installOptions || {};
     installOptions.variables = installOptions.variables || {};
@@ -212,7 +216,7 @@ Api.prototype.addPlugin = function (plugin, installOptions) {
     var pluginManager = PluginManager.get(this.platform, this.locations, jsProject);
     pluginManager.munger = new PlatformMunger(this.platform, this.locations.root, platformJson, new PluginInfoProvider());
     return pluginManager
-        .addPlugin(plugin, installOptions)
+        .addPlugin(pluginInfo, installOptions)
         .then(function () {
             // CB-11657 Add BOM to www files here because files added by plugin
             // probably don't have it. Prepare would add BOM but it might not be called
@@ -238,6 +242,10 @@ Api.prototype.addPlugin = function (plugin, installOptions) {
  */
 Api.prototype.removePlugin = function (plugin, uninstallOptions) {
     var self = this;
+
+    // We need to use custom PluginInfo to trigger windows-specific processing
+    // of changes in .appxmanifest files. See PluginInfo.js for details
+    var pluginInfo = new PluginInfo(plugin.dir);
     var jsProject = JsprojManager.getProject(this.root);
     var platformJson = PlatformJson.load(this.root, this.platform);
     var pluginManager = PluginManager.get(this.platform, this.locations, jsProject);
@@ -245,7 +253,7 @@ Api.prototype.removePlugin = function (plugin, uninstallOptions) {
     //  for appxmanifest's capabilities removal (see also https://issues.apache.org/jira/browse/CB-11066)
     pluginManager.munger = new PlatformMunger(this.platform, this.locations.root, platformJson, new PluginInfoProvider());
     return pluginManager
-        .removePlugin(plugin, uninstallOptions)
+        .removePlugin(pluginInfo, uninstallOptions)
         .then(function () {
             // CB-11657 Add BOM to cordova_plugins, since it is was
             // regenerated after plugin uninstallation and does not have BOM
