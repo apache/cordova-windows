@@ -82,7 +82,7 @@ function cloneObject(obj) {
  * @return {String} name of capability
  */
 function getCapabilityName(capability) {
-    var reg = /Name="(\w+)"/i;
+    var reg = /Name\s*=\s*"(.*?)"/;
     return capability.xml.match(reg)[1];
 }
 
