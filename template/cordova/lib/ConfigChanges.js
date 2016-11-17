@@ -136,7 +136,7 @@ function compareCapabilities(firstCap, secondCap) {
 function generateUapCapabilities(capabilities) {
 
     function hasCapabilityChange(change) {
-        return /^\s*<(Device)?Capability\s/.test(change.xml);
+        return /^\s*<(\w+:)?(Device)?Capability\s/.test(change.xml);
     }
 
     function createPrefixedCapabilityChange(change) {
@@ -144,8 +144,10 @@ function generateUapCapabilities(capabilities) {
             return change;
         }
 
+        //  If capability is already prefixed, avoid adding another prefix
+        var replaceXML = change.xml.indexOf('uap:') > 0 ? change.xml : change.xml.replace(/Capability/, 'uap:Capability');
         return {
-            xml: change.xml.replace(/Capability/, 'uap:Capability'),
+            xml: replaceXML,
             count: change.count,
             before: change.before
         };

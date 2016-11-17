@@ -81,6 +81,7 @@ describe('PlatformMunger', function () {
             ]}};
 
             var capabilitiesMunge = { parents: { '/Package/Capabilities': [
+                { before: undefined, count: 1, xml: '<uap:Capability Name=\"privateNetworkClientServer\">'},
                 { before: undefined, count: 1, xml: '<uap:Capability Name=\"enterpriseAuthentication\">'}
             ]}};
             munger.apply_file_munge(WINDOWS10_MANIFEST, baseMunge, /*remove=*/true);
