@@ -24,6 +24,27 @@ Update these notes using: git log --pretty=format:'* %s' --topo-order --no-merge
 
 cordova-windows is a library that enables developers to create Windows 8/8.1/10 and WP8.1 application projects that support Cordova APIs.
 
+### 4.4.3 (Oct 19, 2016)
+* [CB-12044](https://issues.apache.org/jira/browse/CB-12044) Fix splashscreen image path for ms-appx on Windows
+* [CB-12042](https://issues.apache.org/jira/browse/CB-12042) Copy base.js to www directory at create
+* [CB-11933](https://issues.apache.org/jira/browse/CB-11933) Add uap prefixes for capabilities at plugin install
+* [CB-12003](https://issues.apache.org/jira/browse/CB-12003) updated node_modules
+* [CB-11933](https://issues.apache.org/jira/browse/CB-11933) Remove capabilities from manifest
+* [CB-11993](https://issues.apache.org/jira/browse/CB-11993) - windows platform doesn't test all node versions on appveyor and travis
+* [CB-11825](https://issues.apache.org/jira/browse/CB-11825) Windows dll file won't be copied as resource while adding custom plugin to a UWP project
+* output message, catch exception if require fails, change eventEmitter to events to be consistent with ios+android
+* [CB-11922](https://issues.apache.org/jira/browse/CB-11922) - Add github pull request template
+* [CB-11522](https://issues.apache.org/jira/browse/CB-11522) [windows] Make cordova-js handle 'unknown' type
+* [CB-11857](https://issues.apache.org/jira/browse/CB-11857) Fixed VS 2015 detection on Windows 10 Anniversary
+* [CB-10738](https://issues.apache.org/jira/browse/CB-10738) Use hardcoded Id attribute in Win10 manifest
+* Add missing license headers to prebuild scripts
+* Update bundled cordova-common dependency to 1.4.1
+* [CB-11658](https://issues.apache.org/jira/browse/CB-11658) activated event is not fired on Windows 10 RS1
+* [CB-11657](https://issues.apache.org/jira/browse/CB-11657) Add bom to www after plugin operations
+* [CB-11478](https://issues.apache.org/jira/browse/CB-11478) Parse --archs option consistently
+* [CB-11558](https://issues.apache.org/jira/browse/CB-11558) Make windows plugin rm remove ProjectReference items
+* [CB-11579](https://issues.apache.org/jira/browse/CB-11579) windows: fix bug with 'cordova clean windows'
+
 ### 4.4.2 (Jul 25, 2016)
 * [CB-11548](https://issues.apache.org/jira/browse/CB-11548) Fix issues where MSBuild cannot be found
 * [CB-11241](https://issues.apache.org/jira/browse/CB-11241) Return adding BOM to www back to prepare
