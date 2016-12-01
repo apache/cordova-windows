@@ -64,7 +64,7 @@ module.exports = function patch(platform) {
 
     if (shell.grep(reBaseJs, startPageFilePath).length === 0) {
         // 3. If it doesn't - patch page to include base.js ref before cordova.js
-        var appendBaseJsRe = /( *)(<script\s+(?:type="text\/javascript"\s+)?src="cordova\.js">\s*<\/script>)/;
+        var appendBaseJsRe = /( *)(<script\s+(?:type="text\/javascript"\s+)?src="(.*\/)?cordova\.js">\s*<\/script>)/;
         var subst = '$1<script type="text/javascript" src="' + basejsSrc + '"></script>\n$1$2';
 
         shell.sed('-i', appendBaseJsRe, subst, startPageFilePath);
