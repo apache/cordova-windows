@@ -58,8 +58,11 @@ function readBoolFromCfg(preferenceName, defaultValue, cfg) {
     }
 }
 
-function readPreferencesFromCfg(cfg) {
+function readPreferencesFromCfg(cfg, manifest) {
     try {
+        // Update splashscreen image path to match application manifest
+        splashImageSrc = schema + ':///' + manifest.getSplashScreenImagePath().replace(/\\/g, '/');
+
         bgColor = cfg.getPreferenceValue('SplashScreenBackgroundColor') || bgColor;
         bgColor = bgColor.replace('0x', '#').replace('0X', '#');
         if (bgColor.length > 7) {
@@ -102,8 +105,8 @@ function centerY() {
     }
 }
 
-function init(config) {
-    readPreferencesFromCfg(config);
+function init(config, manifest) {
+    readPreferencesFromCfg(config, manifest);
 
     var splashscreenStyles = document.createElement("link");
     splashscreenStyles.rel = 'stylesheet';
@@ -321,8 +324,8 @@ function onResize() {
 //// </Events>
 
 module.exports = {
-    firstShow: function (config, activatedEventArgs) {
-        init(config);
+    firstShow: function (config, manifest, activatedEventArgs) {
+        init(config, manifest);
         activated(activatedEventArgs);
 
         if (!isVisible() && (splashScreenDelay > 0 || !autoHideSplashScreen)) {

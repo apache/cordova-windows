@@ -20,6 +20,7 @@
 var fs = require('fs');
 var util = require('util');
 var et = require('elementtree');
+var path = require('path');
 var xml= require('cordova-common').xmlHelpers;
 
 var UAP_RESTRICTED_CAPS = ['enterpriseAuthentication', 'sharedUserCertificates',
@@ -413,6 +414,18 @@ AppxManifest.prototype.getVisualElements = function () {
                 } else {
                     delete splashNode.attrib.BackgroundColor;
                 }
+            }
+            return this;
+        },
+        getSplashScreenExtension: function (extension) {
+            var splashNode = visualElements.find('./' + self.prefix + 'SplashScreen');
+            return splashNode && splashNode.attrib.Image && path.extname(splashNode.attrib.Image);
+        },
+        setSplashScreenExtension: function (extension) {
+            var splashNode = visualElements.find('./' + self.prefix + 'SplashScreen');
+            if (splashNode) {
+                var oldPath = splashNode.attrib.Image; 
+                splashNode.attrib.Image = path.dirname(oldPath) + '\\' + path.basename(oldPath, path.extname(oldPath)) + extension;
             }
             return this;
         },

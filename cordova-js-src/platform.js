@@ -78,8 +78,14 @@ module.exports = {
                     return;
                 }
 
-                e.setPromise(makePromise(configHelper.readConfig).then(function (config) {
-                    splashscreen.firstShow(config, e);
+                var manifest;
+
+                e.setPromise(makePromise(configHelper.readManifest).then(function (manifestTmp) {
+                    manifest = manifestTmp;
+                    return makePromise(configHelper.readConfig);
+                })
+                .then(function (config) {
+                    splashscreen.firstShow(config, manifest, e);
                 }).then(function () {
                     // Avoids splashimage flicker on Windows Phone 8.1/10
                     return WinJS.Promise.timeout();

@@ -16,6 +16,15 @@ describe('Cordova clean command', function() {
             if (/config\.xml$/.test(filePath)) return true;
             return fsExistsSyncOrig(filePath);
         });
+        var fsStatSyncOrig = fs.statSync;
+        spyOn(fs, 'statSync').andCallFake(function (filePath) {
+            if (/SplashScreen\.scale-100\.png$/.test(filePath)) {
+                // Use absolute path:
+                return fsStatSyncOrig(iconPath);
+            } 
+
+            return fsStatSyncOrig(filePath);
+        });
     });
 
     afterEach(function() {
@@ -33,7 +42,10 @@ describe('Cordova clean command', function() {
             }
         };
 
-        var rejected = jasmine.createSpy();
+        var rejected = jasmine.createSpy().andCallFake(function(err) {
+            // Log error:
+            expect(err).not.toBeDefined();
+        });
         prepareModule.clean.call(config)
         .then(function() {
             expect(fs.existsSync(iconPath)).toBeFalsy();

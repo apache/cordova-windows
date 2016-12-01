@@ -34,7 +34,12 @@ var rewire  = require('rewire'),
     applyStartPage                  = prepare.__get__('applyStartPage');
 
 var Win10ManifestPath = 'template/package.windows10.appxmanifest',
-    Win81ManifestPath = 'template/package.windows.appxmanifest';
+    Win81ManifestPath = 'template/package.windows.appxmanifest',
+    WP81ManifestPath = 'template/package.phone.appxmanifest';
+
+var Win10ManifestName = path.basename(Win10ManifestPath),
+    Win81ManifestName = path.basename(Win81ManifestPath),
+    WP81ManifestName = path.basename(WP81ManifestPath);
 
 /***
   * Unit tests for validating default ms-appx-web:// URI scheme in Win10
@@ -461,10 +466,10 @@ describe('copyIcons method', function () {
 
     var PROJECT = '/some/path';
 
-    function createMockConfig(images) {
+    function createMockConfig(images, splashScreens) {
         var result = jasmine.createSpyObj('config', ['getIcons', 'getSplashScreens']);
         result.getIcons.andReturn(images);
-        result.getSplashScreens.andReturn([]);
+        result.getSplashScreens.andReturn(splashScreens || []);
 
         return result;
     }
@@ -540,5 +545,169 @@ describe('copyIcons method', function () {
                     path.join('res', 'Windows', 'Square44x44.targetsize-16_altform-unplated_scale-200.png');
             expect(FileUpdater.updatePaths).toHaveBeenCalledWith(expectedPathMap, { rootDir: PROJECT }, logFileOp);
         });
+    });
+
+    it('should ignore splashScreens for Windows 10 project with size >200K and emit a warning', function () {
+        var size300K = 300 * 1024;
+        var warnSpy = jasmine.createSpy('warn');
+        events.on('warn', warnSpy);
+
+        var splashScreens = [
+            {src: 'res/Windows/splashscreen.png', target: 'SplashScreen' },                         // targetProject: 10
+            {src: 'res/Windows/splashscreen.scale-180.png', width: '1116', height: '540' },         // targetProject: 8.1
+            {src: 'res/Windows/splashscreen.scale-200.png', width: '1240', height: '600' },         // targetProject: 10
+            {src: 'res/Windows/splashscreen.scale-400.png', width: '2480', height: '1200' },        // targetProject: 10
+            {src: 'res/Windows/splashscreenphone.scale-240.png', width: '1152', height: '1920' },   // targetProject: WP 8.1
+            {src: 'res/Windows/splashscreenphone.png', target: 'SplashScreenPhone' },               // targetProject: WP 8.1
+        ];
+
+        var splashScreensFiles = splashScreens.map(function(splash) {
+            return path.basename(splash.src);
+        });
+        spyOn(fs, 'readdirSync').andReturn(splashScreensFiles);
+
+        spyOn(fs, 'statSync').andReturn({
+            size: size300K
+        });
+
+        var project = { projectConfig: createMockConfig([], splashScreens), root: PROJECT };
+        var locations = { root: PROJECT };
+
+        copyImages(project, locations);
+
+        var expectedPathMap = {};
+        expectedPathMap['images' + path.sep + 'SplashScreen.scale-180.png'] = 'res/Windows/splashscreen.scale-180.png';
+        expectedPathMap['images' + path.sep + 'SplashScreenPhone.scale-240.png'] = path.join('res', 'Windows', 'splashscreenphone.scale-240.png');
+        expectedPathMap['images' + path.sep + 'SplashScreenPhone.scale-100.png'] = path.join('res', 'Windows', 'splashscreenphone.png');
+        expect(FileUpdater.updatePaths).toHaveBeenCalledWith(expectedPathMap, { rootDir: PROJECT }, logFileOp);
+        expect(warnSpy.calls[0].args[0]).toMatch('file size exceeds the limit');
+    });
+
+    it('should ignore splashScreens with unsupported extensions and emit a warning', function () {
+        var warnSpy = jasmine.createSpy('warn');
+        events.on('warn', warnSpy);
+
+        var splashScreens = [
+            {src: 'res/Windows/splashscreen.gif', target: 'SplashScreen' },                         // targetProject: 10
+            {src: 'res/Windows/splashscreen.scale-180.bmp', width: '1116', height: '540' },         // targetProject: 8.1
+            {src: 'res/Windows/splashscreenphone.tga', target: 'SplashScreenPhone' },               // targetProject: WP 8.1
+        ];
+
+        var splashScreensFiles = splashScreens.map(function(splash) {
+            return path.basename(splash.src);
+        });
+        spyOn(fs, 'readdirSync').andReturn(splashScreensFiles);
+
+        spyOn(fs, 'statSync').andReturn({
+            size: 0
+        });
+
+        var project = { projectConfig: createMockConfig([], splashScreens), root: PROJECT };
+        var locations = { root: PROJECT };
+
+        copyImages(project, locations);
+
+        var extensionNotSupportedMsg = 'extension is not supported';
+        var expectedPathMap = {};
+        expect(FileUpdater.updatePaths).toHaveBeenCalledWith(expectedPathMap, { rootDir: PROJECT }, logFileOp);
+        expect(warnSpy.calls[0].args[0]).toMatch(extensionNotSupportedMsg);
+        expect(warnSpy.calls[1].args[0]).toMatch(extensionNotSupportedMsg);
+        expect(warnSpy.calls[2].args[0]).toMatch(extensionNotSupportedMsg);
+    });
+
+    it('should warn about mixed splashscreen extensions used for non-MRT syntax', function () {
+        var updateSplashScreenImageExtensions = prepare.__get__('updateSplashScreenImageExtensions');
+        spyOn(fs, 'writeFileSync');
+        spyOn(AppxManifest, 'get').andReturn({
+            getVisualElements: function() {
+                return {
+                    getSplashScreenExtension: function() {
+                        return '.png';
+                    },
+                    setSplashScreenExtension: function() {}
+                };
+            },
+            write: function() {}
+        });
+        var warnSpy = jasmine.createSpy('warn');
+        events.on('warn', warnSpy);
+
+        var splashScreens = [
+            {src: 'res/Windows/splashscreen.png', width: '620', height: '300' },                    // targetProject: 10
+            {src: 'res/Windows/splashscreen.scale-180.jpg', width: '1116', height: '540' },         // targetProject: 8.1
+            {src: 'res/Windows/splashscreen.scale-200.png', width: '1240', height: '600' },         // targetProject: 10
+            {src: 'res/Windows/splashscreen.scale-400.jpg', width: '2480', height: '1200' },        // targetProject: 10
+            {src: 'res/Windows/splashscreenphone.scale-240.png', width: '1152', height: '1920' },   // targetProject: WP 8.1
+            {src: 'res/Windows/splashscreenphone.jpg', width: '480', height: '800' },               // targetProject: WP 8.1
+        ];
+
+        var splashScreensFiles = splashScreens.map(function(splash) {
+            return path.basename(splash.src);
+        });
+        spyOn(fs, 'readdirSync').andReturn(splashScreensFiles);
+
+        spyOn(fs, 'statSync').andReturn({
+            size: 0
+        });
+
+        var project = { projectConfig: createMockConfig([], splashScreens), root: PROJECT };
+        var locations = { root: PROJECT };
+
+        updateSplashScreenImageExtensions(project, locations);
+
+        var mixedExtensionsMsg = 'splash screens have mixed file extensions';
+        expect(warnSpy.calls[0].args[0]).toMatch(mixedExtensionsMsg);
+        expect(warnSpy.calls[1].args[0]).toMatch(mixedExtensionsMsg);
+    });
+
+    it('should update manifests with proper splashscreen image extension', function () {
+        // 1. Set manifest with SplashScreen.Image = "image.png" (this is default)
+        // 2. Set config.xml with splash src="image.jpg"
+        // 3. updateSplashScreenImageExtensions should call getSplashScreenExtension, setSplashScreenExtension('.jpg')
+
+        var updateSplashScreenImageExtensions = prepare.__get__('updateSplashScreenImageExtensions');
+        spyOn(fs, 'writeFileSync');
+
+        var win10Manifest = AppxManifest.get(Win10ManifestPath),
+            win81Manifest = AppxManifest.get(Win81ManifestPath),
+            wp81Manifest = AppxManifest.get(WP81ManifestPath);
+
+        spyOn(AppxManifest, 'get').andCallFake(function(manifestPath) {
+            if (manifestPath.indexOf(Win10ManifestName) !== -1) {
+                return win10Manifest;
+            }
+
+            if (manifestPath.indexOf(Win81ManifestName) !== -1) {
+                return win81Manifest;
+            }
+
+            if (manifestPath.indexOf(WP81ManifestName) !== -1) {
+                return wp81Manifest;
+            }
+        });
+
+        var splashScreens = [
+            {src: 'res/Windows/splashscreen.jpg', width: '620', height: '300' },                    // targetProject: 10
+            {src: 'res/Windows/splashscreen.scale-180.jpg', width: '1116', height: '540' },         // targetProject: 8.1
+            {src: 'res/Windows/splashscreenphone.jpg', width: '480', height: '800' },               // targetProject: WP 8.1
+        ];
+
+        var splashScreensFiles = splashScreens.map(function(splash) {
+            return path.basename(splash.src);
+        });
+        spyOn(fs, 'readdirSync').andReturn(splashScreensFiles);
+
+        spyOn(fs, 'statSync').andReturn({
+            size: 0
+        });
+
+        var project = { projectConfig: createMockConfig([], splashScreens), root: PROJECT };
+        var locations = { root: PROJECT };
+
+        updateSplashScreenImageExtensions(project, locations);
+
+        expect(win10Manifest.getVisualElements().getSplashScreenExtension()).toBe('.jpg');
+        expect(win81Manifest.getVisualElements().getSplashScreenExtension()).toBe('.jpg');
+        expect(wp81Manifest.getVisualElements().getSplashScreenExtension()).toBe('.jpg');
     });
 });

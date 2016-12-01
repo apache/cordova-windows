@@ -79,7 +79,9 @@
     <AppxManifest Include="package.phone.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <Content Include="images\*.png" Exclude="images\*.scale-180.*" />
+    <Content Exclude="images\*SplashScreen.*" Include="images\*.png" />
+    <Content Exclude="images\*SplashScreen.*" Include="images\*.jpg" />
+    <Content Exclude="images\*SplashScreen.*" Include="images\*.jpeg" />
   </ItemGroup>
   <ItemGroup>
     <SDKReference Include="Microsoft.Phone.WinJS.2.1, Version=1.0" />

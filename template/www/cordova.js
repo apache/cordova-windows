@@ -1,5 +1,5 @@
 ﻿// Platform: windows
-// 53ea1913735222d326e65326e03391405df3cd4e
+// a3732cb71d9b1dd590338e8cf44196f366d46da3
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -844,26 +844,47 @@ module.exports = channel;
 // file: F:/coho/cordova-windows/cordova-js-src/confighelper.js
 define("cordova/confighelper", function(require, exports, module) {
 
-// config.xml wrapper (non-node ConfigParser analogue)
-var config;
-function Config(xhr) {
-    function loadPreferences(xhr) {
-        var parser = new DOMParser();
-        var doc = parser.parseFromString(xhr.responseText, "application/xml");
+// config.xml and AppxManifest.xml wrapper (non-node ConfigParser analogue)
+var configCache = {};
+var utils = require("cordova/utils");
 
-        var preferences = doc.getElementsByTagName("preference");
-        return Array.prototype.slice.call(preferences);
-    }
+var isPhone = (cordova.platformId == 'windows') && WinJS.Utilities.isPhone;
+var isWin10UWP = navigator.appVersion.indexOf('MSAppHost/3.0') !== -1;
+var splashScreenTagName = isWin10UWP ? "SplashScreen" : (isPhone ? "m3:SplashScreen" : "m2:SplashScreen");
 
-    this.xhr = xhr;
-    this.preferences = loadPreferences(this.xhr);
+function XmlFile(text) {
+    this.text = text;
 }
 
-function readConfig(success, error) {
+XmlFile.prototype.loadTags = function (tagName) {
+    var parser;
+    if (!this.doc) {
+        parser = new DOMParser();
+        this.doc = parser.parseFromString(this.text, "application/xml");
+    }
+
+    var tags = this.doc.getElementsByTagName(tagName);
+    return Array.prototype.slice.call(tags);
+}
+
+function Config(text) {
+    XmlFile.apply(this, arguments);
+    this.preferences = this.loadTags("preference");
+}
+
+function Manifest(text) {
+    XmlFile.apply(this, arguments);
+    this.splashScreen = this.loadTags(splashScreenTagName)[0];
+}
+
+utils.extend(Config, XmlFile);
+utils.extend(Manifest, XmlFile);
+
+function requestFile(filePath, success, error) {
     var xhr;
 
-    if (typeof config != 'undefined') {
-        success(config);
+    if (typeof configCache[filePath] != 'undefined') {
+        success(configCache[filePath]);
     }
 
     function fail(msg) {
@@ -877,11 +898,11 @@ function readConfig(success, error) {
     var xhrStatusChangeHandler = function () {
         if (xhr.readyState == 4) {
             if (xhr.status == 200 || xhr.status == 304 || xhr.status == 0 /* file:// */) {
-                config = new Config(xhr);
-                success(config);
+                configCache[filePath] = xhr.responseText;
+                success(xhr.responseText);
             }
             else {
-                fail('[Windows][cordova.js][xhrStatusChangeHandler] Could not XHR config.xml: ' + xhr.statusText);
+                fail('[Windows][cordova.js][xhrStatusChangeHandler] Could not XHR ' + filePath + ': ' + xhr.statusText);
             }
         }
     };
@@ -890,18 +911,30 @@ function readConfig(success, error) {
     xhr.addEventListener("load", xhrStatusChangeHandler);
 
     try {
-        xhr.open("get", "/config.xml", true);
+        xhr.open("get", filePath, true);
         xhr.send();
     } catch (e) {
-        fail('[Windows][cordova.js][readConfig] Could not XHR config.xml: ' + JSON.stringify(e));
+        fail('[Windows][cordova.js][xhrFile] Could not XHR ' + filePath + ': ' + JSON.stringify(e));
     }
+}
+
+function readConfig(success, error) {
+    requestFile("/config.xml", function (contents) {
+        success(new Config(contents));
+    }, error);
+}
+
+function readManifest(success, error) {
+    requestFile("/AppxManifest.xml", function (contents) {
+        success(new Manifest(contents));
+    }, error);
 }
 
 /**
  * Reads a preference value from config.xml.
  * Returns preference value or undefined if it does not exist.
  * @param {String} preferenceName Preference name to read */
-Config.prototype.getPreferenceValue = function getPreferenceValue(preferenceName) {
+Config.prototype.getPreferenceValue = function (preferenceName) {
     var preferenceItem = this.preferences && this.preferences.filter(function (item) {
         return item.attributes['name'].value === preferenceName;
     });
@@ -911,7 +944,15 @@ Config.prototype.getPreferenceValue = function getPreferenceValue(preferenceName
     }
 }
 
+/**
+ * Reads SplashScreen image path
+ */
+Manifest.prototype.getSplashScreenImagePath = function () {
+    return this.splashScreen.attributes['Image'].value;
+}
+
 exports.readConfig = readConfig;
+exports.readManifest = readManifest;
 
 });
 
@@ -1568,8 +1609,14 @@ module.exports = {
                     return;
                 }
 
-                e.setPromise(makePromise(configHelper.readConfig).then(function (config) {
-                    splashscreen.firstShow(config, e);
+                var manifest;
+
+                e.setPromise(makePromise(configHelper.readManifest).then(function (manifestTmp) {
+                    manifest = manifestTmp;
+                    return makePromise(configHelper.readConfig);
+                })
+                .then(function (config) {
+                    splashscreen.firstShow(config, manifest, e);
                 }).then(function () {
                     // Avoids splashimage flicker on Windows Phone 8.1/10
                     return WinJS.Promise.timeout();
@@ -1867,8 +1914,11 @@ function readBoolFromCfg(preferenceName, defaultValue, cfg) {
     }
 }
 
-function readPreferencesFromCfg(cfg) {
+function readPreferencesFromCfg(cfg, manifest) {
     try {
+        // Update splashscreen image path to match application manifest
+        splashImageSrc = schema + ':///' + manifest.getSplashScreenImagePath().replace(/\\/g, '/');
+
         bgColor = cfg.getPreferenceValue('SplashScreenBackgroundColor') || bgColor;
         bgColor = bgColor.replace('0x', '#').replace('0X', '#');
         if (bgColor.length > 7) {
@@ -1911,8 +1961,8 @@ function centerY() {
     }
 }
 
-function init(config) {
-    readPreferencesFromCfg(config);
+function init(config, manifest) {
+    readPreferencesFromCfg(config, manifest);
 
     var splashscreenStyles = document.createElement("link");
     splashscreenStyles.rel = 'stylesheet';
@@ -2130,8 +2180,8 @@ function onResize() {
 //// </Events>
 
 module.exports = {
-    firstShow: function (config, activatedEventArgs) {
-        init(config);
+    firstShow: function (config, manifest, activatedEventArgs) {
+        init(config, manifest);
         activated(activatedEventArgs);
 
         if (!isVisible() && (splashScreenDelay > 0 || !autoHideSplashScreen)) {

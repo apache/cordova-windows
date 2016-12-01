@@ -212,6 +212,26 @@ describe('AppxManifest', function () {
             visualElementsWindows10.setForegroundText(foregroundTextLight);
             expect(visualElementsWindows10.getForegroundText()).toEqual(undefined);
         });
+
+        it('getSplashScreenExtension/setSplashScreenExtension', function () {
+            var visualElementsWindows = AppxManifest.get(WINDOWS_MANIFEST).getVisualElements();
+            var visualElementsWindows10 = AppxManifest.get(WINDOWS_10_MANIFEST).getVisualElements();
+            var visualElementsWindowsPhone = AppxManifest.get(WINDOWS_PHONE_MANIFEST).getVisualElements();
+            var jpgExtension = '.jpg';
+
+            // PNG is default extension
+            expect(visualElementsWindows.getSplashScreenExtension()).toEqual('.png');
+            expect(visualElementsWindows10.getSplashScreenExtension()).toEqual('.png');
+            expect(visualElementsWindowsPhone.getSplashScreenExtension()).toEqual('.png');
+
+            // Set to jpg
+            visualElementsWindows.setSplashScreenExtension(jpgExtension);
+            expect(visualElementsWindows.getSplashScreenExtension()).toEqual(jpgExtension);
+            visualElementsWindows10.setSplashScreenExtension(jpgExtension);
+            expect(visualElementsWindows10.getSplashScreenExtension()).toEqual(jpgExtension);
+            visualElementsWindowsPhone.setSplashScreenExtension(jpgExtension);
+            expect(visualElementsWindowsPhone.getSplashScreenExtension()).toEqual(jpgExtension);
+        });
     });
 });
 
