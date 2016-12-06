@@ -605,6 +605,11 @@ module.exports.prepare = function (cordovaProject, options) {
     // TODO: invalidate only entries that were affected by config munge
     AppxManifest.purgeCache();
 
+    // CB-10845 avoid using cached appxmanifests since they could be
+    // previously modififed outside of AppxManifest class
+    // TODO: invalidate only entries that were affected by config munge
+    AppxManifest.purgeCache();
+
     // Update own www dir with project's www assets and plugins' assets and js-files
     return Q.when(updateWww(cordovaProject, this.locations))
     .then(function () {
