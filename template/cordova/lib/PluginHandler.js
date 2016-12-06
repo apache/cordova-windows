@@ -25,13 +25,6 @@ var shell = require('shelljs');
 var events = require('cordova-common').events;
 var CordovaError = require('cordova-common').CordovaError;
 
-// returns relative file path for a file in the plugin's folder that can be referenced
-// from a project file.
-function getPluginFilePath(plugin, pluginFile, targetDir) {
-    var src = path.resolve(plugin.dir, pluginFile);
-    return '$(ProjectDir)' + path.relative(targetDir, src);
-}
-
 var handlers = {
     'source-file': {
         install:function(obj, plugin, project, options) {
@@ -53,18 +46,13 @@ var handlers = {
     },
     'resource-file':{
         install:function(obj, plugin, project, options) {
-            // do not copy, but reference the file in the plugin folder. This allows to
-            // have multiple source files map to the same target and select the appropriate
-            // one based on the current build settings, e.g. architecture.
-            // also, we don't check for existence. This allows to insert build variables
-            // into the source file name, e.g.
-            // <resource-file src="$(Platform)/My.dll" target="My.dll" />
-            var relativeSrcPath = getPluginFilePath(plugin, obj.src, project.projectFolder);
-            project.addResourceFileToProject(relativeSrcPath, obj.target, getTargetConditions(obj));
+            // as per specification resource-file target is specified relative to platform root
+            copyFile(plugin.dir, obj.src, project.root, obj.target);
+            project.addResourceFileToProject(obj.target, obj.target, getTargetConditions(obj));
         },
         uninstall:function(obj, plugin, project, options) {
-            var relativeSrcPath = getPluginFilePath(plugin, obj.src, project.projectFolder);
-            project.removeResourceFileFromProject(relativeSrcPath, getTargetConditions(obj));
+            removeFile(project.root, obj.target);
+            project.removeResourceFileFromProject(obj.target, getTargetConditions(obj));
         }
     },
     'lib-file': {
@@ -204,7 +192,7 @@ function copyFile (plugin_dir, src, project_dir, dest, link) {
     dest = path.resolve(project_dir, dest);
 
     // check that dest path is located in project directory
-    if (dest.indexOf(project_dir) !== 0)
+    if (dest.indexOf(path.resolve(project_dir)) !== 0)
         throw new CordovaError('Destination "' + dest + '" for source file "' + src + '" is located outside the project');
 
     shell.mkdir('-p', path.dirname(dest));
