@@ -161,7 +161,8 @@ function parseAndValidateArgs(options) {
         'packageCertificateKeyFile': String,
         'packageThumbprint': String,
         'publisherId': String,
-        'buildConfig': String
+        'buildConfig': String,
+        'buildFlag': [String, Array]
     }, {}, options.argv, 0);
 
     var config = {};
@@ -197,11 +198,15 @@ function parseAndValidateArgs(options) {
     }
 
     // if build.json is provided, parse it
-    var buildConfigPath = options.buildConfig;
+    var buildConfigPath = options.buildConfig || args.buildConfig;
     if (buildConfigPath) {
         buildConfig = parseBuildConfig(buildConfigPath, config.buildType);
         for (var prop in buildConfig) { config[prop] = buildConfig[prop]; }
     }
+
+    // Merge buildFlags from build config and CLI arguments into
+    // single array ensuring that ones from CLI take a precedence
+    config.buildFlags = [].concat(buildConfig.buildFlag || [], args.buildFlag || []);
 
     // CLI arguments override build.json config
     if (args.packageCertificateKeyFile) {
@@ -258,6 +263,10 @@ function parseBuildConfig(buildConfigPath, buildType) {
         }
 
         result.publisherId = windowsInfo.publisherId;
+    }
+
+    if (windowsInfo.buildFlag) {
+        result.buildFlag = windowsInfo.buildFlag;
     }
 
     return result;
@@ -326,13 +335,15 @@ function buildTargets(allMsBuildVersions, config) {
                 build.arch = 'anycpu';
             }
 
-            var otherProperties = { };
-            // Only add the CordovaBundlePlatforms argument when on the last build step
-            if (shouldBundle && index === configsArray.length - 1) {
-                otherProperties.CordovaBundlePlatforms = bundleTerms;
-            } else if (shouldBundle) {
-                otherProperties.CordovaBundlePlatforms = build.arch;
+            // Send build flags to MSBuild
+            var otherProperties = [].concat(config.buildFlags);
+
+            if (shouldBundle) {
+                // Only add the CordovaBundlePlatforms argument when on the last build step
+                var bundleArchs = (index === configsArray.length - 1) ? bundleTerms : build.arch;
+                otherProperties.push('/p:CordovaBundlePlatforms=' + bundleArchs);
             }
+
             return msbuild.buildProject(path.join(ROOT, build.target), config.buildType,  build.arch, otherProperties);
          });
     }, Q());

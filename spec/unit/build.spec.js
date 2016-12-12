@@ -17,6 +17,7 @@
     under the License.
 */
 var Q = require('q'),
+    fs = require('fs'),
     path = require('path'),
     rewire = require('rewire'),
     platformRoot = '../../template',
@@ -392,6 +393,67 @@ describe('run method', function() {
             expect(fail).not.toHaveBeenCalled();
             expect(buildTools151.buildProject).toHaveBeenCalled();
             done();
+        });
+    });
+});
+
+describe('buildFlags', function () {
+
+    describe('parseAndValidateArgs method', function () {
+        var parseAndValidateArgs;
+        var readFileSync;
+
+        beforeEach(function () {
+            parseAndValidateArgs = build.__get__('parseAndValidateArgs');
+            readFileSync = spyOn(fs, 'readFileSync');
+        });
+
+        it('should handle build flags from both CLI and buildConfig.json', function () {
+            readFileSync.andReturn(JSON.stringify({
+                windows: { debug: { buildFlag: 'baz="quux"' } }
+            }));
+
+            var buildOptions = {
+                argv: ['--buildFlag', 'foo=bar', '--buildFlag', 'bar=baz', '--buildConfig', 'buildConfig.json']
+            };
+
+            expect(parseAndValidateArgs(buildOptions).buildFlags).toEqual([ 'baz="quux"', 'foo=bar', 'bar=baz' ]);
+        });
+    });
+
+    describe('build', function () {
+        beforeEach(function () {
+            spyOn(utils, 'isCordovaProject').andReturn(true);
+            spyOn(prepare, 'applyPlatformConfig');
+            spyOn(prepare, 'updateBuildConfig');
+            spyOn(package, 'getPackage').andReturn(Q({}));
+
+            spyOn(AppxManifest, 'get').andReturn({
+                getIdentity: function () {
+                    return  { setPublisher: function () {} };
+                },
+                write: function () {}
+            });
+        });
+
+        it('should pass buildFlags directly to MSBuild', function(done) {
+            var fail = jasmine.createSpy('fail');
+            var buildTools = {version: '14.0', buildProject: jasmine.createSpy('buildProject').andReturn(Q()), path: testPath };
+            var buildOptions = {
+                argv: ['--buildFlag', 'foo=bar']
+            };
+
+            createFindAllAvailableVersionsMock([buildTools]);
+
+            build.run(buildOptions)
+            .fail(fail)
+            .finally(function() {
+                expect(fail).not.toHaveBeenCalled();
+                expect(buildTools.buildProject).toHaveBeenCalledWith(jasmine.any(String),
+                    jasmine.any(String), jasmine.any(String), [ 'foo=bar' ]);
+
+                done();
+            });
         });
     });
 });

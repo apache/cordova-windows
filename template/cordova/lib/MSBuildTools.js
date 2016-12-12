@@ -29,7 +29,7 @@ function MSBuildTools (version, path) {
     this.path = path;
 }
 
-MSBuildTools.prototype.buildProject = function(projFile, buildType, buildarch, otherConfigProperties) {
+MSBuildTools.prototype.buildProject = function(projFile, buildType, buildarch, buildFlags) {
     events.emit('log', 'Building project: ' + projFile);
     events.emit('log', '\tConfiguration : ' + buildType);
     events.emit('log', '\tPlatform      : ' + buildarch);
@@ -46,11 +46,8 @@ MSBuildTools.prototype.buildProject = function(projFile, buildType, buildarch, o
     '/p:Configuration=' + buildType,
     '/p:Platform=' + buildarch];
 
-    if (otherConfigProperties) {
-        var keys = Object.keys(otherConfigProperties);
-        keys.forEach(function(key) {
-            args.push('/p:' + key + '=' + otherConfigProperties[key]);
-        });
+    if (buildFlags) {
+        args = args.concat(buildFlags);
     }
 
     var that = this;
