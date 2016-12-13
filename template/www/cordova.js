@@ -1908,6 +1908,8 @@ var DEFAULT_SPLASHSCREEN_DURATION = 3000, // in milliseconds
     PROGRESSRING_BOTTOM_MARGIN = 10; // needed for windows 10 min height window
 
 var bgColor = "#464646",
+    titleInitialBgColor,
+    titleBgColor,
     autoHideSplashScreen = true,
     splashScreenDelay = DEFAULT_SPLASHSCREEN_DURATION,
     fadeSplashScreen = true,
@@ -1937,6 +1939,13 @@ function readPreferencesFromCfg(cfg, manifest) {
             // Remove aplha
             bgColor = bgColor.slice(0, 1) + bgColor.slice(3, bgColor.length);
         }
+
+        titleBgColor = {
+            a: 255,
+            r: parseInt(bgColor.slice(1, 3), 16),
+            g: parseInt(bgColor.slice(3, 5), 16),
+            b: parseInt(bgColor.slice(5, 7), 16)
+        };
 
         autoHideSplashScreen = readBoolFromCfg('AutoHideSplashScreen', autoHideSplashScreen, cfg);
         splashScreenDelay = cfg.getPreferenceValue('SplashScreenDelay') || splashScreenDelay;
@@ -2010,7 +2019,7 @@ function init(config, manifest) {
 
     if (isWp81) {
         extendedSplashProgress.classList.add('extended-splash-progress-phone');
-    } else if (isWp10) {   
+    } else if (isWp10) {
         extendedSplashProgress.classList.add('extended-splash-progress-wp10');
     } else {
         extendedSplashProgress.classList.add('extended-splash-progress-desktop');
@@ -2065,9 +2074,30 @@ function exitFullScreen() {
     }
 }
 
+// Make title bg color match splashscreen bg color
+function colorizeTitleBar() {
+    var appView = Windows.UI.ViewManagement.ApplicationView.getForCurrentView();
+    if (appView.titleBar) {
+        titleInitialBgColor = appView.titleBar.backgroundColor;
+
+        appView.titleBar.backgroundColor = titleBgColor;
+        appView.titleBar.buttonBackgroundColor = titleBgColor;
+    }
+}
+
+// Revert title bg color
+function revertTitleBarColor() {
+    var appView = Windows.UI.ViewManagement.ApplicationView.getForCurrentView();
+    if (appView.titleBar) {
+        appView.titleBar.backgroundColor = titleInitialBgColor;
+        appView.titleBar.buttonBackgroundColor = titleInitialBgColor;
+    }
+}
+
 // Displays the extended splash screen. Pass the splash screen object retrieved during activation.
 function show() {
     enterFullScreen();
+    colorizeTitleBar();
     disableUserInteraction();
     positionControls();
 
@@ -2140,6 +2170,9 @@ function hide() {
             enableUserInteraction();
             exitFullScreen();
         }
+
+        // Color reversion before fading is over looks better:
+        revertTitleBarColor();
 
         // https://issues.apache.org/jira/browse/CB-11751
         // This can occur when we directly replace whole document.body f.e. in a router.
