@@ -25,6 +25,13 @@ var shell = require('shelljs');
 var events = require('cordova-common').events;
 var CordovaError = require('cordova-common').CordovaError;
 
+// returns relative file path for a file in the plugin's folder that can be referenced
+// from a project file.
+function getPluginFilePath(plugin, pluginFile, targetDir) {
+    var src = path.resolve(plugin.dir, pluginFile);
+    return '$(ProjectDir)' + path.relative(targetDir, src);
+}
+
 var handlers = {
     'source-file': {
         install:function(obj, plugin, project, options) {
@@ -46,13 +53,31 @@ var handlers = {
     },
     'resource-file':{
         install:function(obj, plugin, project, options) {
-            // as per specification resource-file target is specified relative to platform root
-            copyFile(plugin.dir, obj.src, project.root, obj.target);
-            project.addResourceFileToProject(obj.target, obj.target, getTargetConditions(obj));
+            var targetConditions = getTargetConditions(obj);
+            if (targetConditions.reference) {
+                // do not copy, but reference the file in the plugin folder. This allows to
+                // have multiple source files map to the same target and select the appropriate
+                // one based on the current build settings, e.g. architecture.
+                // also, we don't check for existence. This allows to insert build variables
+                // into the source file name, e.g.
+                // <resource-file src="$(Platform)/My.dll" target="My.dll" />
+                var relativeSrcPath = getPluginFilePath(plugin, obj.src, project.projectFolder);
+                project.addResourceFileToProject(relativeSrcPath, obj.target, targetConditions);
+            } else {
+                // as per specification resource-file target is specified relative to platform root
+                copyFile(plugin.dir, obj.src, project.root, obj.target);
+                project.addResourceFileToProject(obj.target, obj.target, targetConditions);
+            }
         },
         uninstall:function(obj, plugin, project, options) {
-            removeFile(project.root, obj.target);
-            project.removeResourceFileFromProject(obj.target, getTargetConditions(obj));
+            var targetConditions = getTargetConditions(obj);
+            if (targetConditions.reference) {
+                var relativeSrcPath = getPluginFilePath(plugin, obj.src, project.projectFolder);
+                project.removeResourceFileFromProject(relativeSrcPath, targetConditions);
+            } else {
+                removeFile(project.root, obj.target);
+                project.removeResourceFileFromProject(obj.target, targetConditions);
+            }
         }
     },
     'lib-file': {
@@ -180,7 +205,7 @@ module.exports.getUninstaller = function(type) {
 };
 
 function getTargetConditions(obj) {
-    return { versions: obj.versions, deviceTarget: obj.deviceTarget, arch: obj.arch };
+    return { versions: obj.versions, deviceTarget: obj.deviceTarget, arch: obj.arch, reference: obj.reference };
 }
 
 function copyFile (plugin_dir, src, project_dir, dest, link) {

@@ -50,6 +50,11 @@ var invalid_source = faultyPluginInfo.getSourceFiles('windows');
 var invalid_resourceFiles = faultyPluginInfo.getResourceFiles('windows');
 var invalid_libfiles = faultyPluginInfo.getLibFiles('windows');
 
+var resourcereferenceplugin = path.join(__dirname, '../fixtures/org.test.plugins.resourcereferenceplugin');
+var resourcePluginInfo = new PluginInfo(resourcereferenceplugin);
+var valid_resourcereferenceFiles = resourcePluginInfo.getResourceFiles('windows');
+
+
 function copyArray(arr) {
     return Array.prototype.slice.call(arr, 0);
 }
@@ -73,6 +78,11 @@ beforeEach(function () {
         }
     });
 });
+
+var getPluginFilePath = PluginHandler.__get__('getPluginFilePath');
+var computeResourcePath = function(resourceFile) {
+    return getPluginFilePath(dummyPluginInfo, resourceFile.src, cordovaProjectWindowsPlatformDir);
+};
 
 var PLATFORM_PROJECTS = {
     all: 'CordovaApp.projitems',
@@ -209,6 +219,7 @@ describe('windows project handler', function () {
 
         describe('of <resource-file> elements', function () {
             var resourceFiles = copyArray(valid_resourceFiles);
+            var resourcereferenceFiles = copyArray(valid_resourcereferenceFiles);
             var invalidResourceFiles = copyArray(invalid_resourceFiles);
             var install = PluginHandler.getInstaller('resource-file');
 
@@ -227,6 +238,21 @@ describe('windows project handler', function () {
 
                 xpath = 'Content[@Include="' + resourceFiles[3].target + '"][@Condition="\'$(Platform)\'==\'x64\'"]';
                 validateInstalledProjects('resource-file', resourceFiles[3], xpath, ['windows8']);
+            });
+
+            it('should write to correct project files when conditions are specified with reference', function () {
+
+                var xpath = 'Content[@Include="' + computeResourcePath(resourcereferenceFiles[0]) + '"][@Condition="\'$(Platform)\'==\'x86\'"]';
+                validateInstalledProjects('resource-file', resourcereferenceFiles[0], xpath, ['all']);
+
+                xpath = 'Content[@Include="' + computeResourcePath(resourcereferenceFiles[1]) + '"]';
+                validateInstalledProjects('resource-file', resourcereferenceFiles[1], xpath, ['windows', 'phone', 'windows10']);
+
+                xpath = 'Content[@Include="' + computeResourcePath(resourcereferenceFiles[2]) + '"]';
+                validateInstalledProjects('resource-file', resourcereferenceFiles[2], xpath, ['phone']);
+
+                xpath = 'Content[@Include="' + computeResourcePath(resourcereferenceFiles[3]) + '"][@Condition="\'$(Platform)\'==\'x64\'"]';
+                validateInstalledProjects('resource-file', resourcereferenceFiles[3], xpath, ['windows8']);
             });
 
             it('should throw if conditions are invalid', function () {
@@ -515,6 +541,30 @@ describe('windows project handler', function () {
                 incText = resourcefiles[3].target;
                 targetConditions = {versions: '8.0', deviceTarget: 'windows', arch: 'x64'};
                 validateUninstalledProjects('resource-file', resourcefiles[3], path, incText, targetConditions, ['windows8']);
+            });
+
+            it('should remove from correct project files when conditions specified with reference', function () {
+                var resourcereferencefiles = copyArray(valid_resourcereferenceFiles);
+
+                resourcereferencefiles.forEach(function(resourceFile) {
+                    install(resourceFile, resourcePluginInfo, dummyProject);
+                });
+                var path = 'ItemGroup/Content';
+                var incText = computeResourcePath(resourcereferencefiles[0]);
+                var targetConditions = {versions: undefined, deviceTarget: undefined, arch: 'x86', reference: 'true'};
+                validateUninstalledProjects('resource-file', resourcereferencefiles[0], path, incText, targetConditions, ['all']);
+
+                incText = computeResourcePath(resourcereferencefiles[1]);
+                targetConditions = {versions: '>=8.1', deviceTarget: undefined, arch: undefined, reference: 'true'};
+                validateUninstalledProjects('resource-file', resourcereferencefiles[1], path, incText, targetConditions, ['windows', 'phone', 'windows10']);
+
+                incText = computeResourcePath(resourcereferencefiles[2]);
+                targetConditions = {versions: undefined, deviceTarget: 'phone', arch: undefined, reference: 'true'};
+                validateUninstalledProjects('resource-file', resourcereferencefiles[2], path, incText, targetConditions, ['phone']);
+
+                incText = computeResourcePath(resourcereferencefiles[3]);
+                targetConditions = {versions: '8.0', deviceTarget: 'windows', arch: 'x64', reference: 'true'};
+                validateUninstalledProjects('resource-file', resourcereferencefiles[3], path, incText, targetConditions, ['windows8']);
             });
         });
 
