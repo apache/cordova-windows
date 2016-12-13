@@ -64,6 +64,12 @@ var handlers = {
                 var relativeSrcPath = getPluginFilePath(plugin, obj.src, project.projectFolder);
                 project.addResourceFileToProject(relativeSrcPath, obj.target, targetConditions);
             } else {
+                // if target already exists, emit warning to consider using a reference instead of copying
+                if (fs.existsSync(path.resolve(project.root, obj.target))) {
+                    events.emit('warn', '<resource-file> with target ' + obj.target + ' already exists and will be overwritten ' +
+                    'by a <resource-file> with the same target. Consider using the attribute reference="true" in the ' +
+                    '<resource-file> tag to avoid overwriting files with the same target. ');
+                }
                 // as per specification resource-file target is specified relative to platform root
                 copyFile(plugin.dir, obj.src, project.root, obj.target);
                 project.addResourceFileToProject(obj.target, obj.target, targetConditions);
