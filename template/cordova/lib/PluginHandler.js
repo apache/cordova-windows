@@ -53,8 +53,7 @@ var handlers = {
     },
     'resource-file':{
         install:function(obj, plugin, project, options) {
-            var targetConditions = getTargetConditions(obj);
-            if (targetConditions.reference) {
+            if (obj.reference) {
                 // do not copy, but reference the file in the plugin folder. This allows to
                 // have multiple source files map to the same target and select the appropriate
                 // one based on the current build settings, e.g. architecture.
@@ -62,27 +61,27 @@ var handlers = {
                 // into the source file name, e.g.
                 // <resource-file src="$(Platform)/My.dll" target="My.dll" />
                 var relativeSrcPath = getPluginFilePath(plugin, obj.src, project.projectFolder);
-                project.addResourceFileToProject(relativeSrcPath, obj.target, targetConditions);
+                project.addResourceFileToProject(relativeSrcPath, obj.target, getTargetConditions(obj));
             } else {
                 // if target already exists, emit warning to consider using a reference instead of copying
                 if (fs.existsSync(path.resolve(project.root, obj.target))) {
                     events.emit('warn', '<resource-file> with target ' + obj.target + ' already exists and will be overwritten ' +
                     'by a <resource-file> with the same target. Consider using the attribute reference="true" in the ' +
-                    '<resource-file> tag to avoid overwriting files with the same target. ');
+                    '<resource-file> tag to avoid overwriting files with the same target. Using reference will not copy files ' +
+                    'to the destination, instead will create a reference to the source path.');
                 }
                 // as per specification resource-file target is specified relative to platform root
                 copyFile(plugin.dir, obj.src, project.root, obj.target);
-                project.addResourceFileToProject(obj.target, obj.target, targetConditions);
+                project.addResourceFileToProject(obj.target, obj.target, getTargetConditions(obj));
             }
         },
         uninstall:function(obj, plugin, project, options) {
-            var targetConditions = getTargetConditions(obj);
-            if (targetConditions.reference) {
+            if (obj.reference) {
                 var relativeSrcPath = getPluginFilePath(plugin, obj.src, project.projectFolder);
-                project.removeResourceFileFromProject(relativeSrcPath, targetConditions);
+                project.removeResourceFileFromProject(relativeSrcPath, getTargetConditions(obj));
             } else {
                 removeFile(project.root, obj.target);
-                project.removeResourceFileFromProject(obj.target, targetConditions);
+                project.removeResourceFileFromProject(obj.target, getTargetConditions(obj));
             }
         }
     },
@@ -211,7 +210,7 @@ module.exports.getUninstaller = function(type) {
 };
 
 function getTargetConditions(obj) {
-    return { versions: obj.versions, deviceTarget: obj.deviceTarget, arch: obj.arch, reference: obj.reference };
+    return { versions: obj.versions, deviceTarget: obj.deviceTarget, arch: obj.arch };
 }
 
 function copyFile (plugin_dir, src, project_dir, dest, link) {
