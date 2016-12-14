@@ -501,19 +501,19 @@ describe('windows project handler', function () {
                 });
                 var path = 'ItemGroup/Content';
                 var incText = computeResourcePath(resourcereferencefiles[0]);
-                var targetConditions = {versions: undefined, deviceTarget: undefined, arch: 'x86', reference: 'true'};
+                var targetConditions = {versions: undefined, deviceTarget: undefined, arch: 'x86'};
                 validateUninstalledProjects('resource-file', resourcereferencefiles[0], path, incText, targetConditions, ['all']);
 
                 incText = computeResourcePath(resourcereferencefiles[1]);
-                targetConditions = {versions: '>=8.1', deviceTarget: undefined, arch: undefined, reference: 'true'};
+                targetConditions = {versions: '>=8.1', deviceTarget: undefined, arch: undefined};
                 validateUninstalledProjects('resource-file', resourcereferencefiles[1], path, incText, targetConditions, ['windows', 'phone', 'windows10']);
 
                 incText = computeResourcePath(resourcereferencefiles[2]);
-                targetConditions = {versions: undefined, deviceTarget: 'phone', arch: undefined, reference: 'true'};
+                targetConditions = {versions: undefined, deviceTarget: 'phone', arch: undefined};
                 validateUninstalledProjects('resource-file', resourcereferencefiles[2], path, incText, targetConditions, ['phone']);
 
                 incText = computeResourcePath(resourcereferencefiles[3]);
-                targetConditions = {versions: '8.0', deviceTarget: 'windows', arch: 'x64', reference: 'true'};
+                targetConditions = {versions: '8.0', deviceTarget: 'windows', arch: 'x64'};
                 validateUninstalledProjects('resource-file', resourcereferencefiles[3], path, incText, targetConditions, ['windows8']);
             });
         });

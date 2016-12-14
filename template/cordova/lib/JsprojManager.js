@@ -121,11 +121,7 @@ jsprojManager.prototype = {
         copyToOutputDirectory.text = 'Always';
         children.push(copyToOutputDirectory);
 
-        var item;
-        if (targetConditions.reference)
-            item = createItemGroupElement('ItemGroup/Content', sourcePath, targetConditions, children);
-        else
-            item = createItemGroupElement('ItemGroup/Content', destPath, targetConditions, children);
+        var item = createItemGroupElement('ItemGroup/Content', sourcePath, targetConditions, children);
 
         this._getMatchingProjects(targetConditions).forEach(function (project) {
             project.appendToRoot(item);
