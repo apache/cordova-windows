@@ -19,18 +19,21 @@
  *
 */
 
-var isPhone = (cordova.platformId == 'windows') && WinJS.Utilities.isPhone;
 var isWp81 = navigator.appVersion.indexOf("Windows Phone 8.1") !== -1;
 var isWp10 = navigator.appVersion.indexOf("Windows Phone 10") !== -1;
+var isPhoneDevice = isWp81 || isWp10;
 var isWin10UWP = navigator.appVersion.indexOf('MSAppHost/3.0') !== -1;
 var isHosted = window.location.protocol.indexOf('http') === 0;
 var isMsAppxWeb = window.location.protocol.indexOf('ms-appx-web') === 0;
 
 var schema = (isHosted || isWin10UWP && isMsAppxWeb) ? 'ms-appx-web' : 'ms-appx';
-var fileName = isPhone ? 'splashscreenphone.png' : 'splashscreen.png';
+var fileName = isWp81 ? 'splashscreenphone.png' : 'splashscreen.png';
 var splashImageSrc = schema + ':///images/' + fileName;
 
-var splashElement = null, extendedSplashImage = null, extendedSplashProgress = null;
+var splashElement = null,
+    extendedSplashImage = null,
+    extendedSplashProgress = null,
+    extendedSplashImageHelper = null;
 
 //// <Config and initialization>
 var DEFAULT_SPLASHSCREEN_DURATION = 3000, // in milliseconds
@@ -90,21 +93,6 @@ function isPortrait() {
     return window.innerHeight > window.innerWidth;
 }
 
-// Shift down the image to be vertical centered
-function centerY() {
-    if (isPortrait()) {
-        if (window.screen.deviceYDPI === 172) { // 720p 4.7"
-            extendedSplashImage.style.transform = "translateY(22px)";
-        } else if (window.screen.deviceYDPI === 230) { // 1080p 5.5"
-            extendedSplashImage.style.transform = "translateY(25px)";
-        } else if (window.screen.deviceYDPI === 211) { // 1080p 6"
-            extendedSplashImage.style.transform = "translateY(27px)";
-        }
-    } else {
-        extendedSplashImage.style.transform = "";
-    }
-}
-
 function init(config, manifest) {
     readPreferencesFromCfg(config, manifest);
 
@@ -125,6 +113,9 @@ function init(config, manifest) {
     splashElement.classList.add('hidden');
     splashElement.style.backgroundColor = bgColor;
 
+    extendedSplashImageHelper = document.createElement('span');
+    extendedSplashImageHelper.id = 'extendedSplashImageHelper';
+
     extendedSplashImage = document.createElement('img');
     extendedSplashImage.id = 'extendedSplashImage';
     extendedSplashImage.alt = 'Splash screen image';
@@ -133,8 +124,6 @@ function init(config, manifest) {
     var draggableAttr = document.createAttribute('draggable');
     draggableAttr.value = 'false';
     extendedSplashImage.attributes.setNamedItem(draggableAttr);
-
-    extendedSplashImage.style.left = '0px';
 
     // This helps prevent flickering by making the system wait until your image has been rendered 
     // before it switches to your extended splash screen.
@@ -148,29 +137,18 @@ function init(config, manifest) {
     extendedSplashProgress.classList.add('win-medium');
     extendedSplashProgress.classList.add('win-ring');
 
-    if (isWp81 || isWp10) {
-        extendedSplashImage.style.maxWidth = "100%";
-        extendedSplashImage.style.maxHeight = "100%";
-        extendedSplashImage.src = splashImageSrc;
-        // center horizontally
-        extendedSplashImage.style.margin = "0 auto";
-        extendedSplashImage.style.display = "block";
-        // center vertically
-        extendedSplashImage.style.position = "relative";
-        extendedSplashImage.style.top = "50%";
+    extendedSplashImage.src = splashImageSrc;
 
-        // Workaround for intial splashimage jump
-        if (isWp10) {
-            extendedSplashImage.style.transform = "translateY(-50%)";
-        } else {
-            centerY();
-        }
+    if (isPhoneDevice) {
+        extendedSplashImage.classList.add('phone');
     }
 
     if (isWp81) {
         extendedSplashProgress.classList.add('extended-splash-progress-phone');
     } else if (isWp10) {   
         extendedSplashProgress.classList.add('extended-splash-progress-wp10');
+    } else {
+        extendedSplashProgress.classList.add('extended-splash-progress-desktop');
     }
 
     if (!showSplashScreenSpinner) {
@@ -180,6 +158,7 @@ function init(config, manifest) {
         extendedSplashProgress.style.color = splashScreenSpinnerColor;
     }
 
+    splashElement.appendChild(extendedSplashImageHelper);
     splashElement.appendChild(extendedSplashImage);
     splashElement.appendChild(extendedSplashProgress);
 
@@ -203,10 +182,28 @@ function enableUserInteraction() {
     document.body.style['-ms-content-zooming'] = origZooming;
 }
 
+// Enter fullscreen mode
+function enterFullScreen() {
+    if (Windows.UI.ViewManagement.ApplicationViewBoundsMode) { // else crash on 8.1
+        var view = Windows.UI.ViewManagement.ApplicationView.getForCurrentView();
+        view.setDesiredBoundsMode(Windows.UI.ViewManagement.ApplicationViewBoundsMode.useCoreWindow);
+        view.suppressSystemOverlays = true;
+    }
+}
+
+// Exit fullscreen mode
+function exitFullScreen() {
+    if (Windows.UI.ViewManagement.ApplicationViewBoundsMode) { // else crash on 8.1
+        var view = Windows.UI.ViewManagement.ApplicationView.getForCurrentView();
+        view.setDesiredBoundsMode(Windows.UI.ViewManagement.ApplicationViewBoundsMode.useVisible);
+        view.suppressSystemOverlays = false;
+    }
+}
+
 // Displays the extended splash screen. Pass the splash screen object retrieved during activation.
 function show() {
+    enterFullScreen();
     disableUserInteraction();
-
     positionControls();
 
     // Once the extended splash screen is setup, apply the CSS style that will make the extended splash screen visible.
@@ -227,13 +224,13 @@ function positionControls() {
     }
 
     // Position the extended splash screen image in the same location as the system splash screen image.
-    if (isPhone) {
+    if (isPhoneDevice) {
         extendedSplashImage.style.top = 0;
         extendedSplashImage.style.left = 0;
-        centerY();
     } else {
-        extendedSplashImage.style.top = splash.imageLocation.y + 'px';
+        // Avoiding subtle image shift on desktop
         extendedSplashImage.style.left = splash.imageLocation.x + 'px';
+        extendedSplashImage.style.top = splash.imageLocation.y + 'px';
     }
 
     if (!isWp81) {
@@ -276,6 +273,7 @@ function hide() {
             WinJS.Utilities.addClass(splashElement, 'hidden');
             splashElement.style.opacity = 1;
             enableUserInteraction();
+            exitFullScreen();
         }
 
         // https://issues.apache.org/jira/browse/CB-11751
