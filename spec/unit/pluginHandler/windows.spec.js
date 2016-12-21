@@ -27,17 +27,22 @@ var rewire = require('rewire');
 var PluginHandler = rewire('../../../template/cordova/lib/PluginHandler');
 var JsprojManager = require('../../../template/cordova/lib/JsprojManager');
 var cordovaProjectDir = path.join(os.tmpdir(), 'plugman');
+var testProjectWindowsPlatformDir = path.join(__dirname, '../fixtures/testProj', 'platforms', 'windows');
 
 var cordovaProjectWindowsPlatformDir = path.join(cordovaProjectDir, 'platforms', 'windows');
 var cordovaProjectPluginsDir = path.join(cordovaProjectDir, 'plugins');
 var PluginInfo = require('cordova-common').PluginInfo;
+var pluginInfo = require('../../../template/cordova/lib/PluginInfo').PluginInfo;
 
 var dummyplugin = path.join(__dirname, '../fixtures/testProj/plugins/org.test.plugins.dummyplugin');
+var testPlugin = path.join(__dirname, '../fixtures/testProj/plugins/testPlugin');
 var dummyPluginInfo = new PluginInfo(dummyplugin);
+var testPluginInfo = new pluginInfo(testPlugin);
 var valid_source = dummyPluginInfo.getSourceFiles('windows');
 var valid_resourceFiles = dummyPluginInfo.getResourceFiles('windows');
 var valid_libfiles = dummyPluginInfo.getLibFiles('windows');
 var valid_frameworks = dummyPluginInfo.getFrameworks('windows');
+var test_frameworks = testPluginInfo.getFrameworks('windows');
 
 var faultyplugin = path.join(__dirname, '../fixtures/org.test.plugins.faultyplugin');
 var faultyPluginInfo = new PluginInfo(faultyplugin);
@@ -303,6 +308,47 @@ describe('windows project handler', function () {
 
                 xpath = 'Reference[@Include="dummy6"]/HintPath';
                 validateInstalledProjects('framework', frameworks[5], xpath, ['windows', 'windows10', 'phone']);
+            });
+
+            it('with .winmd and .dll files', function() {
+               var frameworks = copyArray(test_frameworks);
+               var install = PluginHandler.getInstaller('framework');
+               var uninstall = PluginHandler.getUninstaller('framework');
+               var testProject = JsprojManager.getProject(testProjectWindowsPlatformDir);
+
+               frameworks.forEach(function(framework) {
+                   install(framework, testPluginInfo, testProject);
+               });
+
+               var jsProjFileFromPlatform = path.join(testProjectWindowsPlatformDir, 'CordovaApp.Windows10.jsproj');
+               var searchProjects = testProject._projects.filter(function(project) {
+                   return path.normalize(project.location) === jsProjFileFromPlatform;
+               });
+
+               expect(searchProjects.length).toBe(1);
+               var projectXmlTree = searchProjects[0].xml;
+
+               var refHintPaths = projectXmlTree.findall('./ItemGroup/Reference/HintPath');
+               var pathsEqual = refHintPaths.every(function(hintPath, index) {
+                    return path.basename(hintPath.text) === path.basename(frameworks[index].src);
+               });
+
+               expect(pathsEqual).toBeTruthy();
+
+               var refWinMdStatus = projectXmlTree.findall('./ItemGroup/Reference/IsWinMDFile');
+               var allReferencesHaveMetadata = refWinMdStatus.every(function(isWinMd) {
+                   return isWinMd.text === 'true';
+               });
+
+               expect(allReferencesHaveMetadata).toBeTruthy();
+
+               var refImplements = projectXmlTree.findall('./ItemGroup/Reference/Implementation');
+               expect(refImplements.length).toBe(1);
+               expect(refImplements[0].text).toBe(path.basename(frameworks[1].implementation));
+
+               frameworks.forEach(function(framework) {
+                   uninstall(framework, testPluginInfo, testProject);
+               });
             });
         });
 
