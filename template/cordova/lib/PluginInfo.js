@@ -97,7 +97,7 @@ function createReplacement(manifestFile, originalChange) {
 /*
 A class for holidng the information currently stored in plugin.xml
 It's inherited from cordova-common's PluginInfo class
-In addition it overrides getConfigFiles method to use windows-specific logic
+In addition it overrides getConfigFiles, getEditConfigs, getFrameworks methods to use windows-specific logic
  */
 function PluginInfo(dirname) {
     //  We're not using `util.inherit' because original PluginInfo defines

@@ -318,6 +318,10 @@ describe('windows project handler', function () {
 
                frameworks.forEach(function(framework) {
                    install(framework, testPluginInfo, testProject);
+                   var dest = path.join('plugins', 'testPlugin', framework.targetDir || '', path.basename(framework.src));
+                   if (framework.implementation) {
+                       expect(copyFileSpy).toHaveBeenCalledWith(testPlugin, framework.implementation, testProjectWindowsPlatformDir, path.join(path.dirname(dest), path.basename(framework.implementation)));
+                   }
                });
 
                var jsProjFileFromPlatform = path.join(testProjectWindowsPlatformDir, 'CordovaApp.Windows10.jsproj');
