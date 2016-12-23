@@ -134,7 +134,7 @@ jsprojManager.prototype = {
         });
     },
 
-    addReference: function (relPath, targetConditions) {
+    addReference: function (relPath, targetConditions, implPath) {
         events.emit('verbose', 'jsprojManager.addReference(incText: ' + relPath + ', targetConditions: ' + JSON.stringify(targetConditions) + ')');
 
         // add hint path with full path
@@ -147,6 +147,13 @@ jsprojManager.prototype = {
             var mdFileTag = new et.Element("IsWinMDFile");
             mdFileTag.text = "true";
             children.push(mdFileTag);
+        }
+
+        // We only need to add <Implementation> tag when dll base name differs from winmd name
+        if (implPath && path.basename(relPath, '.winmd') !== path.basename(implPath, '.dll')) {
+            var implementTag = new et.Element('Implementation');
+            implementTag.text = path.basename(implPath);
+            children.push(implementTag);
         }
 
         var item = createItemGroupElement('ItemGroup/Reference', path.basename(relPath, extName), targetConditions, children);
