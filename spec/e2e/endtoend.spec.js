@@ -102,4 +102,16 @@ describe('Cordova create and build', function(){
             done();
         });
     });
+
+    it('spec.6 should build Windows 8.1 project bundle appxupload', function(){
+        shell.exec(buildScriptPath + ' --release --win --bundle --archs=\"x64 x86 arm\"', {silent : true});
+        var packages = shell.ls(appPackagesFolder);
+        expect(packages.filter(function(file) { return file.match(/.*bundle\.appxupload$/); }).length > 0).toBeTruthy();
+    });
+
+    it('spec.7 should build Windows 10 project bundle appxupload', function(){
+        shell.exec(buildScriptPath + ' --release --win --appx=uap --bundle --archs=\"x64 x86 arm\"', {silent : true});
+        var packages = shell.ls(appPackagesFolder);
+        expect(packages.filter(function(file) { return file.match(/.*bundle\.appxupload$/); }).length > 0).toBeTruthy();
+    });
 });
