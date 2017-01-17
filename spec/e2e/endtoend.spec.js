@@ -85,7 +85,7 @@ describe('Cordova create and build', function(){
         api.locations.www = path.join(projectFolder, 'www');
 
         var fail = jasmine.createSpy('fail')
-        .andCallFake(function (err) {
+        .and.callFake(function (err) {
             console.error(err);
         });
 

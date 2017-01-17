@@ -40,13 +40,13 @@ describe('getAllMinMaxUAPVersions method', function () {
 
     var mockConfig;
     beforeEach(function () {
-        spyOn(xml, 'parseElementtreeSync').andReturn(new et.ElementTree(et.XML(TEST_XML)));
+        spyOn(xml, 'parseElementtreeSync').and.returnValue(new et.ElementTree(et.XML(TEST_XML)));
 
         mockConfig = new ConfigParser('/some/file');
     });
 
     it('should correctly transform all versions as a baseline.', function() {
-        spyOn(mockConfig, 'getMatchingPreferences').andReturn([
+        spyOn(mockConfig, 'getMatchingPreferences').and.returnValue([
             { name: 'Windows.Universal-MinVersion', value: '10.0.9910.0' },
             { name: 'Windows.Universal-MaxVersionTested', value: '10.0.9917.0' },
             { name: 'Windows.Desktop-MinVersion', value: '10.0.9910.0' },
@@ -73,7 +73,7 @@ describe('getAllMinMaxUAPVersions method', function () {
     });
 
     it('should produce versions correctly even when the config file has no settings.', function() {
-        spyOn(mockConfig, 'getMatchingPreferences').andReturn([]);
+        spyOn(mockConfig, 'getMatchingPreferences').and.returnValue([]);
 
         var versionSet = mockConfig.getAllMinMaxUAPVersions();
         var verBaseline = rewire('../../template/cordova/lib/ConfigParser')
@@ -88,7 +88,7 @@ describe('getAllMinMaxUAPVersions method', function () {
 
     it('should fail with a RangeError if version specified incorrectly', function() {
         spyOn(mockConfig, 'getMatchingPreferences')
-        .andReturn([
+        .and.returnValue([
             { name: 'Windows.Universal-MinVersion', value: '10.0.9910.f' },
             { name: 'Windows.Universal-MaxVersionTested', value: '10.0.9917.0' },
         ]);

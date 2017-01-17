@@ -15,9 +15,9 @@
   ],
   "scripts": {
     "test": "npm run jshint && npm run test-unit && npm run test-e2e",
-    "test-unit": "jasmine-node --captureExceptions spec/unit",
-    "test-e2e": "jasmine-node --captureExceptions spec/e2e",
-    "cover": "istanbul cover --root template --print detail node_modules/jasmine-node/bin/jasmine-node -- spec/unit",
+    "test-unit": "jasmine --captureExceptions ",
+    "test-e2e": "jasmine --captureExceptions spec/e2e/endtoend.spec.js",
+    "cover": "istanbul cover --root bin/templates/cordova --print detail jasmine",
     "jshint": "jshint bin && jshint template && jshint spec"
   },
   "dependencies": {
@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "istanbul": "^0.4.0",
-    "jasmine-node": "1.14.5",
+    "jasmine": "^2.5.3",
     "jshint": "^2.8.0",
     "rewire": "^2.5.1"
   },

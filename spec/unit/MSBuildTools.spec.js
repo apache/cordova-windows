@@ -106,7 +106,7 @@ describe('checkMSBuildVersion method', function(){
     it('spec.6 should return valid version and path', function(){
         var version  = '14.0';
 
-        spawnSpy.andReturn(Q.resolve(
+        spawnSpy.and.returnValue(Q.resolve(
             '\r\nHKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\12.0\r\n\t' +
             'MSBuildToolsPath\tREG_SZ\t' + fakeToolsPath(version) + '\r\n\r\n')
         );
@@ -118,7 +118,7 @@ describe('checkMSBuildVersion method', function(){
     });
 
     it('spec.7 should return null if no tools found for version', function(){
-        spawnSpy.andReturn(Q.resolve('ERROR: The system was unable to find the specified registry key or value.'));
+        spawnSpy.and.returnValue(Q.resolve('ERROR: The system was unable to find the specified registry key or value.'));
 
         checkMSBuildVersion('14.0').then(function (actual) {
             expect(actual).not.toBeDefined();
@@ -126,7 +126,7 @@ describe('checkMSBuildVersion method', function(){
     });
 
     it('spec.8 should return null on internal error', function(){
-        spawnSpy.andReturn(Q.reject());
+        spawnSpy.and.returnValue(Q.reject());
 
         checkMSBuildVersion('14.0').then(function (actual) {
             expect(actual).not.toBeDefined();
@@ -156,8 +156,8 @@ describe('getAvailableUAPVersions method', function(){
     var programFilesOrig = process.env['ProgramFiles'];
 
     beforeEach(function () {
-        shellTest = spyOn(shell, 'test').andReturn(true);
-        shellLs = spyOn(shell, 'ls').andReturn(availableVersions);
+        shellTest = spyOn(shell, 'test').and.returnValue(true);
+        shellLs = spyOn(shell, 'ls').and.returnValue(availableVersions);
         process.env['ProgramFiles(x86)'] = '/';
         process.env['ProgramFiles'] = '/';
     });
@@ -174,9 +174,9 @@ describe('getAvailableUAPVersions method', function(){
     });
 
     it('should return empty array if no UAP SDKs installed', function() {
-        shellLs.andReturn([]);
+        shellLs.and.returnValue([]);
         expect(buildTools.getAvailableUAPVersions().length).toEqual(0);
-        shellTest.andReturn(false);
+        shellTest.and.returnValue(false);
         expect(buildTools.getAvailableUAPVersions().length).toEqual(0);
     });
 
@@ -188,7 +188,7 @@ describe('getAvailableUAPVersions method', function(){
 
     it('should return sorted list versions with only valid versions', function() {
         var brokenAvailableVersions = availableVersions.concat('Broken.version');
-        shellLs.andReturn(brokenAvailableVersions);
+        shellLs.and.returnValue(brokenAvailableVersions);
 
         var versions = buildTools.getAvailableUAPVersions();
         expect(versions).toEqual(jasmine.any(Array));
@@ -222,7 +222,7 @@ describe('getMSBuildToolsAt method', function () {
     });
 
     it('should return MSBuildTools instance', function (done) {
-        spawnSpy.andReturn(Q(fakeVersion));
+        spawnSpy.and.returnValue(Q(fakeVersion));
 
         buildTools.getMSBuildToolsAt(fakePath)
         .then(function (tools) {
@@ -237,7 +237,7 @@ describe('getMSBuildToolsAt method', function () {
     });
 
     it('should reject promise if no msbuild found', function (done) {
-        spawnSpy.andReturn(Q.reject());
+        spawnSpy.and.returnValue(Q.reject());
 
         buildTools.getMSBuildToolsAt(messyPath)
         .then(success, fail)
