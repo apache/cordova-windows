@@ -115,33 +115,6 @@ function PluginInfo(dirname) {
         var configFiles = parentGetConfigFiles(platform);
         return processChanges(configFiles);
     };
-
-    this.getFrameworks = function(platform) {
-        return _getTags(this._et, 'framework', platform, function(el) {
-            var ret = {
-                itemType: 'framework',
-                type: el.attrib.type,
-                parent: el.attrib.parent,
-                custom: String(el.attrib.custom).toLowerCase() == 'true',
-                src: el.attrib.src,
-                versions: el.attrib.versions,
-                targetDir: el.attrib['target-dir'],
-                deviceTarget: el.attrib['device-target'] || el.attrib.target,
-                arch: el.attrib.arch,
-                implementation: el.attrib.implementation
-            };
-            return ret;
-        });
-    };
-}
-
-function _getTags(pelem, tag, platform, transform) {
-    var platformTag = pelem.find('./platform[@name="' + platform + '"]');
-    var tagsInPlatform = platformTag ? platformTag.findall(tag) : [];
-    if ( typeof transform === 'function' ) {
-        tagsInPlatform = tagsInPlatform.map(transform);
-    }
-    return tagsInPlatform;
 }
 
 exports.PluginInfo = PluginInfo;
