@@ -1,5 +1,5 @@
 ﻿// Platform: windows
-// a3732cb71d9b1dd590338e8cf44196f366d46da3
+// 7c5fcc5a5adfbf3fb8ceaf36fbdd4bd970bd9c20
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
  under the License.
 */
 ;(function() {
-var PLATFORM_VERSION_BUILD_LABEL = '4.5.0-dev';
+var PLATFORM_VERSION_BUILD_LABEL = '5.1.0-dev';
 // file: src/scripts/require.js
 
 /*jshint -W079 */
@@ -841,7 +841,7 @@ module.exports = channel;
 
 });
 
-// file: F:/coho/cordova-windows/cordova-js-src/confighelper.js
+// file: f:/coho/cordova-windows/cordova-js-src/confighelper.js
 define("cordova/confighelper", function(require, exports, module) {
 
 // config.xml and AppxManifest.xml wrapper (non-node ConfigParser analogue)
@@ -956,7 +956,7 @@ exports.readManifest = readManifest;
 
 });
 
-// file: F:/coho/cordova-windows/cordova-js-src/exec.js
+// file: f:/coho/cordova-windows/cordova-js-src/exec.js
 define("cordova/exec", function(require, exports, module) {
 
 /*jslint sloppy:true, plusplus:true*/
@@ -1547,7 +1547,7 @@ exports.reset();
 
 });
 
-// file: F:/coho/cordova-windows/cordova-js-src/platform.js
+// file: f:/coho/cordova-windows/cordova-js-src/platform.js
 define("cordova/platform", function(require, exports, module) {
 
 module.exports = {
@@ -1881,7 +1881,7 @@ exports.load = function(callback) {
 
 });
 
-// file: F:/coho/cordova-windows/cordova-js-src/splashscreen.js
+// file: f:/coho/cordova-windows/cordova-js-src/splashscreen.js
 define("cordova/splashscreen", function(require, exports, module) {
 
 var isWp81 = navigator.appVersion.indexOf("Windows Phone 8.1") !== -1;
@@ -2019,7 +2019,7 @@ function init(config, manifest) {
 
     if (isWp81) {
         extendedSplashProgress.classList.add('extended-splash-progress-phone');
-    } else if (isWp10) {
+    } else if (isWp10) {   
         extendedSplashProgress.classList.add('extended-splash-progress-wp10');
     } else {
         extendedSplashProgress.classList.add('extended-splash-progress-desktop');
