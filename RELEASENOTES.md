@@ -24,6 +24,28 @@ Update these notes using: git log --pretty=format:'* %s' --topo-order --no-merge
 
 cordova-windows is a library that enables developers to create Windows 8/8.1/10 and WP8.1 application projects that support Cordova APIs.
 
+### 5.0.0 (Jan 27, 2017)
+* Remove duplicate logic after upgrading cordova-common
+* [CB-12163](https://issues.apache.org/jira/browse/CB-12163) Add resource-file reference functionality through a flag
+* [CB-12163](https://issues.apache.org/jira/browse/CB-12163) Make resource-file copy files again
+* Upgrade cordova-common to 2.0.0
+* [CB-12298](https://issues.apache.org/jira/browse/CB-12298) [Windows] bundle.appxupload not generated for Windows 10 target
+* [CB-12189](https://issues.apache.org/jira/browse/CB-12189) Add support for WinMD and DLL combination
+* [CB-12238](https://issues.apache.org/jira/browse/CB-12238) [Windows] Colorize titlebar to match splash bg color
+* [CB-11177](https://issues.apache.org/jira/browse/CB-11177) SplashScreen gets shifted on Windows devices with soft navbar
+* [CB-12239](https://issues.apache.org/jira/browse/CB-12239) Add buildFlag option similar to iOS
+* [CB-12193](https://issues.apache.org/jira/browse/CB-12193) cordova.js crashes windows app if there is no CoreWindow Also made confighelper to load after WinJS as it depends on it
+* [CB-11751](https://issues.apache.org/jira/browse/CB-11751) 'extendedSplashScreen' is undefined
+* [CB-12192](https://issues.apache.org/jira/browse/CB-12192) - No SplashScreen on Windows when content.src is subpage
+* [CB-9287](https://issues.apache.org/jira/browse/CB-9287) Not enough Icons and Splashscreens for Windows 8.1 and Windows Phone 8.1
+* Do not ignore already prefixed capabilities at plugin add/rm
+* Fix pattern for extracting capabilities names
+* [CB-12142](https://issues.apache.org/jira/browse/CB-12142) Move windows-specific logic from cordova-common
+* [CB-12147](https://issues.apache.org/jira/browse/CB-12147) (windows) Fix typo in verbose output
+* [CB-12124](https://issues.apache.org/jira/browse/CB-12124) Make available device capabilities in package.windows10.appxmanifest
+* [CB-12071](https://issues.apache.org/jira/browse/CB-12071) Fix for [CB-11825](https://issues.apache.org/jira/browse/CB-11825) breaks usage of InProcessServer in Cordova Windows
+* [CB-12036](https://issues.apache.org/jira/browse/CB-12036) Fix setSplashBgColor exception when no splashscreen is found
+
 ### 4.4.3 (Oct 19, 2016)
 * [CB-12044](https://issues.apache.org/jira/browse/CB-12044) Fix splashscreen image path for ms-appx on Windows
 * [CB-12042](https://issues.apache.org/jira/browse/CB-12042) Copy base.js to www directory at create
