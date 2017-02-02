@@ -62,6 +62,11 @@ module.exports = function patch(platform) {
     var startPageFilePath = shell.ls(path.join(__dirname, '..', startPage))[0];
     var reBaseJs = new RegExp(escapedBasejsSrcMap[platform], 'i');
 
+    if (!startPageFilePath) {
+        console.warn('Warning: Start page is missing on the disk. The build must go on but note that this will cause WACK failures.');
+        return;
+    }
+
     if (shell.grep(reBaseJs, startPageFilePath).length === 0) {
         // 3. If it doesn't - patch page to include base.js ref before cordova.js
         var appendBaseJsRe = /( *)(<script\s+(?:type="text\/javascript"\s+)?src="(.*\/)?cordova\.js">\s*<\/script>)/;
