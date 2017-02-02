@@ -98,9 +98,9 @@
     <AppxManifest Include="package.windows10.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <Content Exclude="images\*SplashScreenPhone*" Include="images\*.png" />
-    <Content Exclude="images\*SplashScreenPhone*" Include="images\*.jpg" />
-    <Content Exclude="images\*SplashScreenPhone*" Include="images\*.jpeg" />
+    <Content Exclude="images\*SplashScreenPhone*;images\*.scale-240.*" Include="images\*.png" />
+    <Content Exclude="images\*SplashScreenPhone*;images\*.scale-240.*" Include="images\*.jpg" />
+    <Content Exclude="images\*SplashScreenPhone*;images\*.scale-240.*" Include="images\*.jpeg" />
   </ItemGroup>
   <Import Project="CordovaApp.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />

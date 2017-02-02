@@ -449,8 +449,9 @@ describe('buildFlags', function () {
             .fail(fail)
             .finally(function() {
                 expect(fail).not.toHaveBeenCalled();
+                // CB-12416 AppxBundle=Never is present because we are not building a bundle
                 expect(buildTools.buildProject).toHaveBeenCalledWith(jasmine.any(String),
-                    jasmine.any(String), jasmine.any(String), [ 'foo=bar' ]);
+                    jasmine.any(String), jasmine.any(String), [ 'foo=bar', '/p:AppxBundle=Never' ]);
 
                 done();
             });
