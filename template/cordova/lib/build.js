@@ -342,6 +342,11 @@ function buildTargets(allMsBuildVersions, config) {
                 // Only add the CordovaBundlePlatforms argument when on the last build step
                 var bundleArchs = (index === configsArray.length - 1) ? bundleTerms : build.arch;
                 otherProperties.push('/p:CordovaBundlePlatforms=' + bundleArchs);
+            } else {
+                // https://issues.apache.org/jira/browse/CB-12416
+                // MSBuild uses AppxBundle=Always by default which leads to a bundle created even if
+                // --bundle was not passed - override that:
+                otherProperties.push('/p:AppxBundle=Never');
             }
 
             // https://issues.apache.org/jira/browse/CB-12298
