@@ -347,6 +347,11 @@ function buildTargets(allMsBuildVersions, config) {
                 if (config.targetProject === 'windows10') {
                     otherProperties.push('/p:UapAppxPackageBuildMode=StoreUpload');
                 }
+            } else {
+                // https://issues.apache.org/jira/browse/CB-12416
+                // MSBuild uses AppxBundle=Always by default which leads to a bundle created even if
+                // --bundle was not passed - override that:
+                otherProperties.push('/p:AppxBundle=Never');
             }
 
             return msbuild.buildProject(path.join(ROOT, build.target), config.buildType,  build.arch, otherProperties);
