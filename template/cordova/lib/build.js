@@ -342,11 +342,11 @@ function buildTargets(allMsBuildVersions, config) {
                 // Only add the CordovaBundlePlatforms argument when on the last build step
                 var bundleArchs = (index === configsArray.length - 1) ? bundleTerms : build.arch;
                 otherProperties.push('/p:CordovaBundlePlatforms=' + bundleArchs);
+            }
 
-                // https://issues.apache.org/jira/browse/CB-12298
-                if (config.targetProject === 'windows10') {
-                    otherProperties.push('/p:UapAppxPackageBuildMode=StoreUpload');
-                }
+            // https://issues.apache.org/jira/browse/CB-12298
+            if (config.targetProject === 'windows10' && config.buildType === 'release') {
+                otherProperties.push('/p:UapAppxPackageBuildMode=StoreUpload');
             }
 
             return msbuild.buildProject(path.join(ROOT, build.target), config.buildType,  build.arch, otherProperties);
