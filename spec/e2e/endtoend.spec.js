@@ -103,15 +103,27 @@ describe('Cordova create and build', function(){
         });
     });
 
-    it('spec.6 should build Windows 8.1 project bundle appxupload', function(){
+    it('spec.6 should generate appxupload for Windows 8.1 project bundle release build', function(){
         shell.exec(buildScriptPath + ' --release --win --bundle --archs=\"x64 x86 arm\"', {silent : true});
         var packages = shell.ls(appPackagesFolder);
         expect(packages.filter(function(file) { return file.match(/.*bundle\.appxupload$/); }).length > 0).toBeTruthy();
     });
 
-    it('spec.7 should build Windows 10 project bundle appxupload', function(){
+    it('spec.6.1 should generate appxupload for Windows 8.1 project non-bundle release build', function(){
+        shell.exec(buildScriptPath + ' --release --win --archs=\"x64 x86 arm\"', {silent : true});
+        var packages = shell.ls(appPackagesFolder);
+        expect(packages.filter(function(file) { return file.match(/.*\.appxupload$/); }).length).toBe(3);
+    });
+
+    it('spec.7 should generate appxupload for Windows 10 project bundle release build', function(){
         shell.exec(buildScriptPath + ' --release --win --appx=uap --bundle --archs=\"x64 x86 arm\"', {silent : true});
         var packages = shell.ls(appPackagesFolder);
         expect(packages.filter(function(file) { return file.match(/.*bundle\.appxupload$/); }).length > 0).toBeTruthy();
+    });
+
+    it('spec.7.1 should generate appxupload for Windows 10 project non-bundle release build', function(){
+        shell.exec(buildScriptPath + ' --release --win --appx=uap --archs=\"x64 x86 arm\"', {silent : true});
+        var packages = shell.ls(appPackagesFolder);
+        expect(packages.filter(function(file) { return file.match(/.*\.appxupload$/); }).length).toBe(3);
     });
 });
