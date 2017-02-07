@@ -25,6 +25,9 @@ Update these notes using: git log --pretty=format:'* %s' --topo-order --no-merge
 cordova-windows is a library that enables developers to create Windows 8/8.1/10 and WP8.1 application projects that support Cordova APIs.
 
 ### 5.0.0 (Jan 27, 2017)
+* [CB-12415](https://issues.apache.org/jira/browse/CB-12415) Windows build fails if start page is missing
+* [CB-12416](https://issues.apache.org/jira/browse/CB-12416) (Windows) Built bundles are misplaced when building for multiple archs
+* [CB-12298](https://issues.apache.org/jira/browse/CB-12298) [Windows] bundle.appxupload not generated for Windows 10 target Generate appxupload for non-bundle builds as well This closes #227
 * Remove duplicate logic after upgrading cordova-common
 * [CB-12163](https://issues.apache.org/jira/browse/CB-12163) Add resource-file reference functionality through a flag
 * [CB-12163](https://issues.apache.org/jira/browse/CB-12163) Make resource-file copy files again
