@@ -43,14 +43,14 @@ describe('The correct version of the app deployment tool is obtained.', function
         }
     });
 
-    it('Provides an AppDeployCmdTool when 8.1 is requested.', function() {
+    it('Test #000 : Provides an AppDeployCmdTool when 8.1 is requested.', function() {
 
         var tool = deployment.getDeploymentTool('8.1');
         expect(tool instanceof AppDeployCmdTool).toBe(true);
 
     });
 
-    it('Provides a WinAppDeployCmdTool when 10.0 is requested.', function() {
+    it('Test #001 : Provides a WinAppDeployCmdTool when 10.0 is requested.', function() {
 
         var tool = deployment.getDeploymentTool('10.0');
         expect(tool instanceof WinAppDeployCmdTool).toBe(true);
@@ -98,66 +98,55 @@ describe('Windows 10 deployment interacts with the file system as expected.', fu
         }
     });
 
-    it('enumerateDevices returns a valid set of objects', function() {
+    it('Test #002 : enumerateDevices returns a valid set of objects', function(done) {
         var deploymentTool = deployment.getDeploymentTool('10.0');
-        var done = false;
-        deploymentTool.enumerateDevices().then(function(deviceList) {
-
+        deploymentTool.enumerateDevices()
+        .then(function(deviceList) {
             expect(deviceList.length).toBe(3);
             expect(deviceList[0].name).toBe('Lumia 1520 (RM-940)');
             expect(deviceList[0].index).toBe(0);
             expect(deviceList[0].type).toBe('device');
-
-            done = true;
-
+            done();
+        }).fail(function err (errMsg) {
+            expect(errMsg).toBeUndefined();
+            done();
         });
-
-        waitsFor(function() { return done; });
     });
 
-    it('installAppPackage passes the correct set of parameters', function() {
+    it('Test #003 : installAppPackage passes the correct set of parameters', function(done) {
         var deploymentTool = deployment.getDeploymentTool('10.0');
-        var done = false;
-        deploymentTool.enumerateDevices().then(function(deviceList) {
-            deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /*shouldLaunch*/ false, /*shouldUpdate*/ false).then(function() {
-
-                // expect() calls are in the fakeSpawn function
-                done = true;
-
-            });
+        deploymentTool.enumerateDevices()
+        .then(function(deviceList) {
+            deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /*shouldLaunch*/ false, /*shouldUpdate*/ false);
+            done();
+        }).fail(function err (errMsg) {
+            expect(errMsg).toBeUndefined();
+            done();
         });
-
-        waitsFor(function() { return done; });
     });
 
-    it('installAppPackage passes the correct set of parameters when updating', function() {
+    it('Test #004 : installAppPackage passes the correct set of parameters when updating', function(done) {
         var deploymentTool = deployment.getDeploymentTool('10.0');
-        var done = false;
-        deploymentTool.enumerateDevices().then(function(deviceList) {
-            deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /*shouldLaunch*/ false, /*shouldUpdate*/ true).then(function() {
-
-                // expect() calls are in the fakeSpawn function
-                done = true;
-
-            });
+        deploymentTool.enumerateDevices()
+        .then(function(deviceList) {
+            deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /*shouldLaunch*/ false, /*shouldUpdate*/ true);
+            done();
+        }).fail(function err (errMsg) {
+            expect(errMsg).toBeUndefined();
+            done();
         });
-
-        waitsFor(function() { return done; });
     });
 
-    it('uninstallAppPackage passes the correct set of parameters', function() {
+    it('Test #005 : uninstallAppPackage passes the correct set of parameters', function(done) {
         var deploymentTool = deployment.getDeploymentTool('10.0');
-        var done = false;
-        deploymentTool.enumerateDevices().then(function(deviceList) {
-            deploymentTool.uninstallAppPackage(TEST_APP_PACKAGE_ID, deviceList[2]).then(function() {
-
-                // expect() calls are in the fakeSpawn function
-                done = true;
-
-            });
+        deploymentTool.enumerateDevices()
+        .then(function(deviceList) {
+            deploymentTool.uninstallAppPackage(TEST_APP_PACKAGE_ID, deviceList[2]);
+            done();
+        }).fail(function err (errMsg) {
+            expect(errMsg).toBeUndefined();
+            done();
         });
-
-        waitsFor(function() { return done; });
     });
 });
 
@@ -206,93 +195,81 @@ describe('Windows 8.1 deployment interacts with the file system as expected.', f
         }
     });
 
-    it('enumerateDevices returns a valid set of objects', function() {
+    it('Test #006 : enumerateDevices returns a valid set of objects', function(done) {
         var deploymentTool = deployment.getDeploymentTool('8.1');
-        var done = false;
-        deploymentTool.enumerateDevices().then(function(deviceList) {
-
+        deploymentTool.enumerateDevices()
+        .then(function(deviceList) {
             expect(deviceList.length).toBe(12);
             expect(deviceList[0].name).toBe('Device');
             expect(deviceList[0].index).toBe(0);
             expect(deviceList[0].type).toBe('device');
-
             expect(deviceList[5].name).toBe('Mobile Emulator 10.0.10150.0 1080p 6 inch 2GB');
             expect(deviceList[5].index).toBe(5);
             expect(deviceList[5].type).toBe('emulator');
-
-            done = true;
-
+            done();
+        }).fail(function err (errMsg) {
+            expect(errMsg).toBeUndefined();
+            done();
         });
-        waitsFor(function() { return done; });
     });
 
-    it('installAppPackage passes the correct set of parameters', function() {
+    it('Test #007 : installAppPackage passes the correct set of parameters', function(done) {
         var deploymentTool = deployment.getDeploymentTool('8.1');
-        var done = false;
-        deploymentTool.enumerateDevices().then(function(deviceList) {
-            deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /*shouldLaunch*/ false, /*shouldUpdate*/ false).then(function() {
-
-                // expect() calls are in the fakeSpawn function
-                done = true;
-
-            });
+        deploymentTool.enumerateDevices()
+        .then(function(deviceList) {
+            deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /*shouldLaunch*/ false, /*shouldUpdate*/ false);
+            done();
+        }).fail(function err (errMsg) {
+            expect(errMsg).toBeUndefined();
+            done();
         });
-        waitsFor(function() { return done; });
     });
 
-    it('installAppPackage passes the correct set of parameters when updating', function() {
+    it('Test #008 : installAppPackage passes the correct set of parameters when updating', function(done) {
         var deploymentTool = deployment.getDeploymentTool('8.1');
-        var done = false;
-        deploymentTool.enumerateDevices().then(function(deviceList) {
-            deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /*shouldLaunch*/ false, /*shouldUpdate*/ true).then(function() {
-
-                // expect() calls are in the fakeSpawn function
-                done = true;
-
-            });
+        deploymentTool.enumerateDevices()
+        .then(function(deviceList) {
+            deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /*shouldLaunch*/ false, /*shouldUpdate*/ true);
+            done();
+        }).fail(function err (errMsg) {
+            expect(errMsg).toBeUndefined();
+            done();
         });
-        waitsFor(function() { return done; });
     });
 
-    it('installAppPackage passes the correct set of parameters when launching', function() {
+    it('Test #009 : installAppPackage passes the correct set of parameters when launching', function(done) {
         var deploymentTool = deployment.getDeploymentTool('8.1');
-        var done = false;
-        deploymentTool.enumerateDevices().then(function(deviceList) {
-            deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /*shouldLaunch*/ true, /*shouldUpdate*/ false).then(function() {
-
-                // expect() calls are in the fakeSpawn function
-                done = true;
-
-            });
+        deploymentTool.enumerateDevices()
+        .then(function(deviceList) {
+            deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /*shouldLaunch*/ true, /*shouldUpdate*/ false);
+            done();
+        }).fail(function err (errMsg) {
+            expect(errMsg).toBeUndefined();
+            done();
         });
-        waitsFor(function() { return done; });
     });
 
-    it('installAppPackage passes the correct set of parameters when updating and launching', function() {
+    it('Test #010 : installAppPackage passes the correct set of parameters when updating and launching', function(done) {
         var deploymentTool = deployment.getDeploymentTool('8.1');
-        var done = false;
-        deploymentTool.enumerateDevices().then(function(deviceList) {
-            deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /*shouldLaunch*/ true, /*shouldUpdate*/ true).then(function() {
-
-                // expect() calls are in the fakeSpawn function
-                done = true;
-
-            });
+        deploymentTool.enumerateDevices()
+        .then(function(deviceList) {
+            deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /*shouldLaunch*/ true, /*shouldUpdate*/ true);
+            done();
+        }).fail(function err (errMsg) {
+            expect(errMsg).toBeUndefined();
+            done();
         });
-        waitsFor(function() { return done; });
     });
 
-    it('uninstallAppPackage passes the correct set of parameters', function() {
+    it('Test #011 : uninstallAppPackage passes the correct set of parameters', function(done) {
         var deploymentTool = deployment.getDeploymentTool('8.1');
-        var done = false;
-        deploymentTool.enumerateDevices().then(function(deviceList) {
-            deploymentTool.uninstallAppPackage(TEST_APP_PACKAGE_ID, deviceList[5]).then(function() {
-
-                // expect() calls are in the fakeSpawn function
-                done = true;
-
-            });
+        deploymentTool.enumerateDevices()
+        .then(function(deviceList) {
+            deploymentTool.uninstallAppPackage(TEST_APP_PACKAGE_ID, deviceList[5]);
+            done();
+       }).fail(function err (errMsg) {
+            expect(errMsg).toBeUndefined();
+            done();
         });
-        waitsFor(function() { return done; });
     });
 });

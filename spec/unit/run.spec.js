@@ -251,15 +251,15 @@ describe('run method', function() {
 
     it('spec.8 should accept --archs parameter either as cli or as platform arg', function(done) {
 
-        spyOn(utils, 'isCordovaProject').andReturn(true);
-        spyOn(packages, 'getPackage').andReturn(Q({ arch: 'arm' }));
-        spyOn(packages, 'deployToDesktop').andReturn(Q());
+        spyOn(utils, 'isCordovaProject').and.returnValue(true);
+        spyOn(packages, 'getPackage').and.returnValue(Q({ arch: 'arm' }));
+        spyOn(packages, 'deployToDesktop').and.returnValue(Q());
 
         var anyString = jasmine.any(String);
         var expectedDeployOptions = jasmine.objectContaining({arch: 'arm'});
 
         var fail = jasmine.createSpy('fail')
-        .andCallFake(function (err) {
+        .and.callFake(function (err) {
             console.error(err);
         });
 
@@ -284,9 +284,9 @@ describe('run method', function() {
 
     it('spec.9 should fall back to anycpu if --archs parameter is not specified', function(done) {
 
-        spyOn(utils, 'isCordovaProject').andReturn(true);
-        spyOn(packages, 'getPackage').andReturn(Q({ arch: 'anycpu' }));
-        spyOn(packages, 'deployToDesktop').andReturn(Q());
+        spyOn(utils, 'isCordovaProject').and.returnValue(true);
+        spyOn(packages, 'getPackage').and.returnValue(Q({ arch: 'anycpu' }));
+        spyOn(packages, 'deployToDesktop').and.returnValue(Q());
 
         var anyString = jasmine.any(String);
         var expectedDeployOptions = jasmine.objectContaining({arch: 'anycpu'});

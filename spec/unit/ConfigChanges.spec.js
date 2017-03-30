@@ -53,7 +53,7 @@ describe('PlatformMunger', function () {
             { before: undefined, count: 1, xml: '<DummyElement name="Dummy" />'}
         ]}};
         munger = new PlatformMunger('windows', tempDir);
-        spyOn(BaseMunger.prototype, 'apply_file_munge').andCallThrough();
+        spyOn(BaseMunger.prototype, 'apply_file_munge').and.callThrough();
     });
 
     afterEach(function () {
@@ -122,7 +122,7 @@ describe('Capabilities within package.windows.appxmanifest', function() {
     }
 
     var fail = jasmine.createSpy('fail')
-    .andCallFake(function (err) {
+    .and.callFake(function (err) {
         console.error(err);
     });
 

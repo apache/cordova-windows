@@ -84,17 +84,17 @@ describe('run method', function() {
         configParserOriginal = build.__get__('ConfigParser');
 
         var originalBuildMethod = build.run;
-        spyOn(build, 'run').andCallFake(function () {
+        spyOn(build, 'run').and.callFake(function () {
             // Bind original build to custom 'this' object to mock platform's locations property
             return originalBuildMethod.apply({locations: {www: 'some/path'}}, arguments);
         });
 
-        spyOn(utils, 'isCordovaProject').andReturn(true);
+        spyOn(utils, 'isCordovaProject').and.returnValue(true);
         spyOn(prepare, 'applyPlatformConfig');
         spyOn(prepare, 'updateBuildConfig');
-        spyOn(package, 'getPackage').andReturn(Q({}));
+        spyOn(package, 'getPackage').and.returnValue(Q({}));
 
-        spyOn(AppxManifest, 'get').andReturn({
+        spyOn(AppxManifest, 'get').and.returnValue({
             getIdentity: function () {
                 return  { setPublisher: function () {} };
             },
@@ -113,7 +113,7 @@ describe('run method', function() {
             buildSpy = jasmine.createSpy();
 
         // utils.isCordovaProject is a spy, so we can call andReturn directly on it
-        utils.isCordovaProject.andReturn(false);
+        utils.isCordovaProject.and.returnValue(false);
         createFindAllAvailableVersionsMock([{version: '14.0', buildProject: buildSpy, path: testPath }]);
 
         build.run([ 'node', buildPath, '--release', '--debug' ])
@@ -153,10 +153,8 @@ describe('run method', function() {
         build.run({ buildConfig: buildConfigPath })
         .finally(function() {
             expect(prepare.updateBuildConfig).toHaveBeenCalled();
-
-            var buildOpts = prepare.updateBuildConfig.calls[0].args[0];
+            var buildOpts = prepare.updateBuildConfig.calls.argsFor(0)[0];
             var buildConfig = require(buildConfigPath).windows.debug;
-
             expect(buildOpts.packageCertificateKeyFile).toBeDefined();
             expect(buildOpts.packageCertificateKeyFile)
                 .toEqual(path.resolve(path.dirname(buildConfigPath), buildConfig.packageCertificateKeyFile));
@@ -165,13 +163,15 @@ describe('run method', function() {
                 expect(buildOpts[key]).toBeDefined();
                 expect(buildOpts[key]).toEqual(buildConfig[key]);
             });
-
+            done();
+        }).fail(function err (errMsg) {
+            expect(errMsg).toBeUndefined();
             done();
         });
-    });
+    }, 20000);
 
     it('spec.4 should call buildProject of MSBuildTools with buildType = "release" if called with --release argument', function(done) {
-        var buildSpy = jasmine.createSpy().andCallFake(function (solutionFile, buildType, buildArch) {
+        var buildSpy = jasmine.createSpy().and.callFake(function (solutionFile, buildType, buildArch) {
             expect(buildType).toBe('release');
         });
 
@@ -185,7 +185,7 @@ describe('run method', function() {
     });
 
     it('spec.5 should call buildProject of MSBuildTools with buildType = "debug" if called without arguments', function(done) {
-        var buildSpy = jasmine.createSpy().andCallFake(function (solutionFile, buildType, buildArch) {
+        var buildSpy = jasmine.createSpy().and.callFake(function (solutionFile, buildType, buildArch) {
             expect(buildType).toBe('debug');
         });
 
@@ -199,7 +199,7 @@ describe('run method', function() {
     });
 
     it('spec.6 should call buildProject of MSBuildTools with buildArch = "arm" if called with --archs="arm" argument', function(done) {
-        var buildSpy = jasmine.createSpy().andCallFake(function (solutionFile, buildType, buildArch) {
+        var buildSpy = jasmine.createSpy().and.callFake(function (solutionFile, buildType, buildArch) {
             expect(buildArch).toBe('arm');
         });
 
@@ -338,7 +338,7 @@ describe('run method', function() {
     });
 
     it('spec.13 should be able to override target via --appx parameter', function(done) {
-        var buildSpy = jasmine.createSpy().andCallFake(function(solutionFile, buildType, buildArch) {
+        var buildSpy = jasmine.createSpy().and.callFake(function(solutionFile, buildType, buildArch) {
                 // check that we build Windows 10 and not Windows 8.1
                 expect(solutionFile.toLowerCase()).toMatch('cordovaapp.windows10.jsproj');
             });
@@ -361,10 +361,10 @@ describe('run method', function() {
         process.env.VSINSTALLDIR = customMSBuildPath;
 
         spyOn(MSBuildTools, 'getMSBuildToolsAt')
-            .andReturn(Q({
+            .and.returnValue(Q({
                 path: customMSBuildPath,
                 version: customMSBuildVersion,
-                buildProject: jasmine.createSpy('buildProject').andReturn(Q())
+                buildProject: jasmine.createSpy('buildProject').and.returnValue(Q())
             }));
 
         var fail = jasmine.createSpy('fail');
@@ -409,7 +409,7 @@ describe('buildFlags', function () {
         });
 
         it('should handle build flags from both CLI and buildConfig.json', function () {
-            readFileSync.andReturn(JSON.stringify({
+            readFileSync.and.returnValue(JSON.stringify({
                 windows: { debug: { buildFlag: 'baz="quux"' } }
             }));
 
@@ -423,12 +423,12 @@ describe('buildFlags', function () {
 
     describe('build', function () {
         beforeEach(function () {
-            spyOn(utils, 'isCordovaProject').andReturn(true);
+            spyOn(utils, 'isCordovaProject').and.returnValue(true);
             spyOn(prepare, 'applyPlatformConfig');
             spyOn(prepare, 'updateBuildConfig');
-            spyOn(package, 'getPackage').andReturn(Q({}));
+            spyOn(package, 'getPackage').and.returnValue(Q({}));
 
-            spyOn(AppxManifest, 'get').andReturn({
+            spyOn(AppxManifest, 'get').and.returnValue({
                 getIdentity: function () {
                     return  { setPublisher: function () {} };
                 },
@@ -438,7 +438,7 @@ describe('buildFlags', function () {
 
         it('should pass buildFlags directly to MSBuild', function(done) {
             var fail = jasmine.createSpy('fail');
-            var buildTools = {version: '14.0', buildProject: jasmine.createSpy('buildProject').andReturn(Q()), path: testPath };
+            var buildTools = {version: '14.0', buildProject: jasmine.createSpy('buildProject').and.returnValue(Q()), path: testPath };
             var buildOptions = {
                 argv: ['--buildFlag', 'foo=bar']
             };

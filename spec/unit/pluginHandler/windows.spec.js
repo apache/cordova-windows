@@ -66,18 +66,26 @@ function winJoin() {
 }
 
 beforeEach(function () {
-    this.addMatchers({
-        toContainXmlPath: function (xpath) {
-            var xml = this.actual;
-            var notText = this.isNot ? 'not ' : '';
-            this.message = function () {
-                return 'Expected xml \'' + et.tostring(xml) + '\' ' + notText + 'to contain elements matching \'' + xpath + '\'.';
+    jasmine.addMatchers({
+        toContainXmlPath: function () {
+            return {
+                compare: function(actual, expected) {
+                    var xml = actual;
+                    var notText = this.isNot ? 'not ' : '';
+                    var result = {};
+                    result.pass = xml.find(expected) !== null;
+                    if(result.pass) {
+                        result.message = 'Expected xml \'' + et.tostring(xml) + '\' ' + notText + 'to contain elements matching \'' + actual + '\'.';
+                    } else {
+                        result.message = 'Expected xml \'' + et.tostring(xml) + '\' ' + notText + 'to not contain elements matching \'' + actual + '\'.';
+                    }
+                        return result;
+                }
             };
-
-            return xml.find(xpath) !== null;
         }
     });
 });
+
 
 var getPluginFilePath = PluginHandler.__get__('getPluginFilePath');
 var computeResourcePath = function(resourceFile) {
@@ -114,7 +122,7 @@ describe('windows project handler', function () {
         var copyFileSpy = jasmine.createSpy('copyFile');
 
         beforeEach(function () {
-            PluginHandler.__set__('copyFile', copyFileSpy.andCallFake(copyFileOrig));
+            PluginHandler.__set__('copyFile', copyFileSpy.and.callFake(copyFileOrig));
         });
 
         afterEach(function() {
@@ -122,7 +130,6 @@ describe('windows project handler', function () {
         });
 
         function validateInstalledProjects(tag, elementToInstall, xpath, supportedPlatforms) {
-            jasmine.getEnv().currentSpec.removeAllSpies();
 
             var projects = copyArray(dummyProject.projects);
             projects.push(dummyProject.master);
@@ -173,7 +180,7 @@ describe('windows project handler', function () {
 
             projects.forEach(function (project) {
                 if (projectsAddedTo.indexOf(path.basename(project.location)) > -1) {
-                    projectsAddedToSpies.push(spyOn(project, 'appendToRoot').andCallFake(appendToRootFake));
+                    projectsAddedToSpies.push(spyOn(project, 'appendToRoot').and.callFake(appendToRootFake));
                 } else {
                     projectsNotAddedToSpies.push(spyOn(project, 'appendToRoot'));
                 }
@@ -194,26 +201,26 @@ describe('windows project handler', function () {
 
             var install = PluginHandler.getInstaller('source-file');
 
-            it('should copy stuff from one location to another by calling common.copyFile', function () {
+            it('Test #000 : should copy stuff from one location to another by calling common.copyFile', function () {
                 var source = copyArray(valid_source);
                 install(source[0], dummyPluginInfo, dummyProject);
                 expect(copyFileSpy).toHaveBeenCalledWith(dummyPluginInfo.dir, 'src/windows/dummer.js', cordovaProjectWindowsPlatformDir, path.join('plugins', 'org.test.plugins.dummyplugin', 'dummer.js'), false);
             });
-            it('should throw if source-file src cannot be found', function () {
+            it('Test #001 : should throw if source-file src cannot be found', function () {
                 var source = copyArray(invalid_source);
-                copyFileSpy.andCallFake(copyFileOrig);
+                copyFileSpy.and.callFake(copyFileOrig);
                 expect(function () {
                     install(source[1], faultyPluginInfo, dummyProject);
-                }).toThrow('"' + path.resolve(faultyplugin, 'src/windows/NotHere.js') + '" not found!');
+                }).toThrow(new Error ('"' + path.resolve(faultyplugin, 'src/windows/NotHere.js') + '" not found!'));
             });
-            it('should throw if source-file target already exists', function () {
+            it('Test #002 : should throw if source-file target already exists', function () {
                 var source = copyArray(valid_source);
                 var target = path.join(cordovaProjectWindowsPlatformDir, 'plugins', dummyPluginInfo.id, 'dummer.js');
                 shell.mkdir('-p', path.dirname(target));
                 fs.writeFileSync(target, 'some bs', 'utf-8');
                 expect(function () {
                     install(source[0], dummyPluginInfo, dummyProject);
-                }).toThrow('"' + target + '" already exists!');
+                }).toThrow(new Error ('"' + target + '" already exists!'));
             });
         });
 
@@ -225,48 +232,64 @@ describe('windows project handler', function () {
 
             // This could be separated into individual specs, but that results in a lot of copying and deleting the
             // project files, which is not needed.
-            it('should write to correct project files when conditions are specified', function () {
 
+            it('Test #003 : should write to correct project files when conditions are specified', function () {
                 var xpath = 'Content[@Include="' + resourceFiles[0].target + '"][@Condition="\'$(Platform)\'==\'x86\'"]';
                 validateInstalledProjects('resource-file', resourceFiles[0], xpath, ['all']);
-
-                xpath = 'Content[@Include="' + resourceFiles[1].target + '"]';
-                validateInstalledProjects('resource-file', resourceFiles[1], xpath, ['windows', 'phone', 'windows10']);
-
-                xpath = 'Content[@Include="' + resourceFiles[2].target + '"]';
-                validateInstalledProjects('resource-file', resourceFiles[2], xpath, ['phone']);
-
-                xpath = 'Content[@Include="' + resourceFiles[3].target + '"][@Condition="\'$(Platform)\'==\'x64\'"]';
-                validateInstalledProjects('resource-file', resourceFiles[3], xpath, ['windows8']);
             });
 
-            it('should write to correct project files when conditions are specified with reference', function () {
 
+            // project files, which is not needed.
+            it('Test #004 : should write to correct project files when conditions are specified', function () {
+                var xpath = 'Content[@Include="' + resourceFiles[1].target + '"]';
+                validateInstalledProjects('resource-file', resourceFiles[1], xpath, ['windows', 'phone', 'windows10']);
+            });
+
+            // project files, which is not needed.
+            it('Test #005 : should write to correct project files when conditions are specified', function () {
+                var xpath = 'Content[@Include="' + resourceFiles[2].target + '"]';
+                validateInstalledProjects('resource-file', resourceFiles[2], xpath, ['phone']);
+            });
+
+            it('Test #006 : should write to correct project files when conditions are specified with reference', function () {
                 var xpath = 'Content[@Include="' + computeResourcePath(resourcereferenceFiles[0]) + '"][@Condition="\'$(Platform)\'==\'x86\'"]';
                 validateInstalledProjects('resource-file', resourcereferenceFiles[0], xpath, ['all']);
 
-                xpath = 'Content[@Include="' + computeResourcePath(resourcereferenceFiles[1]) + '"]';
+            });
+
+            it('Test #007 : should write to correct project files when conditions are specified with reference', function () {
+                var xpath = 'Content[@Include="' + computeResourcePath(resourcereferenceFiles[1]) + '"]';
                 validateInstalledProjects('resource-file', resourcereferenceFiles[1], xpath, ['windows', 'phone', 'windows10']);
+            });
 
-                xpath = 'Content[@Include="' + computeResourcePath(resourcereferenceFiles[2]) + '"]';
+            it('Test #008 : should write to correct project files when conditions are specified with reference', function () {
+                var xpath = 'Content[@Include="' + computeResourcePath(resourcereferenceFiles[2]) + '"]';
                 validateInstalledProjects('resource-file', resourcereferenceFiles[2], xpath, ['phone']);
+            });
 
-                xpath = 'Content[@Include="' + computeResourcePath(resourcereferenceFiles[3]) + '"][@Condition="\'$(Platform)\'==\'x64\'"]';
+            it('Test #009 : should write to correct project files when conditions are specified with reference', function () {
+                var xpath = 'Content[@Include="' + computeResourcePath(resourcereferenceFiles[3]) + '"][@Condition="\'$(Platform)\'==\'x64\'"]';
                 validateInstalledProjects('resource-file', resourcereferenceFiles[3], xpath, ['windows8']);
             });
 
-            it('should throw if conditions are invalid', function () {
+            // project files, which is not needed.
+            it('Test #010 : should write to correct project files when conditions are specified', function () {
+                var xpath = 'Content[@Include="' + resourceFiles[3].target + '"][@Condition="\'$(Platform)\'==\'x64\'"]';
+                validateInstalledProjects('resource-file', resourceFiles[3], xpath, ['windows8']);
+            });
+
+            it('Test #011 : should throw if conditions are invalid', function () {
                 expect(function () {
                     install(invalidResourceFiles[0], faultyPluginInfo, dummyProject);
-                }).toThrow('Invalid arch attribute (must be "x86", "x64" or "ARM"): x85');
+                }).toThrow(new Error ('Invalid arch attribute (must be "x86", "x64" or "ARM"): x85'));
 
                 expect(function () {
                     install(invalidResourceFiles[1], faultyPluginInfo, dummyProject);
-                }).toThrow('Invalid versions attribute (must be a valid semantic version range): 8.0a');
+                }).toThrow(new Error ('Invalid versions attribute (must be a valid semantic version range): 8.0a'));
 
                 expect(function () {
                     install(invalidResourceFiles[2], faultyPluginInfo, dummyProject);
-                }).toThrow('Invalid device-target attribute (must be "all", "phone", "windows" or "win"): daphne');
+                }).toThrow(new Error('Invalid device-target attribute (must be "all", "phone", "windows" or "win"): daphne'));
             });
         });
 
@@ -277,32 +300,35 @@ describe('windows project handler', function () {
 
             // This could be separated into individual specs, but that results in a lot of copying and deleting the
             // project files, which is not needed.
-            it('should write to correct project files when conditions are specified', function () {
+            it('Test #012 : should write to correct project files when conditions are specified', function () {
                 var xpath = 'SDKReference[@Include="TestSDK1, Version=1.0"][@Condition="\'$(Platform)\'==\'x86\'"]';
                 validateInstalledProjects('lib-file', libfiles[0], xpath, ['all']);
-
-                xpath = 'SDKReference[@Include="TestSDK2, Version=1.0"]';
+            });
+            it('Test #013 : should write to correct project files when conditions are specified', function () {
+                var xpath = 'SDKReference[@Include="TestSDK2, Version=1.0"]';
                 validateInstalledProjects('lib-file', libfiles[1], xpath, ['windows', 'phone', 'windows10']);
-
-                xpath = 'SDKReference[@Include="TestSDK3, Version=1.0"]';
+            });
+            it('Test #014 : should write to correct project files when conditions are specified', function () {
+                var xpath = 'SDKReference[@Include="TestSDK3, Version=1.0"]';
                 validateInstalledProjects('lib-file', libfiles[2], xpath, ['phone']);
-
-                xpath = 'SDKReference[@Include="TestSDK4, Version=1.0"]';
+            });
+            it('Test #015 : should write to correct project files when conditions are specified', function () {
+                var xpath = 'SDKReference[@Include="TestSDK4, Version=1.0"]';
                 validateInstalledProjects('lib-file', libfiles[3], xpath, ['windows8']);
             });
 
-            it('should throw if conditions are invalid', function () {
+            it('Test #016 : should throw if conditions are invalid', function () {
                 expect(function () {
                     install(invalidLibFiles[0], faultyPluginInfo, dummyProject);
-                }).toThrow('Invalid arch attribute (must be "x86", "x64" or "ARM"): x85');
+                }).toThrow(new Error ('Invalid arch attribute (must be "x86", "x64" or "ARM"): x85'));
 
                 expect(function () {
                     install(invalidLibFiles[1], faultyPluginInfo, dummyProject);
-                }).toThrow('Invalid versions attribute (must be a valid semantic version range): 8.0a');
+                }).toThrow(new Error ('Invalid versions attribute (must be a valid semantic version range): 8.0a'));
 
                 expect(function () {
                     install(invalidLibFiles[2], faultyPluginInfo, dummyProject);
-                }).toThrow('Invalid device-target attribute (must be "all", "phone", "windows" or "win"): daphne');
+                }).toThrow(new Error ('Invalid device-target attribute (must be "all", "phone", "windows" or "win"): daphne'));
             });
         });
 
@@ -311,27 +337,37 @@ describe('windows project handler', function () {
 
             // This could be separated into individual specs, but that results in a lot of copying and deleting the
             // project files, which is not needed.
-            it('should write to correct project files when conditions are specified', function () {
+            it('Test #017 : should write to correct project files when conditions are specified', function () {
                 var xpath = 'Reference[@Include="dummy1"][@Condition="\'$(Platform)\'==\'x64\'"]/HintPath';
                 validateInstalledProjects('framework', frameworks[0], xpath, ['all']);
+            });
 
-                xpath = 'Reference[@Include="dummy2"]/HintPath';
+            it('Test #018 : should write to correct project files when conditions are specified', function () {
+                var xpath = 'Reference[@Include="dummy2"]/HintPath';
                 validateInstalledProjects('framework', frameworks[1], xpath, ['all']);
+            });
 
-                xpath = 'Reference[@Include="dummy3"]/HintPath';
+            it('Test #019 : should write to correct project files when conditions are specified', function () {
+                var xpath = 'Reference[@Include="dummy3"]/HintPath';
                 validateInstalledProjects('framework', frameworks[2], xpath, ['windows', 'windows8', 'windows10']);
+            });
 
-                xpath = 'Reference[@Include="dummy4"][@Condition="\'$(Platform)\'==\'ARM\'"]/HintPath';
+            it('Test #020 : should write to correct project files when conditions are specified', function () {
+                var xpath = 'Reference[@Include="dummy4"][@Condition="\'$(Platform)\'==\'ARM\'"]/HintPath';
                 validateInstalledProjects('framework', frameworks[3], xpath, ['phone']);
+            });
 
-                xpath = 'Reference[@Include="dummy5"]/HintPath';
+            it('Test #021 : should write to correct project files when conditions are specified', function () {
+                var xpath = 'Reference[@Include="dummy5"]/HintPath';
                 validateInstalledProjects('framework', frameworks[4], xpath, ['phone']);
+            });
 
-                xpath = 'Reference[@Include="dummy6"]/HintPath';
+            it('Test #022 : should write to correct project files when conditions are specified', function () {
+                var xpath = 'Reference[@Include="dummy6"]/HintPath';
                 validateInstalledProjects('framework', frameworks[5], xpath, ['windows', 'windows10', 'phone']);
             });
 
-            it('with .winmd and .dll files', function() {
+            it('Test #023 : with .winmd and .dll files', function() {
                var frameworks = copyArray(test_frameworks);
                var install = PluginHandler.getInstaller('framework');
                var uninstall = PluginHandler.getUninstaller('framework');
@@ -380,7 +416,7 @@ describe('windows project handler', function () {
         describe('of <framework> elements of type \'projectReference\'', function () {
             var frameworks = copyArray(valid_frameworks);
 
-            it('should write to correct project files when conditions are specified', function () {
+            it('Test #024 : should write to correct project files when conditions are specified', function () {
                 var curDir;
                 var xpath;
 
@@ -389,12 +425,38 @@ describe('windows project handler', function () {
 
                 xpath = 'ProjectReference[@Include="' + winJoin('..', '..', 'plugins', 'org.test.plugins.dummyplugin', 'src', 'windows', 'dummy1.vcxproj') + '"][@Condition="\'$(Platform)\'==\'x64\'"]';
                 validateInstalledProjects('framework', frameworks[6], xpath, ['all']);
+                process.chdir(path.join(curDir, '..', '..', '..'));
+            });
+            it('Test #025 : should write to correct project files when conditions are specified', function () {
+                var curDir;
+                var xpath;
+
+                curDir = __dirname;
+                process.chdir(path.join(curDir, '..', 'fixtures', 'testProj'));
 
                 xpath = 'ProjectReference[@Include="' + winJoin('..', '..', 'plugins', 'org.test.plugins.dummyplugin', 'src', 'windows', 'dummy2.vcxproj') + '"]';
                 validateInstalledProjects('framework', frameworks[7], xpath, ['windows8']);
 
+                process.chdir(path.join(curDir, '..', '..', '..'));
+            });
+            it('Test #026 : should write to correct project files when conditions are specified', function () {
+                var curDir;
+                var xpath;
+
+                curDir = __dirname;
+                process.chdir(path.join(curDir, '..', 'fixtures', 'testProj'));
+
                 xpath = 'ProjectReference[@Include="' + winJoin('..', '..', 'plugins', 'org.test.plugins.dummyplugin', 'src', 'windows', 'dummy3.vcxproj') + '"]';
                 validateInstalledProjects('framework', frameworks[8], xpath, ['windows', 'windows8', 'windows10']);
+
+                process.chdir(path.join(curDir, '..', '..', '..'));
+            });
+            it('Test #027 : should write to correct project files when conditions are specified', function () {
+                var curDir;
+                var xpath;
+
+                curDir = __dirname;
+                process.chdir(path.join(curDir, '..', 'fixtures', 'testProj'));
 
                 xpath = 'ProjectReference[@Include="' + winJoin('..', '..', 'plugins', 'org.test.plugins.dummyplugin', 'src', 'windows', 'dummy4.vcxproj') + '"]';
                 validateInstalledProjects('framework', frameworks[9], xpath, ['windows', 'phone']);
@@ -415,13 +477,13 @@ describe('windows project handler', function () {
                 platformWwwDest = path.resolve(dummyProject.platformWww, 'plugins', dummyPluginInfo.id, jsModule.src);
             });
 
-            it('should put module to both www and platform_www when options.usePlatformWww flag is specified', function () {
+            it('Test #028 : should put module to both www and platform_www when options.usePlatformWww flag is specified', function () {
                 install(jsModule, dummyPluginInfo, dummyProject, {usePlatformWww: true});
                 expect(fs.writeFileSync).toHaveBeenCalledWith(wwwDest, jasmine.any(String), 'utf-8');
                 expect(fs.writeFileSync).toHaveBeenCalledWith(platformWwwDest, jasmine.any(String), 'utf-8');
             });
 
-            it('should put module to www only when options.usePlatformWww flag is not specified', function () {
+            it('Test #025 : should put module to www only when options.usePlatformWww flag is not specified', function () {
                 install(jsModule, dummyPluginInfo, dummyProject);
                 expect(fs.writeFileSync).toHaveBeenCalledWith(wwwDest, jasmine.any(String), 'utf-8');
                 expect(fs.writeFileSync).not.toHaveBeenCalledWith(platformWwwDest, jasmine.any(String), 'utf-8');
@@ -434,18 +496,18 @@ describe('windows project handler', function () {
             var install = PluginHandler.getInstaller('asset');
 
             beforeEach(function () {
-                copyFileSpy.reset();
+                copyFileSpy.calls.reset();
                 wwwDest = path.resolve(dummyProject.www, asset.target);
                 platformWwwDest = path.resolve(dummyProject.platformWww, asset.target);
             });
 
-            it('should put asset to both www and platform_www when options.usePlatformWww flag is specified', function () {
+            it('Test #029 : should put asset to both www and platform_www when options.usePlatformWww flag is specified', function () {
                 install(asset, dummyPluginInfo, dummyProject, {usePlatformWww: true});
                 expect(copyFileSpy).toHaveBeenCalledWith(dummyPluginInfo.dir, asset.src, dummyProject.www, asset.target);
                 expect(copyFileSpy).toHaveBeenCalledWith(dummyPluginInfo.dir, asset.src, dummyProject.platformWww, asset.target);
             });
 
-            it('should put asset to www only when options.usePlatformWww flag is not specified', function () {
+            it('Test #030 : should put asset to www only when options.usePlatformWww flag is not specified', function () {
                 install(asset, dummyPluginInfo, dummyProject);
                 expect(copyFileSpy).toHaveBeenCalledWith(dummyPluginInfo.dir, asset.src, dummyProject.www, asset.target);
                 expect(copyFileSpy).not.toHaveBeenCalledWith(dummyPluginInfo.dir, asset.src, dummyProject.platformWww, asset.target);
@@ -458,7 +520,7 @@ describe('windows project handler', function () {
         var removeFileSpy = jasmine.createSpy('removeFile');
 
         beforeEach(function () {
-            PluginHandler.__set__('removeFile', removeFileSpy.andCallFake(removeFileOrig));
+            PluginHandler.__set__('removeFile', removeFileSpy.and.callFake(removeFileOrig));
         });
 
         afterEach(function () {
@@ -466,7 +528,6 @@ describe('windows project handler', function () {
         });
 
         function validateUninstalledProjects(tag, elementToUninstall, xmlPath, incText, targetConditions, supportedPlatforms) {
-            jasmine.getEnv().currentSpec.removeAllSpies();
 
             var projects = copyArray(dummyProject.projects);
             projects.push(dummyProject.master);
@@ -506,7 +567,7 @@ describe('windows project handler', function () {
             var install = PluginHandler.getInstaller('source-file');
             var uninstall = PluginHandler.getUninstaller('source-file');
 
-            it('should remove stuff by calling common.removeFile', function () {
+            it('Test #031 : should remove stuff by calling common.removeFile', function () {
                 var source = copyArray(valid_source);
                 install(source[0], dummyPluginInfo, dummyProject);
                 uninstall(source[0], dummyPluginInfo, dummyProject);
@@ -519,7 +580,7 @@ describe('windows project handler', function () {
             // project files, which is not needed.
             var install = PluginHandler.getInstaller('resource-file');
 
-            it('should remove from correct project files when conditions specified', function () {
+            it('Test #032 : should remove from correct project files when conditions specified', function () {
                 var resourcefiles = copyArray(valid_resourceFiles);
 
                 resourcefiles.forEach(function(resourceFile) {
@@ -529,21 +590,44 @@ describe('windows project handler', function () {
                 var incText = resourcefiles[0].target;
                 var targetConditions = {versions: undefined, deviceTarget: undefined, arch: 'x86'};
                 validateUninstalledProjects('resource-file', resourcefiles[0], path, incText, targetConditions, ['all']);
+            });
 
-                incText = resourcefiles[1].target;
-                targetConditions = {versions: '>=8.1', deviceTarget: undefined, arch: undefined};
+            it('Test #033 : should remove from correct project files when conditions specified', function () {
+                var resourcefiles = copyArray(valid_resourceFiles);
+
+                resourcefiles.forEach(function(resourceFile) {
+                    install(resourceFile, dummyPluginInfo, dummyProject);
+                });
+                var path = 'ItemGroup/Content';
+                var incText = resourcefiles[1].target;
+                var targetConditions = {versions: '>=8.1', deviceTarget: undefined, arch: undefined};
                 validateUninstalledProjects('resource-file', resourcefiles[1], path, incText, targetConditions, ['windows', 'phone', 'windows10']);
+            });
 
-                incText = resourcefiles[2].target;
-                targetConditions = {versions: undefined, deviceTarget: 'phone', arch: undefined};
+            it('Test #034 : should remove from correct project files when conditions specified', function () {
+                var resourcefiles = copyArray(valid_resourceFiles);
+
+                resourcefiles.forEach(function(resourceFile) {
+                    install(resourceFile, dummyPluginInfo, dummyProject);
+                });
+                var path = 'ItemGroup/Content';
+                var incText = resourcefiles[2].target;
+                var targetConditions = {versions: undefined, deviceTarget: 'phone', arch: undefined};
                 validateUninstalledProjects('resource-file', resourcefiles[2], path, incText, targetConditions, ['phone']);
+            });
 
-                incText = resourcefiles[3].target;
-                targetConditions = {versions: '8.0', deviceTarget: 'windows', arch: 'x64'};
+            it('Test #035 : should remove from correct project files when conditions specified', function () {
+                var resourcefiles = copyArray(valid_resourceFiles);
+                resourcefiles.forEach(function(resourceFile) {
+                    install(resourceFile, dummyPluginInfo, dummyProject);
+                });
+                var path = 'ItemGroup/Content';
+                var incText = resourcefiles[3].target;
+                var targetConditions = {versions: '8.0', deviceTarget: 'windows', arch: 'x64'};
                 validateUninstalledProjects('resource-file', resourcefiles[3], path, incText, targetConditions, ['windows8']);
             });
 
-            it('should remove from correct project files when conditions specified with reference', function () {
+            it('Test #036 : should remove from correct project files when conditions specified with reference', function () {
                 var resourcereferencefiles = copyArray(valid_resourcereferenceFiles);
 
                 resourcereferencefiles.forEach(function(resourceFile) {
@@ -553,17 +637,40 @@ describe('windows project handler', function () {
                 var incText = computeResourcePath(resourcereferencefiles[0]);
                 var targetConditions = {versions: undefined, deviceTarget: undefined, arch: 'x86'};
                 validateUninstalledProjects('resource-file', resourcereferencefiles[0], path, incText, targetConditions, ['all']);
+            });
+            it('Test #036 : should remove from correct project files when conditions specified with reference', function () {
+                var resourcereferencefiles = copyArray(valid_resourcereferenceFiles);
 
-                incText = computeResourcePath(resourcereferencefiles[1]);
-                targetConditions = {versions: '>=8.1', deviceTarget: undefined, arch: undefined};
+                resourcereferencefiles.forEach(function(resourceFile) {
+                    install(resourceFile, resourcePluginInfo, dummyProject);
+                });
+                var path = 'ItemGroup/Content';
+                var incText = computeResourcePath(resourcereferencefiles[1]);
+                var targetConditions = {versions: '>=8.1', deviceTarget: undefined, arch: undefined};
                 validateUninstalledProjects('resource-file', resourcereferencefiles[1], path, incText, targetConditions, ['windows', 'phone', 'windows10']);
+            });
 
-                incText = computeResourcePath(resourcereferencefiles[2]);
-                targetConditions = {versions: undefined, deviceTarget: 'phone', arch: undefined};
+            it('Test #036 : should remove from correct project files when conditions specified with reference', function () {
+                var resourcereferencefiles = copyArray(valid_resourcereferenceFiles);
+
+                resourcereferencefiles.forEach(function(resourceFile) {
+                    install(resourceFile, resourcePluginInfo, dummyProject);
+                });
+                var path = 'ItemGroup/Content';
+                var incText = computeResourcePath(resourcereferencefiles[2]);
+                var targetConditions = {versions: undefined, deviceTarget: 'phone', arch: undefined};
                 validateUninstalledProjects('resource-file', resourcereferencefiles[2], path, incText, targetConditions, ['phone']);
+            });
 
-                incText = computeResourcePath(resourcereferencefiles[3]);
-                targetConditions = {versions: '8.0', deviceTarget: 'windows', arch: 'x64'};
+            it('Test #036 : should remove from correct project files when conditions specified with reference', function () {
+                var resourcereferencefiles = copyArray(valid_resourcereferenceFiles);
+
+                resourcereferencefiles.forEach(function(resourceFile) {
+                    install(resourceFile, resourcePluginInfo, dummyProject);
+                });
+                var path = 'ItemGroup/Content';
+                var incText = computeResourcePath(resourcereferencefiles[3]);
+                var targetConditions = {versions: '8.0', deviceTarget: 'windows', arch: 'x64'};
                 validateUninstalledProjects('resource-file', resourcereferencefiles[3], path, incText, targetConditions, ['windows8']);
             });
         });
@@ -571,9 +678,8 @@ describe('windows project handler', function () {
         describe('of <lib-file> elements', function () {
             // This could be separated into individual specs, but that results in a lot of copying and deleting the
             // project files, which is not needed.
-            it('should remove from correct project files when conditions specified', function () {
+            it('Test #033 : should remove from correct project files when conditions specified', function () {
                 var libfiles = copyArray(valid_libfiles);
-
                 libfiles.forEach(function(libfile) {
                     PluginHandler.getInstaller('lib-file')(libfile, dummyPluginInfo, dummyProject);
                 });
@@ -582,17 +688,41 @@ describe('windows project handler', function () {
                 var incText = 'TestSDK1, Version=1.0';
                 var targetConditions = {versions: undefined, deviceTarget: undefined, arch: 'x86'};
                 validateUninstalledProjects('lib-file', libfiles[0], path, incText, targetConditions, ['all']);
+            });
 
-                incText = 'TestSDK2, Version=1.0';
-                targetConditions = {versions: '>=8.1', deviceTarget: undefined, arch: undefined};
+            it('Test #034 : should remove from correct project files when conditions specified', function () {
+                var libfiles = copyArray(valid_libfiles);
+                libfiles.forEach(function(libfile) {
+                    PluginHandler.getInstaller('lib-file')(libfile, dummyPluginInfo, dummyProject);
+                });
+
+                var path = 'ItemGroup/SDKReference';
+                var incText = 'TestSDK2, Version=1.0';
+                var targetConditions = {versions: '>=8.1', deviceTarget: undefined, arch: undefined};
                 validateUninstalledProjects('lib-file', libfiles[1], path, incText, targetConditions, ['windows', 'phone', 'windows10']);
+            });
 
-                incText = 'TestSDK3, Version=1.0';
-                targetConditions = {versions: undefined, deviceTarget: 'phone', arch: undefined};
+            it('Test #035 : should remove from correct project files when conditions specified', function () {
+                var libfiles = copyArray(valid_libfiles);
+                libfiles.forEach(function(libfile) {
+                    PluginHandler.getInstaller('lib-file')(libfile, dummyPluginInfo, dummyProject);
+                });
+
+                var path = 'ItemGroup/SDKReference';
+                var incText = 'TestSDK3, Version=1.0';
+                var targetConditions = {versions: undefined, deviceTarget: 'phone', arch: undefined};
                 validateUninstalledProjects('lib-file', libfiles[2], path, incText, targetConditions, ['phone']);
+            });
 
-                incText = 'TestSDK4, Version=1.0';
-                targetConditions = {versions: '8.0', deviceTarget: 'windows', arch: 'x86'};
+            it('Test #036 : should remove from correct project files when conditions specified', function () {
+                var libfiles = copyArray(valid_libfiles);
+                libfiles.forEach(function(libfile) {
+                    PluginHandler.getInstaller('lib-file')(libfile, dummyPluginInfo, dummyProject);
+                });
+
+                var path = 'ItemGroup/SDKReference';
+                var incText = 'TestSDK4, Version=1.0';
+                var targetConditions = {versions: '8.0', deviceTarget: 'windows', arch: 'x86'};
                 validateUninstalledProjects('lib-file', libfiles[3], path, incText, targetConditions, ['windows8']);
             });
         });
@@ -600,7 +730,7 @@ describe('windows project handler', function () {
        describe('of <framework> elements', function () {
             // This could be separated into individual specs, but that results in a lot of copying and deleting the
             // project files, which is not needed.
-            it('should remove from correct project files when conditions specified', function () {
+            it('Test #037 : should remove from correct project files when conditions specified', function () {
                 var curDir;
                 curDir = __dirname;
                 process.chdir(path.join(curDir, '..', 'fixtures', 'testProj'));
@@ -611,30 +741,100 @@ describe('windows project handler', function () {
                     PluginHandler.getInstaller('framework')(framework, dummyPluginInfo, dummyProject);
                 });
 
-
                 var path2 = 'ItemGroup/Reference';
                 var incText = 'dummy1';
                 var targetConditions = {versions: undefined, deviceTarget: undefined, arch: 'x64'};
                 validateUninstalledProjects('framework', frameworks[0], path2, incText, targetConditions, ['all']);
 
-                incText = 'dummy2';
-                targetConditions = {versions: '>=8.0', deviceTarget: undefined, arch: undefined};
+                process.chdir(path.join(curDir, '..', '..', '..'));
+            });
+
+            it('Test #038 : should remove from correct project files when conditions specified', function () {
+                var curDir;
+                curDir = __dirname;
+                process.chdir(path.join(curDir, '..', 'fixtures', 'testProj'));
+
+                var frameworks = copyArray(valid_frameworks);
+
+                frameworks.forEach(function(framework) {
+                    PluginHandler.getInstaller('framework')(framework, dummyPluginInfo, dummyProject);
+                });
+
+                var path2 = 'ItemGroup/Reference';
+                var incText = 'dummy2';
+                var targetConditions = {versions: '>=8.0', deviceTarget: undefined, arch: undefined};
                 validateUninstalledProjects('framework', frameworks[1], path2, incText, targetConditions, ['all']);
+                process.chdir(path.join(curDir, '..', '..', '..'));
+            });
 
-                incText = 'dummy3';
-                targetConditions = {versions: undefined, deviceTarget: 'windows', arch: undefined};
+            it('Test #039 : should remove from correct project files when conditions specified', function () {
+                var curDir;
+                curDir = __dirname;
+                process.chdir(path.join(curDir, '..', 'fixtures', 'testProj'));
+
+                var frameworks = copyArray(valid_frameworks);
+
+                frameworks.forEach(function(framework) {
+                    PluginHandler.getInstaller('framework')(framework, dummyPluginInfo, dummyProject);
+                });
+
+                var path2 = 'ItemGroup/Reference';
+                var incText = 'dummy3';
+                var targetConditions = {versions: undefined, deviceTarget: 'windows', arch: undefined};
                 validateUninstalledProjects('framework', frameworks[2], path2, incText, targetConditions, ['windows', 'windows8', 'windows10']);
+                process.chdir(path.join(curDir, '..', '..', '..'));
+            });
 
-                incText = 'dummy4';
-                targetConditions = {versions: '8.1', deviceTarget: 'phone', arch: 'ARM'};
+            it('Test #040 : should remove from correct project files when conditions specified', function () {
+                var curDir;
+                curDir = __dirname;
+                process.chdir(path.join(curDir, '..', 'fixtures', 'testProj'));
+
+                var frameworks = copyArray(valid_frameworks);
+
+                frameworks.forEach(function(framework) {
+                    PluginHandler.getInstaller('framework')(framework, dummyPluginInfo, dummyProject);
+                });
+
+                var path2 = 'ItemGroup/Reference';
+                var incText = 'dummy4';
+                var targetConditions = {versions: '8.1', deviceTarget: 'phone', arch: 'ARM'};
                 validateUninstalledProjects('framework', frameworks[3], path2, incText, targetConditions, ['phone']);
+                process.chdir(path.join(curDir, '..', '..', '..'));
+            });
 
-                incText = 'dummy5';
-                targetConditions = {versions: undefined, deviceTarget: 'phone', arch: undefined};
+            it('Test #041 : should remove from correct project files when conditions specified', function () {
+                var curDir;
+                curDir = __dirname;
+                process.chdir(path.join(curDir, '..', 'fixtures', 'testProj'));
+
+                var frameworks = copyArray(valid_frameworks);
+
+                frameworks.forEach(function(framework) {
+                    PluginHandler.getInstaller('framework')(framework, dummyPluginInfo, dummyProject);
+                });
+
+                var path2 = 'ItemGroup/Reference';
+                var incText = 'dummy5';
+                var targetConditions = {versions: undefined, deviceTarget: 'phone', arch: undefined};
                 validateUninstalledProjects('framework', frameworks[4], path2, incText, targetConditions, ['phone']);
+                process.chdir(path.join(curDir, '..', '..', '..'));
+            });
 
-                incText = 'dummy6';
-                targetConditions = {versions: '>=8.1', deviceTarget: undefined, arch: undefined};
+            it('Test #042 : should remove from correct project files when conditions specified', function () {
+                var curDir;
+                curDir = __dirname;
+                process.chdir(path.join(curDir, '..', 'fixtures', 'testProj'));
+
+                var frameworks = copyArray(valid_frameworks);
+
+                frameworks.forEach(function(framework) {
+                    PluginHandler.getInstaller('framework')(framework, dummyPluginInfo, dummyProject);
+                });
+
+                var path2 = 'ItemGroup/Reference';
+                var incText = 'dummy6';
+                var targetConditions = {versions: '>=8.1', deviceTarget: undefined, arch: undefined};
                 validateUninstalledProjects('framework', frameworks[5], path2, incText, targetConditions, ['windows', 'windows10', 'phone']);
 
                 process.chdir(path.join(curDir, '..', '..', '..'));
@@ -644,7 +844,7 @@ describe('windows project handler', function () {
         describe('of <framework> elements of type \'projectReference\'', function () {
             // This could be separated into individual specs, but that results in a lot of copying and deleting the
             // project files, which is not needed.
-            it('should remove from correct project files when conditions specified', function () {
+            it('Test #043 :should remove from correct project files when conditions specified', function () {
                 var curDir;
                 curDir = __dirname;
                 process.chdir(path.join(curDir, '..', 'fixtures', 'testProj'));
@@ -660,16 +860,63 @@ describe('windows project handler', function () {
                 var targetConditions = {versions: undefined, deviceTarget: undefined, arch: 'x64'};
                 validateUninstalledProjects('framework', frameworks[6], xmlPath, incText, targetConditions, ['all']);
 
-                incText = winJoin('..', '..', 'plugins', dummyPluginInfo.id, frameworks[7].src);
-                targetConditions = {versions: '<8.1', deviceTarget: undefined, arch: undefined};
+                process.chdir(path.join(curDir, '..', '..', '..'));
+            });
+            it('Test #044 :should remove from correct project files when conditions specified', function () {
+                var curDir;
+                curDir = __dirname;
+                process.chdir(path.join(curDir, '..', 'fixtures', 'testProj'));
+
+                var frameworks = copyArray(valid_frameworks);
+
+                frameworks.forEach(function(framework) {
+                    PluginHandler.getInstaller('framework')(framework, dummyPluginInfo, dummyProject);
+                });
+
+                var xmlPath = 'ItemGroup/ProjectReference';
+
+                var incText = winJoin('..', '..', 'plugins', dummyPluginInfo.id, frameworks[7].src);
+                var targetConditions = {versions: '<8.1', deviceTarget: undefined, arch: undefined};
                 validateUninstalledProjects('framework', frameworks[7], xmlPath, incText, targetConditions, ['windows8']);
 
-                incText = winJoin('..', '..', 'plugins', dummyPluginInfo.id, frameworks[8].src);
-                targetConditions = {versions: undefined, deviceTarget: 'win', arch: undefined};
+                process.chdir(path.join(curDir, '..', '..', '..'));
+            });
+
+            it('Test #045 :should remove from correct project files when conditions specified', function () {
+                var curDir;
+                curDir = __dirname;
+                process.chdir(path.join(curDir, '..', 'fixtures', 'testProj'));
+
+                var frameworks = copyArray(valid_frameworks);
+
+                frameworks.forEach(function(framework) {
+                    PluginHandler.getInstaller('framework')(framework, dummyPluginInfo, dummyProject);
+                });
+
+                var xmlPath = 'ItemGroup/ProjectReference';
+
+                var incText = winJoin('..', '..', 'plugins', dummyPluginInfo.id, frameworks[8].src);
+                var targetConditions = {versions: undefined, deviceTarget: 'win', arch: undefined};
                 validateUninstalledProjects('framework', frameworks[8], xmlPath, incText, targetConditions, ['windows', 'windows8', 'windows10']);
 
-                incText = winJoin('..', '..', 'plugins', dummyPluginInfo.id, frameworks[9].src);
-                targetConditions = {versions: '8.1', deviceTarget: 'all', arch: 'x86'};
+                process.chdir(path.join(curDir, '..', '..', '..'));
+            });
+
+            it('Test #046 :should remove from correct project files when conditions specified', function () {
+                var curDir;
+                curDir = __dirname;
+                process.chdir(path.join(curDir, '..', 'fixtures', 'testProj'));
+
+                var frameworks = copyArray(valid_frameworks);
+
+                frameworks.forEach(function(framework) {
+                    PluginHandler.getInstaller('framework')(framework, dummyPluginInfo, dummyProject);
+                });
+
+                var xmlPath = 'ItemGroup/ProjectReference';
+
+                var incText = winJoin('..', '..', 'plugins', dummyPluginInfo.id, frameworks[9].src);
+                var targetConditions = {versions: '8.1', deviceTarget: 'all', arch: 'x86'};
                 validateUninstalledProjects('framework', frameworks[9], xmlPath, incText, targetConditions, ['windows', 'phone']);
 
                 process.chdir(path.join(curDir, '..', '..', '..'));
@@ -689,19 +936,19 @@ describe('windows project handler', function () {
                 spyOn(shell, 'rm');
 
                 var existsSyncOrig = fs.existsSync;
-                spyOn(fs, 'existsSync').andCallFake(function (file) {
+                spyOn(fs, 'existsSync').and.callFake(function (file) {
                     if ([wwwDest, platformWwwDest].indexOf(file) >= 0 ) return true;
                     return existsSyncOrig.call(fs, file);
                 });
             });
 
-            it('should put module to both www and platform_www when options.usePlatformWww flag is specified', function () {
+            it('Test #047 : should put module to both www and platform_www when options.usePlatformWww flag is specified', function () {
                 uninstall(jsModule, dummyPluginInfo, dummyProject, {usePlatformWww: true});
                 expect(shell.rm).toHaveBeenCalledWith(jasmine.any(String), wwwDest);
                 expect(shell.rm).toHaveBeenCalledWith(jasmine.any(String), platformWwwDest);
             });
 
-            it('should put module to www only when options.usePlatformWww flag is not specified', function () {
+            it('Test #048 : should put module to www only when options.usePlatformWww flag is not specified', function () {
                 uninstall(jsModule, dummyPluginInfo, dummyProject);
                 expect(shell.rm).toHaveBeenCalledWith(jasmine.any(String), wwwDest);
                 expect(shell.rm).not.toHaveBeenCalledWith(jasmine.any(String), platformWwwDest);
@@ -720,19 +967,19 @@ describe('windows project handler', function () {
                 spyOn(shell, 'rm');
 
                 var existsSyncOrig = fs.existsSync;
-                spyOn(fs, 'existsSync').andCallFake(function (file) {
+                spyOn(fs, 'existsSync').and.callFake(function (file) {
                     if ([wwwDest, platformWwwDest].indexOf(file) >= 0 ) return true;
                     return existsSyncOrig.call(fs, file);
                 });
             });
 
-            it('should put module to both www and platform_www when options.usePlatformWww flag is specified', function () {
+            it('Test #049 : should put module to both www and platform_www when options.usePlatformWww flag is specified', function () {
                 uninstall(asset, dummyPluginInfo, dummyProject, {usePlatformWww: true});
                 expect(shell.rm).toHaveBeenCalledWith(jasmine.any(String), wwwDest);
                 expect(shell.rm).toHaveBeenCalledWith(jasmine.any(String), platformWwwDest);
             });
 
-            it('should put module to www only when options.usePlatformWww flag is not specified', function () {
+            it('Test #050 : should put module to www only when options.usePlatformWww flag is not specified', function () {
                 uninstall(asset, dummyPluginInfo, dummyProject);
                 expect(shell.rm).toHaveBeenCalledWith(jasmine.any(String), wwwDest);
                 expect(shell.rm).not.toHaveBeenCalledWith(jasmine.any(String), platformWwwDest);

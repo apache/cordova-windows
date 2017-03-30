@@ -13,6 +13,8 @@ Thumbs.db
 node_modules/.bin
 node_modules/istanbul/
 node_modules/jasmine-node/
+node_modules/jasmine/
+node_modules/jasmine-core/
 node_modules/jshint/
 node_modules/rewire/
 node_modules/align-text/

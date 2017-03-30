@@ -12,12 +12,12 @@ describe('Cordova clean command', function() {
         iconPath = path.join(currentProject, 'images/SplashScreen.scale-100.png');
 
         var fsExistsSyncOrig = fs.existsSync;
-        spyOn(fs, 'existsSync').andCallFake(function (filePath) {
+        spyOn(fs, 'existsSync').and.callFake(function (filePath) {
             if (/config\.xml$/.test(filePath)) return true;
             return fsExistsSyncOrig(filePath);
         });
         var fsStatSyncOrig = fs.statSync;
-        spyOn(fs, 'statSync').andCallFake(function (filePath) {
+        spyOn(fs, 'statSync').and.callFake(function (filePath) {
             if (/SplashScreen\.scale-100\.png$/.test(filePath)) {
                 // Use absolute path:
                 return fsStatSyncOrig(iconPath);
@@ -42,7 +42,7 @@ describe('Cordova clean command', function() {
             }
         };
 
-        var rejected = jasmine.createSpy().andCallFake(function(err) {
+        var rejected = jasmine.createSpy().and.callFake(function(err) {
             // Log error:
             expect(err).not.toBeDefined();
         });

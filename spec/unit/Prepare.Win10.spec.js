@@ -200,7 +200,7 @@ describe('A Windows 10 project should warn if it supports remote mode and restri
         mockConfig = createMockConfigAndManifestForApplyAccessRules(true, 'http://www.bing.com/*');
         addCapabilityDeclarationToMockManifest(mockConfig.manifest, 'documentsLibrary');
 
-        spyOn(AppxManifest, 'get').andReturn(mockConfig.manifest);
+        spyOn(AppxManifest, 'get').and.returnValue(mockConfig.manifest);
 
         stringFound = false;
         events.on('warn', function (msg) {
@@ -242,7 +242,7 @@ function createMockConfigAndManifestForApplyAccessRules(isWin10) {
     '</widget>\n';
 
     var origParseElementtreeSync = xml.parseElementtreeSync;
-    spyOn(xml, 'parseElementtreeSync').andCallFake(function(path) {
+    spyOn(xml, 'parseElementtreeSync').and.callFake(function(path) {
         if (path ==='config.xml') return new et.ElementTree(et.XML(TEST_XML));
         return origParseElementtreeSync(path);
     });
@@ -250,7 +250,7 @@ function createMockConfigAndManifestForApplyAccessRules(isWin10) {
     var config = new ConfigParser('config.xml');
 
     var origGetPreference = config.getPreference;
-    spyOn(config, 'getPreference').andCallFake(function (prefName) {
+    spyOn(config, 'getPreference').and.callFake(function (prefName) {
         if (prefName === 'WindowsDefaultUriPrefix') {
             return isWin10 ? 'ms-appx-web://' : 'ms-appx://';
         }
@@ -468,8 +468,8 @@ describe('copyIcons method', function () {
 
     function createMockConfig(images, splashScreens) {
         var result = jasmine.createSpyObj('config', ['getIcons', 'getSplashScreens']);
-        result.getIcons.andReturn(images);
-        result.getSplashScreens.andReturn(splashScreens || []);
+        result.getIcons.and.returnValue(images);
+        result.getSplashScreens.and.returnValue(splashScreens || []);
 
         return result;
     }
@@ -506,7 +506,7 @@ describe('copyIcons method', function () {
         events.on('warn', warnSpy);
         copyImages(project, locations);
         expect(FileUpdater.updatePaths).toHaveBeenCalledWith({}, { rootDir: PROJECT }, logFileOp);
-        expect(warnSpy.calls[0].args[0]).toMatch('image was skipped');
+        expect(warnSpy.calls.argsFor(0)[0]).toMatch('image was skipped');
     });
 
     describe('when "target" attribute is specified for the image', function () {
@@ -524,7 +524,7 @@ describe('copyIcons method', function () {
                 'Square44x44.targetsize-16.jpg'
             ];
 
-            spyOn(fs, 'readdirSync').andReturn(matchingFiles.concat(nonMatchingFiles));
+            spyOn(fs, 'readdirSync').and.returnValue(matchingFiles.concat(nonMatchingFiles));
 
             var images = [{src: 'res/Windows/Square44x44.png', target: 'SmallIcon' }];
             var project = { projectConfig: createMockConfig(images), root: PROJECT };
@@ -564,9 +564,9 @@ describe('copyIcons method', function () {
         var splashScreensFiles = splashScreens.map(function(splash) {
             return path.basename(splash.src);
         });
-        spyOn(fs, 'readdirSync').andReturn(splashScreensFiles);
+        spyOn(fs, 'readdirSync').and.returnValue(splashScreensFiles);
 
-        spyOn(fs, 'statSync').andReturn({
+        spyOn(fs, 'statSync').and.returnValue({
             size: size300K
         });
 
@@ -580,7 +580,7 @@ describe('copyIcons method', function () {
         expectedPathMap['images' + path.sep + 'SplashScreenPhone.scale-240.png'] = path.join('res', 'Windows', 'splashscreenphone.scale-240.png');
         expectedPathMap['images' + path.sep + 'SplashScreenPhone.scale-100.png'] = path.join('res', 'Windows', 'splashscreenphone.png');
         expect(FileUpdater.updatePaths).toHaveBeenCalledWith(expectedPathMap, { rootDir: PROJECT }, logFileOp);
-        expect(warnSpy.calls[0].args[0]).toMatch('file size exceeds the limit');
+        expect(warnSpy.calls.argsFor(0)[0]).toMatch('file size exceeds the limit');
     });
 
     it('should ignore splashScreens with unsupported extensions and emit a warning', function () {
@@ -596,9 +596,9 @@ describe('copyIcons method', function () {
         var splashScreensFiles = splashScreens.map(function(splash) {
             return path.basename(splash.src);
         });
-        spyOn(fs, 'readdirSync').andReturn(splashScreensFiles);
+        spyOn(fs, 'readdirSync').and.returnValue(splashScreensFiles);
 
-        spyOn(fs, 'statSync').andReturn({
+        spyOn(fs, 'statSync').and.returnValue({
             size: 0
         });
 
@@ -610,15 +610,15 @@ describe('copyIcons method', function () {
         var extensionNotSupportedMsg = 'extension is not supported';
         var expectedPathMap = {};
         expect(FileUpdater.updatePaths).toHaveBeenCalledWith(expectedPathMap, { rootDir: PROJECT }, logFileOp);
-        expect(warnSpy.calls[0].args[0]).toMatch(extensionNotSupportedMsg);
-        expect(warnSpy.calls[1].args[0]).toMatch(extensionNotSupportedMsg);
-        expect(warnSpy.calls[2].args[0]).toMatch(extensionNotSupportedMsg);
+        expect(warnSpy.calls.argsFor(0)[0]).toMatch(extensionNotSupportedMsg);
+        expect(warnSpy.calls.argsFor(1)[0]).toMatch(extensionNotSupportedMsg);
+        expect(warnSpy.calls.argsFor(2)[0]).toMatch(extensionNotSupportedMsg);
     });
 
     it('should warn about mixed splashscreen extensions used for non-MRT syntax', function () {
         var updateSplashScreenImageExtensions = prepare.__get__('updateSplashScreenImageExtensions');
         spyOn(fs, 'writeFileSync');
-        spyOn(AppxManifest, 'get').andReturn({
+        spyOn(AppxManifest, 'get').and.returnValue({
             getVisualElements: function() {
                 return {
                     getSplashScreenExtension: function() {
@@ -644,9 +644,9 @@ describe('copyIcons method', function () {
         var splashScreensFiles = splashScreens.map(function(splash) {
             return path.basename(splash.src);
         });
-        spyOn(fs, 'readdirSync').andReturn(splashScreensFiles);
+        spyOn(fs, 'readdirSync').and.returnValue(splashScreensFiles);
 
-        spyOn(fs, 'statSync').andReturn({
+        spyOn(fs, 'statSync').and.returnValue({
             size: 0
         });
 
@@ -656,8 +656,8 @@ describe('copyIcons method', function () {
         updateSplashScreenImageExtensions(project, locations);
 
         var mixedExtensionsMsg = 'splash screens have mixed file extensions';
-        expect(warnSpy.calls[0].args[0]).toMatch(mixedExtensionsMsg);
-        expect(warnSpy.calls[1].args[0]).toMatch(mixedExtensionsMsg);
+        expect(warnSpy.calls.argsFor(0)[0]).toMatch(mixedExtensionsMsg);
+        expect(warnSpy.calls.argsFor(1)[0]).toMatch(mixedExtensionsMsg);
     });
 
     it('should update manifests with proper splashscreen image extension', function () {
@@ -672,7 +672,7 @@ describe('copyIcons method', function () {
             win81Manifest = AppxManifest.get(Win81ManifestPath),
             wp81Manifest = AppxManifest.get(WP81ManifestPath);
 
-        spyOn(AppxManifest, 'get').andCallFake(function(manifestPath) {
+        spyOn(AppxManifest, 'get').and.callFake(function(manifestPath) {
             if (manifestPath.indexOf(Win10ManifestName) !== -1) {
                 return win10Manifest;
             }
@@ -695,9 +695,9 @@ describe('copyIcons method', function () {
         var splashScreensFiles = splashScreens.map(function(splash) {
             return path.basename(splash.src);
         });
-        spyOn(fs, 'readdirSync').andReturn(splashScreensFiles);
+        spyOn(fs, 'readdirSync').and.returnValue(splashScreensFiles);
 
-        spyOn(fs, 'statSync').andReturn({
+        spyOn(fs, 'statSync').and.returnValue({
             size: 0
         });
 
