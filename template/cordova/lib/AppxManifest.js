@@ -102,7 +102,7 @@ AppxManifest.get = function (fileName, ignoreCache) {
     var root = xml.parseElementtreeSync(fileName).getroot();
     var prefixes = Object.keys(root.attrib)
     .reduce(function (result, attrib) {
-        if (attrib.indexOf('xmlns') === 0 && attrib !== 'xmlns:mp') {
+        if (attrib.indexOf('xmlns') === 0 && attrib !== 'xmlns:mp' && attrib !== 'xmlns:uap3') {
             result.push(attrib.replace('xmlns', '').replace(':', ''));
         }
 
