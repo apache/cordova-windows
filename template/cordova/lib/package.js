@@ -55,11 +55,14 @@ module.exports.getPackage = function (projectType, buildtype, buildArch) {
             var packageFile = path.join(dir, pkgFile);
             var pkgInfo = module.exports.getPackageFileInfo(packageFile);
 
-            if (pkgInfo && pkgInfo.type == projectType &&
-                pkgInfo.arch == buildArch && pkgInfo.buildtype == buildtype) {
-                // if package's properties are corresponds to properties provided
-                // resolve the promise with this package's info
-                return Q.resolve(pkgInfo);
+            if (pkgInfo && 
+                pkgInfo.type == projectType && 
+                pkgInfo.buildtype == buildtype && 
+                ( pkgInfo.arch == buildArch || 
+                  pkgInfo.archs && pkgInfo.archs.indexOf(buildArch) > -1) ) {
+                    // if package's properties match properties provided
+                    // resolve the promise with this package's info
+                    return Q.resolve(pkgInfo);
             }
         }
     }
