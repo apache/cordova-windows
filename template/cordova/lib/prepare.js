@@ -189,6 +189,10 @@ function applyCoreProperties(config, manifest) {
     if (name) {
         manifest.getVisualElements().setDisplayName(name);
     }
+    var description = config.description();
+    if (description) {
+        visualElems.attrib.Description = description;
+    }
 
     var description = config.description();
     manifest.getProperties().setDescription(description);
