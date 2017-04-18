@@ -24,11 +24,11 @@
     <SharedGUID>9ebdb27f-d75b-4d8c-b53f-7be4a1fe89f9</SharedGUID>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="$(MSBuildThisFileDirectory)www\**" />
+    <Content Include="www\**" Exclude="**\*.ts" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="$(MSBuildThisFileDirectory)config.xml" />
+    <Content Include="config.xml" />
   </ItemGroup>
-  <Import Project="CordovaAppDebug.projitems" Condition="Exists('$(MSBuildThisFileDirectory)CordovaAppDebug.projitems') And '$(Configuration)'=='Debug'" />
-  <Import Project="CordovaAppRelease.projitems" Condition="Exists('$(MSBuildThisFileDirectory)CordovaAppRelease.projitems') And '$(Configuration)'!='Debug'" />
+  <Import Project="CordovaAppDebug.projitems" Condition="Exists('CordovaAppDebug.projitems') And '$(Configuration)'=='Debug'" />
+  <Import Project="CordovaAppRelease.projitems" Condition="Exists('CordovaAppRelease.projitems') And '$(Configuration)'!='Debug'" />
 </Project>
