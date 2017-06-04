@@ -384,6 +384,9 @@ AppxManifest.prototype.getVisualElements = function () {
         setBackgroundColor: function (color) {
             if (!color)
                 throw new TypeError('VisualElements.BackgroundColor attribute must be defined in appxmanifest at ' + this.path);
+            
+            if(color=='transparent')
+				return this;
 
             visualElements.attrib.BackgroundColor = refineColor(color);
             return this;
