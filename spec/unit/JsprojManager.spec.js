@@ -30,7 +30,7 @@ var FAKE_MANIFEST = new et.ElementTree(et.XML(
     '<?xml version="1.0" encoding="UTF-8"?>' +
     '<Package>' +
         '<Properties>' +
-            '<DisplayName>HelloCordova</DisplayName>'+
+            '<DisplayName>HelloCordova</DisplayName>' +
         '</Properties>' +
     '</Package>'));
 

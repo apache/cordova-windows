@@ -17,8 +17,8 @@
        under the License.
 */
 
-var Q     = require('q');
-var path  = require('path');
+var Q = require('q');
+var path = require('path');
 var shell = require('shelljs');
 var Version = require('./Version');
 var events = require('cordova-common').events;
@@ -29,7 +29,7 @@ function MSBuildTools (version, path) {
     this.path = path;
 }
 
-MSBuildTools.prototype.buildProject = function(projFile, buildType, buildarch, buildFlags) {
+MSBuildTools.prototype.buildProject = function (projFile, buildType, buildarch, buildFlags) {
     events.emit('log', 'Building project: ' + projFile);
     events.emit('log', '\tConfiguration : ' + buildType);
     events.emit('log', '\tPlatform      : ' + buildarch);
@@ -43,8 +43,8 @@ MSBuildTools.prototype.buildProject = function(projFile, buildType, buildarch, b
     };
 
     var args = ['/clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal', '/nologo',
-    '/p:Configuration=' + buildType,
-    '/p:Platform=' + buildarch];
+        '/p:Configuration=' + buildType,
+        '/p:Platform=' + buildarch];
 
     if (buildFlags) {
         args = args.concat(buildFlags);
@@ -56,11 +56,9 @@ MSBuildTools.prototype.buildProject = function(projFile, buildType, buildarch, b
     // Check if SDK required to build the respective platform is present. If not present, return with corresponding error, else call msbuild.
     if (projFile.indexOf('CordovaApp.Phone.jsproj') > -1) {
         promise = checkPhoneSDK();
-    }
-    else if (projFile.indexOf('CordovaApp.Windows.jsproj') > -1) {
+    } else if (projFile.indexOf('CordovaApp.Windows.jsproj') > -1) {
         promise = checkWinSDK('8.1');
-    }
-    else {
+    } else {
         promise = checkWinSDK('10.0');
     }
 
@@ -81,12 +79,12 @@ module.exports.findAvailableVersion = function () {
     });
 };
 
-function findAllAvailableVersionsFallBack() {
+function findAllAvailableVersionsFallBack () {
     var versions = ['15.0', '14.0', '12.0', '4.0'];
     events.emit('verbose', 'Searching for available MSBuild versions...');
 
-    return Q.all(versions.map(checkMSBuildVersion)).then(function(unprocessedResults) {
-        return unprocessedResults.filter(function(item) {
+    return Q.all(versions.map(checkMSBuildVersion)).then(function (unprocessedResults) {
+        return unprocessedResults.filter(function (item) {
             return !!item;
         });
     });
@@ -99,9 +97,9 @@ module.exports.findAllAvailableVersions = function () {
     if (process.env.VSINSTALLDIR) {
         var msBuildPath = path.join(process.env.VSINSTALLDIR, 'MSBuild/15.0/Bin');
         return module.exports.getMSBuildToolsAt(msBuildPath)
-        .then(function (msBuildTools) {
-            return [msBuildTools];
-        }).catch(findAllAvailableVersionsFallBack);
+            .then(function (msBuildTools) {
+                return [msBuildTools];
+            }).catch(findAllAvailableVersionsFallBack);
     }
 
     return findAllAvailableVersionsFallBack();
@@ -118,38 +116,37 @@ module.exports.getMSBuildToolsAt = function (location) {
 
     // TODO: can we account on these params availability and printed version format?
     return spawn(msbuildExe, ['-version', '-nologo'])
-    .then(function (output) {
-        // MSBuild prints its' version as 14.0.25123.0, so we pick only first 2 segments
-        var version = output.match(/^(\d+\.\d+)/)[1];
-        return new MSBuildTools(version, location);
-    });
+        .then(function (output) {
+            // MSBuild prints its' version as 14.0.25123.0, so we pick only first 2 segments
+            var version = output.match(/^(\d+\.\d+)/)[1];
+            return new MSBuildTools(version, location);
+        });
 };
 
-function checkMSBuildVersion(version) {
+function checkMSBuildVersion (version) {
     return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\' + version, '/v', 'MSBuildToolsPath'])
-    .then(function(output) {
-        // fetch msbuild path from 'reg' output
-        var toolsPath = /MSBuildToolsPath\s+REG_SZ\s+(.*)/i.exec(output);
-        if (toolsPath) {
-            toolsPath = toolsPath[1];
-            // CB-9565: Windows 10 invokes .NET Native compiler, which only runs on x86 arch,
-            // so if we're running an x64 Node, make sure to use x86 tools.
-            if ((version === '15.0' || version === '14.0') && toolsPath.indexOf('amd64') > -1) {
-                toolsPath = path.resolve(toolsPath, '..');
+        .then(function (output) {
+            // fetch msbuild path from 'reg' output
+            var toolsPath = /MSBuildToolsPath\s+REG_SZ\s+(.*)/i.exec(output);
+            if (toolsPath) {
+                toolsPath = toolsPath[1];
+                // CB-9565: Windows 10 invokes .NET Native compiler, which only runs on x86 arch,
+                // so if we're running an x64 Node, make sure to use x86 tools.
+                if ((version === '15.0' || version === '14.0') && toolsPath.indexOf('amd64') > -1) {
+                    toolsPath = path.resolve(toolsPath, '..');
+                }
+                events.emit('verbose', 'Found MSBuild v' + version + ' at ' + toolsPath);
+                return new MSBuildTools(version, toolsPath);
             }
-            events.emit('verbose', 'Found MSBuild v' + version + ' at ' + toolsPath);
-            return new MSBuildTools(version, toolsPath);
-        }
-    })
-    .catch(function (err) {
-        // if 'reg' exits with error, assume that registry key not found
-        return;
-    });
+        }).catch(function (err) { /* eslint handle-callback-err : 0 */
+            // if 'reg' exits with error, assume that registry key not found
+
+        });
 }
 
 /// returns an array of available UAP Versions
-function getAvailableUAPVersions() {
-    /*jshint -W069 */
+function getAvailableUAPVersions () {
+    /* jshint -W069 */
     var programFilesFolder = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
     // No Program Files folder found, so we won't be able to find UAP SDK
     if (!programFilesFolder) return [];
@@ -160,11 +157,11 @@ function getAvailableUAPVersions() {
     }
 
     var result = [];
-    shell.ls(uapFolderPath).filter(function(uapDir) {
+    shell.ls(uapFolderPath).filter(function (uapDir) {
         return shell.test('-d', path.join(uapFolderPath, uapDir));
-    }).map(function(folder) {
+    }).map(function (folder) {
         return Version.tryParse(folder);
-    }).forEach(function(version, index) {
+    }).forEach(function (version, index) {
         if (version) {
             result.push(version);
         }

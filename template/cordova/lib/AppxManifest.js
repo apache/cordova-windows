@@ -21,22 +21,22 @@ var fs = require('fs');
 var util = require('util');
 var et = require('elementtree');
 var path = require('path');
-var xml= require('cordova-common').xmlHelpers;
+var xml = require('cordova-common').xmlHelpers;
 
 var UAP_RESTRICTED_CAPS = ['enterpriseAuthentication', 'sharedUserCertificates',
-                           'documentsLibrary', 'musicLibrary', 'picturesLibrary',
-                           'videosLibrary', 'removableStorage', 'internetClientClientServer',
-                           'privateNetworkClientServer'];
+    'documentsLibrary', 'musicLibrary', 'picturesLibrary',
+    'videosLibrary', 'removableStorage', 'internetClientClientServer',
+    'privateNetworkClientServer'];
 
 // UAP namespace capabilities come from the XSD type ST_Capability_Uap from AppxManifestTypes.xsd
-var CAPS_NEEDING_UAPNS  = ['documentsLibrary', 'picturesLibrary', 'videosLibrary',
-                           'musicLibrary', 'enterpriseAuthentication', 'sharedUserCertificates',
-                           'removableStorage', 'appointments', 'contacts', 'userAccountInformation',
-                           'phoneCall', 'blockedChatMessages', 'objects3D'];
+var CAPS_NEEDING_UAPNS = ['documentsLibrary', 'picturesLibrary', 'videosLibrary',
+    'musicLibrary', 'enterpriseAuthentication', 'sharedUserCertificates',
+    'removableStorage', 'appointments', 'contacts', 'userAccountInformation',
+    'phoneCall', 'blockedChatMessages', 'objects3D'];
 
 var KNOWN_ORIENTATIONS = {
-    'default':   ['portrait', 'landscape', 'landscapeFlipped'],
-    'portrait':  ['portrait'],
+    'default': ['portrait', 'landscape', 'landscapeFlipped'],
+    'portrait': ['portrait'],
     'landscape': ['landscape', 'landscapeFlipped']
 };
 
@@ -58,7 +58,7 @@ var manifestCache = {};
  * @param  {string}  prefix  A namespace prefix used to prepend some elements.
  *   Depends on manifest type.
  */
-function AppxManifest(path, prefix) {
+function AppxManifest (path, prefix) {
     this.path = path;
     // Append ':' to prefix if needed
     prefix = prefix || '';
@@ -101,13 +101,13 @@ AppxManifest.get = function (fileName, ignoreCache) {
 
     var root = xml.parseElementtreeSync(fileName).getroot();
     var prefixes = Object.keys(root.attrib)
-    .reduce(function (result, attrib) {
-        if (attrib.indexOf('xmlns') === 0 && attrib !== 'xmlns:mp' && attrib !== 'xmlns:uap3') {
-            result.push(attrib.replace('xmlns', '').replace(':', ''));
-        }
+        .reduce(function (result, attrib) {
+            if (attrib.indexOf('xmlns') === 0 && attrib !== 'xmlns:mp' && attrib !== 'xmlns:uap3') {
+                result.push(attrib.replace('xmlns', '').replace(':', ''));
+            }
 
-        return result;
-    }, []).sort();
+            return result;
+        }, []).sort();
 
     var prefix = prefixes[prefixes.length - 1];
     var Manifest = prefix === 'uap' ? Win10AppxManifest : AppxManifest;
@@ -141,8 +141,7 @@ AppxManifest.purgeCache = function (cacheKeys) {
 
 AppxManifest.prototype.getPhoneIdentity = function () {
     var phoneIdentity = this.doc.getroot().find('./mp:PhoneIdentity');
-    if (!phoneIdentity)
-        throw new Error('Failed to find PhoneIdentity element in appxmanifest at ' + this.path);
+    if (!phoneIdentity) { throw new Error('Failed to find PhoneIdentity element in appxmanifest at ' + this.path); }
 
     return {
         getPhoneProductId: function () {
@@ -158,8 +157,7 @@ AppxManifest.prototype.getPhoneIdentity = function () {
 
 AppxManifest.prototype.getIdentity = function () {
     var identity = this.doc.getroot().find('./Identity');
-    if (!identity)
-        throw new Error('Failed to find "Identity" node. The appxmanifest at ' + this.path + ' is invalid');
+    if (!identity) { throw new Error('Failed to find "Identity" node. The appxmanifest at ' + this.path + ' is invalid'); }
 
     return {
         getName: function () {
@@ -182,10 +180,10 @@ AppxManifest.prototype.getIdentity = function () {
             return identity.attrib.Version;
         },
         setVersion: function (version) {
-            if (!version) throw new TypeError('Identity.Version attribute must be non-empty in appxmanifest at ' + this.path );
+            if (!version) throw new TypeError('Identity.Version attribute must be non-empty in appxmanifest at ' + this.path);
 
             // Adjust version number as per CB-5337 Windows8 build fails due to invalid app version
-            if(version && version.match(/\.\d/g)) {
+            if (version && version.match(/\.\d/g)) {
                 var numVersionComponents = version.match(/\.\d/g).length + 1;
                 while (numVersionComponents++ < 4) {
                     version += '.0';
@@ -201,8 +199,7 @@ AppxManifest.prototype.getIdentity = function () {
 AppxManifest.prototype.getProperties = function () {
     var properties = this.doc.getroot().find('./Properties');
 
-    if (!properties)
-        throw new Error('Failed to find "Properties" node. The appxmanifest at ' + this.path + ' is invalid');
+    if (!properties) { throw new Error('Failed to find "Properties" node. The appxmanifest at ' + this.path + ' is invalid'); }
 
     return {
         getDisplayName: function () {
@@ -260,14 +257,13 @@ AppxManifest.prototype.getProperties = function () {
             description.text = processDescription(text);
 
             return this;
-        },
+        }
     };
 };
 
 AppxManifest.prototype.getApplication = function () {
     var application = this.doc.getroot().find('./Applications/Application');
-    if (!application)
-        throw new Error('Failed to find "Application" element. The appxmanifest at ' + this.path + ' is invalid');
+    if (!application) { throw new Error('Failed to find "Application" element. The appxmanifest at ' + this.path + ' is invalid'); }
 
     var self = this;
 
@@ -316,7 +312,7 @@ AppxManifest.prototype.getApplication = function () {
             appUriRules = new et.Element('ApplicationContentUriRules');
             application.append(appUriRules);
 
-            rules.forEach(function(rule) {
+            rules.forEach(function (rule) {
                 appUriRules.append(new et.Element('Rule', {Match: rule, Type: 'include'}));
             });
 
@@ -328,10 +324,9 @@ AppxManifest.prototype.getApplication = function () {
 AppxManifest.prototype.getVisualElements = function () {
     var self = this;
     var visualElements = this.doc.getroot().find('./Applications/Application/' +
-        this.prefix  + 'VisualElements');
+        this.prefix + 'VisualElements');
 
-    if (!visualElements)
-        throw new Error('Failed to find "VisualElements" node. The appxmanifest at ' + this.path + ' is invalid');
+    if (!visualElements) { throw new Error('Failed to find "VisualElements" node. The appxmanifest at ' + this.path + ' is invalid'); }
 
     return {
         _node: visualElements,
@@ -350,7 +345,7 @@ AppxManifest.prototype.getVisualElements = function () {
                 });
         },
         setOrientation: function (orientation) {
-            if (!orientation || orientation === ''){
+            if (!orientation || orientation === '') {
                 orientation = 'default';
             }
 
@@ -363,7 +358,7 @@ AppxManifest.prototype.getVisualElements = function () {
                 return this;
             }
 
-            if(!rotationPreferenceRoot) {
+            if (!rotationPreferenceRoot) {
                 rotationPreferenceRoot = new et.Element(rotationPreferenceRootName);
                 visualElements.append(rotationPreferenceRoot);
             }
@@ -371,8 +366,8 @@ AppxManifest.prototype.getVisualElements = function () {
             rotationPreferenceRoot.clear();
 
             var orientations = KNOWN_ORIENTATIONS[orientation] || orientation.split(',');
-            orientations.forEach(function(orientation) {
-                var el = new et.Element(self.prefix + 'Rotation', {Preference: orientation} );
+            orientations.forEach(function (orientation) {
+                var el = new et.Element(self.prefix + 'Rotation', {Preference: orientation});
                 rotationPreferenceRoot.append(el);
             });
 
@@ -382,8 +377,7 @@ AppxManifest.prototype.getVisualElements = function () {
             return visualElements.attrib.BackgroundColor;
         },
         setBackgroundColor: function (color) {
-            if (!color)
-                throw new TypeError('VisualElements.BackgroundColor attribute must be defined in appxmanifest at ' + this.path);
+            if (!color) { throw new TypeError('VisualElements.BackgroundColor attribute must be defined in appxmanifest at ' + this.path); }
 
             visualElements.attrib.BackgroundColor = refineColor(color);
             return this;
@@ -424,7 +418,7 @@ AppxManifest.prototype.getVisualElements = function () {
         setSplashScreenExtension: function (extension) {
             var splashNode = visualElements.find('./' + self.prefix + 'SplashScreen');
             if (splashNode) {
-                var oldPath = splashNode.attrib.Image; 
+                var oldPath = splashNode.attrib.Image;
                 splashNode.attrib.Image = path.dirname(oldPath) + '\\' + path.basename(oldPath, path.extname(oldPath)) + extension;
             }
             return this;
@@ -445,12 +439,11 @@ AppxManifest.prototype.getVisualElements = function () {
             return visualElements.attrib.Description;
         },
         setDescription: function (description) {
-            if (!description || description.length === 0)
-                throw new TypeError('VisualElements.Description attribute must be defined and non-empty in appxmanifest at ' + this.path);
+            if (!description || description.length === 0) { throw new TypeError('VisualElements.Description attribute must be defined and non-empty in appxmanifest at ' + this.path); }
 
             visualElements.attrib.Description = processDescription(description);
             return this;
-        },
+        }
     };
 };
 
@@ -459,33 +452,33 @@ AppxManifest.prototype.getCapabilities = function () {
     if (!capabilities) return [];
 
     return capabilities.getchildren()
-    .map(function (element) {
-        return { type: element.tag, name: element.attrib.Name };
-    });
+        .map(function (element) {
+            return { type: element.tag, name: element.attrib.Name };
+        });
 };
 
-function isCSSColorName(color) {
+function isCSSColorName (color) {
     return color.indexOf('0x') === -1 && color.indexOf('#') === -1;
 }
 
-function refineColor(color) {
+function refineColor (color) {
     if (isCSSColorName(color)) {
         return color;
     }
 
     // return three-byte hexadecimal number preceded by "#" (required for Windows)
     color = color.replace('0x', '').replace('#', '');
-    if (color.length == 3) {
+    if (color.length === 3) {
         color = color[0] + color[0] + color[1] + color[1] + color[2] + color[2];
     }
     // alpha is not supported, so we remove it
-    if (color.length == 8) { // AArrggbb
+    if (color.length === 8) { // AArrggbb
         color = color.slice(2);
     }
     return '#' + color;
 }
 
-function processDescription(text) {
+function processDescription (text) {
     var result = text;
 
     // Description value limitations: https://msdn.microsoft.com/en-us/library/windows/apps/br211429.aspx
@@ -519,7 +512,7 @@ AppxManifest.prototype.setAppName = function (name) {
  * @param   {String}  [destPath]  File to write manifest to. If omitted,
  *   manifest will be written to file it has been read from.
  */
-AppxManifest.prototype.write = function(destPath) {
+AppxManifest.prototype.write = function (destPath) {
     // sort Capability elements as per CB-5350 Windows8 build fails due to invalid 'Capabilities' definition
     sortCapabilities(this.doc);
     fs.writeFileSync(destPath || this.path, this.doc.write({indent: 4}), 'utf-8');
@@ -530,33 +523,32 @@ AppxManifest.prototype.write = function(destPath) {
  * @param   {Elementtree.Document}  manifest  An XML document that represents
  *   appxmanifest
  */
-function sortCapabilities(manifest) {
+function sortCapabilities (manifest) {
 
     // removes namespace prefix (m3:Capability -> Capability)
     // this is required since elementtree returns qualified name with namespace
-    function extractLocalName(tag) {
+    function extractLocalName (tag) {
         return tag.split(':').pop(); // takes last part of string after ':'
     }
 
-    var capabilitiesRoot = manifest.find('.//Capabilities'),
-        capabilities = capabilitiesRoot.getchildren() || [];
+    var capabilitiesRoot = manifest.find('.//Capabilities');
+    var capabilities = capabilitiesRoot.getchildren() || [];
     // to sort elements we remove them and then add again in the appropriate order
-    capabilities.forEach(function(elem) { // no .clear() method
+    capabilities.forEach(function (elem) { // no .clear() method
         capabilitiesRoot.remove(elem);
         // CB-7601 we need local name w/o namespace prefix to sort capabilities correctly
         elem.localName = extractLocalName(elem.tag);
     });
-    capabilities.sort(function(a, b) {
-        return (a.localName > b.localName) ? 1: -1;
+    capabilities.sort(function (a, b) {
+        return (a.localName > b.localName) ? 1 : -1;
     });
-    capabilities.forEach(function(elem) {
+    capabilities.forEach(function (elem) {
         capabilitiesRoot.append(elem);
     });
 }
 
-
-function Win10AppxManifest(path) {
-    AppxManifest.call(this, path, /*prefix=*/'uap');
+function Win10AppxManifest (path) {
+    AppxManifest.call(this, path, /* prefix= */'uap');
 }
 
 util.inherits(Win10AppxManifest, AppxManifest);
@@ -588,7 +580,7 @@ Win10AppxManifest.prototype.getApplication = function () {
         appUriRules = new et.Element('uap:ApplicationContentUriRules');
         application.append(appUriRules);
 
-        rules.forEach(function(rule) {
+        rules.forEach(function (rule) {
             appUriRules.append(new et.Element('uap:Rule', { Match: rule, Type: 'include', WindowsRuntimeAccess: 'all' }));
         });
 
@@ -643,9 +635,9 @@ Win10AppxManifest.prototype.setAppName = function (name) {
  */
 Win10AppxManifest.prototype.getRestrictedCapabilities = function () {
     var restrictedCapabilities = this.getCapabilities()
-    .filter(function (capability) {
-        return UAP_RESTRICTED_CAPS.indexOf(capability.name) >= 0;
-    });
+        .filter(function (capability) {
+            return UAP_RESTRICTED_CAPS.indexOf(capability.name) >= 0;
+        });
 
     return restrictedCapabilities.length === 0 ? false : restrictedCapabilities;
 };
@@ -688,11 +680,11 @@ Win10AppxManifest.prototype.setDependencies = function (dependencies) {
  * @param   {String}  [destPath]  File to write manifest to. If omitted,
  *   manifest will be written to file it has been read from.
  */
-Win10AppxManifest.prototype.write = function(destPath) {
+Win10AppxManifest.prototype.write = function (destPath) {
     fs.writeFileSync(destPath || this.path, this.writeToString(), 'utf-8');
 };
 
-Win10AppxManifest.prototype.writeToString = function() {
+Win10AppxManifest.prototype.writeToString = function () {
     ensureUapPrefixedCapabilities(this.doc.find('.//Capabilities'));
     ensureUniqueCapabilities(this.doc.find('.//Capabilities'));
     // sort Capability elements as per CB-5350 Windows8 build fails due to invalid 'Capabilities' definition
@@ -704,30 +696,30 @@ Win10AppxManifest.prototype.writeToString = function() {
  * Checks for capabilities which require the uap: prefix in Windows 10.
  * @param capabilities {ElementTree.Element} The appx manifest element for <capabilities>
  */
-function ensureUapPrefixedCapabilities(capabilities) {
+function ensureUapPrefixedCapabilities (capabilities) {
     capabilities.getchildren()
-    .forEach(function(el) {
-        if (CAPS_NEEDING_UAPNS.indexOf(el.attrib.Name) > -1 && el.tag.indexOf('uap:') !== 0) {
-            el.tag = 'uap:' + el.tag;
-        }
-    });
+        .forEach(function (el) {
+            if (CAPS_NEEDING_UAPNS.indexOf(el.attrib.Name) > -1 && el.tag.indexOf('uap:') !== 0) {
+                el.tag = 'uap:' + el.tag;
+            }
+        });
 }
 
 /**
  * Cleans up duplicate capability declarations that were generated during the prepare process
  * @param capabilities {ElementTree.Element} The appx manifest element for <capabilities>
  */
-function ensureUniqueCapabilities(capabilities) {
+function ensureUniqueCapabilities (capabilities) {
     var uniqueCapabilities = [];
     capabilities.getchildren()
-    .forEach(function(el) {
-        var name = el.attrib.Name;
-        if (uniqueCapabilities.indexOf(name) !== -1) {
-            capabilities.remove(el);
-        } else {
-            uniqueCapabilities.push(name);
-        }
-    });
+        .forEach(function (el) {
+            var name = el.attrib.Name;
+            if (uniqueCapabilities.indexOf(name) !== -1) {
+                capabilities.remove(el);
+            } else {
+                uniqueCapabilities.push(name);
+            }
+        });
 }
 
 module.exports = AppxManifest;

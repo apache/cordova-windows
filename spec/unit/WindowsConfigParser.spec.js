@@ -45,7 +45,7 @@ describe('getAllMinMaxUAPVersions method', function () {
         mockConfig = new ConfigParser('/some/file');
     });
 
-    it('should correctly transform all versions as a baseline.', function() {
+    it('should correctly transform all versions as a baseline.', function () {
         spyOn(mockConfig, 'getMatchingPreferences').and.returnValue([
             { name: 'Windows.Universal-MinVersion', value: '10.0.9910.0' },
             { name: 'Windows.Universal-MaxVersionTested', value: '10.0.9917.0' },
@@ -72,7 +72,7 @@ describe('getAllMinMaxUAPVersions method', function () {
         expect(versionSet[2].MaxVersionTested).toBe(ver9917);
     });
 
-    it('should produce versions correctly even when the config file has no settings.', function() {
+    it('should produce versions correctly even when the config file has no settings.', function () {
         spyOn(mockConfig, 'getMatchingPreferences').and.returnValue([]);
 
         var versionSet = mockConfig.getAllMinMaxUAPVersions();
@@ -86,18 +86,17 @@ describe('getAllMinMaxUAPVersions method', function () {
 
     });
 
-    it('should fail with a RangeError if version specified incorrectly', function() {
+    it('should fail with a RangeError if version specified incorrectly', function () {
         spyOn(mockConfig, 'getMatchingPreferences')
-        .and.returnValue([
-            { name: 'Windows.Universal-MinVersion', value: '10.0.9910.f' },
-            { name: 'Windows.Universal-MaxVersionTested', value: '10.0.9917.0' },
-        ]);
+            .and.returnValue([
+                { name: 'Windows.Universal-MinVersion', value: '10.0.9910.f' },
+                { name: 'Windows.Universal-MaxVersionTested', value: '10.0.9917.0' }
+            ]);
 
         try {
             mockConfig.getAllMinMaxUAPVersions();
             expect(false).toBe(true);
-        }
-        catch (ex) {
+        } catch (ex) {
             expect(ex.constructor).toBe(RangeError);
         }
     });

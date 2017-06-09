@@ -54,11 +54,11 @@ describe('AppxManifest', function () {
         });
 
         it('Test #001 : should throw if first parameter is not a file', function () {
-            expect(function () { new AppxManifest('/invalid/path'); }).toThrow();
+            expect(function () { new AppxManifest('/invalid/path'); }).toThrow(); /* eslint no-new : 0 */
         });
 
         it('Test #002 : should throw if first parameter is not a valid manifest file (no "Package" tag)', function () {
-            expect(function () { new AppxManifest('/invalid/manifest'); }).toThrow();
+            expect(function () { new AppxManifest('/invalid/manifest'); }).toThrow(); /* eslint no-new : 0 */
         });
 
         it('Test #003 : should add ":" to manifest prefix if needed', function () {
@@ -123,7 +123,7 @@ describe('AppxManifest', function () {
         });
 
         it('Test #011 : should cache AppxManifest instances by default', function () {
-            var manifest  = AppxManifest.get('/no/prefixed');
+            var manifest = AppxManifest.get('/no/prefixed');
             expect(xml.parseElementtreeSync.calls.count()).toBe(2);
 
             var manifest2 = AppxManifest.get('/no/prefixed');
@@ -133,7 +133,7 @@ describe('AppxManifest', function () {
         });
 
         it('Test #012 : should not use cache to get AppxManifest instances when "ignoreCache" is specified', function () {
-            var manifest  = AppxManifest.get('/no/prefixed');
+            var manifest = AppxManifest.get('/no/prefixed');
             expect(xml.parseElementtreeSync.calls.count()).toBe(2);
 
             var manifest2 = AppxManifest.get('/no/prefixed', true);
@@ -143,7 +143,7 @@ describe('AppxManifest', function () {
         });
 
         it('Test #013 : should not cache AppxManifest instances when "ignoreCache" is specified', function () {
-            var manifest  = AppxManifest.get('/no/prefixed', true);
+            var manifest = AppxManifest.get('/no/prefixed', true);
             expect(xml.parseElementtreeSync.calls.count()).toBe(2);
 
             var manifest2 = AppxManifest.get('/no/prefixed');
@@ -154,7 +154,7 @@ describe('AppxManifest', function () {
     });
 
     describe('instance get* methods', function () {
-        var methods = ['getPhoneIdentity','getIdentity','getProperties','getApplication','getVisualElements'];
+        var methods = ['getPhoneIdentity', 'getIdentity', 'getProperties', 'getApplication', 'getVisualElements'];
 
         it('Test #014 : should exists', function () {
             var manifest = AppxManifest.get(WINDOWS_PHONE_MANIFEST);
@@ -176,7 +176,7 @@ describe('AppxManifest', function () {
             var capabilities = manifest.doc.find('.//Capabilities');
             capabilities.append(new et.Element('uap:Capability', { 'Name': 'enterpriseAuthentication' }));
             capabilities.append(new et.Element('uap:Capability', { 'Name': 'enterpriseAuthentication' }));
-            
+
             var xml = manifest.writeToString();
 
             expect((xml.match(/enterpriseAuthentication/g) || []).length).toBe(1);
@@ -234,4 +234,3 @@ describe('AppxManifest', function () {
         });
     });
 });
-

@@ -52,7 +52,7 @@ describe('check_reqs module', function () {
         });
     });
 
-    describe('has check_all method', function() {
+    describe('has check_all method', function () {
         // var consoleLogOriginal;
 
         var Requirement,
@@ -83,7 +83,7 @@ describe('check_reqs module', function () {
             fakeConfig = new ConfigParser('/some/file');
         });
 
-        afterEach(function() {
+        afterEach(function () {
             check_reqs.__set__('requirements', originalrequirements);
             check_reqs.__set__('checkFns', originalcheckFns);
             check_reqs.__set__('config', originalconfig);
@@ -106,42 +106,42 @@ describe('check_reqs module', function () {
             });
         });
 
-        it('Test #003 : that should not reject if one of requirements is not installed', function  (done) {
+        it('Test #003 : that should not reject if one of requirements is not installed', function (done) {
             check_reqs.__set__('requirements', fakeRequirements);
             fakeCheckFns[0] = function () { return Q.reject('Error message'); };
             check_reqs.__set__('checkFns', fakeCheckFns);
             check_reqs.__set__('config', fakeConfig);
 
             check_reqs.check_all()
-            .then(function (requirements) {
-                expect(requirements.length).toBe(3);
-                expect(requirements[0].installed).toBeFalsy();
-                done();
-            })
-            .catch(function  (error) {
-                expect(error).not.toBeDefined();
-                done();
-            });
+                .then(function (requirements) {
+                    expect(requirements.length).toBe(3);
+                    expect(requirements[0].installed).toBeFalsy();
+                    done();
+                })
+                .catch(function (error) {
+                    expect(error).not.toBeDefined();
+                    done();
+                });
         });
 
-        it('Test #004 : that should reject if one of checks has internal erorrs', function  (done) {
+        it('Test #004 : that should reject if one of checks has internal erorrs', function (done) {
             check_reqs.__set__('requirements', fakeRequirements);
             fakeCheckFns[0] = checkSpy.and.throwError('Fatal error');
             check_reqs.__set__('checkFns', fakeCheckFns);
             check_reqs.__set__('config', fakeConfig);
 
             check_reqs.check_all()
-            .then(function (requirements) {
-                expect(requirements).not.toBeDefined();
-                done();
-            })
-            .catch(function  (error) {
-                expect(error).toMatch('Fatal error');
-                done();
-            });
+                .then(function (requirements) {
+                    expect(requirements).not.toBeDefined();
+                    done();
+                })
+                .catch(function (error) {
+                    expect(error).toMatch('Fatal error');
+                    done();
+                });
         });
 
-        it('Test #005 : that should not run other requirements checks if `fatal` requirement isn\'t installed', function  (done) {
+        it('Test #005 : that should not run other requirements checks if `fatal` requirement isn\'t installed', function (done) {
             check_reqs.__set__('requirements', fakeRequirements);
             // The second requirement is fatal, so we're setting up second check to fail
             fakeCheckFns[1] = checkSpy.and.returnValue(Q.reject('Error message'));
@@ -149,16 +149,16 @@ describe('check_reqs module', function () {
             check_reqs.__set__('config', fakeConfig);
 
             check_reqs.check_all()
-            .then(function (requirements) {
-                expect(requirements.length).toBe(2);
-                expect(requirements[1].isFatal).toBeTruthy();
-                expect(checkSpy.calls.count()).toBe(2);
-                done();
-            })
-            .catch(function  (error) {
-                expect(error).not.toBeDefined();
-                done();
-            });
+                .then(function (requirements) {
+                    expect(requirements.length).toBe(2);
+                    expect(requirements[1].isFatal).toBeTruthy();
+                    expect(checkSpy.calls.count()).toBe(2);
+                    done();
+                })
+                .catch(function (error) {
+                    expect(error).not.toBeDefined();
+                    done();
+                });
         });
     });
 

@@ -37,7 +37,7 @@ var pluginInfo = require('../../../template/cordova/lib/PluginInfo').PluginInfo;
 var dummyplugin = path.join(__dirname, '../fixtures/testProj/plugins/org.test.plugins.dummyplugin');
 var testPlugin = path.join(__dirname, '../fixtures/testProj/plugins/testPlugin');
 var dummyPluginInfo = new PluginInfo(dummyplugin);
-var testPluginInfo = new pluginInfo(testPlugin);
+var testPluginInfo = new pluginInfo(testPlugin); /* eslint new-cap : 0 */
 var valid_source = dummyPluginInfo.getSourceFiles('windows');
 var valid_resourceFiles = dummyPluginInfo.getResourceFiles('windows');
 var valid_libfiles = dummyPluginInfo.getLibFiles('windows');
@@ -54,12 +54,11 @@ var resourcereferenceplugin = path.join(__dirname, '../fixtures/org.test.plugins
 var resourcePluginInfo = new PluginInfo(resourcereferenceplugin);
 var valid_resourcereferenceFiles = resourcePluginInfo.getResourceFiles('windows');
 
-
-function copyArray(arr) {
+function copyArray (arr) {
     return Array.prototype.slice.call(arr, 0);
 }
 
-function winJoin() {
+function winJoin () {
     // use Node API when possible
     if (path.win32) return path.win32.join.apply(path, arguments);
     return copyArray(arguments).join('\\').replace(/\//g, '\\');
@@ -69,26 +68,25 @@ beforeEach(function () {
     jasmine.addMatchers({
         toContainXmlPath: function () {
             return {
-                compare: function(actual, expected) {
+                compare: function (actual, expected) {
                     var xml = actual;
                     var notText = this.isNot ? 'not ' : '';
                     var result = {};
                     result.pass = xml.find(expected) !== null;
-                    if(result.pass) {
+                    if (result.pass) {
                         result.message = 'Expected xml \'' + et.tostring(xml) + '\' ' + notText + 'to contain elements matching \'' + actual + '\'.';
                     } else {
                         result.message = 'Expected xml \'' + et.tostring(xml) + '\' ' + notText + 'to not contain elements matching \'' + actual + '\'.';
                     }
-                        return result;
+                    return result;
                 }
             };
         }
     });
 });
 
-
 var getPluginFilePath = PluginHandler.__get__('getPluginFilePath');
-var computeResourcePath = function(resourceFile) {
+var computeResourcePath = function (resourceFile) {
     return getPluginFilePath(dummyPluginInfo, resourceFile.src, cordovaProjectWindowsPlatformDir);
 };
 
@@ -125,11 +123,11 @@ describe('windows project handler', function () {
             PluginHandler.__set__('copyFile', copyFileSpy.and.callFake(copyFileOrig));
         });
 
-        afterEach(function() {
+        afterEach(function () {
             PluginHandler.__set__('copyFile', copyFileOrig);
         });
 
-        function validateInstalledProjects(tag, elementToInstall, xpath, supportedPlatforms) {
+        function validateInstalledProjects (tag, elementToInstall, xpath, supportedPlatforms) {
 
             var projects = copyArray(dummyProject.projects);
             projects.push(dummyProject.master);
@@ -211,7 +209,7 @@ describe('windows project handler', function () {
                 copyFileSpy.and.callFake(copyFileOrig);
                 expect(function () {
                     install(source[1], faultyPluginInfo, dummyProject);
-                }).toThrow(new Error ('"' + path.resolve(faultyplugin, 'src/windows/NotHere.js') + '" not found!'));
+                }).toThrow(new Error('"' + path.resolve(faultyplugin, 'src/windows/NotHere.js') + '" not found!'));
             });
             it('Test #002 : should throw if source-file target already exists', function () {
                 var source = copyArray(valid_source);
@@ -220,7 +218,7 @@ describe('windows project handler', function () {
                 fs.writeFileSync(target, 'some bs', 'utf-8');
                 expect(function () {
                     install(source[0], dummyPluginInfo, dummyProject);
-                }).toThrow(new Error ('"' + target + '" already exists!'));
+                }).toThrow(new Error('"' + target + '" already exists!'));
             });
         });
 
@@ -237,7 +235,6 @@ describe('windows project handler', function () {
                 var xpath = 'Content[@Include="' + resourceFiles[0].target + '"][@Condition="\'$(Platform)\'==\'x86\'"]';
                 validateInstalledProjects('resource-file', resourceFiles[0], xpath, ['all']);
             });
-
 
             // project files, which is not needed.
             it('Test #004 : should write to correct project files when conditions are specified', function () {
@@ -281,11 +278,11 @@ describe('windows project handler', function () {
             it('Test #011 : should throw if conditions are invalid', function () {
                 expect(function () {
                     install(invalidResourceFiles[0], faultyPluginInfo, dummyProject);
-                }).toThrow(new Error ('Invalid arch attribute (must be "x86", "x64" or "ARM"): x85'));
+                }).toThrow(new Error('Invalid arch attribute (must be "x86", "x64" or "ARM"): x85'));
 
                 expect(function () {
                     install(invalidResourceFiles[1], faultyPluginInfo, dummyProject);
-                }).toThrow(new Error ('Invalid versions attribute (must be a valid semantic version range): 8.0a'));
+                }).toThrow(new Error('Invalid versions attribute (must be a valid semantic version range): 8.0a'));
 
                 expect(function () {
                     install(invalidResourceFiles[2], faultyPluginInfo, dummyProject);
@@ -320,15 +317,15 @@ describe('windows project handler', function () {
             it('Test #016 : should throw if conditions are invalid', function () {
                 expect(function () {
                     install(invalidLibFiles[0], faultyPluginInfo, dummyProject);
-                }).toThrow(new Error ('Invalid arch attribute (must be "x86", "x64" or "ARM"): x85'));
+                }).toThrow(new Error('Invalid arch attribute (must be "x86", "x64" or "ARM"): x85'));
 
                 expect(function () {
                     install(invalidLibFiles[1], faultyPluginInfo, dummyProject);
-                }).toThrow(new Error ('Invalid versions attribute (must be a valid semantic version range): 8.0a'));
+                }).toThrow(new Error('Invalid versions attribute (must be a valid semantic version range): 8.0a'));
 
                 expect(function () {
                     install(invalidLibFiles[2], faultyPluginInfo, dummyProject);
-                }).toThrow(new Error ('Invalid device-target attribute (must be "all", "phone", "windows" or "win"): daphne'));
+                }).toThrow(new Error('Invalid device-target attribute (must be "all", "phone", "windows" or "win"): daphne'));
             });
         });
 
@@ -367,49 +364,49 @@ describe('windows project handler', function () {
                 validateInstalledProjects('framework', frameworks[5], xpath, ['windows', 'windows10', 'phone']);
             });
 
-            it('Test #023 : with .winmd and .dll files', function() {
-               var frameworks = copyArray(test_frameworks);
-               var install = PluginHandler.getInstaller('framework');
-               var uninstall = PluginHandler.getUninstaller('framework');
-               var testProject = JsprojManager.getProject(testProjectWindowsPlatformDir);
+            it('Test #023 : with .winmd and .dll files', function () {
+                var frameworks = copyArray(test_frameworks);
+                var install = PluginHandler.getInstaller('framework');
+                var uninstall = PluginHandler.getUninstaller('framework');
+                var testProject = JsprojManager.getProject(testProjectWindowsPlatformDir);
 
-               frameworks.forEach(function(framework) {
-                   install(framework, testPluginInfo, testProject);
-                   var dest = path.join('plugins', 'testPlugin', framework.targetDir || '', path.basename(framework.src));
-                   if (framework.implementation) {
-                       expect(copyFileSpy).toHaveBeenCalledWith(testPlugin, framework.implementation, testProjectWindowsPlatformDir, path.join(path.dirname(dest), path.basename(framework.implementation)));
-                   }
-               });
+                frameworks.forEach(function (framework) {
+                    install(framework, testPluginInfo, testProject);
+                    var dest = path.join('plugins', 'testPlugin', framework.targetDir || '', path.basename(framework.src));
+                    if (framework.implementation) {
+                        expect(copyFileSpy).toHaveBeenCalledWith(testPlugin, framework.implementation, testProjectWindowsPlatformDir, path.join(path.dirname(dest), path.basename(framework.implementation)));
+                    }
+                });
 
-               var jsProjFileFromPlatform = path.join(testProjectWindowsPlatformDir, 'CordovaApp.Windows10.jsproj');
-               var searchProjects = testProject._projects.filter(function(project) {
-                   return path.normalize(project.location) === jsProjFileFromPlatform;
-               });
+                var jsProjFileFromPlatform = path.join(testProjectWindowsPlatformDir, 'CordovaApp.Windows10.jsproj');
+                var searchProjects = testProject._projects.filter(function (project) {
+                    return path.normalize(project.location) === jsProjFileFromPlatform;
+                });
 
-               expect(searchProjects.length).toBe(1);
-               var projectXmlTree = searchProjects[0].xml;
+                expect(searchProjects.length).toBe(1);
+                var projectXmlTree = searchProjects[0].xml;
 
-               var refHintPaths = projectXmlTree.findall('./ItemGroup/Reference/HintPath');
-               var pathsEqual = refHintPaths.every(function(hintPath, index) {
+                var refHintPaths = projectXmlTree.findall('./ItemGroup/Reference/HintPath');
+                var pathsEqual = refHintPaths.every(function (hintPath, index) {
                     return path.basename(hintPath.text) === path.basename(frameworks[index].src);
-               });
+                });
 
-               expect(pathsEqual).toBeTruthy();
+                expect(pathsEqual).toBeTruthy();
 
-               var refWinMdStatus = projectXmlTree.findall('./ItemGroup/Reference/IsWinMDFile');
-               var allReferencesHaveMetadata = refWinMdStatus.every(function(isWinMd) {
-                   return isWinMd.text === 'true';
-               });
+                var refWinMdStatus = projectXmlTree.findall('./ItemGroup/Reference/IsWinMDFile');
+                var allReferencesHaveMetadata = refWinMdStatus.every(function (isWinMd) {
+                    return isWinMd.text === 'true';
+                });
 
-               expect(allReferencesHaveMetadata).toBeTruthy();
+                expect(allReferencesHaveMetadata).toBeTruthy();
 
-               var refImplements = projectXmlTree.findall('./ItemGroup/Reference/Implementation');
-               expect(refImplements.length).toBe(1);
-               expect(refImplements[0].text).toBe(path.basename(frameworks[1].implementation));
+                var refImplements = projectXmlTree.findall('./ItemGroup/Reference/Implementation');
+                expect(refImplements.length).toBe(1);
+                expect(refImplements[0].text).toBe(path.basename(frameworks[1].implementation));
 
-               frameworks.forEach(function(framework) {
-                   uninstall(framework, testPluginInfo, testProject);
-               });
+                frameworks.forEach(function (framework) {
+                    uninstall(framework, testPluginInfo, testProject);
+                });
             });
         });
 
@@ -465,7 +462,7 @@ describe('windows project handler', function () {
             });
         });
 
-        describe('of <js-module> elements', function() {
+        describe('of <js-module> elements', function () {
             var jsModule = {src: 'www/dummyplugin.js'};
             var wwwDest, platformWwwDest;
 
@@ -490,9 +487,10 @@ describe('windows project handler', function () {
             });
         });
 
-        describe('of <asset> elements', function() {
+        describe('of <asset> elements', function () {
             var asset = {src: 'www/dummyplugin.js', target: 'foo/dummy.js'};
-            var wwwDest, platformWwwDest;
+            var wwwDest; /* eslint no-unused-vars : 0 */
+            var platformWwwDest; /* eslint no-unused-vars : 0 */
             var install = PluginHandler.getInstaller('asset');
 
             beforeEach(function () {
@@ -527,7 +525,7 @@ describe('windows project handler', function () {
             PluginHandler.__set__('removeFile', removeFileOrig);
         });
 
-        function validateUninstalledProjects(tag, elementToUninstall, xmlPath, incText, targetConditions, supportedPlatforms) {
+        function validateUninstalledProjects (tag, elementToUninstall, xmlPath, incText, targetConditions, supportedPlatforms) {
 
             var projects = copyArray(dummyProject.projects);
             projects.push(dummyProject.master);
@@ -583,7 +581,7 @@ describe('windows project handler', function () {
             it('Test #032 : should remove from correct project files when conditions specified', function () {
                 var resourcefiles = copyArray(valid_resourceFiles);
 
-                resourcefiles.forEach(function(resourceFile) {
+                resourcefiles.forEach(function (resourceFile) {
                     install(resourceFile, dummyPluginInfo, dummyProject);
                 });
                 var path = 'ItemGroup/Content';
@@ -595,7 +593,7 @@ describe('windows project handler', function () {
             it('Test #033 : should remove from correct project files when conditions specified', function () {
                 var resourcefiles = copyArray(valid_resourceFiles);
 
-                resourcefiles.forEach(function(resourceFile) {
+                resourcefiles.forEach(function (resourceFile) {
                     install(resourceFile, dummyPluginInfo, dummyProject);
                 });
                 var path = 'ItemGroup/Content';
@@ -607,7 +605,7 @@ describe('windows project handler', function () {
             it('Test #034 : should remove from correct project files when conditions specified', function () {
                 var resourcefiles = copyArray(valid_resourceFiles);
 
-                resourcefiles.forEach(function(resourceFile) {
+                resourcefiles.forEach(function (resourceFile) {
                     install(resourceFile, dummyPluginInfo, dummyProject);
                 });
                 var path = 'ItemGroup/Content';
@@ -618,7 +616,7 @@ describe('windows project handler', function () {
 
             it('Test #035 : should remove from correct project files when conditions specified', function () {
                 var resourcefiles = copyArray(valid_resourceFiles);
-                resourcefiles.forEach(function(resourceFile) {
+                resourcefiles.forEach(function (resourceFile) {
                     install(resourceFile, dummyPluginInfo, dummyProject);
                 });
                 var path = 'ItemGroup/Content';
@@ -630,7 +628,7 @@ describe('windows project handler', function () {
             it('Test #036 : should remove from correct project files when conditions specified with reference', function () {
                 var resourcereferencefiles = copyArray(valid_resourcereferenceFiles);
 
-                resourcereferencefiles.forEach(function(resourceFile) {
+                resourcereferencefiles.forEach(function (resourceFile) {
                     install(resourceFile, resourcePluginInfo, dummyProject);
                 });
                 var path = 'ItemGroup/Content';
@@ -641,7 +639,7 @@ describe('windows project handler', function () {
             it('Test #036 : should remove from correct project files when conditions specified with reference', function () {
                 var resourcereferencefiles = copyArray(valid_resourcereferenceFiles);
 
-                resourcereferencefiles.forEach(function(resourceFile) {
+                resourcereferencefiles.forEach(function (resourceFile) {
                     install(resourceFile, resourcePluginInfo, dummyProject);
                 });
                 var path = 'ItemGroup/Content';
@@ -653,7 +651,7 @@ describe('windows project handler', function () {
             it('Test #036 : should remove from correct project files when conditions specified with reference', function () {
                 var resourcereferencefiles = copyArray(valid_resourcereferenceFiles);
 
-                resourcereferencefiles.forEach(function(resourceFile) {
+                resourcereferencefiles.forEach(function (resourceFile) {
                     install(resourceFile, resourcePluginInfo, dummyProject);
                 });
                 var path = 'ItemGroup/Content';
@@ -665,7 +663,7 @@ describe('windows project handler', function () {
             it('Test #036 : should remove from correct project files when conditions specified with reference', function () {
                 var resourcereferencefiles = copyArray(valid_resourcereferenceFiles);
 
-                resourcereferencefiles.forEach(function(resourceFile) {
+                resourcereferencefiles.forEach(function (resourceFile) {
                     install(resourceFile, resourcePluginInfo, dummyProject);
                 });
                 var path = 'ItemGroup/Content';
@@ -680,7 +678,7 @@ describe('windows project handler', function () {
             // project files, which is not needed.
             it('Test #033 : should remove from correct project files when conditions specified', function () {
                 var libfiles = copyArray(valid_libfiles);
-                libfiles.forEach(function(libfile) {
+                libfiles.forEach(function (libfile) {
                     PluginHandler.getInstaller('lib-file')(libfile, dummyPluginInfo, dummyProject);
                 });
 
@@ -692,7 +690,7 @@ describe('windows project handler', function () {
 
             it('Test #034 : should remove from correct project files when conditions specified', function () {
                 var libfiles = copyArray(valid_libfiles);
-                libfiles.forEach(function(libfile) {
+                libfiles.forEach(function (libfile) {
                     PluginHandler.getInstaller('lib-file')(libfile, dummyPluginInfo, dummyProject);
                 });
 
@@ -704,7 +702,7 @@ describe('windows project handler', function () {
 
             it('Test #035 : should remove from correct project files when conditions specified', function () {
                 var libfiles = copyArray(valid_libfiles);
-                libfiles.forEach(function(libfile) {
+                libfiles.forEach(function (libfile) {
                     PluginHandler.getInstaller('lib-file')(libfile, dummyPluginInfo, dummyProject);
                 });
 
@@ -716,7 +714,7 @@ describe('windows project handler', function () {
 
             it('Test #036 : should remove from correct project files when conditions specified', function () {
                 var libfiles = copyArray(valid_libfiles);
-                libfiles.forEach(function(libfile) {
+                libfiles.forEach(function (libfile) {
                     PluginHandler.getInstaller('lib-file')(libfile, dummyPluginInfo, dummyProject);
                 });
 
@@ -727,7 +725,7 @@ describe('windows project handler', function () {
             });
         });
 
-       describe('of <framework> elements', function () {
+        describe('of <framework> elements', function () {
             // This could be separated into individual specs, but that results in a lot of copying and deleting the
             // project files, which is not needed.
             it('Test #037 : should remove from correct project files when conditions specified', function () {
@@ -737,7 +735,7 @@ describe('windows project handler', function () {
 
                 var frameworks = copyArray(valid_frameworks);
 
-                frameworks.forEach(function(framework) {
+                frameworks.forEach(function (framework) {
                     PluginHandler.getInstaller('framework')(framework, dummyPluginInfo, dummyProject);
                 });
 
@@ -756,7 +754,7 @@ describe('windows project handler', function () {
 
                 var frameworks = copyArray(valid_frameworks);
 
-                frameworks.forEach(function(framework) {
+                frameworks.forEach(function (framework) {
                     PluginHandler.getInstaller('framework')(framework, dummyPluginInfo, dummyProject);
                 });
 
@@ -774,7 +772,7 @@ describe('windows project handler', function () {
 
                 var frameworks = copyArray(valid_frameworks);
 
-                frameworks.forEach(function(framework) {
+                frameworks.forEach(function (framework) {
                     PluginHandler.getInstaller('framework')(framework, dummyPluginInfo, dummyProject);
                 });
 
@@ -792,7 +790,7 @@ describe('windows project handler', function () {
 
                 var frameworks = copyArray(valid_frameworks);
 
-                frameworks.forEach(function(framework) {
+                frameworks.forEach(function (framework) {
                     PluginHandler.getInstaller('framework')(framework, dummyPluginInfo, dummyProject);
                 });
 
@@ -810,7 +808,7 @@ describe('windows project handler', function () {
 
                 var frameworks = copyArray(valid_frameworks);
 
-                frameworks.forEach(function(framework) {
+                frameworks.forEach(function (framework) {
                     PluginHandler.getInstaller('framework')(framework, dummyPluginInfo, dummyProject);
                 });
 
@@ -828,7 +826,7 @@ describe('windows project handler', function () {
 
                 var frameworks = copyArray(valid_frameworks);
 
-                frameworks.forEach(function(framework) {
+                frameworks.forEach(function (framework) {
                     PluginHandler.getInstaller('framework')(framework, dummyPluginInfo, dummyProject);
                 });
 
@@ -851,7 +849,7 @@ describe('windows project handler', function () {
 
                 var frameworks = copyArray(valid_frameworks);
 
-                frameworks.forEach(function(framework) {
+                frameworks.forEach(function (framework) {
                     PluginHandler.getInstaller('framework')(framework, dummyPluginInfo, dummyProject);
                 });
 
@@ -869,7 +867,7 @@ describe('windows project handler', function () {
 
                 var frameworks = copyArray(valid_frameworks);
 
-                frameworks.forEach(function(framework) {
+                frameworks.forEach(function (framework) {
                     PluginHandler.getInstaller('framework')(framework, dummyPluginInfo, dummyProject);
                 });
 
@@ -889,7 +887,7 @@ describe('windows project handler', function () {
 
                 var frameworks = copyArray(valid_frameworks);
 
-                frameworks.forEach(function(framework) {
+                frameworks.forEach(function (framework) {
                     PluginHandler.getInstaller('framework')(framework, dummyPluginInfo, dummyProject);
                 });
 
@@ -909,7 +907,7 @@ describe('windows project handler', function () {
 
                 var frameworks = copyArray(valid_frameworks);
 
-                frameworks.forEach(function(framework) {
+                frameworks.forEach(function (framework) {
                     PluginHandler.getInstaller('framework')(framework, dummyPluginInfo, dummyProject);
                 });
 
@@ -923,7 +921,7 @@ describe('windows project handler', function () {
             });
         });
 
-        describe('of <js-module> elements', function() {
+        describe('of <js-module> elements', function () {
             var jsModule = {src: 'www/dummyPlugin.js'};
             var wwwDest, platformWwwDest;
 
@@ -937,7 +935,7 @@ describe('windows project handler', function () {
 
                 var existsSyncOrig = fs.existsSync;
                 spyOn(fs, 'existsSync').and.callFake(function (file) {
-                    if ([wwwDest, platformWwwDest].indexOf(file) >= 0 ) return true;
+                    if ([wwwDest, platformWwwDest].indexOf(file) >= 0) return true;
                     return existsSyncOrig.call(fs, file);
                 });
             });
@@ -955,7 +953,7 @@ describe('windows project handler', function () {
             });
         });
 
-        describe('of <asset> elements', function() {
+        describe('of <asset> elements', function () {
             var asset = {src: 'www/dummyPlugin.js', target: 'foo/dummy.js'};
             var wwwDest, platformWwwDest;
             var uninstall = PluginHandler.getUninstaller('asset');
@@ -968,7 +966,7 @@ describe('windows project handler', function () {
 
                 var existsSyncOrig = fs.existsSync;
                 spyOn(fs, 'existsSync').and.callFake(function (file) {
-                    if ([wwwDest, platformWwwDest].indexOf(file) >= 0 ) return true;
+                    if ([wwwDest, platformWwwDest].indexOf(file) >= 0) return true;
                     return existsSyncOrig.call(fs, file);
                 });
             });

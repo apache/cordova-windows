@@ -17,11 +17,11 @@
     "apache"
   ],
   "scripts": {
-    "test": "npm run jshint && npm run test-unit && npm run test-e2e",
+    "test": "npm run eslint && npm run test-unit && npm run test-e2e",
     "test-unit": "jasmine --captureExceptions ",
     "test-e2e": "jasmine --captureExceptions spec/e2e/endtoend.spec.js",
     "cover": "istanbul cover --root bin/templates/cordova --print detail jasmine",
-    "jshint": "jshint bin && jshint template && jshint spec"
+    "eslint": "eslint bin && eslint template && eslint spec"
   },
   "dependencies": {
     "cordova-common": "^2.0.0",
@@ -34,9 +34,15 @@
     "winjs": "^4.4.0"
   },
   "devDependencies": {
+    "eslint": "^4.2.0",
+    "eslint-config-semistandard": "^11.0.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-import": "^2.3.0",
+    "eslint-plugin-node": "^5.0.0",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^3.0.1",
     "istanbul": "^0.4.0",
     "jasmine": "^2.5.3",
-    "jshint": "^2.8.0",
     "rewire": "^2.5.1"
   },
   "bundledDependencies": [

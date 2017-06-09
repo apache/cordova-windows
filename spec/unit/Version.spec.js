@@ -45,9 +45,9 @@ describe('Version constructor', function () {
     });
 });
 
-describe('Version parse functions work as expected.', function() {
+describe('Version parse functions work as expected.', function () {
 
-    it('Test #001 : should behave correctly', function() {
+    it('Test #001 : should behave correctly', function () {
         var version = Version.fromString('1.2.4.7');
         expect(version.major).toBe(1);
         expect(version.minor).toBe(2);
@@ -55,7 +55,7 @@ describe('Version parse functions work as expected.', function() {
         expect(version.qfe).toBe(7);
     });
 
-    it('Test #002 : should parse incomplete version string.', function() {
+    it('Test #002 : should parse incomplete version string.', function () {
         var version = Version.fromString('1.5.3');
         expect(version.major).toBe(1);
         expect(version.minor).toBe(5);
@@ -63,32 +63,30 @@ describe('Version parse functions work as expected.', function() {
         expect(version.qfe).toBe(0);
     });
 
-    it('Test #003 : should produce an error as the version string is invalid', function() {
+    it('Test #003 : should produce an error as the version string is invalid', function () {
         try {
             Version.fromString('This is invalid.');
 
             expect(false).toBe(true);
-        }
-        catch (ex) {
+        } catch (ex) {
             expect(ex.constructor).toBe(RangeError);
         }
     });
 
-    it('Test #004 : should produce an error as the string is too long.', function() {
+    it('Test #004 : should produce an error as the string is too long.', function () {
         try {
             Version.fromString('1.5.3.2.7');
 
             expect(false).toBe(true);
-        }
-        catch (ex) {
+        } catch (ex) {
             expect(ex.constructor).toBe(RangeError);
         }
         expect(Version.tryParse('This is invalid')).toBe(false);
     });
 });
 
-describe('Version equality functions work as expected.', function() {
-    it('Test #005 : should parse incomplete version string.', function() {
+describe('Version equality functions work as expected.', function () {
+    it('Test #005 : should parse incomplete version string.', function () {
         var v1Base = new Version(1, 1, 2, 3);
         // equal to v1Base
         var v1Copy = new Version(1, 1, 2, 3);
@@ -123,8 +121,8 @@ describe('Version equality functions work as expected.', function() {
     });
 });
 
-describe('Version equality tests integrate with Array sort and toString() as expected.', function() {
-    it('Test #006 : should parse incomplete version string.', function() {
+describe('Version equality tests integrate with Array sort and toString() as expected.', function () {
+    it('Test #006 : should parse incomplete version string.', function () {
         var v1Base = new Version(1, 1, 2, 3);
         // equal to v1Base
         var v1Copy = new Version(1, 1, 2, 3);

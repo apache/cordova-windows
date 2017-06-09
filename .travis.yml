@@ -9,7 +9,7 @@ install:
     - npm install
     - npm install -g codecov
 script:
-    - npm run jshint
+    - npm run eslint
     - npm run cover
 after_script:
     - codecov

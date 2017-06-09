@@ -38,8 +38,8 @@ var MANIFESTS = {
 var SUBSTS = ['package.phone.appxmanifest', 'package.windows.appxmanifest', 'package.windows10.appxmanifest'];
 var TARGETS = ['windows', 'phone', 'all'];
 
-function processChanges(changes) {
-    var hasManifestChanges  = changes.some(function(change) {
+function processChanges (changes) {
+    var hasManifestChanges = changes.some(function (change) {
         return change.target === 'package.appxmanifest';
     });
 
@@ -52,7 +52,7 @@ function processChanges(changes) {
     var oldChanges = changes;
     changes = [];
 
-    oldChanges.forEach(function(change) {
+    oldChanges.forEach(function (change) {
         // Only support semver/device-target demux for package.appxmanifest
         // Pass through in case something downstream wants to use it
         if (change.target !== 'package.appxmanifest') {
@@ -67,13 +67,13 @@ function processChanges(changes) {
     return changes;
 }
 
-function demuxChangeWithSubsts(change, manifestFiles) {
-    return manifestFiles.map(function(file) {
-         return createReplacement(file, change);
+function demuxChangeWithSubsts (change, manifestFiles) {
+    return manifestFiles.map(function (file) {
+        return createReplacement(file, change);
     });
 }
 
-function getManifestsForChange(change) {
+function getManifestsForChange (change) {
     var hasTarget = (typeof change.deviceTarget !== 'undefined');
     var hasVersion = (typeof change.versions !== 'undefined');
 
@@ -90,7 +90,7 @@ function getManifestsForChange(change) {
     }
 
     var knownWindowsVersionsForTargetDeviceSet = Object.keys(MANIFESTS[targetDeviceSet]);
-    return knownWindowsVersionsForTargetDeviceSet.reduce(function(manifestFiles, winver) {
+    return knownWindowsVersionsForTargetDeviceSet.reduce(function (manifestFiles, winver) {
         if (hasVersion && !semver.satisfies(winver, change.versions)) {
             return manifestFiles;
         }
@@ -100,37 +100,36 @@ function getManifestsForChange(change) {
 
 // This is a local function that creates the new replacement representing the
 // mutation.  Used to save code further down.
-function createReplacement(manifestFile, originalChange) {
+function createReplacement (manifestFile, originalChange) {
     var replacement = {
-        target:         manifestFile,
-        parent:         originalChange.parent,
-        after:          originalChange.after,
-        xmls:           originalChange.xmls,
-        versions:       originalChange.versions,
-        deviceTarget:   originalChange.deviceTarget
+        target: manifestFile,
+        parent: originalChange.parent,
+        after: originalChange.after,
+        xmls: originalChange.xmls,
+        versions: originalChange.versions,
+        deviceTarget: originalChange.deviceTarget
     };
     return replacement;
 }
-
 
 /*
 A class for holidng the information currently stored in plugin.xml
 It's inherited from cordova-common's PluginInfo class
 In addition it overrides getConfigFiles, getEditConfigs, getFrameworks methods to use windows-specific logic
  */
-function PluginInfo(dirname) {
+function PluginInfo (dirname) {
     //  We're not using `util.inherit' because original PluginInfo defines
     //  its' methods inside of constructor
     CommonPluginInfo.apply(this, arguments);
     var parentGetConfigFiles = this.getConfigFiles;
     var parentGetEditConfigs = this.getEditConfigs;
 
-    this.getEditConfigs = function(platform) {
+    this.getEditConfigs = function (platform) {
         var editConfigs = parentGetEditConfigs(platform);
         return processChanges(editConfigs);
     };
 
-    this.getConfigFiles = function(platform) {
+    this.getConfigFiles = function (platform) {
         var configFiles = parentGetConfigFiles(platform);
         return processChanges(configFiles);
     };

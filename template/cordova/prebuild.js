@@ -20,7 +20,9 @@
 // https://issues.apache.org/jira/browse/CB-11658 activated event is not fired on Windows 10 RS1
 // Patching start page to include WinJS/base.js reference to HTML as a workaround
 
-module.exports = function patch(platform) {
+/* eslint no-useless-escape : 0 */
+
+module.exports = function patch (platform) {
     console.log('Patching ' + platform + ' in prebuild event...');
 
     var shell = require('shelljs');
