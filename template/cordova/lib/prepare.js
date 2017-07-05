@@ -766,7 +766,7 @@ function updateWww(cordovaProject, destinations) {
     events.emit(
         'verbose', 'Merging and updating files from [' + sourceDirs.join(', ') + '] to ' + targetDir);
     FileUpdater.mergeAndUpdateDir(
-        sourceDirs, targetDir, { rootDir: cordovaProject.root }, logFileOp);
+        sourceDirs, targetDir, { rootDir: cordovaProject.root, exclude: '.*' }, logFileOp);
 }
 
 /**
