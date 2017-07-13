@@ -19,6 +19,7 @@
 
 var Q = require('q');
 var path = require('path');
+var fs = require('fs');
 var shell = require('shelljs');
 var Version = require('./Version');
 var events = require('cordova-common').events;
@@ -124,6 +125,16 @@ module.exports.getMSBuildToolsAt = function (location) {
 };
 
 function checkMSBuildVersion (version) {
+    // first, check if we have a VS 2017+ with such a version
+    var correspondingWillow = module.exports.getWillowInstallations().filter(function (inst) {
+        return inst.version === version;
+    })[0];
+    if (correspondingWillow) {
+        var toolsPath = path.join(correspondingWillow.path, 'MSBuild', version, 'Bin');
+        if (shell.test('-e', toolsPath)) {
+            return module.exports.getMSBuildToolsAt(toolsPath);
+        }
+    }
     return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\' + version, '/v', 'MSBuildToolsPath'])
         .then(function (output) {
             // fetch msbuild path from 'reg' output
@@ -140,12 +151,11 @@ function checkMSBuildVersion (version) {
             }
         }).catch(function (err) { /* eslint handle-callback-err : 0 */
             // if 'reg' exits with error, assume that registry key not found
-
         });
 }
 
 /// returns an array of available UAP Versions
-function getAvailableUAPVersions () {
+module.exports.getAvailableUAPVersions = function () {
     /* jshint -W069 */
     var programFilesFolder = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
     // No Program Files folder found, so we won't be able to find UAP SDK
@@ -168,6 +178,54 @@ function getAvailableUAPVersions () {
     });
 
     return result;
+};
+
+/**
+ * Lists all VS 2017+ instances dirs in ProgramData
+ * 
+ * @return {String[]} List of paths to all VS2017+ instances
+ */
+function getWillowProgDataPaths () {
+    if (!process.env.systemdrive) {
+        // running on linux/osx?
+        return [];
+    }
+    var instancesRoot = path.join(process.env.systemdrive, 'ProgramData/Microsoft/VisualStudio/Packages/_Instances');
+    if (!shell.test('-d', instancesRoot)) {
+        // can't seem to find VS instances dir, return empty result
+        return [];
+    }
+
+    return fs.readdirSync(instancesRoot).map(function (file) {
+        var instanceDir = path.join(instancesRoot, file);
+        if (shell.test('-d', instanceDir)) {
+            return instanceDir;
+        }
+    }).filter(function (progDataPath) {
+        // make sure state.json exists
+        return shell.test('-e', path.join(progDataPath, 'state.json'));
+    });
 }
 
-module.exports.getAvailableUAPVersions = getAvailableUAPVersions;
+/**
+ * Lists all installed VS 2017+ versions
+ * 
+ * @return {Object[]} List of all VS 2017+ versions
+ */
+module.exports.getWillowInstallations = function () {
+    var progDataPaths = getWillowProgDataPaths();
+    var installations = [];
+    progDataPaths.forEach(function (progDataPath) {
+        try {
+            var stateJsonPath = path.join(progDataPath, 'state.json');
+            var fileContents = fs.readFileSync(stateJsonPath, 'utf-8');
+            var state = JSON.parse(fileContents);
+            // get only major and minor version
+            var version = state.product.version.match(/^(\d+\.\d+)/)[1];
+            installations.push({ version: version, path: state.installationPath });
+        } catch (err) {
+            // something's wrong, skip this one
+        }
+    });
+    return installations;
+};

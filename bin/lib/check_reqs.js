@@ -94,7 +94,7 @@ function getHighestAppropriateVersion (versions, requiredVersion) {
         .sort(Version.comparer)
         .filter(function (toolVersion) {
             return toolVersion.gte(requiredVersion);
-        })[0];
+        }).reverse()[0];
 }
 
 /**
@@ -147,6 +147,12 @@ function getInstalledVSVersions () {
                     installedVersions.splice(installedVersions.indexOf('12.0'), 1);
                     return installedVersions;
                 });
+        })
+        .then(function (installedVersions) {
+            var willowVersions = MSBuildTools.getWillowInstallations().map(function (installation) {
+                return installation.version;
+            });
+            return installedVersions.concat(willowVersions);
         });
 }
 
@@ -280,6 +286,9 @@ var checkMSBuild = function (windowsTargetVersion, windowsPhoneTargetVersion) {
 var checkVS = function (windowsTargetVersion, windowsPhoneTargetVersion) {
     var vsRequiredVersion = getMinimalRequiredVersionFor('visualstudio', windowsTargetVersion, windowsPhoneTargetVersion);
 
+    if (process.env.VSINSTALLDIR) {
+        return Q('(user-specified)');
+    }
     return getInstalledVSVersions()
         .then(function (installedVersions) {
             var appropriateVersion = getHighestAppropriateVersion(installedVersions, vsRequiredVersion);
