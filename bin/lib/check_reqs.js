@@ -273,7 +273,7 @@ var checkMSBuild = function (windowsTargetVersion, windowsPhoneTargetVersion) {
                 ? shortenVersion(appropriateVersion)
                 : Q.reject('MSBuild tools v.' + shortenVersion(msbuildRequiredVersion) + ' not found. ' +
                     'Please install Visual Studio ' + mapVSVersionToName(getMinimalRequiredVersionFor('visualstudio', windowsTargetVersion, windowsPhoneTargetVersion)) +
-                    ' from https://www.visualstudio.com/downloads/download-visual-studio-vs');
+                    ' or higher from https://www.visualstudio.com/downloads/download-visual-studio-vs');
         });
 };
 
@@ -287,7 +287,7 @@ var checkVS = function (windowsTargetVersion, windowsPhoneTargetVersion) {
                 ? shortenVersion(appropriateVersion)
                 : Q.reject('Required version of Visual Studio not found. Please install Visual Studio ' +
                     mapVSVersionToName(vsRequiredVersion) +
-                    ' from https://www.visualstudio.com/downloads/download-visual-studio-vs');
+                    ' or higher from https://www.visualstudio.com/downloads/download-visual-studio-vs');
         });
 };
 
