@@ -147,7 +147,10 @@ module.exports.findDevice = function (deploymentTool, target) {
             return Q.resolve(deviceList[0]);
         } else {
             var candidateList = deviceList.filter(function (device) {
-                return device.index === parseInt(target, 10);
+                var deviceIndexEqualsTarget = device.index === parseInt(target, 10);
+                var deviceNameContainsTarget = device.name.toLowerCase().indexOf(target.toLowerCase()) >= 0;
+                
+                return deviceIndexEqualsTarget || deviceNameContainsTarget;
             });
 
             if (candidateList.length > 0) {
