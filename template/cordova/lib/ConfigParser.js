@@ -67,7 +67,7 @@ WindowsConfigParser.prototype.getMatchingPreferences = function (regexp) {
 WindowsConfigParser.prototype.getWindowsTargetVersion = function () {
     var preference = this.getPreference('windows-target-version');
 
-    if (!preference) { preference = '8.1'; } // default is 8.1.
+    if (!preference) { preference = 'UAP'; } // default is UAP
 
     return preference;
 };
