@@ -156,7 +156,6 @@ function checkMSBuildVersion (version) {
 
 /// returns an array of available UAP Versions
 module.exports.getAvailableUAPVersions = function () {
-    /* jshint -W069 */
     var programFilesFolder = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
     // No Program Files folder found, so we won't be able to find UAP SDK
     if (!programFilesFolder) return [];
@@ -182,7 +181,7 @@ module.exports.getAvailableUAPVersions = function () {
 
 /**
  * Lists all VS 2017+ instances dirs in ProgramData
- * 
+ *
  * @return {String[]} List of paths to all VS2017+ instances
  */
 function getWillowProgDataPaths () {
@@ -209,7 +208,7 @@ function getWillowProgDataPaths () {
 
 /**
  * Lists all installed VS 2017+ versions
- * 
+ *
  * @return {Object[]} List of all VS 2017+ versions
  */
 module.exports.getWillowInstallations = function () {

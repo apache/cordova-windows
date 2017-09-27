@@ -17,8 +17,6 @@
        under the License.
 */
 
-/* jshint -W069 */
-
 var Q = require('q');
 var fs = require('fs');
 var path = require('path');

@@ -531,7 +531,6 @@ function updateSplashScreenImageExtensions (cordovaProject, locations) {
 
     function checkThatExtensionsAreNotMixed () {
         for (var target in extensionsUsed) {
-            /* jshint loopfunc: true */
             if (extensionsUsed.hasOwnProperty(target)) {
                 var extensionsUsedForTarget = extensionsUsed[target];
 

@@ -17,8 +17,6 @@
     under the License.
 */
 
-/* jshint sub:true */
-
 var util = require('util');
 var Version = require('./Version');
 var ConfigParser = require('cordova-common').ConfigParser;
