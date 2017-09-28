@@ -149,7 +149,6 @@ describe('MSBuildTools object', function () {
 });
 
 describe('getAvailableUAPVersions method', function () {
-    /* jshint -W069 */
     var availableVersions = ['10.0.10030.0', '10.0.10166.0', '10.0.10078.0'];
     var shellTest, shellLs;
     var programFilesx86Orig = process.env['ProgramFiles(x86)'];

@@ -16,8 +16,6 @@
  *
 */
 
-/* jshint laxcomma:true */
-
 var rewire = require('rewire');
 var common = rewire('../../../template/cordova/lib/PluginHandler');
 var path = require('path');
