@@ -30,9 +30,9 @@ var CordovaError = require('cordova-common').CordovaError;
 // build and project types specified by script parameters
 module.exports.getPackage = function (projectType, buildtype, buildArch) {
     var appPackages = path.resolve(path.join(__dirname, '..', '..', 'AppPackages'));
-    // reject promise if apppackages folder doesn't exists
+    // reject promise if AppPackages folder doesn't exist
     if (!fs.existsSync(appPackages)) {
-        return Q.reject('AppPackages doesn\'t exists');
+        return Q.reject('AppPackages folder doesn\'t exist');
     }
     // find out and resolve paths for all folders inside AppPackages
     var pkgDirs = fs.readdirSync(appPackages).map(function (relative) {
