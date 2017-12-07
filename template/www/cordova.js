@@ -1905,18 +1905,21 @@
                 splashImageSrc = schema + ':///' + manifest.getSplashScreenImagePath().replace(/\\/g, '/');
 
                 bgColor = cfg.getPreferenceValue('SplashScreenBackgroundColor') || bgColor;
-                bgColor = bgColor.replace('0x', '#').replace('0X', '#');
-                if (bgColor.length > 7) {
-                    // Remove aplha
-                    bgColor = bgColor.slice(0, 1) + bgColor.slice(3, bgColor.length);
-                }
+                bgColor = bgColor.toLowerCase().replace('0x', '#');
 
-                titleBgColor = {
-                    a: 255,
-                    r: parseInt(bgColor.slice(1, 3), 16),
-                    g: parseInt(bgColor.slice(3, 5), 16),
-                    b: parseInt(bgColor.slice(5, 7), 16)
-                };
+                if (bgColor !== 'transparent') {
+                    if (bgColor.length > 7) {
+                        // Remove aplha
+                        bgColor = bgColor.slice(0, 1) + bgColor.slice(3, bgColor.length);
+                    }
+
+                    titleBgColor = {
+                        a: 255,
+                        r: parseInt(bgColor.slice(1, 3), 16),
+                        g: parseInt(bgColor.slice(3, 5), 16),
+                        b: parseInt(bgColor.slice(5, 7), 16)
+                    };
+                }
 
                 autoHideSplashScreen = readBoolFromCfg('AutoHideSplashScreen', autoHideSplashScreen, cfg);
                 splashScreenDelay = cfg.getPreferenceValue('SplashScreenDelay') || splashScreenDelay;
@@ -2048,7 +2051,7 @@
         // Make title bg color match splashscreen bg color
         function colorizeTitleBar () {
             var appView = Windows.UI.ViewManagement.ApplicationView.getForCurrentView();
-            if (appView.titleBar) {
+            if (appView.titleBar && (typeof titleBgColor !== 'undefined')) {
                 titleInitialBgColor = appView.titleBar.backgroundColor;
 
                 appView.titleBar.backgroundColor = titleBgColor;
@@ -2059,7 +2062,7 @@
         // Revert title bg color
         function revertTitleBarColor () {
             var appView = Windows.UI.ViewManagement.ApplicationView.getForCurrentView();
-            if (appView.titleBar) {
+            if (appView.titleBar && (typeof titleInitialBgColor !== 'undefined')) {
                 appView.titleBar.backgroundColor = titleInitialBgColor;
                 appView.titleBar.buttonBackgroundColor = titleInitialBgColor;
             }
