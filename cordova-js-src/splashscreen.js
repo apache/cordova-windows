@@ -43,6 +43,7 @@ var DEFAULT_SPLASHSCREEN_DURATION = 3000, // in milliseconds
     PROGRESSRING_BOTTOM_MARGIN = 10; // needed for windows 10 min height window
 
 var bgColor = "#464646",
+    isBgColorTransparent = false,
     titleInitialBgColor,
     titleBgColor,
     autoHideSplashScreen = true,
@@ -70,10 +71,11 @@ function readPreferencesFromCfg(cfg, manifest) {
 
         bgColor = cfg.getPreferenceValue('SplashScreenBackgroundColor') || bgColor;
         bgColor = bgColor.toLowerCase().replace('0x', '#');
+        isBgColorTransparent = (bgColor === 'transparent');
 
-        if (bgColor !== 'transparent') {
+        if (!isBgColorTransparent) {
             if (bgColor.length > 7) {
-                // Remove aplha
+                // Remove alpha
                 bgColor = bgColor.slice(0, 1) + bgColor.slice(3, bgColor.length);
             }
 
@@ -215,7 +217,7 @@ function exitFullScreen() {
 // Make title bg color match splashscreen bg color
 function colorizeTitleBar() {
     var appView = Windows.UI.ViewManagement.ApplicationView.getForCurrentView();
-    if (isWin10UWP && (typeof titleBgColor !== 'undefined')) {
+    if (isWin10UWP && !isBgColorTransparent) {
         titleInitialBgColor = appView.titleBar.backgroundColor;
 
         appView.titleBar.backgroundColor = titleBgColor;
@@ -226,7 +228,7 @@ function colorizeTitleBar() {
 // Revert title bg color
 function revertTitleBarColor() {
     var appView = Windows.UI.ViewManagement.ApplicationView.getForCurrentView();
-    if (isWin10UWP && (typeof titleInitialBgColor !== 'undefined')) {
+    if (isWin10UWP && !isBgColorTransparent) {
         appView.titleBar.backgroundColor = titleInitialBgColor;
         appView.titleBar.buttonBackgroundColor = titleInitialBgColor;
     }

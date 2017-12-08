@@ -1879,6 +1879,7 @@
         var PROGRESSRING_BOTTOM_MARGIN = 10; // needed for windows 10 min height window
 
         var bgColor = '#464646';
+        var isBgColorTransparent = false;
         var titleInitialBgColor;
         var titleBgColor;
         var autoHideSplashScreen = true;
@@ -1906,10 +1907,11 @@
 
                 bgColor = cfg.getPreferenceValue('SplashScreenBackgroundColor') || bgColor;
                 bgColor = bgColor.toLowerCase().replace('0x', '#');
+                isBgColorTransparent = (bgColor === 'transparent');
 
-                if (bgColor !== 'transparent') {
+                if (!isBgColorTransparent) {
                     if (bgColor.length > 7) {
-                        // Remove aplha
+                        // Remove alpha
                         bgColor = bgColor.slice(0, 1) + bgColor.slice(3, bgColor.length);
                     }
 
@@ -2051,7 +2053,7 @@
         // Make title bg color match splashscreen bg color
         function colorizeTitleBar () {
             var appView = Windows.UI.ViewManagement.ApplicationView.getForCurrentView();
-            if (appView.titleBar && (typeof titleBgColor !== 'undefined')) {
+            if (appView.titleBar && !isBgColorTransparent) {
                 titleInitialBgColor = appView.titleBar.backgroundColor;
 
                 appView.titleBar.backgroundColor = titleBgColor;
@@ -2062,7 +2064,7 @@
         // Revert title bg color
         function revertTitleBarColor () {
             var appView = Windows.UI.ViewManagement.ApplicationView.getForCurrentView();
-            if (appView.titleBar && (typeof titleInitialBgColor !== 'undefined')) {
+            if (appView.titleBar && !isBgColorTransparent) {
                 appView.titleBar.backgroundColor = titleInitialBgColor;
                 appView.titleBar.buttonBackgroundColor = titleInitialBgColor;
             }
