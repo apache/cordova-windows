@@ -24,29 +24,6 @@ Update these notes using: git log --pretty=format:'* %s' --topo-order --no-merge
 
 cordova-windows is a library that enables developers to create Windows 8/8.1/10 and WP8.1 application projects that support Cordova APIs.
 
-### 5.1.0 (Jan 20, 2018)
-* [CB-13799](https://issues.apache.org/jira/browse/CB-13799) Updated checked-in node_modules
-* [CB-13641](https://issues.apache.org/jira/browse/CB-13641) support transparent splash screen background color. (#245)
-* [CB-13175](https://issues.apache.org/jira/browse/CB-13175) fixing **Windows**8.1 crash on startup
-* [CB-13422](https://issues.apache.org/jira/browse/CB-13422) (windows) Fix typo in build error message
-* [CB-12895](https://issues.apache.org/jira/browse/CB-12895) ignoring cordova.js for eslint & removing comments and references to jshint
-* [CB-13237](https://issues.apache.org/jira/browse/CB-13237) Default to UAP
-* [CB-13155](https://issues.apache.org/jira/browse/CB-13155) Improved target parsing
-* [CB-13022](https://issues.apache.org/jira/browse/CB-13022) Correct a VS installation warning during check_reqs
-* [CB-12636](https://issues.apache.org/jira/browse/CB-12636) Fix check_reqs to properly find VS 2017
-* [CB-12895](https://issues.apache.org/jira/browse/CB-12895) : setup eslint and removed jshint
-* Allow build when using --bundle and multiple architectures. This closes #175
-* [CB-12617](https://issues.apache.org/jira/browse/CB-12617) Removed node 0.x from CI
-* [CB-12847](https://issues.apache.org/jira/browse/CB-12847) fixed `bugs` entry in `package.json`.
-* [CB-12784](https://issues.apache.org/jira/browse/CB-12784) Fixed a crash on **Windows** 10 Creators Update
-* Add support for uap3.
-* [CB-12018](https://issues.apache.org/jira/browse/CB-12018) : updated tests to work with jasmine instead of jasmine-node
-* [CB-12499](https://issues.apache.org/jira/browse/CB-12499) UWP: Dependent external libraries specified as resource-file not being referenced in Release mode
-* [CB-12404](https://issues.apache.org/jira/browse/CB-12404) Updated RELEASENOTES and Version for release 5.0.0
-* [CB-12415](https://issues.apache.org/jira/browse/CB-12415) **Windows** build fails if start page is missing
-* [CB-12416](https://issues.apache.org/jira/browse/CB-12416) (Windows) Built bundles are misplaced when building for multiple archs
-* [CB-12298](https://issues.apache.org/jira/browse/CB-12298) [Windows] bundle.appxupload not generated for **Windows** 10 target Generate appxupload for non-bundle builds as well This closes #227
-
 ### 5.0.0 (Jan 27, 2017)
 * [CB-12415](https://issues.apache.org/jira/browse/CB-12415) Windows build fails if start page is missing
 * [CB-12416](https://issues.apache.org/jira/browse/CB-12416) (Windows) Built bundles are misplaced when building for multiple archs
