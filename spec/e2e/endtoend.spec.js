@@ -90,6 +90,12 @@ describe('Cordova create and build', function () {
         _expectExist(/.*Phone.*\.appxupload/);
     });
 
+    it('spec.2c should build 8.1 win + phone project', function () {
+        shell.exec(buildScriptPath + ' --appx=8.1', {silent: silent});
+        _expectExist(/.*Windows.*\.appxupload/);
+        _expectExist(/.*Phone.*\.appxupload/);
+    });
+
     // --archs
     
     it('spec.3 should build project for particular CPU', function () {
