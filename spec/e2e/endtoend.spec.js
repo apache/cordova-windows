@@ -55,11 +55,24 @@ describe('Cordova create and build', function () {
         expect(fs.existsSync(projectFolder)).toBe(true);
     });
 
-    it('spec.2 should build project', function () {
+    it('spec.2a should build default (win10) project', function () {
         shell.exec(buildScriptPath + '', {silent: silent});
         var packages = shell.ls(appPackagesFolder);
-        expect(packages.filter(function (file) { return file.match(/.*Phone.*\.appx.*/); }).length).toBe(1);
-        expect(packages.filter(function (file) { return file.match(/.*Windows.*\.appx.*/); }).length).toBe(1);
+        var subDir = 'CordovaApp.Windows10_1.0.0.0_anycpu_debug_Test';
+        expect(packages.filter(function (file) { return file.match(subDir); }).length).toBe(1);
+        verifySubDirContainsFile(subDir, 'CordovaApp.Windows10_1.0.0.0_anycpu_debug.appx');
+    });
+
+    it('spec.2b should build 8.1 win project', function () {
+        shell.exec(buildScriptPath + ' --appx=8.1-win', {silent: silent});
+        var packages = shell.ls(appPackagesFolder);
+        expect(packages.filter(function (file) { return file.match(/.*Windows.*\.appxupload/); }).length).toBe(1);
+    });
+
+    it('spec.2c should build 8.1 phone project', function () {
+        shell.exec(buildScriptPath + ' --appx=8.1-phone', {silent: silent});
+        var packages = shell.ls(appPackagesFolder);
+        expect(packages.filter(function (file) { return file.match(/.*Phone.*\.appxupload*/); }).length).toBe(1);
     });
 
     it('spec.3 should build project for particular CPU', function () {
