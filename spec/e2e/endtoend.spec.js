@@ -34,7 +34,8 @@ describe('Cordova create and build', function () {
     var buildDirectory = path.join(__dirname, '../..');
     var appPackagesFolder = path.join(buildDirectory, projectFolder, 'AppPackages');
     var buildScriptPath = '"' + path.join(buildDirectory, projectFolder, 'cordova', 'build') + '"';
-    var silent = true;
+    var silent = false;
+
     function verifySubDirContainsFile (subDirName, fileName, count) {
         count = typeof count !== 'undefined' ? count : 1;
 
@@ -200,7 +201,7 @@ describe('Cordova create and build', function () {
 
     // --release --bundle
 
-    it('spec.6a should generate appxupload and appxbundle for Windows 10 project bundle release build', function () {
+    fit('spec.6a should generate appxupload and appxbundle for Windows 10 project bundle release build', function () {
         shell.exec(buildScriptPath + ' --release --bundle --archs=\"x64 x86 arm\"', {silent: silent});
         _expectExist(/.*bundle\.appxupload$/, 3);
         _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_Test', 'CordovaApp.Windows10_1.0.0.0_x64_x86_arm.appxbundle');
