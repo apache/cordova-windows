@@ -34,6 +34,7 @@ describe('Cordova create and build', function () {
     var buildDirectory = path.join(__dirname, '../..');
     var appPackagesFolder = path.join(buildDirectory, projectFolder, 'AppPackages');
     var buildScriptPath = '"' + path.join(buildDirectory, projectFolder, 'cordova', 'build') + '"';
+    var silent = true;
 
     function verifySubDirContainsFile (subDirName, fileName) {
         var subDir = path.join(appPackagesFolder, subDirName);
@@ -42,7 +43,7 @@ describe('Cordova create and build', function () {
     }
 
     beforeEach(function () {
-        shell.exec(path.join('bin', 'create') + ' "' + projectFolder + '" com.test.app 応用', {silent: true});
+        shell.exec(path.join('bin', 'create') + ' "' + projectFolder + '" com.test.app 応用', {silent: silent});
     });
 
     afterEach(function () {
@@ -55,21 +56,21 @@ describe('Cordova create and build', function () {
     });
 
     it('spec.2 should build project', function () {
-        shell.exec(buildScriptPath, {silent: true});
+        shell.exec(buildScriptPath + '', {silent: silent});
         var packages = shell.ls(appPackagesFolder);
         expect(packages.filter(function (file) { return file.match(/.*Phone.*\.appx.*/); }).length).toBe(1);
         expect(packages.filter(function (file) { return file.match(/.*Windows.*\.appx.*/); }).length).toBe(1);
     });
 
     it('spec.3 should build project for particular CPU', function () {
-        shell.exec(buildScriptPath + ' --archs=\"x64\"', {silent: true}); /* eslint no-useless-escape : 0 */
+        shell.exec(buildScriptPath + ' --archs=\"x64\"', {silent: silent}); /* eslint no-useless-escape : 0 */
         var packages = shell.ls(appPackagesFolder);
         expect(packages.filter(function (file) { return file.match(/.*Phone.*x64.*\.appx.*/); }).length).toBe(1);
         expect(packages.filter(function (file) { return file.match(/.*Windows.*x64.*\.appx.*/); }).length).toBe(1);
     });
 
     it('spec.4 should build project for CPUs separated by whitespaces', function () {
-        shell.exec(buildScriptPath + ' --archs=\"x64 x86 arm anycpu\"', {silent: true}); /* eslint no-useless-escape : 0 */
+        shell.exec(buildScriptPath + ' --archs=\"x64 x86 arm anycpu\"', {silent: silent}); /* eslint no-useless-escape : 0 */
         var packages = shell.ls(appPackagesFolder);
         expect(packages.filter(function (file) { return file.match(/.*Phone.*x86.*\.appx.*/); }).length).toBe(1);
         expect(packages.filter(function (file) { return file.match(/.*Phone.*x64.*\.appx.*/); }).length).toBe(1);
@@ -97,7 +98,7 @@ describe('Cordova create and build', function () {
 
         api.addPlugin(extensionsPluginInfo)
             .then(function () {
-                shell.exec(buildScriptPath, {silent: true});
+                shell.exec(buildScriptPath, {silent: silent});
                 var packages = shell.ls(appPackagesFolder);
                 expect(packages.filter(function (file) { return file.match(/.*Phone.*\.appx.*/); }).length).toBe(1);
                 expect(packages.filter(function (file) { return file.match(/.*Windows.*\.appx.*/); }).length).toBe(1);
@@ -110,7 +111,7 @@ describe('Cordova create and build', function () {
     });
 
     it('spec.6 should generate appxupload and appxbundle for Windows 8.1 project bundle release build', function () {
-        shell.exec(buildScriptPath + ' --release --win --bundle --archs=\"x64 x86 arm\"', {silent: true});
+        shell.exec(buildScriptPath + ' --release --win --bundle --archs=\"x64 x86 arm\"', {silent: silent});
         var packages = shell.ls(appPackagesFolder);
         expect(packages.filter(function (file) { return file.match(/.*bundle\.appxupload$/); }).length > 0).toBeTruthy();
 
@@ -121,13 +122,13 @@ describe('Cordova create and build', function () {
     });
 
     it('spec.6.1 should generate appxupload for Windows 8.1 project non-bundle release build', function () {
-        shell.exec(buildScriptPath + ' --release --win --archs=\"x64 x86 arm\"', {silent: true});
+        shell.exec(buildScriptPath + ' --release --win --archs=\"x64 x86 arm\"', {silent: silent});
         var packages = shell.ls(appPackagesFolder);
         expect(packages.filter(function (file) { return file.match(/.*\.appxupload$/); }).length).toBe(3);
     });
 
     it('spec.7 should generate appxupload and appxbundle for Windows 10 project bundle release build', function () {
-        shell.exec(buildScriptPath + ' --release --win --appx=uap --bundle --archs=\"x64 x86 arm\"', {silent: true});
+        shell.exec(buildScriptPath + ' --release --win --appx=uap --bundle --archs=\"x64 x86 arm\"', {silent: silent});
         var packages = shell.ls(appPackagesFolder);
         expect(packages.filter(function (file) { return file.match(/.*bundle\.appxupload$/); }).length > 0).toBeTruthy();
 
@@ -138,7 +139,7 @@ describe('Cordova create and build', function () {
     });
 
     it('spec.7.1 should generate appxupload for Windows 10 project non-bundle release build', function () {
-        shell.exec(buildScriptPath + ' --release --win --appx=uap --archs=\"x64 x86 arm\"', {silent: true});
+        shell.exec(buildScriptPath + ' --release --win --appx=uap --archs=\"x64 x86 arm\"', {silent: silent});
         var packages = shell.ls(appPackagesFolder);
         expect(packages.filter(function (file) { return file.match(/.*\.appxupload$/); }).length).toBe(3);
 
@@ -159,7 +160,7 @@ describe('Cordova create and build', function () {
     });
 
     it('spec.8 for a non-bundle case for Windows Phone 8.1 it should build appx in separate dirs for each architecture', function () {
-        shell.exec(buildScriptPath + ' --release --phone --archs=\"x86 arm\"', {silent: true});
+        shell.exec(buildScriptPath + ' --release --phone --archs=\"x86 arm\"', {silent: silent});
         var packages = shell.ls(appPackagesFolder);
 
         var armSubDir = 'CordovaApp.Phone_1.0.0.0_arm_Test';
