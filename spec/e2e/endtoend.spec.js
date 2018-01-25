@@ -34,23 +34,22 @@ describe('Cordova create and build', function () {
     var buildDirectory = path.join(__dirname, '../..');
     var appPackagesFolder = path.join(buildDirectory, projectFolder, 'AppPackages');
     var buildScriptPath = '"' + path.join(buildDirectory, projectFolder, 'cordova', 'build') + '"';
-    var silent = true;
+    var silent = false;
 
-    function verifySubDirContainsFile (subDirName, fileName) {
+    function verifySubDirContainsFile (subDirName, fileName, count = 1) {
         var subDir = path.join(appPackagesFolder, subDirName);
         var packages = shell.ls(subDir);
-        expect(packages.filter(function (file) { return file.match(fileName); }).length).toBe(1);
+        expect(packages.filter(function (file) { return file.match(fileName); }).length).toBe(count);
     }
 
-    function _expectExist(fileNamePattern) {
+    function _expectExist (fileNamePattern, count = 1) {
         var packages = shell.ls(appPackagesFolder);
-        expect(packages.filter(function (file) { return file.match(fileNamePattern); }).length).toBe(1);
+        expect(packages.filter(function (file) { return file.match(fileNamePattern); }).length).toBe(count);
     }
 
-    function _expectSubdirAndFileExist(subDirName, fileName) {
-        var packages = shell.ls(appPackagesFolder);
+    function _expectSubdirAndFileExist (subDirName, fileName, count = 1) {
         _expectExist(subDirName);
-        verifySubDirContainsFile(subDirName, fileName);
+        verifySubDirContainsFile(subDirName, fileName, count);
     }
 
     beforeEach(function () {
@@ -67,7 +66,7 @@ describe('Cordova create and build', function () {
     });
 
     // default
-    
+
     it('spec.2 should build default (win10) project', function () {
         shell.exec(buildScriptPath + '', {silent: silent});
         _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_anycpu_debug_Test', 'CordovaApp.Windows10_1.0.0.0_anycpu_debug.appx');
@@ -97,30 +96,51 @@ describe('Cordova create and build', function () {
     });
 
     // --archs
-    
-    it('spec.3 should build project for particular CPU', function () {
+
+    it('spec.3a should build project for particular CPU', function () {
         shell.exec(buildScriptPath + ' --archs=\"x64\"', {silent: silent}); /* eslint no-useless-escape : 0 */
-        var packages = shell.ls(appPackagesFolder);
-        expect(packages.filter(function (file) { return file.match(/.*Phone.*x64.*\.appx.*/); }).length).toBe(1);
-        expect(packages.filter(function (file) { return file.match(/.*Windows.*x64.*\.appx.*/); }).length).toBe(1);
+        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_x64_debug_Test', 'CordovaApp.Windows10_1.0.0.0_x64_debug.appx');
     });
 
-    it('spec.4 should build project for CPUs separated by whitespaces', function () {
+    it('spec.3b should build project for particular CPU', function () {
+        shell.exec(buildScriptPath + ' --appx=8.1 --archs=\"x64\"', {silent: silent}); /* eslint no-useless-escape : 0 */
+        _expectExist(/.*Phone.*x64.*\.appxupload/);
+        _expectExist(/.*Windows.*x64.*\.appxupload/);
+    });
+
+    it('spec.3c should build project for particular CPU', function () {
+        shell.exec(buildScriptPath + ' --appx=8.1-win --archs=\"x64\"', {silent: silent}); /* eslint no-useless-escape : 0 */
+        _expectExist(/.*Windows.*x64.*\.appxupload/);
+    });
+
+    it('spec.3d should build project for particular CPU', function () {
+        shell.exec(buildScriptPath + ' --appx=8.1-phone --archs=\"x64\"', {silent: silent}); /* eslint no-useless-escape : 0 */
+        _expectExist(/.*Phone.*x64.*\.appxupload/);
+    });
+
+    it('spec.4a should build project for CPUs separated by whitespaces', function () {
         shell.exec(buildScriptPath + ' --archs=\"x64 x86 arm anycpu\"', {silent: silent}); /* eslint no-useless-escape : 0 */
-        var packages = shell.ls(appPackagesFolder);
-        expect(packages.filter(function (file) { return file.match(/.*Phone.*x86.*\.appx.*/); }).length).toBe(1);
-        expect(packages.filter(function (file) { return file.match(/.*Phone.*x64.*\.appx.*/); }).length).toBe(1);
-        expect(packages.filter(function (file) { return file.match(/.*Phone.*arm.*\.appx.*/); }).length).toBe(1);
-        expect(packages.filter(function (file) { return file.match(/.*Phone.*AnyCPU.*\.appx.*/i); }).length).toBe(1);
-        expect(packages.filter(function (file) { return file.match(/.*Windows.*x64.*\.appx.*/); }).length).toBe(1);
-        expect(packages.filter(function (file) { return file.match(/.*Windows.*x86.*\.appx.*/); }).length).toBe(1);
-        expect(packages.filter(function (file) { return file.match(/.*Windows.*arm.*\.appx.*/); }).length).toBe(1);
-        expect(packages.filter(function (file) { return file.match(/.*Windows.*anycpu.*\.appx.*/i); }).length).toBe(1);
+        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_x64_debug_Test', 'CordovaApp.Windows10_1.0.0.0_x64_debug.appx');
+        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_x86_debug_Test', 'CordovaApp.Windows10_1.0.0.0_x86_debug.appx');
+        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_arm_debug_Test', 'CordovaApp.Windows10_1.0.0.0_arm_debug.appx');
+        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_anycpu_debug_Test', 'CordovaApp.Windows10_1.0.0.0_anycpu_debug.appx');
+    });
+
+    it('spec.4b should build project for CPUs separated by whitespaces', function () {
+        shell.exec(buildScriptPath + ' --appx=8.1 --archs=\"x64 x86 arm anycpu\"', {silent: silent}); /* eslint no-useless-escape : 0 */
+        _expectExist(/.*Phone.*x86.*\.appxupload/);
+        _expectExist(/.*Phone.*x64.*\.appxupload/);
+        _expectExist(/.*Phone.*arm.*\.appxupload/);
+        _expectExist(/.*Phone.*AnyCPU.*\.appxupload/i);
+        _expectExist(/.*Windows.*x64.*\.appxupload/);
+        _expectExist(/.*Windows.*x86.*\.appxupload/);
+        _expectExist(/.*Windows.*arm.*\.appxupload/);
+        _expectExist(/.*Windows.*anycpu.*\.appxupload/i);
     });
 
     // "InProcessServer extension"
 
-    it('spec.5 should build project containing plugin with InProcessServer extension', function (done) {
+    it('spec.5a should build project containing plugin with InProcessServer extension', function (done) {
         var extensionsPluginInfo, api;
 
         extensionsPluginInfo = new PluginInfo(extensionsPlugin);
@@ -137,9 +157,7 @@ describe('Cordova create and build', function () {
         api.addPlugin(extensionsPluginInfo)
             .then(function () {
                 shell.exec(buildScriptPath, {silent: silent});
-                var packages = shell.ls(appPackagesFolder);
-                expect(packages.filter(function (file) { return file.match(/.*Phone.*\.appx.*/); }).length).toBe(1);
-                expect(packages.filter(function (file) { return file.match(/.*Windows.*\.appx.*/); }).length).toBe(1);
+                _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_anycpu_debug_Test', 'CordovaApp.Windows10_1.0.0.0_anycpu_debug.appx');
             })
             .catch(fail)
             .finally(function () {
@@ -148,74 +166,70 @@ describe('Cordova create and build', function () {
             });
     });
 
-    // --release 8.1
+    it('spec.5b should build project (8.1) containing plugin with InProcessServer extension', function (done) {
+        var extensionsPluginInfo, api;
 
-    it('spec.6 should generate appxupload and appxbundle for Windows 8.1 project bundle release build', function () {
-        shell.exec(buildScriptPath + ' --release --win --bundle --archs=\"x64 x86 arm\"', {silent: silent});
-        var packages = shell.ls(appPackagesFolder);
-        expect(packages.filter(function (file) { return file.match(/.*bundle\.appxupload$/); }).length > 0).toBeTruthy();
+        extensionsPluginInfo = new PluginInfo(extensionsPlugin);
+        api = new Api();
+        api.root = projectFolder;
+        api.locations.root = projectFolder;
+        api.locations.www = path.join(projectFolder, 'www');
 
-        var bundleDirName = 'CordovaApp.Windows_1.0.0.0_Test';
-        expect(packages.filter(function (file) { return file.match(bundleDirName); }).length).toBe(1);
+        var fail = jasmine.createSpy('fail')
+            .and.callFake(function (err) {
+                console.error(err);
+            });
 
-        verifySubDirContainsFile(bundleDirName, 'CordovaApp.Windows_1.0.0.0_x64_x86_arm.appxbundle');
+        api.addPlugin(extensionsPluginInfo)
+            .then(function () {
+                shell.exec(buildScriptPath + ' --appx=8.1', {silent: silent});
+                _expectExist(/.*Windows.*\.appxupload/);
+                _expectExist(/.*Phone.*\.appxupload/);
+            })
+            .catch(fail)
+            .finally(function () {
+                expect(fail).not.toHaveBeenCalled();
+                done();
+            });
     });
 
-    it('spec.6.1 should generate appxupload for Windows 8.1 project non-bundle release build', function () {
-        shell.exec(buildScriptPath + ' --release --win --archs=\"x64 x86 arm\"', {silent: silent});
-        var packages = shell.ls(appPackagesFolder);
-        expect(packages.filter(function (file) { return file.match(/.*\.appxupload$/); }).length).toBe(3);
-    });
+    // --release --bundle
 
-    // --release 10
+    it('spec.6 should generate appxupload and appxbundle for Windows 10 project bundle release build', function () {
+        shell.exec(buildScriptPath + ' --release --bundle --archs=\"x64 x86 arm\"', {silent: silent});
+        _expectExist(/.*bundle\.appxupload$/, 3);
+        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_Test', 'CordovaApp.Windows10_1.0.0.0_x64_x86_arm.appxbundle');
+    });
 
     it('spec.7 should generate appxupload and appxbundle for Windows 10 project bundle release build', function () {
-        shell.exec(buildScriptPath + ' --release --win --appx=uap --bundle --archs=\"x64 x86 arm\"', {silent: silent});
-        var packages = shell.ls(appPackagesFolder);
-        expect(packages.filter(function (file) { return file.match(/.*bundle\.appxupload$/); }).length > 0).toBeTruthy();
-
-        var bundleDirName = 'CordovaApp.Windows10_1.0.0.0_Test';
-        expect(packages.filter(function (file) { return file.match(bundleDirName); }).length).toBe(1);
-
-        verifySubDirContainsFile(bundleDirName, 'CordovaApp.Windows10_1.0.0.0_x64_x86_arm.appxbundle');
+        shell.exec(buildScriptPath + ' --release --appx=8.1-phone --bundle --archs=\"x64 x86 arm\"', {silent: silent});
+        _expectExist(/.*bundle\.appxupload$/, 3);
+        _expectSubdirAndFileExist('CordovaApp.Phone_1.0.0.0_Test', 'CordovaApp.Phone_1.0.0.0_x64_x86_arm.appxbundle');
     });
 
-    it('spec.7.1 should generate appxupload for Windows 10 project non-bundle release build', function () {
-        shell.exec(buildScriptPath + ' --release --win --appx=uap --archs=\"x64 x86 arm\"', {silent: silent});
-        var packages = shell.ls(appPackagesFolder);
-        expect(packages.filter(function (file) { return file.match(/.*\.appxupload$/); }).length).toBe(3);
+    // --release (non-bundle)
 
+    it('spec.8 should generate appxupload for Windows 10 project non-bundle release build', function () {
+        shell.exec(buildScriptPath + ' --release --win --archs=\"x64 x86 arm\"', {silent: silent});
+        _expectExist(/.*\.appxupload$/, 3);
+
+    });
+
+    it('spec.9a should generate appxupload for Windows 10 project non-bundle release build', function () {
+        shell.exec(buildScriptPath + ' --release --archs=\"x64 x86 arm\"', {silent: silent});
+        _expectExist(/.*\.appxupload$/, 3);
         // CB-12416 Should build appx in separate dirs for each architecture
-        var armSubDir = 'CordovaApp.Windows10_1.0.0.0_arm_Test';
-        var x64SubDir = 'CordovaApp.Windows10_1.0.0.0_x64_Test';
-        var x86SubDir = 'CordovaApp.Windows10_1.0.0.0_x86_Test';
-
         // Should contain a subdirectory for each of the architectures
-        expect(packages.filter(function (file) { return file.match(armSubDir); }).length).toBe(1);
-        expect(packages.filter(function (file) { return file.match(x64SubDir); }).length).toBe(1);
-        expect(packages.filter(function (file) { return file.match(x86SubDir); }).length).toBe(1);
-
         // These subdirectories should contain corresponding appx files
-        verifySubDirContainsFile(armSubDir, 'CordovaApp.Windows10_1.0.0.0_arm.appx');
-        verifySubDirContainsFile(x64SubDir, 'CordovaApp.Windows10_1.0.0.0_x64.appx');
-        verifySubDirContainsFile(x86SubDir, 'CordovaApp.Windows10_1.0.0.0_x86.appx');
+        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_arm_Test', 'CordovaApp.Windows10_1.0.0.0_arm.appx');
+        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_x64_Test', 'CordovaApp.Windows10_1.0.0.0_x64.appx');
+        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_x86_Test', 'CordovaApp.Windows10_1.0.0.0_x86.appx');
     });
 
-    // --release 8.1
-
-    it('spec.8 for a non-bundle case for Windows Phone 8.1 it should build appx in separate dirs for each architecture', function () {
-        shell.exec(buildScriptPath + ' --release --phone --archs=\"x86 arm\"', {silent: silent});
-        var packages = shell.ls(appPackagesFolder);
-
-        var armSubDir = 'CordovaApp.Phone_1.0.0.0_arm_Test';
-        var x86SubDir = 'CordovaApp.Phone_1.0.0.0_x86_Test';
-
-        // Should contain a subdirectory for each of the architectures
-        expect(packages.filter(function (file) { return file.match(armSubDir); }).length).toBe(1);
-        expect(packages.filter(function (file) { return file.match(x86SubDir); }).length).toBe(1);
-
-        // These subdirectories should contain corresponding appx files
-        verifySubDirContainsFile(armSubDir, 'CordovaApp.Phone_1.0.0.0_arm.appx');
-        verifySubDirContainsFile(x86SubDir, 'CordovaApp.Phone_1.0.0.0_x86.appx');
+    it('spec.9b for a non-bundle case for Windows Phone 8.1 it should build appx in separate dirs for each architecture', function () {
+        shell.exec(buildScriptPath + ' --release --appx=8.1-phone --phone --archs=\"x86 arm\"', {silent: silent});
+        _expectExist(/.*\.appxupload$/, 2);
+        _expectSubdirAndFileExist('CordovaApp.Phone_1.0.0.0_arm_Test', 'CordovaApp.Phone_1.0.0.0_arm.appx');
+        _expectSubdirAndFileExist('CordovaApp.Phone_1.0.0.0_x86_Test', 'CordovaApp.Phone_1.0.0.0_x86.appx');
     });
 });

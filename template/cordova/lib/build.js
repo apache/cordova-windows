@@ -78,7 +78,6 @@ module.exports.run = function run (buildOptions) {
 // returns list of projects to be built based on config.xml and additional parameters (-appx)
 function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig = null) {
 
-
     var configXML = new ConfigParser(path.join(ROOT, 'config.xml'));
     var targets = [];
     var noSwitches = !(isPhoneSwitch || isWinSwitch);
@@ -144,7 +143,7 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig 
         }
     }
 
-    if(buildConfig !== null) {
+    if (buildConfig !== null) {
         // As part of reworking how build and package determine the winning project, set the 'target type' project
         // as part of build configuration.  This will be used for determining the binary to 'run' after build is done.
         if (targets.length > 0) {
@@ -165,7 +164,7 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig 
     }
 
     return targets;
-};
+}
 module.exports.getBuildTargets = getBuildTargets;
 
 /**
