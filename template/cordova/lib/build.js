@@ -77,7 +77,7 @@ module.exports.run = function run (buildOptions) {
 
 // returns list of projects to be built based on config.xml and additional parameters (-appx)
 function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig) {
-    buildConfig = typeof buildConfig  !== 'undefined' ? buildConfig : null;
+    buildConfig = typeof buildConfig !== 'undefined' ? buildConfig : null;
 
     var configXML = new ConfigParser(path.join(ROOT, 'config.xml'));
     var targets = [];
