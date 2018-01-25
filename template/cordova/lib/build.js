@@ -81,6 +81,8 @@ module.exports.getBuildTargets = function (isWinSwitch, isPhoneSwitch, projOverr
     // apply build target override if one was specified
     if (projOverride) {
         switch (projOverride.toLowerCase()) {
+        case '8.1':
+            return [projFiles.win, projFiles.phone];
         case '8.1-phone':
             return [projFiles.phone];
         case '8.1-win':
