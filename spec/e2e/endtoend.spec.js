@@ -42,6 +42,17 @@ describe('Cordova create and build', function () {
         expect(packages.filter(function (file) { return file.match(fileName); }).length).toBe(1);
     }
 
+    function _expectExist(fileNamePattern) {
+        var packages = shell.ls(appPackagesFolder);
+        expect(packages.filter(function (file) { return file.match(fileNamePattern); }).length).toBe(1);
+    }
+
+    function _expectSubdirAndFileExist(subDirName, fileName) {
+        var packages = shell.ls(appPackagesFolder);
+        _expectExist(subDirName);
+        verifySubDirContainsFile(subDirName, fileName);
+    }
+
     beforeEach(function () {
         shell.exec(path.join('bin', 'create') + ' "' + projectFolder + '" com.test.app 応用', {silent: silent});
     });
@@ -55,28 +66,28 @@ describe('Cordova create and build', function () {
         expect(fs.existsSync(projectFolder)).toBe(true);
     });
 
-    // default build
+    // default
     
-    it('spec.2a should build default (win10) project', function () {
+    it('spec.2 should build default (win10) project', function () {
         shell.exec(buildScriptPath + '', {silent: silent});
-        var packages = shell.ls(appPackagesFolder);
-        var subDir = 'CordovaApp.Windows10_1.0.0.0_anycpu_debug_Test';
-        expect(packages.filter(function (file) { return file.match(subDir); }).length).toBe(1);
-        verifySubDirContainsFile(subDir, 'CordovaApp.Windows10_1.0.0.0_anycpu_debug.appx');
+        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_anycpu_debug_Test', 'CordovaApp.Windows10_1.0.0.0_anycpu_debug.appx');
     });
 
-    // --appx 8.1
+    // --appx
+
+    it('spec.2a should build win10 project', function () {
+        shell.exec(buildScriptPath + ' --appx=uap', {silent: silent});
+        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_anycpu_debug_Test', 'CordovaApp.Windows10_1.0.0.0_anycpu_debug.appx');
+    });
 
     it('spec.2b should build 8.1 win project', function () {
         shell.exec(buildScriptPath + ' --appx=8.1-win', {silent: silent});
-        var packages = shell.ls(appPackagesFolder);
-        expect(packages.filter(function (file) { return file.match(/.*Windows.*\.appxupload/); }).length).toBe(1);
+        _expectExist(/.*Windows.*\.appxupload/);
     });
 
     it('spec.2c should build 8.1 phone project', function () {
         shell.exec(buildScriptPath + ' --appx=8.1-phone', {silent: silent});
-        var packages = shell.ls(appPackagesFolder);
-        expect(packages.filter(function (file) { return file.match(/.*Phone.*\.appxupload*/); }).length).toBe(1);
+        _expectExist(/.*Phone.*\.appxupload/);
     });
 
     // --archs
