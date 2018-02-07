@@ -22,6 +22,7 @@ var util = require('util');
 var et = require('elementtree');
 var path = require('path');
 var xml = require('cordova-common').xmlHelpers;
+var semver = require('semver');
 
 var UAP_RESTRICTED_CAPS = ['enterpriseAuthentication', 'sharedUserCertificates',
     'documentsLibrary', 'musicLibrary', 'picturesLibrary',
@@ -39,6 +40,24 @@ var KNOWN_ORIENTATIONS = {
     'portrait': ['portrait'],
     'landscape': ['landscape', 'landscapeFlipped']
 };
+
+var MANIFESTS = {
+    'windows': {
+        '8.1.0': 'package.windows.appxmanifest',
+        '10.0.0': 'package.windows10.appxmanifest'
+    },
+    'phone': {
+        '8.1.0': 'package.phone.appxmanifest',
+        '10.0.0': 'package.windows10.appxmanifest'
+    },
+    'all': {
+        '8.1.0': ['package.windows.appxmanifest', 'package.phone.appxmanifest'],
+        '10.0.0': 'package.windows10.appxmanifest'
+    }
+};
+
+var SUBSTS = ['package.phone.appxmanifest', 'package.windows.appxmanifest', 'package.windows10.appxmanifest'];
+var TARGETS = ['windows', 'phone', 'all'];
 
 /**
  * Store to cache appxmanifest files based on file location
@@ -118,6 +137,35 @@ AppxManifest.get = function (fileName, ignoreCache) {
     }
 
     return result;
+};
+
+AppxManifest.processChanges = function (changes) {
+    var hasManifestChanges = changes.some(function (change) {
+        return change.target === 'package.appxmanifest';
+    });
+
+    if (!hasManifestChanges) {
+        return changes;
+    }
+
+    // Demux 'package.appxmanifest' into relevant platform-specific appx manifests.
+    // Only spend the cycles if there are version-specific plugin settings
+    var oldChanges = changes;
+    changes = [];
+
+    oldChanges.forEach(function (change) {
+        // Only support semver/device-target demux for package.appxmanifest
+        // Pass through in case something downstream wants to use it
+        if (change.target !== 'package.appxmanifest') {
+            changes.push(change);
+            return;
+        }
+
+        var manifestsForChange = getManifestsForChange(change);
+        changes = changes.concat(demuxChangeWithSubsts(change, manifestsForChange));
+    });
+
+    return changes;
 };
 
 /**
@@ -456,6 +504,51 @@ AppxManifest.prototype.getCapabilities = function () {
             return { type: element.tag, name: element.attrib.Name };
         });
 };
+
+function demuxChangeWithSubsts (change, manifestFiles) {
+    return manifestFiles.map(function (file) {
+        return createReplacement(file, change);
+    });
+}
+
+function getManifestsForChange (change) {
+    var hasTarget = (typeof change.deviceTarget !== 'undefined');
+    var hasVersion = (typeof change.versions !== 'undefined');
+
+    var targetDeviceSet = hasTarget ? change.deviceTarget : 'all';
+
+    if (TARGETS.indexOf(targetDeviceSet) === -1) {
+        // target-device couldn't be resolved, fix it up here to a valid value
+        targetDeviceSet = 'all';
+    }
+
+    // No semver/device-target for this config-file, pass it through
+    if (!(hasTarget || hasVersion)) {
+        return SUBSTS;
+    }
+
+    var knownWindowsVersionsForTargetDeviceSet = Object.keys(MANIFESTS[targetDeviceSet]);
+    return knownWindowsVersionsForTargetDeviceSet.reduce(function (manifestFiles, winver) {
+        if (hasVersion && !semver.satisfies(winver, change.versions)) {
+            return manifestFiles;
+        }
+        return manifestFiles.concat(MANIFESTS[targetDeviceSet][winver]);
+    }, []);
+}
+
+// This is a local function that creates the new replacement representing the
+// mutation.  Used to save code further down.
+function createReplacement (manifestFile, originalChange) {
+    var replacement = {
+        target: manifestFile,
+        parent: originalChange.parent,
+        after: originalChange.after,
+        xmls: originalChange.xmls,
+        versions: originalChange.versions,
+        deviceTarget: originalChange.deviceTarget
+    };
+    return replacement;
+}
 
 function isCSSColorName (color) {
     return color.indexOf('0x') === -1 && color.indexOf('#') === -1;

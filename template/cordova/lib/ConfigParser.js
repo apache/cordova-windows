@@ -20,6 +20,7 @@
 var util = require('util');
 var Version = require('./Version');
 var ConfigParser = require('cordova-common').ConfigParser;
+var AppxManifest = require('./AppxManifest');
 
 var BASE_UAP_VERSION = new Version(10, 0, 10240, 0);
 
@@ -48,6 +49,11 @@ WindowsConfigParser.prototype.startPage = function () {
 
 WindowsConfigParser.prototype.windows_packageVersion = function () {
     return this.doc.getroot().attrib['windows-packageVersion'];
+};
+
+WindowsConfigParser.prototype.getConfigFiles = function (platform) {
+    var configFiles = ConfigParser.prototype.getConfigFiles.call(this, platform);
+    return AppxManifest.processChanges(configFiles);
 };
 
 WindowsConfigParser.prototype.getMatchingPreferences = function (regexp) {

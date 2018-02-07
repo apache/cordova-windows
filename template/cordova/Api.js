@@ -25,6 +25,7 @@ var CordovaLogger = require('cordova-common').CordovaLogger;
 var PlatformMunger = require('./lib/ConfigChanges.js').PlatformMunger;
 var PlatformJson = require('cordova-common').PlatformJson;
 var PluginInfo = require('./lib/PluginInfo').PluginInfo;
+var ConfigParser = require('./lib/ConfigParser');
 var PluginInfoProvider = require('cordova-common').PluginInfoProvider;
 
 var PLATFORM = 'windows';
@@ -172,6 +173,8 @@ Api.prototype.getPlatformInfo = function () {
  *   CordovaError instance.
  */
 Api.prototype.prepare = function (cordovaProject, prepareOptions) {
+    var configPath = cordovaProject.projectConfig.path;
+    cordovaProject.projectConfig = new ConfigParser(configPath);
     return require('./lib/prepare').prepare.call(this, cordovaProject, prepareOptions);
 };
 

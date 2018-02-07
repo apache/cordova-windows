@@ -22,6 +22,7 @@ var et = require('elementtree');
 var xml = require('cordova-common').xmlHelpers;
 var ConfigParser = require('../../template/cordova/lib/ConfigParser');
 var ConfigParserOrig = require('cordova-common').ConfigParser;
+var AppxManifest = require('../../template/cordova/lib/AppxManifest');
 
 var TEST_XML = '<?xml version="1.0" encoding="UTF-8"?><widget/>';
 
@@ -99,5 +100,19 @@ describe('getAllMinMaxUAPVersions method', function () {
         } catch (ex) {
             expect(ex.constructor).toBe(RangeError);
         }
+    });
+});
+
+describe('getConfigFiles method', function () {
+    var mockConfig;
+    beforeEach(function () {
+        spyOn(xml, 'parseElementtreeSync').and.returnValue(new et.ElementTree(et.XML(TEST_XML)));
+        mockConfig = new ConfigParser('/some/file');
+    });
+
+    it('should call AppxManifest.processChanges to distribute changes across manifests', function () {
+        spyOn(AppxManifest, 'processChanges').and.callThrough();
+        mockConfig.getConfigFiles('windows');
+        expect(AppxManifest.processChanges).toHaveBeenCalled();
     });
 });

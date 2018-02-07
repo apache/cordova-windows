@@ -27,10 +27,8 @@ var AppxManifest = require('../../template/cordova/lib/AppxManifest');
 var os = require('os');
 var path = require('path');
 var shell = require('shelljs');
-var rewire = require('rewire');
 
 var configChanges = require('../../template/cordova/lib/ConfigChanges');
-var pluginInfo = rewire('../../template/cordova/lib/PluginInfo.js');
 var tempDir = path.join(os.tmpdir(), 'windows');
 var WINDOWS_MANIFEST = 'package.windows.appxmanifest';
 var WINDOWS10_MANIFEST = 'package.windows10.appxmanifest';
@@ -246,7 +244,6 @@ describe('generate_plugin_config_munge for windows project', function () {
     });
 
     it('should not process change w/o target package.appxmanifest', function () {
-        var processChanges = pluginInfo.__get__('processChanges');
         var testChanges = [
             {
                 target: 'package.windows.appxmanifest'
@@ -256,20 +253,18 @@ describe('generate_plugin_config_munge for windows project', function () {
             }
         ];
 
-        var changes = processChanges(testChanges);
+        var changes = AppxManifest.processChanges(testChanges);
         expect(changes.length).toBe(4);
         expect(changes[0].target).toBe(testChanges[0].target);
     });
 
     it('should apply changes to all manifests in case of incorrect "deviceTarget" attribute', function () {
-        var processChanges = pluginInfo.__get__('processChanges');
-
         var testChanges = [{
             deviceTarget: 'wrong_device_target',
             target: 'package.appxmanifest'
         }];
 
-        var changes = processChanges(testChanges);
+        var changes = AppxManifest.processChanges(testChanges);
         expect(changes.length).toBe(3);
         expect(changes[0].target).toBe('package.windows.appxmanifest');
         expect(changes[1].target).toBe('package.phone.appxmanifest');
