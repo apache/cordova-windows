@@ -73,29 +73,29 @@ describe('Cordova create and build', function () {
 
     // default
 
-    it('spec.2 should build default (win10) project', function () {
+    it('spec.2a should build default (win10) project', function () {
         shell.exec(buildScriptPath + '', {silent: silent});
         _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_anycpu_debug_Test', 'CordovaApp.Windows10_1.0.0.0_anycpu_debug.appx');
     });
 
     // --appx
 
-    it('spec.2a should build uap/win10 project', function () {
+    it('spec.2b should build uap/win10 project', function () {
         shell.exec(buildScriptPath + ' --appx=uap', {silent: silent});
         _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_anycpu_debug_Test', 'CordovaApp.Windows10_1.0.0.0_anycpu_debug.appx');
     });
 
-    it('spec.2b should build 8.1 win project', function () {
+    it('spec.2c should build 8.1 win project', function () {
         shell.exec(buildScriptPath + ' --appx=8.1-win', {silent: silent});
         _expectExist(/.*Windows.*\.appxupload/);
     });
 
-    it('spec.2c should build 8.1 phone project', function () {
+    it('spec.2d should build 8.1 phone project', function () {
         shell.exec(buildScriptPath + ' --appx=8.1-phone', {silent: silent});
         _expectExist(/.*Phone.*\.appxupload/);
     });
 
-    it('spec.2c should build 8.1 win + phone project', function () {
+    it('spec.2e should build 8.1 win + phone project', function () {
         shell.exec(buildScriptPath + ' --appx=8.1', {silent: silent});
         _expectExist(/.*Windows.*\.appxupload/);
         _expectExist(/.*Phone.*\.appxupload/);
@@ -229,6 +229,7 @@ describe('Cordova create and build', function () {
         _expectSubdirAndFileExist('CordovaApp.Phone_1.0.0.0_x86_Test', 'CordovaApp.Phone_1.0.0.0_x86.appx');
     });
 
+    // this will be move up again when it is fixed for VS 2017
     it('spec.6a should generate appxupload and appxbundle for Windows 10 project bundle release build', function () {
         shell.exec(buildScriptPath + ' --release --bundle --archs=\"x64 x86 arm\"', {silent: silent});
         _expectExist(/.*bundle\.appxupload$/, 3);
