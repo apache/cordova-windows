@@ -76,22 +76,8 @@ module.exports.run = function run (buildOptions) {
 };
 
 // returns list of projects to be built based on config.xml and additional parameters (-appx)
-module.exports.getBuildTargets = function (isWinSwitch, isPhoneSwitch, projOverride) {
-
-    // apply build target override if one was specified
-    if (projOverride) {
-        switch (projOverride.toLowerCase()) {
-        case '8.1-phone':
-            return [projFiles.phone];
-        case '8.1-win':
-            return [projFiles.win];
-        case 'uap':
-            return [projFiles.win10];
-        default:
-            events.emit('warn', 'Ignoring unrecognized --appx parameter passed to build: "' + projOverride + '"');
-            break;
-        }
-    }
+function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig) {
+    buildConfig = typeof buildConfig !== 'undefined' ? buildConfig : null;
 
     var configXML = new ConfigParser(path.join(ROOT, 'config.xml'));
     var targets = [];
@@ -137,8 +123,50 @@ module.exports.getBuildTargets = function (isWinSwitch, isPhoneSwitch, projOverr
         }
     }
 
+    // apply build target override if one was specified
+    if (projOverride) {
+        switch (projOverride.toLowerCase()) {
+        case '8.1':
+            targets = [projFiles.win, projFiles.phone];
+            break;
+        case '8.1-phone':
+            targets = [projFiles.phone];
+            break;
+        case '8.1-win':
+            targets = [projFiles.win];
+            break;
+        case 'uap':
+            targets = [projFiles.win10];
+            break;
+        default:
+            events.emit('warn', 'Ignoring unrecognized --appx parameter passed to build: "' + projOverride + '"');
+            break;
+        }
+    }
+
+    if (buildConfig !== null) {
+        // As part of reworking how build and package determine the winning project, set the 'target type' project
+        // as part of build configuration.  This will be used for determining the binary to 'run' after build is done.
+        if (targets.length > 0) {
+            switch (targets[0]) {
+            case projFiles.phone:
+                buildConfig.targetProject = 'phone';
+                break;
+            case projFiles.win10:
+                buildConfig.targetProject = 'windows10';
+                break;
+            case projFiles.win:
+                /* falls through */
+            default:
+                buildConfig.targetProject = 'windows';
+                break;
+            }
+        }
+    }
+
     return targets;
-};
+}
+module.exports.getBuildTargets = getBuildTargets;
 
 /**
  * Parses and validates buildOptions object and platform-specific CLI arguments,
@@ -276,7 +304,7 @@ function parseBuildConfig (buildConfigPath, buildType) {
 function updateManifestWithPublisher (allMsBuildVersions, config) {
     if (!config.publisherId) return;
 
-    var selectedBuildTargets = getBuildTargets(config);
+    var selectedBuildTargets = getBuildTargets(config.win, config.phone, config.projVerOverride, config);
     var msbuild = getLatestMSBuild(allMsBuildVersions);
     var myBuildTargets = filterSupportedTargets(selectedBuildTargets, msbuild);
     var manifestFiles = myBuildTargets.map(function (proj) {
@@ -291,7 +319,7 @@ function updateManifestWithPublisher (allMsBuildVersions, config) {
 
 function buildTargets (allMsBuildVersions, config) {
     // filter targets to make sure they are supported on this development machine
-    var selectedBuildTargets = getBuildTargets(config);
+    var selectedBuildTargets = getBuildTargets(config.win, config.phone, config.projVerOverride, config);
     var msbuild = getLatestMSBuild(allMsBuildVersions);
     if (!msbuild) {
         return Q.reject(new CordovaError('No valid MSBuild was detected for the selected target.'));
@@ -407,92 +435,6 @@ function clearIntermediatesAndGetPackage (bundleTerms, config, hasAnyCpu) {
     });
 
     return pckage.getPackageFileInfo(finalFile);
-}
-
-// Can update buildConfig in the following ways:
-//  * Sets targetProject property, the project to launch when complete
-function getBuildTargets (buildConfig) {
-    var configXML = new ConfigParser(path.join(ROOT, 'config.xml'));
-    var targets = [];
-    var noSwitches = !(buildConfig.phone || buildConfig.win);
-
-    // Windows
-    if (buildConfig.win || noSwitches) { // if --win or no arg
-        var windowsTargetVersion = configXML.getWindowsTargetVersion();
-        switch (windowsTargetVersion) {
-        case '8':
-        case '8.0':
-            throw new CordovaError('windows8 platform is deprecated. To use windows-target-version=8.0 you must downgrade to cordova-windows@4.');
-        case '8.1':
-            targets.push(projFiles.win);
-            break;
-        case '10.0':
-        case 'UAP':
-            targets.push(projFiles.win10);
-            break;
-        default:
-            throw new Error('Unsupported windows-target-version value: ' + windowsTargetVersion);
-        }
-    }
-
-    // Windows Phone
-    if (buildConfig.phone || noSwitches) { // if --phone or no arg
-        var windowsPhoneTargetVersion = configXML.getWindowsPhoneTargetVersion();
-        switch (windowsPhoneTargetVersion) {
-        case '8.1':
-            targets.push(projFiles.phone);
-            break;
-        case '10.0':
-        case 'UAP':
-            if (!buildConfig.win && !noSwitches) {
-                // Already built due to --win or no switches
-                // and since the same thing can be run on Phone as Windows,
-                // we can skip this one.
-                targets.push(projFiles.win10);
-            }
-            break;
-        default:
-            throw new Error('Unsupported windows-phone-target-version value: ' + windowsPhoneTargetVersion);
-        }
-    }
-
-    // apply build target override if one was specified
-    if (buildConfig.projVerOverride) {
-        switch (buildConfig.projVerOverride) {
-        case '8.1-phone':
-            targets = [projFiles.phone];
-            break;
-        case '8.1-win':
-            targets = [projFiles.win];
-            break;
-        case 'uap':
-            targets = [projFiles.win10];
-            break;
-        default:
-            events.emit('warn', 'Ignoring unrecognized --appx parameter passed to build: "' + buildConfig.projVerOverride + '"');
-            break;
-        }
-    }
-
-    // As part of reworking how build and package determine the winning project, set the 'target type' project
-    // as part of build configuration.  This will be used for determining the binary to 'run' after build is done.
-    if (targets.length > 0) {
-        switch (targets[0]) {
-        case projFiles.phone:
-            buildConfig.targetProject = 'phone';
-            break;
-        case projFiles.win10:
-            buildConfig.targetProject = 'windows10';
-            break;
-        case projFiles.win:
-            /* falls through */
-        default:
-            buildConfig.targetProject = 'windows';
-            break;
-        }
-    }
-
-    return targets;
 }
 
 function getLatestMSBuild (allMsBuildVersions) {
