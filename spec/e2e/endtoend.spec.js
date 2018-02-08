@@ -249,6 +249,7 @@ describe('Cordova create and build', function () {
     it('spec.6a should generate appxupload and appxbundle for Windows 10 project bundle release build (all target platforms)', function () {
         shell.exec(buildScriptPath + ' --release --bundle --archs=\"x64 x86 arm\"', {silent: silent});
         _expectExist(/.*bundle\.appxupload$/, 3);
+        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_Test', 'CordovaApp.Windows10_1.0.0.0_x64.appxbundle'); // XXX SHOULD NOT SUCCEED
         _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_Test', 'CordovaApp.Windows10_1.0.0.0_x64_x86_arm.appxbundle');
     });
 
