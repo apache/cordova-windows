@@ -67,6 +67,8 @@ describe('Cordova create and build', function () {
     }
 
     beforeEach(function () {
+        shell.cd(buildDirectory);
+        shell.rm('-rf', projectFolder);
         shell.exec(path.join('bin', 'create') + ' "' + projectFolder + '" com.test.app 応用', {silent: silent});
     });
 
