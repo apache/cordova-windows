@@ -2077,7 +2077,7 @@ function exitFullScreen() {
 // Make title bg color match splashscreen bg color
 function colorizeTitleBar() {
     var appView = Windows.UI.ViewManagement.ApplicationView.getForCurrentView();
-    if (appView.titleBar) {
+    if (isWin10UWP) {
         titleInitialBgColor = appView.titleBar.backgroundColor;
 
         appView.titleBar.backgroundColor = titleBgColor;
@@ -2088,7 +2088,7 @@ function colorizeTitleBar() {
 // Revert title bg color
 function revertTitleBarColor() {
     var appView = Windows.UI.ViewManagement.ApplicationView.getForCurrentView();
-    if (appView.titleBar) {
+    if (isWin10UWP) {
         appView.titleBar.backgroundColor = titleInitialBgColor;
         appView.titleBar.buttonBackgroundColor = titleInitialBgColor;
     }
