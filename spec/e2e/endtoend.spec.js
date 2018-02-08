@@ -239,10 +239,17 @@ describe('Cordova create and build', function () {
         _expectSubdirAndFileExist('CordovaApp.Phone_1.0.0.0_x86_Test', 'CordovaApp.Phone_1.0.0.0_x86.appx');
     });
 
+    it('spec.6pre1 should generate appxupload and appxbundle for Windows 10 project bundle release build (x64 only)', function () {
+        shell.exec(buildScriptPath + ' --release --bundle --archs=\"x64\"', {silent: silent});
+        _expectExist(/.*bundle\.appxupload$/, 1);
+        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_Test', 'CordovaApp.Windows10_1.0.0.0_x64.appxbundle');
+    });
+
     // this will be move up again when it is fixed for VS 2017
     it('spec.6a should generate appxupload and appxbundle for Windows 10 project bundle release build (all target platforms)', function () {
         shell.exec(buildScriptPath + ' --release --bundle --archs=\"x64 x86 arm\"', {silent: silent});
         _expectExist(/.*bundle\.appxupload$/, 3);
         _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_Test', 'CordovaApp.Windows10_1.0.0.0_x64_x86_arm.appxbundle');
     });
+
 });
