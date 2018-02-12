@@ -131,7 +131,7 @@ function checkMSBuildVersion (version) {
         return inst.version === version;
     })[0];
     if (correspondingWillow) {
-        if(version == '15.5') version = '15.0'; // workaround for vs<->msbuild version mismatch
+        if (version === '15.5') version = '15.0'; // workaround for vs<->msbuild version mismatch
         var toolsPath = path.join(correspondingWillow.path, 'MSBuild', version, 'Bin');
         if (shell.test('-e', toolsPath)) {
             return module.exports.getMSBuildToolsAt(toolsPath);
