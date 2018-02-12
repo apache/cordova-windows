@@ -95,6 +95,7 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
             break;
         case '10.0':
         case 'uap':
+        case 'uwp':
             targets.push(projFiles.win10);
             break;
         default:
@@ -111,6 +112,7 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
             break;
         case '10.0':
         case 'uap':
+        case 'uwp':
             if (targets.indexOf(projFiles.win10) < 0) {
                 // Already built due to --win or no switches
                 // and since the same thing can be run on Phone as Windows,
@@ -136,6 +138,7 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
             targets = [projFiles.win];
             break;
         case 'uap':
+        case 'uwp':
             targets = [projFiles.win10];
             break;
         default:
