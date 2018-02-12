@@ -82,7 +82,7 @@ module.exports.findAvailableVersion = function () {
 };
 
 function findAllAvailableVersionsFallBack () {
-    var versions = ['15.0', '14.0', '12.0', '4.0'];
+    var versions = ['15.5', '15.0', '14.0', '12.0', '4.0'];
     events.emit('verbose', 'Searching for available MSBuild versions...');
 
     return Q.all(versions.map(checkMSBuildVersion)).then(function (unprocessedResults) {
@@ -131,6 +131,7 @@ function checkMSBuildVersion (version) {
         return inst.version === version;
     })[0];
     if (correspondingWillow) {
+        if(version == '15.5') version = '15.0'; // workaround for vs<->msbuild version mismatch
         var toolsPath = path.join(correspondingWillow.path, 'MSBuild', version, 'Bin');
         if (shell.test('-e', toolsPath)) {
             return module.exports.getMSBuildToolsAt(toolsPath);
