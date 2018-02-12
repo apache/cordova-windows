@@ -57,6 +57,16 @@ var REQUIRED_VERSIONS = {
         visualstudio: '14.0',
         windowssdk: '10.0',
         phonesdk: '10.0'
+    },
+    'UAP': {
+        // Note that Windows 10 target is also supported on Windows 7, so this should look
+        // like '6.1 || >=6.3', but due to Version module restricted functionality we handle
+        // this case separately in checkOS function below.
+        os: '6.3',
+        msbuild: '14.0',
+        visualstudio: '14.0',
+        windowssdk: '10.0',
+        phonesdk: '10.0'
     }
 };
 
