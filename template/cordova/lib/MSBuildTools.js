@@ -35,7 +35,7 @@ MSBuildTools.prototype.buildProject = function (projFile, buildType, buildarch, 
     events.emit('log', '\tConfiguration : ' + buildType);
     events.emit('log', '\tPlatform      : ' + buildarch);
     events.emit('log', '\tBuildflags    : ' + buildFlags);
-    events.emit('log', '\tMSBuildTools  : ' + msbuild.path);
+    events.emit('log', '\tMSBuildTools  : ' + this.path);
 
     var checkWinSDK = function (target_platform) {
         return require('./check_reqs').isWinSDKPresent(target_platform);
