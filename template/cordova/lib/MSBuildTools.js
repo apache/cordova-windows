@@ -70,6 +70,7 @@ MSBuildTools.prototype.buildProject = function (projFile, buildType, buildarch, 
 };
 
 // returns full path to msbuild tools required to build the project and tools version
+// check_reqs.js -> run()
 module.exports.findAvailableVersion = function () {
     var versions = ['15.0', '14.0', '12.0', '4.0'];
 
@@ -92,6 +93,8 @@ function findAllAvailableVersionsFallBack () {
     });
 }
 
+// build.js -> run()
+// check_reqs.js -> checkMSBuild()
 module.exports.findAllAvailableVersions = function () {
     // CB-11548 use VSINSTALLDIR environment if defined to find MSBuild. If VSINSTALLDIR
     // is not specified or doesn't contain the MSBuild path we are looking for - fall back
@@ -155,7 +158,8 @@ function checkMSBuildVersion (version) {
         });
 }
 
-/// returns an array of available UAP Versions
+// returns an array of available UAP Versions
+// prepare.js
 module.exports.getAvailableUAPVersions = function () {
     var programFilesFolder = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
     // No Program Files folder found, so we won't be able to find UAP SDK
