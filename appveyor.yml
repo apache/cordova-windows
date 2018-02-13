@@ -37,6 +37,7 @@ test_script:
   - node --version
   - npm --version
   - msbuild -version -nologo
+  - where msbuild
   - "\"%ProgramFiles(x86)%\\Microsoft Visual Studio\\Installer\\vswhere\" -property installationPath -products * -all"
   - "\"%ProgramFiles(x86)%\\Microsoft Visual Studio\\Installer\\vswhere\" -property installationPath -all"
   - npm test
