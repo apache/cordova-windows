@@ -34,6 +34,8 @@ describe('Cordova create and build', function () {
     var buildDirectory = path.join(__dirname, '../..');
     var appPackagesFolder = path.join(buildDirectory, projectFolder, 'AppPackages');
     var buildScriptPath = '"' + path.join(buildDirectory, projectFolder, 'cordova', 'build') + '"';
+    var prepareScriptPath = '"' + path.join(buildDirectory, projectFolder, 'cordova', 'prepare') + '"';
+
     var silent = false;
 
     function verifySubDirContainsFile (subDirName, fileName, count) {
@@ -60,6 +62,7 @@ describe('Cordova create and build', function () {
 
     beforeEach(function () {
         shell.exec(path.join('bin', 'create') + ' "' + projectFolder + '" com.test.app 応用', {silent: silent});
+        shell.exec(prepareScriptPath + '', {silent: silent});
     });
 
     afterEach(function () {
