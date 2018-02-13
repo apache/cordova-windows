@@ -50,7 +50,7 @@ var project = {
     projectConfig: new ConfigParser(path.join(projectRoot, 'config.xml')),
     locations: {
         plugins: path.join(projectRoot, 'plugins'),
-        www: path.join(projectRoot, 'platform_www')
+        www: path.join(projectRoot, 'www')
     }
 };
 
