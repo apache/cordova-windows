@@ -35,6 +35,7 @@ MSBuildTools.prototype.buildProject = function (projFile, buildType, buildarch, 
     events.emit('log', '\tConfiguration : ' + buildType);
     events.emit('log', '\tPlatform      : ' + buildarch);
     events.emit('log', '\tBuildflags    : ' + buildFlags);
+    events.emit('log', '\tMSBuildTools  : ' + msbuild.path);
 
     var checkWinSDK = function (target_platform) {
         return require('./check_reqs').isWinSDKPresent(target_platform);
@@ -232,4 +233,31 @@ module.exports.getWillowInstallations = function () {
         }
     });
     return installations;
+};
+
+// gets the latest MSBuild version from a list of versions
+module.exports.getLatestMSBuild = function (allMsBuildVersions) {
+    events.emit('verbose', 'getLatestMSBuild');
+
+    var availableVersions = allMsBuildVersions
+        .filter(function (buildTools) {
+            // Sanitize input - filter out tools w/ invalid versions
+            return Version.tryParse(buildTools.version);
+        }).sort(function (a, b) {
+            // Sort tools list - use parsed Version objects for that
+            // to respect both major and minor versions segments
+            var parsedA = Version.fromString(a.version);
+            var parsedB = Version.fromString(b.version);
+
+            if (parsedA.gt(parsedB)) return -1;
+            if (parsedA.eq(parsedB)) return 0;
+            return 1;
+        });
+
+    console.log('availableVersions', availableVersions);
+
+    if (availableVersions.length > 0) {
+        // After sorting the first item will be the highest version available
+        return availableVersions[0];
+    }
 };

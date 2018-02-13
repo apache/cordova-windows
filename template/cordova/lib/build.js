@@ -24,7 +24,6 @@ var shell = require('shelljs');
 var utils = require('./utils');
 var prepare = require('./prepare');
 var pckage = require('./package');
-var Version = require('./Version');
 var MSBuildTools = require('./MSBuildTools');
 var AppxManifest = require('./AppxManifest');
 var ConfigParser = require('./ConfigParser');
@@ -308,7 +307,7 @@ function updateManifestWithPublisher (allMsBuildVersions, config) {
     if (!config.publisherId) return;
 
     var selectedBuildTargets = getBuildTargets(config.win, config.phone, config.projVerOverride, config);
-    var msbuild = getLatestMSBuild(allMsBuildVersions);
+    var msbuild = MSBuildTools.getLatestMSBuild(allMsBuildVersions);
     var myBuildTargets = filterSupportedTargets(selectedBuildTargets, msbuild);
     var manifestFiles = myBuildTargets.map(function (proj) {
         return projFilesToManifests[proj];
@@ -323,7 +322,7 @@ function updateManifestWithPublisher (allMsBuildVersions, config) {
 function buildTargets (allMsBuildVersions, config) {
     // filter targets to make sure they are supported on this development machine
     var selectedBuildTargets = getBuildTargets(config.win, config.phone, config.projVerOverride, config);
-    var msbuild = getLatestMSBuild(allMsBuildVersions);
+    var msbuild = MSBuildTools.getLatestMSBuild(allMsBuildVersions);
     if (!msbuild) {
         return Q.reject(new CordovaError('No valid MSBuild was detected for the selected target.'));
     }
@@ -438,28 +437,6 @@ function clearIntermediatesAndGetPackage (bundleTerms, config, hasAnyCpu) {
     });
 
     return pckage.getPackageFileInfo(finalFile);
-}
-
-function getLatestMSBuild (allMsBuildVersions) {
-    var availableVersions = allMsBuildVersions
-        .filter(function (buildTools) {
-            // Sanitize input - filter out tools w/ invalid versions
-            return Version.tryParse(buildTools.version);
-        }).sort(function (a, b) {
-            // Sort tools list - use parsed Version objects for that
-            // to respect both major and minor versions segments
-            var parsedA = Version.fromString(a.version);
-            var parsedB = Version.fromString(b.version);
-
-            if (parsedA.gt(parsedB)) return -1;
-            if (parsedA.eq(parsedB)) return 0;
-            return 1;
-        });
-
-    if (availableVersions.length > 0) {
-        // After sorting the first item will be the highest version available
-        return availableVersions[0];
-    }
 }
 
 // TODO: Fix this so that it outlines supported versions based on version criteria:
