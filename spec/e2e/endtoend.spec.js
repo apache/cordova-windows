@@ -85,7 +85,7 @@ describe('Cordova create and build', function () {
         _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_anycpu_debug_Test', 'CordovaApp.Windows10_1.0.0.0_anycpu_debug.appx');
     });
 
-    it('spec.2cshould build uwp (win10) project', function () {
+    it('spec.2c should build uwp (win10) project', function () {
         shell.exec(buildScriptPath + ' --appx=uwp', {silent: silent});
         _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_anycpu_debug_Test', 'CordovaApp.Windows10_1.0.0.0_anycpu_debug.appx');
     });
