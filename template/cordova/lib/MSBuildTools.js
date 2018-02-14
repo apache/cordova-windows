@@ -143,12 +143,12 @@ function checkMSBuildVersion (version) {
 
     // first, check if we have a VS 2017+ with such a version
     var willows = module.exports.getWillowInstallations();
-    //console.log('willows', willows);
+    // console.log('willows', willows);
     var correspondingWillows = willows.filter(function (inst) {
-        //console.log('willows.filter', inst.version, version, inst.version === version);
+        // console.log('willows.filter', inst.version, version, inst.version === version);
         return inst.version === version;
     });
-    //console.log('correspondingWillows', correspondingWillows);
+    // console.log('correspondingWillows', correspondingWillows);
     var correspondingWillow = correspondingWillows[0]; // TODO Do not only handle one!
     if (correspondingWillow) {
         version = '15.0';
@@ -157,7 +157,7 @@ function checkMSBuildVersion (version) {
         console.log('from list of VS installations: ', correspondingWillows);
         if (shell.test('-e', toolsPath)) {
             var msbuild = module.exports.getMSBuildToolsAt(toolsPath);
-            console.log('selected VS exists:', toolsPath, );
+            console.log('selected VS exists:', toolsPath);
             // TODO check for JavaScript folder
             return msbuild;
         }
@@ -183,8 +183,6 @@ function checkMSBuildVersion (version) {
             console.log('no registry result for version ' + version);
             // if 'reg' exits with error, assume that registry key not found
         });
-
-    console.log('no msbuild found with version ', version);
 }
 
 module.exports.getLatestMatchingMSBuild = function (selectedBuildTargets) {
