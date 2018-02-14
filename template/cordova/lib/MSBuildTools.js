@@ -72,20 +72,6 @@ MSBuildTools.prototype.buildProject = function (projFile, buildType, buildarch, 
     });
 };
 
-// returns full path to msbuild tools required to build the project and tools version
-// check_reqs.js -> run()
-module.exports.findAvailableVersion = function () {
-    var versions = ['15.5', '15.0', '14.0', '12.0', '4.0'];
-
-    return Q.all(versions.map(checkMSBuildVersion)).then(function (versions) {
-        console.log('findAvailableVersion', versions);
-        // select first msbuild version available, and resolve promise with it
-        var msbuildTools = versions[0] || versions[1] || versions[2] || versions[3] || versions[4];
-
-        return msbuildTools ? Q.resolve(msbuildTools) : Q.reject('MSBuild tools not found');
-    });
-};
-
 // build.js -> run()
 // check_reqs.js -> checkMSBuild()
 module.exports.findAllAvailableVersions = function () {
@@ -117,6 +103,20 @@ function findAllAvailableVersionsFallBack () {
         });
     });
 }
+
+// returns full path to msbuild tools required to build the project and tools version
+// check_reqs.js -> run()
+module.exports.findAvailableVersion = function () {
+    var versions = ['15.5', '15.0', '14.0', '12.0', '4.0'];
+
+    return Q.all(versions.map(checkMSBuildVersion)).then(function (versions) {
+        console.log('findAvailableVersion', versions);
+        // select first msbuild version available, and resolve promise with it
+        var msbuildTools = versions[0] || versions[1] || versions[2] || versions[3] || versions[4];
+
+        return msbuildTools ? Q.resolve(msbuildTools) : Q.reject('MSBuild tools not found');
+    });
+};
 
 /**
  * Gets MSBuildTools instance for user-specified location
