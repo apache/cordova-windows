@@ -41,22 +41,22 @@ describe('Cordova create and build', function () {
 
     function verifySubDirContainsFile (subDirName, fileName, count) {
         count = typeof count !== 'undefined' ? count : 1;
-    
+
         var subDir = path.join(appPackagesFolder, subDirName);
         var packages = shell.ls(subDir);
         expect(packages.filter(function (file) { return file.match(fileName); }).length).toBe(count);
     }
-    
+
     function _expectExist (fileNamePattern, count) {
         count = typeof count !== 'undefined' ? count : 1;
     
         var packages = shell.ls(appPackagesFolder);
         expect(packages.filter(function (file) { return file.match(fileNamePattern); }).length).toBe(count);
     }
-    
+
     function _expectSubdirAndFileExist (subDirName, fileName, count) {
         count = typeof count !== 'undefined' ? count : 1;
-    
+
         _expectExist(subDirName);
         verifySubDirContainsFile(subDirName, fileName, count);
     }
