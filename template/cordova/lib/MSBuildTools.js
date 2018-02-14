@@ -188,9 +188,12 @@ function checkMSBuildVersion (version) {
 module.exports.getLatestMatchingMSBuild = function (selectedBuildTargets) {
     events.emit('verbose', 'getLatestMatchingMSBuild');
     console.log('getLatestMatchingMSBuild', selectedBuildTargets);
-    var msbuild = this.getLatestMSBuild();
-    // we don't do anything with selectedBuildTargets yet, but could theoretically nope out if this msbuild doesn't work for that target
-    return msbuild;
+    return this.getLatestMSBuild()
+        .then(function(msbuild) {
+            // filter targets to make sure they are supported on this development machine
+            var myBuildTargets = filterSupportedTargets(selectedBuildTargets, msbuild);
+            return [msbuild, myBuildTargets];
+        });
 };
 
 // gets the latest MSBuild version from a list of versions
@@ -251,8 +254,7 @@ function msBuild155TargetsFilter (target) {
     return target === projFiles.win10;
 }
 
-MSBuildTools.prototype.filterSupportedTargets = function (targets) {
-    var msbuild = this;
+function filterSupportedTargets (targets, msbuild) {
     console.log('MSBuildTools->filterSupportedTargets', targets, msbuild);
     if (!targets || targets.length === 0) {
         events.emit('warn', 'No build targets specified');
