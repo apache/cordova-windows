@@ -49,7 +49,7 @@ describe('Cordova create and build', function () {
 
     function _expectExist (fileNamePattern, count) {
         count = typeof count !== 'undefined' ? count : 1;
-    
+
         var packages = shell.ls(appPackagesFolder);
         expect(packages.filter(function (file) { return file.match(fileNamePattern); }).length).toBe(count);
     }
