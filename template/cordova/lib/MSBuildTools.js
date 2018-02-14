@@ -37,18 +37,20 @@ MSBuildTools.prototype.buildProject = function (projFile, buildType, buildarch, 
     events.emit('log', '\tBuildflags    : ' + buildFlags);
     events.emit('log', '\tMSBuildTools  : ' + this.path);
 
+    // Additional requirement checks
     var checkWinSDK = function (target_platform) {
         return require('./check_reqs').isWinSDKPresent(target_platform);
     };
-
     var checkPhoneSDK = function () {
         return require('./check_reqs').isPhoneSDKPresent();
     };
 
+    // default build args
     var args = ['/clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal', '/nologo',
         '/p:Configuration=' + buildType,
         '/p:Platform=' + buildarch];
 
+    // add buildFlags if present
     if (buildFlags) {
         args = args.concat(buildFlags);
     }
@@ -140,6 +142,8 @@ function checkMSBuildVersion (version) {
             return module.exports.getMSBuildToolsAt(toolsPath);
         }
     }
+
+    // older vs versions that were registered in registry
     return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\' + version, '/v', 'MSBuildToolsPath'])
         .then(function (output) {
             // fetch msbuild path from 'reg' output
