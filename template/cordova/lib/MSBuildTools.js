@@ -143,22 +143,23 @@ function checkMSBuildVersion (version) {
 
     // first, check if we have a VS 2017+ with such a version
     var willows = module.exports.getWillowInstallations();
-    console.log('willows', willows);
+    //console.log('willows', willows);
     var correspondingWillows = willows.filter(function (inst) {
-        console.log('correspondingWillow', inst.version === version);
+        //console.log('willows.filter', inst.version, version, inst.version === version);
         return inst.version === version;
     });
-    console.log('correspondingWillows', correspondingWillows);
-    var correspondingWillow = correspondingWillows[1];
+    //console.log('correspondingWillows', correspondingWillows);
+    var correspondingWillow = correspondingWillows[0]; // TODO Do not only handle one!
     if (correspondingWillow) {
-        // TODO adapt for 15.5=>15.0 case
         version = '15.0';
         var toolsPath = path.join(correspondingWillow.path, 'MSBuild', version, 'Bin');
-        console.log('correspondingWillow:', toolsPath);
+        console.log('matching VS:', version, toolsPath);
+        console.log('from list of VS installations: ', correspondingWillows);
         if (shell.test('-e', toolsPath)) {
-            console.log('correspondingWillow:', toolsPath, module.exports.getMSBuildToolsAt(toolsPath));
+            var msbuild = module.exports.getMSBuildToolsAt(toolsPath);
+            console.log('selected VS exists:', toolsPath, );
             // TODO check for JavaScript folder
-            return module.exports.getMSBuildToolsAt(toolsPath);
+            return msbuild;
         }
     }
 
@@ -179,11 +180,20 @@ function checkMSBuildVersion (version) {
                 return new MSBuildTools(version, toolsPath);
             }
         }).catch(function (err) { /* eslint handle-callback-err : 0 */
-            console.log('no reg result', version, err);
+            console.log('no registry result for version ' + version);
             // if 'reg' exits with error, assume that registry key not found
         });
+
+    console.log('no msbuild found with version ', version);
 }
 
+module.exports.getLatestMatchingMSBuild = function (selectedBuildTargets) {
+    events.emit('verbose', 'getLatestMatchingMSBuild');
+    console.log('getLatestMatchingMSBuild', selectedBuildTargets);
+    var msbuild = this.getLatestMSBuild();
+    // we don't do anything with selectedBuildTargets yet, but could theoretically nope out if this msbuild doesn't work for that target
+    return msbuild;
+};
 
 // gets the latest MSBuild version from a list of versions
 module.exports.getLatestMSBuild = function () {

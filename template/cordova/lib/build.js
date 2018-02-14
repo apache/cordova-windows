@@ -60,7 +60,7 @@ module.exports.run = function run (buildOptions) {
     // get build targets
     var selectedBuildTargets = getBuildTargets(buildConfig.win, buildConfig.phone, buildConfig.projVerOverride, buildConfig);
 
-    return MSBuildTools.getLatestMSBuild() // get latest msbuild tools
+    return MSBuildTools.getLatestMatchingMSBuild(selectedBuildTargets) // get latest msbuild tools
         .then(function (msbuild) {
 
             // filter targets to make sure they are supported on this development machine
