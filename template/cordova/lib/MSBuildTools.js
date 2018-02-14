@@ -85,17 +85,6 @@ module.exports.findAvailableVersion = function () {
     });
 };
 
-function findAllAvailableVersionsFallBack () {
-    var versions = ['15.0', '14.0', '12.0', '4.0'];
-    events.emit('verbose', 'Searching for available MSBuild versions...');
-
-    return Q.all(versions.map(checkMSBuildVersion)).then(function (unprocessedResults) {
-        return unprocessedResults.filter(function (item) {
-            return !!item;
-        });
-    });
-}
-
 // build.js -> run()
 // check_reqs.js -> checkMSBuild()
 module.exports.findAllAvailableVersions = function () {
@@ -112,6 +101,17 @@ module.exports.findAllAvailableVersions = function () {
 
     return findAllAvailableVersionsFallBack();
 };
+
+function findAllAvailableVersionsFallBack () {
+    var versions = ['15.0', '14.0', '12.0', '4.0'];
+    events.emit('verbose', 'Searching for available MSBuild versions...');
+
+    return Q.all(versions.map(checkMSBuildVersion)).then(function (unprocessedResults) {
+        return unprocessedResults.filter(function (item) {
+            return !!item;
+        });
+    });
+}
 
 /**
  * Gets MSBuildTools instance for user-specified location
