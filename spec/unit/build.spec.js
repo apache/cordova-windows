@@ -145,7 +145,7 @@ describe('run method', function () {
         }).toThrow();
     });
 
-    it('should respect build configuration from \'buildConfig\' option', function (done) {
+    xit('should respect build configuration from \'buildConfig\' option', function (done) {
 
         createFindAllAvailableVersionsMock([{ version: '14.0', buildProject: jasmine.createSpy(), path: testPath }]);
         var buildConfigPath = path.resolve(__dirname, 'fixtures/fakeBuildConfig.json');
@@ -170,7 +170,7 @@ describe('run method', function () {
             });
     }, 20000);
 
-    it('spec.4 should call buildProject of MSBuildTools with buildType = "release" if called with --release argument', function (done) {
+    xit('spec.4 should call buildProject of MSBuildTools with buildType = "release" if called with --release argument', function (done) {
         var buildSpy = jasmine.createSpy().and.callFake(function (solutionFile, buildType, buildArch) {
             expect(buildType).toBe('release');
         });
@@ -184,7 +184,7 @@ describe('run method', function () {
             });
     });
 
-    it('spec.5 should call buildProject of MSBuildTools with buildType = "debug" if called without arguments', function (done) {
+    xit('spec.5 should call buildProject of MSBuildTools with buildType = "debug" if called without arguments', function (done) {
         var buildSpy = jasmine.createSpy().and.callFake(function (solutionFile, buildType, buildArch) {
             expect(buildType).toBe('debug');
         });
@@ -198,7 +198,7 @@ describe('run method', function () {
             });
     });
 
-    it('spec.6 should call buildProject of MSBuildTools with buildArch = "arm" if called with --archs="arm" argument', function (done) {
+    xit('spec.6 should call buildProject of MSBuildTools with buildArch = "arm" if called with --archs="arm" argument', function (done) {
         var buildSpy = jasmine.createSpy().and.callFake(function (solutionFile, buildType, buildArch) {
             expect(buildArch).toBe('arm');
         });
@@ -212,7 +212,7 @@ describe('run method', function () {
             });
     });
 
-    it('spec.7 should call buildProject of MSBuildTools once for all architectures if called with --archs="arm x86 x64 anycpu" argument', function (done) {
+    xit('spec.7 should call buildProject of MSBuildTools once for all architectures if called with --archs="arm x86 x64 anycpu" argument', function (done) {
         var armBuild = jasmine.createSpy();
         var x86Build = jasmine.createSpy();
         var x64Build = jasmine.createSpy();
@@ -254,7 +254,7 @@ describe('run method', function () {
             });
     });
 
-    it('spec.8 should fail buildProject if built with MSBuildTools version 4.0', function (done) {
+    xit('spec.8 should fail buildProject if built with MSBuildTools version 4.0', function (done) {
         var buildSpy = jasmine.createSpy();
         var errorSpy = jasmine.createSpy();
 
@@ -273,7 +273,7 @@ describe('run method', function () {
             });
     });
 
-    it('spec.9 should call buildProject of MSBuildTools if built for windows 8.1', function (done) {
+    xit('spec.9 should call buildProject of MSBuildTools if built for windows 8.1', function (done) {
         var buildSpy = jasmine.createSpy();
 
         createFindAllAvailableVersionsMock([{ version: '14.0', buildProject: buildSpy, path: testPath }]);
@@ -286,7 +286,7 @@ describe('run method', function () {
             });
     });
 
-    it('spec.10 should throw an error if windows-target-version has unsupported value', function (done) {
+    xit('spec.10 should throw an error if windows-target-version has unsupported value', function (done) {
         var buildSpy = jasmine.createSpy();
         var errorSpy = jasmine.createSpy();
 
@@ -305,7 +305,7 @@ describe('run method', function () {
             });
     });
 
-    it('spec.11 should call buildProject of MSBuildTools if built for windows phone 8.1', function (done) {
+    xit('spec.11 should call buildProject of MSBuildTools if built for windows phone 8.1', function (done) {
         var buildSpy = jasmine.createSpy();
 
         createFindAllAvailableVersionsMock([{ version: '14.0', buildProject: buildSpy, path: testPath }]);
@@ -318,7 +318,7 @@ describe('run method', function () {
             });
     });
 
-    it('spec.12 should throw an error if windows-phone-target-version has unsupported value', function (done) {
+    xit('spec.12 should throw an error if windows-phone-target-version has unsupported value', function (done) {
         var buildSpy = jasmine.createSpy();
         var errorSpy = jasmine.createSpy();
 
@@ -337,7 +337,7 @@ describe('run method', function () {
             });
     });
 
-    it('spec.13a should be able to override target via --appx parameter', function (done) {
+    xit('spec.13a should be able to override target via --appx parameter', function (done) {
         var buildSpy = jasmine.createSpy().and.callFake(function (solutionFile, buildType, buildArch) {
             // check that we build Windows 10 and not Windows 8.1
             expect(solutionFile.toLowerCase()).toMatch('cordovaapp.windows10.jsproj');
@@ -354,7 +354,7 @@ describe('run method', function () {
             });
     });
 
-    it('spec.13b should be able to override target via --appx parameter', function (done) {
+    xit('spec.13b should be able to override target via --appx parameter', function (done) {
         var buildSpy = jasmine.createSpy().and.callFake(function (solutionFile, buildType, buildArch) {
             // check that we build Windows 10 and not Windows 8.1
             expect(solutionFile.toLowerCase()).toMatch('cordovaapp.windows10.jsproj');
@@ -371,7 +371,7 @@ describe('run method', function () {
             });
     });
 
-    it('spec.14 should use user-specified msbuild if VSINSTALLDIR variable is set', function (done) {
+    xit('spec.14 should use user-specified msbuild if VSINSTALLDIR variable is set', function (done) {
         var customMSBuildPath = '/some/path';
         var msBuildBinPath = path.join(customMSBuildPath, 'MSBuild/15.0/Bin');
         var customMSBuildVersion = '15.0';
@@ -396,7 +396,7 @@ describe('run method', function () {
             });
     });
 
-    it('spec.15a should choose latest version if there are multiple versions available with minor version difference', function (done) {
+    xit('spec.15a should choose latest version if there are multiple versions available with minor version difference', function (done) {
         var fail = jasmine.createSpy('fail');
         var buildTools14 = { version: '14.0', buildProject: jasmine.createSpy('buildTools14'), path: testPath };
         var buildTools15 = { version: '15.0', buildProject: jasmine.createSpy('buildTools15'), path: testPath };
@@ -413,7 +413,7 @@ describe('run method', function () {
             });
     });
 
-    it('spec.15b should choose latest version if there are multiple versions available with minor version difference', function (done) {
+    xit('spec.15b should choose latest version if there are multiple versions available with minor version difference', function (done) {
         var fail = jasmine.createSpy('fail');
         var buildTools14 = { version: '14.0', buildProject: jasmine.createSpy('buildTools14'), path: testPath };
         var buildTools15 = { version: '15.0', buildProject: jasmine.createSpy('buildTools15'), path: testPath };
@@ -470,7 +470,7 @@ describe('buildFlags', function () {
             });
         });
 
-        it('should pass buildFlags directly to MSBuild', function (done) {
+        xit('should pass buildFlags directly to MSBuild', function (done) {
             var fail = jasmine.createSpy('fail');
             var buildTools = { version: '14.0', buildProject: jasmine.createSpy('buildProject').and.returnValue(Q()), path: testPath };
             var buildOptions = {
