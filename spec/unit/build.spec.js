@@ -337,7 +337,7 @@ describe('run method', function () {
             });
     });
 
-    it('spec.13 should be able to override target via --appx parameter', function (done) {
+    it('spec.13a should be able to override target via --appx parameter', function (done) {
         var buildSpy = jasmine.createSpy().and.callFake(function (solutionFile, buildType, buildArch) {
             // check that we build Windows 10 and not Windows 8.1
             expect(solutionFile.toLowerCase()).toMatch('cordovaapp.windows10.jsproj');
@@ -348,6 +348,23 @@ describe('run method', function () {
         createConfigParserMock('8.1', '8.1');
         // explicitly specify Windows 10 as target
         build.run({argv: ['--appx=uap']})
+            .finally(function () {
+                expect(buildSpy).toHaveBeenCalled();
+                done();
+            });
+    });
+
+    it('spec.13b should be able to override target via --appx parameter', function (done) {
+        var buildSpy = jasmine.createSpy().and.callFake(function (solutionFile, buildType, buildArch) {
+            // check that we build Windows 10 and not Windows 8.1
+            expect(solutionFile.toLowerCase()).toMatch('cordovaapp.windows10.jsproj');
+        });
+
+        createFindAllAvailableVersionsMock([{ version: '14.0', buildProject: buildSpy, path: testPath }]);
+        // provision config to target Windows 8.1
+        createConfigParserMock('8.1', '8.1');
+        // explicitly specify Windows 10 as target
+        build.run({argv: ['--appx=uwp']})
             .finally(function () {
                 expect(buildSpy).toHaveBeenCalled();
                 done();
@@ -379,7 +396,7 @@ describe('run method', function () {
             });
     });
 
-    it('spec.15 should choose latest version if there are multiple versions available with minor version difference', function (done) {
+    it('spec.15a should choose latest version if there are multiple versions available with minor version difference', function (done) {
         var fail = jasmine.createSpy('fail');
         var buildTools14 = { version: '14.0', buildProject: jasmine.createSpy('buildTools14'), path: testPath };
         var buildTools15 = { version: '15.0', buildProject: jasmine.createSpy('buildTools15'), path: testPath };
@@ -388,6 +405,23 @@ describe('run method', function () {
         createFindAllAvailableVersionsMock([buildTools14, buildTools15, buildTools151]);
         // explicitly specify Windows 10 as target
         build.run({argv: ['--appx=uap']})
+            .fail(fail)
+            .finally(function () {
+                expect(fail).not.toHaveBeenCalled();
+                expect(buildTools151.buildProject).toHaveBeenCalled();
+                done();
+            });
+    });
+
+    it('spec.15b should choose latest version if there are multiple versions available with minor version difference', function (done) {
+        var fail = jasmine.createSpy('fail');
+        var buildTools14 = { version: '14.0', buildProject: jasmine.createSpy('buildTools14'), path: testPath };
+        var buildTools15 = { version: '15.0', buildProject: jasmine.createSpy('buildTools15'), path: testPath };
+        var buildTools151 = { version: '15.1', buildProject: jasmine.createSpy('buildTools151'), path: testPath };
+
+        createFindAllAvailableVersionsMock([buildTools14, buildTools15, buildTools151]);
+        // explicitly specify Windows 10 as target
+        build.run({argv: ['--appx=uwp']})
             .fail(fail)
             .finally(function () {
                 expect(fail).not.toHaveBeenCalled();
