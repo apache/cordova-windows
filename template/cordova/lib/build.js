@@ -438,54 +438,6 @@ function clearIntermediatesAndGetPackage (bundleTerms, config, hasAnyCpu) {
     return pckage.getPackageFileInfo(finalFile);
 }
 
-// TODO: Fix this so that it outlines supported versions based on version criteria:
-// - v14: Windows 8.1, Windows 10
-// - v12: Windows 8.1
-function msBuild12TargetsFilter (target) {
-    return target === projFiles.win || target === projFiles.phone;
-}
-
-function msBuild14TargetsFilter (target) {
-    return target === projFiles.win || target === projFiles.phone || target === projFiles.win10;
-}
-
-function msBuild15TargetsFilter (target) {
-    return target === projFiles.win || target === projFiles.phone || target === projFiles.win10;
-}
-
-function filterSupportedTargets (targets, msbuild) {
-    if (!targets || targets.length === 0) {
-        events.emit('warn', 'No build targets specified');
-        return [];
-    }
-
-    var targetFilters = {
-        '12.0': msBuild12TargetsFilter,
-        '14.0': msBuild14TargetsFilter,
-        '15.x': msBuild15TargetsFilter,
-        get: function (version) {
-            // Apart from exact match also try to get filter for version range
-            // so we can find for example targets for version '15.1'
-            return this[version] || this[version.replace(/\.\d+$/, '.x')];
-        }
-    };
-
-    var filter = targetFilters.get(msbuild.version);
-    if (!filter) {
-        events.emit('warn', 'MSBuild v' + msbuild.version + ' is not supported, aborting.');
-        return [];
-    }
-
-    var supportedTargets = targets.filter(filter);
-    // unsupported targets have been detected
-    if (supportedTargets.length !== targets.length) {
-        events.emit('warn', 'Not all desired build targets are compatible with the current build environment. ' +
-            'Please install Visual Studio 2015 for Windows 8.1 and Windows 10, ' +
-            'or Visual Studio 2013 Update 2 for Windows 8.1.');
-    }
-    return supportedTargets;
-}
-
 function cleanIntermediates () {
     var buildPath = path.join(ROOT, 'build');
     if (shell.test('-e', buildPath)) {
