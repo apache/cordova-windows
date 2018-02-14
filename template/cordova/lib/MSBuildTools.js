@@ -90,14 +90,14 @@ module.exports.findAvailableVersion = function () {
 // check_reqs.js -> checkMSBuild()
 module.exports.findAllAvailableVersions = function () {
     console.log('findAllAvailableVersions');
-    // CB-11548 use VSINSTALLDIR environment if defined to find MSBuild. 
+    // CB-11548 use VSINSTALLDIR environment if defined to find MSBuild.
     if (process.env.VSINSTALLDIR) {
         var msBuildPath = path.join(process.env.VSINSTALLDIR, 'MSBuild/15.0/Bin');
         return module.exports.getMSBuildToolsAt(msBuildPath)
             .then(function (msBuildTools) {
                 return [msBuildTools];
             })
-            // If VSINSTALLDIR is not specified or doesn't contain the MSBuild path we are 
+            // If VSINSTALLDIR is not specified or doesn't contain the MSBuild path we are
             // looking for - fall back to default discovery mechanism.
             .catch(findAllAvailableVersionsFallBack);
     }
@@ -133,14 +133,14 @@ module.exports.getMSBuildToolsAt = function (location) {
         .then(function (output) {
             // MSBuild prints its' version as 14.0.25123.0, so we pick only first 2 segments
             var version = output.match(/^(\d+\.\d+)/)[1];
-            console.log('return new MSBuildTools', version, location)
+            console.log('return new MSBuildTools', version, location);
             return new MSBuildTools(version, location);
         });
 };
 
 function checkMSBuildVersion (version) {
     console.log('checkMSBuildVersion', version);
-    
+
     // first, check if we have a VS 2017+ with such a version
     var willows = module.exports.getWillowInstallations();
     console.log('willows', willows);
@@ -211,13 +211,12 @@ module.exports.getLatestMSBuild = function () {
 
             if (availableVersions.length > 0) {
                 // After sorting the first item will be the highest version available
-                msbuild = availableVersions[0];
+                var msbuild = availableVersions[0];
                 events.emit('verbose', 'Using MSBuild v' + msbuild.version + ' from ' + msbuild.path);
                 return msbuild;
             }
-    });
+        });
 };
-
 
 var projFiles = {
     phone: 'CordovaApp.Phone.jsproj',
@@ -244,7 +243,7 @@ function msBuild155TargetsFilter (target) {
     return target === projFiles.win10;
 }
 
-MSBuildTools.prototype.filterSupportedTargets = function(targets) {
+MSBuildTools.prototype.filterSupportedTargets = function (targets) {
     var msbuild = this;
     console.log('MSBuildTools->filterSupportedTargets', targets, msbuild);
     if (!targets || targets.length === 0) {
@@ -278,7 +277,7 @@ MSBuildTools.prototype.filterSupportedTargets = function(targets) {
             'or Visual Studio 2013 Update 2 for Windows 8.1.');
     }
     return supportedTargets;
-}
+};
 
 /**
  * Lists all VS 2017+ instances dirs in ProgramData
