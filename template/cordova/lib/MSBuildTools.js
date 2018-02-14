@@ -184,31 +184,6 @@ function checkMSBuildVersion (version) {
         });
 }
 
-// returns an array of available UAP Versions
-// prepare.js
-module.exports.getAvailableUAPVersions = function () {
-    var programFilesFolder = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
-    // No Program Files folder found, so we won't be able to find UAP SDK
-    if (!programFilesFolder) return [];
-
-    var uapFolderPath = path.join(programFilesFolder, 'Windows Kits', '10', 'Platforms', 'UAP');
-    if (!shell.test('-e', uapFolderPath)) {
-        return []; // No UAP SDK exists on this machine
-    }
-
-    var result = [];
-    shell.ls(uapFolderPath).filter(function (uapDir) {
-        return shell.test('-d', path.join(uapFolderPath, uapDir));
-    }).map(function (folder) {
-        return Version.tryParse(folder);
-    }).forEach(function (version, index) {
-        if (version) {
-            result.push(version);
-        }
-    });
-
-    return result;
-};
 
 // gets the latest MSBuild version from a list of versions
 module.exports.getLatestMSBuild = function () {
@@ -353,4 +328,30 @@ module.exports.getWillowInstallations = function () {
         }
     });
     return installations;
+};
+
+// returns an array of available UAP Versions
+// prepare.js
+module.exports.getAvailableUAPVersions = function () {
+    var programFilesFolder = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
+    // No Program Files folder found, so we won't be able to find UAP SDK
+    if (!programFilesFolder) return [];
+
+    var uapFolderPath = path.join(programFilesFolder, 'Windows Kits', '10', 'Platforms', 'UAP');
+    if (!shell.test('-e', uapFolderPath)) {
+        return []; // No UAP SDK exists on this machine
+    }
+
+    var result = [];
+    shell.ls(uapFolderPath).filter(function (uapDir) {
+        return shell.test('-d', path.join(uapFolderPath, uapDir));
+    }).map(function (folder) {
+        return Version.tryParse(folder);
+    }).forEach(function (version, index) {
+        if (version) {
+            result.push(version);
+        }
+    });
+
+    return result;
 };
