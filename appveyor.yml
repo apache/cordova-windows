@@ -38,7 +38,6 @@ test_script:
   - npm --version
   - msbuild -version -nologo
   - where msbuild
-  - where vswhere
   - "if exist \"%ProgramFiles(x86)%\\Microsoft Visual Studio\\Installer\\vswhere\" \"%ProgramFiles(x86)%\\Microsoft Visual Studio\\Installer\\vswhere\" -property installationPath -products * -all"
   - "if exist \"%ProgramFiles(x86)%\\Microsoft Visual Studio\\Installer\\vswhere\" \"%ProgramFiles(x86)%\\Microsoft Visual Studio\\Installer\\vswhere\" -property installationPath -all"
   - "if exist \"%ProgramFiles(x86)%\\Microsoft Visual Studio\\Installer\\vswhere\" \"%ProgramFiles(x86)%\\Microsoft Visual Studio\\Installer\\vswhere\" -property installationPath -legacy"
