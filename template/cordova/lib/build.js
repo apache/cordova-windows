@@ -57,20 +57,30 @@ module.exports.run = function run (buildOptions) {
 
     var buildConfig = parseAndValidateArgs(buildOptions);
 
-    return MSBuildTools.findAllAvailableVersions()
-        .then(function (msbuildTools) {
+    // get build targets
+    var selectedBuildTargets = getBuildTargets(buildConfig.win, buildConfig.phone, buildConfig.projVerOverride, buildConfig);
+
+    return MSBuildTools.getLatestMSBuild() // get latest msbuild tools
+        .then(function (msbuild) {
+
+            // filter targets to make sure they are supported on this development machine
+            var myBuildTargets = msbuild.filterSupportedTargets(selectedBuildTargets);
+
             // Apply build related configs
             prepare.updateBuildConfig(buildConfig);
 
             if (buildConfig.publisherId) {
-                updateManifestWithPublisher(msbuildTools, buildConfig);
+                updateManifestWithPublisher(buildConfig, myBuildTargets);
             }
 
             cleanIntermediates();
-            return buildTargets(msbuildTools, buildConfig);
+            // build!
+            return buildTargets(buildConfig, myBuildTargets, msbuild);
         }).then(function (pkg) {
             events.emit('verbose', ' BUILD OUTPUT: ' + pkg.appx);
             return pkg;
+        }).catch(function (error) {
+            return Q.reject(new CordovaError('No valid MSBuild was detected for the selected target: ' + error, error));
         });
 };
 
@@ -303,12 +313,9 @@ function parseBuildConfig (buildConfigPath, buildType) {
 
 // Note: This function is very narrow and only writes to the app manifest if an update is done.  See CB-9450 for the
 // reasoning of why this is the case.
-function updateManifestWithPublisher (allMsBuildVersions, config) {
+function updateManifestWithPublisher (config, myBuildTargets) {
     if (!config.publisherId) return;
 
-    var selectedBuildTargets = getBuildTargets(config.win, config.phone, config.projVerOverride, config);
-    var msbuild = MSBuildTools.getLatestMSBuild(allMsBuildVersions);
-    var myBuildTargets = filterSupportedTargets(selectedBuildTargets, msbuild);
     var manifestFiles = myBuildTargets.map(function (proj) {
         return projFilesToManifests[proj];
     });
@@ -319,15 +326,7 @@ function updateManifestWithPublisher (allMsBuildVersions, config) {
     });
 }
 
-function buildTargets (allMsBuildVersions, config) {
-    // filter targets to make sure they are supported on this development machine
-    var selectedBuildTargets = getBuildTargets(config.win, config.phone, config.projVerOverride, config);
-    var msbuild = MSBuildTools.getLatestMSBuild(allMsBuildVersions);
-    if (!msbuild) {
-        return Q.reject(new CordovaError('No valid MSBuild was detected for the selected target.'));
-    }
-    events.emit('verbose', 'Using MSBuild v' + msbuild.version + ' from ' + msbuild.path);
-    var myBuildTargets = filterSupportedTargets(selectedBuildTargets, msbuild);
+function buildTargets (config, myBuildTargets, msbuild) {
 
     var buildConfigs = [];
     var bundleTerms = '';

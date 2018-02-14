@@ -211,31 +211,39 @@ module.exports.getAvailableUAPVersions = function () {
 };
 
 // gets the latest MSBuild version from a list of versions
-module.exports.getLatestMSBuild = function (allMsBuildVersions) {
+module.exports.getLatestMSBuild = function () {
     events.emit('verbose', 'getLatestMSBuild');
 
-    var availableVersions = allMsBuildVersions
-        .filter(function (buildTools) {
-            // Sanitize input - filter out tools w/ invalid versions
-            return Version.tryParse(buildTools.version);
-        }).sort(function (a, b) {
-            // Sort tools list - use parsed Version objects for that
-            // to respect both major and minor versions segments
-            var parsedA = Version.fromString(a.version);
-            var parsedB = Version.fromString(b.version);
+    return this.findAllAvailableVersions()
+        .then(function (allMsBuildVersions) {
 
-            if (parsedA.gt(parsedB)) return -1;
-            if (parsedA.eq(parsedB)) return 0;
-            return 1;
-        });
+            var availableVersions = allMsBuildVersions
+                .filter(function (buildTools) {
+                    // Sanitize input - filter out tools w/ invalid versions
+                    return Version.tryParse(buildTools.version);
+                }).sort(function (a, b) {
+                    // Sort tools list - use parsed Version objects for that
+                    // to respect both major and minor versions segments
+                    var parsedA = Version.fromString(a.version);
+                    var parsedB = Version.fromString(b.version);
 
-    console.log('availableVersions', availableVersions);
+                    if (parsedA.gt(parsedB)) return -1;
+                    if (parsedA.eq(parsedB)) return 0;
+                    return 1;
+                });
 
-    if (availableVersions.length > 0) {
-        // After sorting the first item will be the highest version available
-        return availableVersions[0];
-    }
+            console.log('availableVersions', availableVersions);
+
+            if (availableVersions.length > 0) {
+                // After sorting the first item will be the highest version available
+                msbuild = availableVersions[0];
+                events.emit('verbose', 'Using MSBuild v' + msbuild.version + ' from ' + msbuild.path);
+                return msbuild;
+            }
+    });
 };
+
+
 var projFiles = {
     phone: 'CordovaApp.Phone.jsproj',
     win: 'CordovaApp.Windows.jsproj',
