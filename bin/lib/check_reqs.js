@@ -339,7 +339,7 @@ var checkPhoneSdk = function (windowsTargetVersion, windowsPhoneTargetVersion) {
 };
 
 module.exports.run = function () {
-    return checkOS().then(function () {
+    return checkOS('10.0', '10.0').then(function () {
         return MSBuildTools.findAvailableVersion();
     });
 };
