@@ -35,6 +35,7 @@ MSBuildTools.prototype.buildProject = function (projFile, buildType, buildarch, 
     events.emit('log', '\tConfiguration : ' + buildType);
     events.emit('log', '\tPlatform      : ' + buildarch);
     events.emit('log', '\tBuildflags    : ' + buildFlags);
+    events.emit('log', '\tMSBuildTools  : ' + this.path);
 
     var checkWinSDK = function (target_platform) {
         return require('./check_reqs').isWinSDKPresent(target_platform);
@@ -70,6 +71,7 @@ MSBuildTools.prototype.buildProject = function (projFile, buildType, buildarch, 
 };
 
 // returns full path to msbuild tools required to build the project and tools version
+// check_reqs.js -> run()
 module.exports.findAvailableVersion = function () {
     var versions = ['15.0', '14.0', '12.0', '4.0'];
 
@@ -92,6 +94,8 @@ function findAllAvailableVersionsFallBack () {
     });
 }
 
+// build.js -> run()
+// check_reqs.js -> checkMSBuild()
 module.exports.findAllAvailableVersions = function () {
     // CB-11548 use VSINSTALLDIR environment if defined to find MSBuild. If VSINSTALLDIR
     // is not specified or doesn't contain the MSBuild path we are looking for - fall back
@@ -155,7 +159,8 @@ function checkMSBuildVersion (version) {
         });
 }
 
-/// returns an array of available UAP Versions
+// returns an array of available UAP Versions
+// prepare.js
 module.exports.getAvailableUAPVersions = function () {
     var programFilesFolder = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
     // No Program Files folder found, so we won't be able to find UAP SDK
@@ -228,4 +233,31 @@ module.exports.getWillowInstallations = function () {
         }
     });
     return installations;
+};
+
+// gets the latest MSBuild version from a list of versions
+module.exports.getLatestMSBuild = function (allMsBuildVersions) {
+    events.emit('verbose', 'getLatestMSBuild');
+
+    var availableVersions = allMsBuildVersions
+        .filter(function (buildTools) {
+            // Sanitize input - filter out tools w/ invalid versions
+            return Version.tryParse(buildTools.version);
+        }).sort(function (a, b) {
+            // Sort tools list - use parsed Version objects for that
+            // to respect both major and minor versions segments
+            var parsedA = Version.fromString(a.version);
+            var parsedB = Version.fromString(b.version);
+
+            if (parsedA.gt(parsedB)) return -1;
+            if (parsedA.eq(parsedB)) return 0;
+            return 1;
+        });
+
+    console.log('availableVersions', availableVersions);
+
+    if (availableVersions.length > 0) {
+        // After sorting the first item will be the highest version available
+        return availableVersions[0];
+    }
 };
