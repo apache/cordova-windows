@@ -287,7 +287,7 @@ var checkVS = function (windowsTargetVersion, windowsPhoneTargetVersion) {
     var vsRequiredVersion = getMinimalRequiredVersionFor('visualstudio', windowsTargetVersion, windowsPhoneTargetVersion);
 
     if (process.env.VSINSTALLDIR) {
-        return Q('(user-specified)');
+        return Q('(user-specified via VSINSTALLDIR)');
     }
     return getInstalledVSVersions()
         .then(function (installedVersions) {
