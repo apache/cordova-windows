@@ -78,6 +78,7 @@ module.exports.findAvailableVersion = function () {
     var versions = ['15.0', '14.0', '12.0', '4.0'];
 
     return Q.all(versions.map(checkMSBuildVersion)).then(function (versions) {
+        console.log('findAvailableVersion', versions);
         // select first msbuild version available, and resolve promise with it
         var msbuildTools = versions[0] || versions[1] || versions[2] || versions[3];
 
@@ -91,6 +92,7 @@ module.exports.findAllAvailableVersions = function () {
     // CB-11548 use VSINSTALLDIR environment if defined to find MSBuild. If VSINSTALLDIR
     // is not specified or doesn't contain the MSBuild path we are looking for - fall back
     // to default discovery mechanism.
+    console.log('findAllAvailableVersions');
     if (process.env.VSINSTALLDIR) {
         var msBuildPath = path.join(process.env.VSINSTALLDIR, 'MSBuild/15.0/Bin');
         return module.exports.getMSBuildToolsAt(msBuildPath)
@@ -104,6 +106,8 @@ module.exports.findAllAvailableVersions = function () {
 
 function findAllAvailableVersionsFallBack () {
     var versions = ['15.0', '14.0', '12.0', '4.0'];
+    console.log('findAllAvailableVersionsFALLBACK');
+
     events.emit('verbose', 'Searching for available MSBuild versions...');
 
     return Q.all(versions.map(checkMSBuildVersion)).then(function (unprocessedResults) {
@@ -120,6 +124,7 @@ function findAllAvailableVersionsFallBack () {
  * @returns  Promise<MSBuildTools>  The MSBuildTools instance at specified location
  */
 module.exports.getMSBuildToolsAt = function (location) {
+    console.log('getMSBuildToolsAt', location);
     var msbuildExe = path.resolve(location, 'msbuild');
 
     // TODO: can we account on these params availability and printed version format?
@@ -127,18 +132,31 @@ module.exports.getMSBuildToolsAt = function (location) {
         .then(function (output) {
             // MSBuild prints its' version as 14.0.25123.0, so we pick only first 2 segments
             var version = output.match(/^(\d+\.\d+)/)[1];
+            console.log('return new MSBuildTools', version, location)
             return new MSBuildTools(version, location);
         });
 };
 
 function checkMSBuildVersion (version) {
+    console.log('checkMSBuildVersion', version);
+    
     // first, check if we have a VS 2017+ with such a version
-    var correspondingWillow = module.exports.getWillowInstallations().filter(function (inst) {
+    var willows = module.exports.getWillowInstallations();
+    console.log('willows', willows);
+    var correspondingWillows = willows.filter(function (inst) {
+        console.log('correspondingWillow', inst.version === version);
         return inst.version === version;
-    })[0];
+    });
+    console.log('correspondingWillows', correspondingWillows);
+    var correspondingWillow = correspondingWillows[1];
     if (correspondingWillow) {
+        // TODO adapt for 15.5=>15.0 case
+        version = '15.0';
         var toolsPath = path.join(correspondingWillow.path, 'MSBuild', version, 'Bin');
+        console.log('correspondingWillow:', toolsPath);
         if (shell.test('-e', toolsPath)) {
+            console.log('correspondingWillow:', toolsPath, module.exports.getMSBuildToolsAt(toolsPath));
+            // TODO check for JavaScript folder
             return module.exports.getMSBuildToolsAt(toolsPath);
         }
     }
@@ -146,6 +164,7 @@ function checkMSBuildVersion (version) {
     // older vs versions that were registered in registry
     return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\' + version, '/v', 'MSBuildToolsPath'])
         .then(function (output) {
+            console.log('spawn', output);
             // fetch msbuild path from 'reg' output
             var toolsPath = /MSBuildToolsPath\s+REG_SZ\s+(.*)/i.exec(output);
             if (toolsPath) {
@@ -159,6 +178,7 @@ function checkMSBuildVersion (version) {
                 return new MSBuildTools(version, toolsPath);
             }
         }).catch(function (err) { /* eslint handle-callback-err : 0 */
+            console.log('no reg result', version, err);
             // if 'reg' exits with error, assume that registry key not found
         });
 }
