@@ -287,7 +287,7 @@ var checkVS = function (windowsTargetVersion, windowsPhoneTargetVersion) {
     var vsRequiredVersion = getMinimalRequiredVersionFor('visualstudio', windowsTargetVersion, windowsPhoneTargetVersion);
 
     if (process.env.VSINSTALLDIR) {
-        return Q('(user-specified)');
+        return Q('(user-specified via VSINSTALLDIR)');
     }
     return getInstalledVSVersions()
         .then(function (installedVersions) {
@@ -339,7 +339,7 @@ var checkPhoneSdk = function (windowsTargetVersion, windowsPhoneTargetVersion) {
 };
 
 module.exports.run = function () {
-    return checkOS().then(function () {
+    return checkOS('10.0', '10.0').then(function () {
         return MSBuildTools.findAvailableVersion();
     });
 };
@@ -388,8 +388,15 @@ function getConfig () {
         config = config || new ConfigParser(path.join(__dirname, '../../config.xml'));
         return Q(config);
     } catch (e) {
-        return Q.reject(new CordovaError('Can\'t check requirements for Windows platform.' +
-            'The config.xml file is either missing or malformed.'));
+        // try again to cover case of being called from command line
+        try {
+            config = config || new ConfigParser(path.join(__dirname, '../../template/config.xml'));
+            return Q(config);
+        } catch (e) {
+            // yeah, really no config.xml
+            return Q.reject(new CordovaError('Can\'t check requirements for Windows platform.' +
+                'The config.xml file is either missing or malformed.'));
+        }
     }
 }
 
