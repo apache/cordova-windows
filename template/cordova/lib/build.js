@@ -100,8 +100,7 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
         case '8.0':
             throw new CordovaError('windows8 platform is deprecated. To use windows-target-version=8.0 you must downgrade to cordova-windows@4.');
         case '8.1':
-            targets.push(projFiles.win);
-            break;
+            throw new CordovaError('windows8.1 platform is deprecated. To use windows-target-version=8.1 you must downgrade to cordova-windows@6.');
         case '10.0':
         case 'uap':
         case 'uwp':

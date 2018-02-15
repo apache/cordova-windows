@@ -61,6 +61,11 @@ function getMinimalRequiredVersionFor (requirement, windowsTargetVersion, window
     if (windowsPhoneTargetVersion === '8' || windowsPhoneTargetVersion === '8.0') {
         throw new CordovaError('8.0 is not a valid version for windows-phone-target-version (use the wp8 Cordova platform instead)');
     }
+
+    if (windowsTargetVersion === '8.1' || windowsPhoneTargetVersion === '8.1') {
+        throw new CordovaError('Windows (Phone) 8.1 projects are deprecated. To use you may downgrade to cordova-windows@6.');
+    }
+
     var windowsReqVersion = Version.tryParse(REQUIRED_VERSIONS[windowsTargetVersion][requirement]);
     var phoneReqVersion = Version.tryParse(REQUIRED_VERSIONS[windowsPhoneTargetVersion][requirement]);
 
