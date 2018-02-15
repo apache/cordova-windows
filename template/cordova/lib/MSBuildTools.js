@@ -93,7 +93,7 @@ module.exports.findAllAvailableVersions = function () {
 function findAllAvailableVersionsFallBack () {
     console.log('findAllAvailableVersionsFALLBACK');
 
-    var versions = ['15.0', '14.0', '12.0', '4.0'];
+    var versions = ['15.5', '15.0', '14.0', '12.0', '4.0'];
     events.emit('verbose', 'Searching for available MSBuild versions...');
 
     return Q.all(versions.map(checkMSBuildVersion)).then(function (unprocessedResults) {
@@ -106,12 +106,12 @@ function findAllAvailableVersionsFallBack () {
 // returns full path to msbuild tools required to build the project and tools version
 // check_reqs.js -> run()
 module.exports.findAvailableVersion = function () {
-    var versions = ['15.0', '14.0', '12.0', '4.0'];
+    var versions = ['15.5', '15.0', '14.0', '12.0', '4.0'];
 
     return Q.all(versions.map(checkMSBuildVersion)).then(function (versions) {
         console.log('findAvailableVersion', versions);
         // select first msbuild version available, and resolve promise with it
-        var msbuildTools = versions[0] || versions[1] || versions[2] || versions[3];
+        var msbuildTools = versions[0] || versions[1] || versions[2] || versions[3] || versions[4];
 
         return msbuildTools ? Q.resolve(msbuildTools) : Q.reject('MSBuild tools not found');
     });
@@ -150,6 +150,8 @@ function checkMSBuildVersion (version) {
     // console.log('correspondingWillows', correspondingWillows);
     var correspondingWillow = correspondingWillows[0]; // TODO Do not only handle one!
     if (correspondingWillow) {
+        // super hacky: VS2017/Willow is 15.x but MSBuild is always 15.0 in path - so set that here
+        version = '15.0';
         var toolsPath = path.join(correspondingWillow.path, 'MSBuild', version, 'Bin');
         console.log('matching VS:', version, toolsPath);
         console.log('from list of VS installations: ', correspondingWillows);
@@ -253,6 +255,10 @@ function msBuild15TargetsFilter (target) {
     return target === projFiles.win || target === projFiles.phone || target === projFiles.win10;
 }
 
+function msBuild155TargetsFilter (target) {
+    return target === projFiles.win10;
+}
+
 function filterSupportedTargets (targets, msbuild) {
     console.log('MSBuildTools->filterSupportedTargets', targets, msbuild);
     if (!targets || targets.length === 0) {
@@ -264,6 +270,7 @@ function filterSupportedTargets (targets, msbuild) {
         '12.0': msBuild12TargetsFilter,
         '14.0': msBuild14TargetsFilter,
         '15.x': msBuild15TargetsFilter,
+        '15.5': msBuild155TargetsFilter,
         get: function (version) {
             // Apart from exact match also try to get filter for version range
             // so we can find for example targets for version '15.1'
