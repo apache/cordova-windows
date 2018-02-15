@@ -150,6 +150,7 @@ function checkMSBuildVersion (version) {
     // console.log('correspondingWillows', correspondingWillows);
     var correspondingWillow = correspondingWillows[0]; // TODO Do not only handle one!
     if (correspondingWillow) {
+        // super hacky: VS2017/Willow is 15.x but MSBuild is always 15.0 in path - so set that here
         version = '15.0';
         var toolsPath = path.join(correspondingWillow.path, 'MSBuild', version, 'Bin');
         console.log('matching VS:', version, toolsPath);
