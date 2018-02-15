@@ -68,6 +68,7 @@ MSBuildTools.prototype.buildProject = function (projFile, buildType, buildarch, 
     }
 
     return promise.then(function () {
+        console.log('buildProject spawn:', path.join(that.path, 'msbuild'), [projFile].concat(args), { stdio: 'inherit' });
         return spawn(path.join(that.path, 'msbuild'), [projFile].concat(args), { stdio: 'inherit' });
     });
 };
