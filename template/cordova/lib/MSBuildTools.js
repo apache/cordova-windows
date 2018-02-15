@@ -75,9 +75,28 @@ MSBuildTools.prototype.buildProject = function (projFile, buildType, buildarch, 
 // check_reqs.js -> checkMSBuild()
 module.exports.findAllAvailableVersions = function () {
     console.log('findAllAvailableVersions');
+
+    var msBuildPath = '';
+
+    // Use MSBUILDDIR environment variable if defined to find MSBuild.
+    // MSBUILDDIR = C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin
+    // MSBUILDDIR = C:\Program Files (x86)\MSBuild\14.0\bin\
+    if (process.env.MSBUILDDIR) {
+        console.log('ENV var MSBUILDDIR is set', process.env.MSBUILDDIR);
+        msBuildPath = process.env.MSBUILDDIR;
+        return module.exports.getMSBuildToolsAt(msBuildPath)
+            .then(function (msBuildTools) {
+                return [msBuildTools];
+            })
+            // If MSBUILDDIR is not specified or doesn't contain a valid MSBuild
+            // - fall back to default discovery mechanism.
+            .catch(findAllAvailableVersionsFallBack);
+    }
+
     // CB-11548 use VSINSTALLDIR environment if defined to find MSBuild.
     if (process.env.VSINSTALLDIR) {
-        var msBuildPath = path.join(process.env.VSINSTALLDIR, 'MSBuild/15.0/Bin');
+        console.log('ENV var VSINSTALLDIR is set', process.env.VSINSTALLDIR);
+        msBuildPath = path.join(process.env.VSINSTALLDIR, 'MSBuild/15.0/Bin');
         return module.exports.getMSBuildToolsAt(msBuildPath)
             .then(function (msBuildTools) {
                 return [msBuildTools];

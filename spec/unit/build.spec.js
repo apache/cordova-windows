@@ -371,7 +371,7 @@ describe('run method', function () {
             });
     });
 
-    it('spec.14 should use user-specified msbuild if VSINSTALLDIR variable is set', function (done) {
+    it('spec.14a should use user-specified msbuild if VSINSTALLDIR variable is set', function (done) {
         var customMSBuildPath = '/some/path';
         var msBuildBinPath = path.join(customMSBuildPath, 'MSBuild/15.0/Bin');
         var customMSBuildVersion = '15.0';
@@ -392,6 +392,30 @@ describe('run method', function () {
                 expect(fail).not.toHaveBeenCalled();
                 expect(MSBuildTools.getMSBuildToolsAt).toHaveBeenCalledWith(msBuildBinPath);
                 delete process.env.VSINSTALLDIR;
+                done();
+            });
+    });
+
+    it('spec.14b should use user-specified msbuild if MSBUILDDIR variable is set', function (done) {
+        var msBuildBinPath = path.join('/some/path', 'MSBuild/15.0/Bin');
+        var customMSBuildVersion = '15.0';
+        process.env.MSBUILDDIR = msBuildBinPath;
+
+        spyOn(MSBuildTools, 'getMSBuildToolsAt')
+            .and.returnValue(Q({
+                path: msBuildBinPath,
+                version: customMSBuildVersion,
+                buildProject: jasmine.createSpy('buildProject').and.returnValue(Q())
+            }));
+
+        var fail = jasmine.createSpy('fail');
+
+        build.run({})
+            .fail(fail)
+            .finally(function () {
+                expect(fail).not.toHaveBeenCalled();
+                expect(MSBuildTools.getMSBuildToolsAt).toHaveBeenCalledWith(msBuildBinPath);
+                delete process.env.MSBUILDDIR;
                 done();
             });
     });
