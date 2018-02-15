@@ -19,13 +19,23 @@
 # appveyor file
 # http://www.appveyor.com/docs/appveyor-yml
 
-image:
-- Visual Studio 2015
-- Visual Studio 2017
 environment:
   matrix:
-    - nodejs_version: "4"
     - nodejs_version: "6"
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+
+    - nodejs_version: "6"
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      MSBUILDDIR: "C:\\Program Files (x86)\\MSBuild\\14.0\\bin\\"
+
+    - nodejs_version: "6"
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+
+    - nodejs_version: "4"
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+
+    - nodejs_version: "4"
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
 
 install:
   - ps: Install-Product node $env:nodejs_version
