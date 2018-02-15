@@ -256,11 +256,11 @@ var projFiles = {
 // - v14: Windows 8.1, Windows 10
 // - v12: Windows 8.1
 function msBuild14TargetsFilter (target) {
-    return target === projFiles.win || target === projFiles.phone || target === projFiles.win10;
+    return target === projFiles.win10;
 }
 
 function msBuild15TargetsFilter (target) {
-    return target === projFiles.win || target === projFiles.phone || target === projFiles.win10;
+    return target === projFiles.win10;
 }
 
 function msBuild155TargetsFilter (target) {
