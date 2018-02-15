@@ -249,8 +249,6 @@ module.exports.getLatestMSBuild = function () {
 };
 
 var projFiles = {
-    phone: 'CordovaApp.Phone.jsproj',
-    win: 'CordovaApp.Windows.jsproj',
     win10: 'CordovaApp.Windows10.jsproj'
 };
 

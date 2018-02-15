@@ -92,9 +92,6 @@ var computeResourcePath = function (resourceFile) {
 
 var PLATFORM_PROJECTS = {
     all: 'CordovaApp.projitems',
-    phone: 'CordovaApp.Phone.jsproj',
-    windows: 'CordovaApp.Windows.jsproj',
-    windows8: 'CordovaApp.Windows80.jsproj',
     windows10: 'CordovaApp.Windows10.jsproj'
 };
 
