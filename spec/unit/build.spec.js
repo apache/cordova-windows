@@ -376,6 +376,9 @@ describe('run method', function () {
         var msBuildBinPath = path.join(customMSBuildPath, 'MSBuild/15.0/Bin');
         var customMSBuildVersion = '15.0';
         process.env.VSINSTALLDIR = customMSBuildPath;
+        // avoid crosspollution with MSBUILDDIR
+        var backupMSBUILDDIR = process.env.MSBUILDDIR;
+        delete process.env.MSBUILDDIR;
 
         spyOn(MSBuildTools, 'getMSBuildToolsAt')
             .and.returnValue(Q({
@@ -392,6 +395,7 @@ describe('run method', function () {
                 expect(fail).not.toHaveBeenCalled();
                 expect(MSBuildTools.getMSBuildToolsAt).toHaveBeenCalledWith(msBuildBinPath);
                 delete process.env.VSINSTALLDIR;
+                process.env.MSBUILDDIR = backupMSBUILDDIR;
                 done();
             });
     });
@@ -400,6 +404,9 @@ describe('run method', function () {
         var msBuildBinPath = path.join('/some/path', 'MSBuild/15.0/Bin');
         var customMSBuildVersion = '15.0';
         process.env.MSBUILDDIR = msBuildBinPath;
+        // avoid crosspollution with VSINSTALLDIR
+        var backupVSINSTALLDIR = process.env.VSINSTALLDIR;
+        delete process.env.VSINSTALLDIR;
 
         spyOn(MSBuildTools, 'getMSBuildToolsAt')
             .and.returnValue(Q({
@@ -416,6 +423,7 @@ describe('run method', function () {
                 expect(fail).not.toHaveBeenCalled();
                 expect(MSBuildTools.getMSBuildToolsAt).toHaveBeenCalledWith(msBuildBinPath);
                 delete process.env.MSBUILDDIR;
+                process.env.VSINSTALLDIR = backupVSINSTALLDIR;
                 done();
             });
     });
