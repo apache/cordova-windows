@@ -250,8 +250,6 @@ describe('generate_plugin_config_munge for windows project', function () {
 
         var changes = AppxManifest.processChanges(testChanges);
         expect(changes.length).toBe(3);
-        expect(changes[0].target).toBe('package.windows.appxmanifest');
-        expect(changes[1].target).toBe('package.phone.appxmanifest');
         expect(changes[2].target).toBe('package.windows10.appxmanifest');
     });
 });

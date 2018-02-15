@@ -53,7 +53,7 @@ var MANIFESTS = {
     }
 };
 
-var SUBSTS = ['package.phone.appxmanifest', 'package.windows.appxmanifest', 'package.windows10.appxmanifest'];
+var SUBSTS = ['package.windows10.appxmanifest'];
 var TARGETS = ['windows', 'phone', 'all'];
 
 /**

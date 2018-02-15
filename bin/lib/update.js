@@ -47,7 +47,7 @@ module.exports.update = function (destinationDir, options) {
     // The only place, where it is being persisted - phone/win10 appxmanifest file,
     // but since win10 introduced just recently, we can't rely on its manifest
     // for old platform versions.
-    var manifestPath = path.join(destinationDir, 'package.phone.appxmanifest');
+    var manifestPath = path.join(destinationDir, 'package.phone.appxmanifest'); // TODO
     try {
         guid = AppxManifest.get(manifestPath).getPhoneIdentity().getPhoneProductId();
     } catch (e) { /* ignore IO errors */ }

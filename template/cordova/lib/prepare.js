@@ -39,8 +39,6 @@ var PluginInfoProvider = require('cordova-common').PluginInfoProvider;
 var DEFAULT_DESCRIPTION = 'CordovaApp';
 
 var PROJECT_WINDOWS10 = 'CordovaApp.Windows10.jsproj';
-var MANIFEST_WINDOWS = 'package.windows.appxmanifest';
-var MANIFEST_PHONE = 'package.phone.appxmanifest';
 var MANIFEST_WINDOWS10 = 'package.windows10.appxmanifest';
 
 var TEMPLATE =
@@ -566,9 +564,7 @@ function updateSplashScreenImageExtensions (cordovaProject, locations) {
     checkThatExtensionsAreNotMixed();
 
     var manifestSplashScreenMap = {};
-    manifestSplashScreenMap[MANIFEST_WINDOWS] = desktopSplashScreen;
     manifestSplashScreenMap[MANIFEST_WINDOWS10] = desktopSplashScreen;
-    manifestSplashScreenMap[MANIFEST_PHONE] = phoneSplashScreen;
 
     for (var manifest in manifestSplashScreenMap) {
         if (manifestSplashScreenMap.hasOwnProperty(manifest)) {
@@ -779,7 +775,7 @@ function cleanWww (projectRoot, locations) {
  */
 function updateProjectAccordingTo (projectConfig, locations) {
     // Apply appxmanifest changes
-    [MANIFEST_WINDOWS, MANIFEST_WINDOWS10, MANIFEST_PHONE]
+    [MANIFEST_WINDOWS10] // TODO simplify
         .forEach(function (manifestFile) {
             updateManifestFile(projectConfig, path.join(locations.root, manifestFile));
         });

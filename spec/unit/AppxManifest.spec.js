@@ -24,9 +24,7 @@ var AppxManifest = rewire('../../template/cordova/lib/AppxManifest');
 var Win10AppxManifest = AppxManifest.__get__('Win10AppxManifest');
 var refineColor = AppxManifest.__get__('refineColor');
 
-var WINDOWS_MANIFEST = 'template/package.windows.appxmanifest';
 var WINDOWS_10_MANIFEST = 'template/package.windows10.appxmanifest';
-var WINDOWS_PHONE_MANIFEST = 'template/package.phone.appxmanifest';
 var CSS_COLOR_NAME = 'turquoise';
 
 describe('AppxManifest', function () {
@@ -214,23 +212,15 @@ describe('AppxManifest', function () {
         });
 
         it('Test #018 : getSplashScreenExtension/setSplashScreenExtension', function () {
-            var visualElementsWindows = AppxManifest.get(WINDOWS_MANIFEST).getVisualElements();
             var visualElementsWindows10 = AppxManifest.get(WINDOWS_10_MANIFEST).getVisualElements();
-            var visualElementsWindowsPhone = AppxManifest.get(WINDOWS_PHONE_MANIFEST).getVisualElements();
             var jpgExtension = '.jpg';
 
             // PNG is default extension
-            expect(visualElementsWindows.getSplashScreenExtension()).toEqual('.png');
             expect(visualElementsWindows10.getSplashScreenExtension()).toEqual('.png');
-            expect(visualElementsWindowsPhone.getSplashScreenExtension()).toEqual('.png');
 
             // Set to jpg
-            visualElementsWindows.setSplashScreenExtension(jpgExtension);
-            expect(visualElementsWindows.getSplashScreenExtension()).toEqual(jpgExtension);
             visualElementsWindows10.setSplashScreenExtension(jpgExtension);
             expect(visualElementsWindows10.getSplashScreenExtension()).toEqual(jpgExtension);
-            visualElementsWindowsPhone.setSplashScreenExtension(jpgExtension);
-            expect(visualElementsWindowsPhone.getSplashScreenExtension()).toEqual(jpgExtension);
         });
     });
 });

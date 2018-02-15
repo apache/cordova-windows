@@ -38,8 +38,6 @@ var projFiles = {
     win10: 'CordovaApp.Windows10.jsproj'
 };
 var projFilesToManifests = {
-    'CordovaApp.Phone.jsproj': 'package.phone.appxmanifest',
-    'CordovaApp.Windows.jsproj': 'package.windows.appxmanifest',
     'CordovaApp.Windows10.jsproj': 'package.windows10.appxmanifest'
 };
 
