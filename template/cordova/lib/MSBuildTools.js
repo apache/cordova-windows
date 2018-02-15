@@ -37,18 +37,20 @@ MSBuildTools.prototype.buildProject = function (projFile, buildType, buildarch, 
     events.emit('log', '\tBuildflags    : ' + buildFlags);
     events.emit('log', '\tMSBuildTools  : ' + this.path);
 
+    // Additional requirement checks
     var checkWinSDK = function (target_platform) {
         return require('./check_reqs').isWinSDKPresent(target_platform);
     };
-
     var checkPhoneSDK = function () {
         return require('./check_reqs').isPhoneSDKPresent();
     };
 
+    // default build args
     var args = ['/clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal', '/nologo',
         '/p:Configuration=' + buildType,
         '/p:Platform=' + buildarch];
 
+    // add buildFlags if present
     if (buildFlags) {
         args = args.concat(buildFlags);
     }
@@ -70,20 +72,27 @@ MSBuildTools.prototype.buildProject = function (projFile, buildType, buildarch, 
     });
 };
 
-// returns full path to msbuild tools required to build the project and tools version
-// check_reqs.js -> run()
-module.exports.findAvailableVersion = function () {
-    var versions = ['15.0', '14.0', '12.0', '4.0'];
+// check_reqs.js -> checkMSBuild()
+module.exports.findAllAvailableVersions = function () {
+    console.log('findAllAvailableVersions');
+    // CB-11548 use VSINSTALLDIR environment if defined to find MSBuild.
+    if (process.env.VSINSTALLDIR) {
+        var msBuildPath = path.join(process.env.VSINSTALLDIR, 'MSBuild/15.0/Bin');
+        return module.exports.getMSBuildToolsAt(msBuildPath)
+            .then(function (msBuildTools) {
+                return [msBuildTools];
+            })
+            // If VSINSTALLDIR is not specified or doesn't contain the MSBuild path we are
+            // looking for - fall back to default discovery mechanism.
+            .catch(findAllAvailableVersionsFallBack);
+    }
 
-    return Q.all(versions.map(checkMSBuildVersion)).then(function (versions) {
-        // select first msbuild version available, and resolve promise with it
-        var msbuildTools = versions[0] || versions[1] || versions[2] || versions[3];
-
-        return msbuildTools ? Q.resolve(msbuildTools) : Q.reject('MSBuild tools not found');
-    });
+    return findAllAvailableVersionsFallBack();
 };
 
 function findAllAvailableVersionsFallBack () {
+    console.log('findAllAvailableVersionsFALLBACK');
+
     var versions = ['15.0', '14.0', '12.0', '4.0'];
     events.emit('verbose', 'Searching for available MSBuild versions...');
 
@@ -94,21 +103,18 @@ function findAllAvailableVersionsFallBack () {
     });
 }
 
-// build.js -> run()
-// check_reqs.js -> checkMSBuild()
-module.exports.findAllAvailableVersions = function () {
-    // CB-11548 use VSINSTALLDIR environment if defined to find MSBuild. If VSINSTALLDIR
-    // is not specified or doesn't contain the MSBuild path we are looking for - fall back
-    // to default discovery mechanism.
-    if (process.env.VSINSTALLDIR) {
-        var msBuildPath = path.join(process.env.VSINSTALLDIR, 'MSBuild/15.0/Bin');
-        return module.exports.getMSBuildToolsAt(msBuildPath)
-            .then(function (msBuildTools) {
-                return [msBuildTools];
-            }).catch(findAllAvailableVersionsFallBack);
-    }
+// returns full path to msbuild tools required to build the project and tools version
+// check_reqs.js -> run()
+module.exports.findAvailableVersion = function () {
+    var versions = ['15.0', '14.0', '12.0', '4.0'];
 
-    return findAllAvailableVersionsFallBack();
+    return Q.all(versions.map(checkMSBuildVersion)).then(function (versions) {
+        console.log('findAvailableVersion', versions);
+        // select first msbuild version available, and resolve promise with it
+        var msbuildTools = versions[0] || versions[1] || versions[2] || versions[3];
+
+        return msbuildTools ? Q.resolve(msbuildTools) : Q.reject('MSBuild tools not found');
+    });
 };
 
 /**
@@ -118,6 +124,7 @@ module.exports.findAllAvailableVersions = function () {
  * @returns  Promise<MSBuildTools>  The MSBuildTools instance at specified location
  */
 module.exports.getMSBuildToolsAt = function (location) {
+    console.log('getMSBuildToolsAt', location);
     var msbuildExe = path.resolve(location, 'msbuild');
 
     // TODO: can we account on these params availability and printed version format?
@@ -125,23 +132,39 @@ module.exports.getMSBuildToolsAt = function (location) {
         .then(function (output) {
             // MSBuild prints its' version as 14.0.25123.0, so we pick only first 2 segments
             var version = output.match(/^(\d+\.\d+)/)[1];
+            console.log('return new MSBuildTools', version, location);
             return new MSBuildTools(version, location);
         });
 };
 
 function checkMSBuildVersion (version) {
+    console.log('checkMSBuildVersion', version);
+
     // first, check if we have a VS 2017+ with such a version
-    var correspondingWillow = module.exports.getWillowInstallations().filter(function (inst) {
+    var willows = module.exports.getWillowInstallations();
+    // console.log('willows', willows);
+    var correspondingWillows = willows.filter(function (inst) {
+        // console.log('willows.filter', inst.version, version, inst.version === version);
         return inst.version === version;
-    })[0];
+    });
+    // console.log('correspondingWillows', correspondingWillows);
+    var correspondingWillow = correspondingWillows[0]; // TODO Do not only handle one!
     if (correspondingWillow) {
         var toolsPath = path.join(correspondingWillow.path, 'MSBuild', version, 'Bin');
+        console.log('matching VS:', version, toolsPath);
+        console.log('from list of VS installations: ', correspondingWillows);
         if (shell.test('-e', toolsPath)) {
-            return module.exports.getMSBuildToolsAt(toolsPath);
+            var msbuild = module.exports.getMSBuildToolsAt(toolsPath);
+            console.log('selected VS exists:', toolsPath);
+            // TODO check for JavaScript folder
+            return msbuild;
         }
     }
+
+    // older vs versions that were registered in registry
     return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\' + version, '/v', 'MSBuildToolsPath'])
         .then(function (output) {
+            console.log('spawn', output);
             // fetch msbuild path from 'reg' output
             var toolsPath = /MSBuildToolsPath\s+REG_SZ\s+(.*)/i.exec(output);
             if (toolsPath) {
@@ -155,35 +178,114 @@ function checkMSBuildVersion (version) {
                 return new MSBuildTools(version, toolsPath);
             }
         }).catch(function (err) { /* eslint handle-callback-err : 0 */
+            console.log('no registry result for version ' + version);
             // if 'reg' exits with error, assume that registry key not found
         });
 }
 
-// returns an array of available UAP Versions
-// prepare.js
-module.exports.getAvailableUAPVersions = function () {
-    var programFilesFolder = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
-    // No Program Files folder found, so we won't be able to find UAP SDK
-    if (!programFilesFolder) return [];
+// build.js -> run()
+module.exports.getLatestMatchingMSBuild = function (selectedBuildTargets) {
+    events.emit('verbose', 'getLatestMatchingMSBuild');
+    console.log('getLatestMatchingMSBuild', selectedBuildTargets);
+    // TODO
+    // 1. findAllAvailableVersions
+    // 2. filter down to versions that can build all selectedBuildTargets
+    // 3. filter for latest one of those
+    return this.getLatestMSBuild()
+        .then(function (msbuild) {
+            // filter targets to make sure they are supported on this development machine
+            var myBuildTargets = filterSupportedTargets(selectedBuildTargets, msbuild);
+            return [msbuild, myBuildTargets];
+        });
+};
 
-    var uapFolderPath = path.join(programFilesFolder, 'Windows Kits', '10', 'Platforms', 'UAP');
-    if (!shell.test('-e', uapFolderPath)) {
-        return []; // No UAP SDK exists on this machine
+// gets the latest MSBuild version from a list of versions
+module.exports.getLatestMSBuild = function () {
+    events.emit('verbose', 'getLatestMSBuild');
+
+    return this.findAllAvailableVersions()
+        .then(function (allMsBuildVersions) {
+
+            var availableVersions = allMsBuildVersions
+                .filter(function (buildTools) {
+                    // Sanitize input - filter out tools w/ invalid versions
+                    return Version.tryParse(buildTools.version);
+                }).sort(function (a, b) {
+                    // Sort tools list - use parsed Version objects for that
+                    // to respect both major and minor versions segments
+                    var parsedA = Version.fromString(a.version);
+                    var parsedB = Version.fromString(b.version);
+
+                    if (parsedA.gt(parsedB)) return -1;
+                    if (parsedA.eq(parsedB)) return 0;
+                    return 1;
+                });
+
+            console.log('availableVersions', availableVersions);
+
+            if (availableVersions.length > 0) {
+                // After sorting the first item will be the highest version available
+                var msbuild = availableVersions[0];
+                events.emit('verbose', 'Using MSBuild v' + msbuild.version + ' from ' + msbuild.path);
+                return msbuild;
+            }
+        });
+};
+
+var projFiles = {
+    phone: 'CordovaApp.Phone.jsproj',
+    win: 'CordovaApp.Windows.jsproj',
+    win10: 'CordovaApp.Windows10.jsproj'
+};
+
+// TODO: Fix this so that it outlines supported versions based on version criteria:
+// - v14: Windows 8.1, Windows 10
+// - v12: Windows 8.1
+function msBuild12TargetsFilter (target) {
+    return target === projFiles.win || target === projFiles.phone;
+}
+
+function msBuild14TargetsFilter (target) {
+    return target === projFiles.win || target === projFiles.phone || target === projFiles.win10;
+}
+
+function msBuild15TargetsFilter (target) {
+    return target === projFiles.win || target === projFiles.phone || target === projFiles.win10;
+}
+
+function filterSupportedTargets (targets, msbuild) {
+    console.log('MSBuildTools->filterSupportedTargets', targets, msbuild);
+    if (!targets || targets.length === 0) {
+        events.emit('warn', 'No build targets specified');
+        return [];
     }
 
-    var result = [];
-    shell.ls(uapFolderPath).filter(function (uapDir) {
-        return shell.test('-d', path.join(uapFolderPath, uapDir));
-    }).map(function (folder) {
-        return Version.tryParse(folder);
-    }).forEach(function (version, index) {
-        if (version) {
-            result.push(version);
+    var targetFilters = {
+        '12.0': msBuild12TargetsFilter,
+        '14.0': msBuild14TargetsFilter,
+        '15.x': msBuild15TargetsFilter,
+        get: function (version) {
+            // Apart from exact match also try to get filter for version range
+            // so we can find for example targets for version '15.1'
+            return this[version] || this[version.replace(/\.\d+$/, '.x')];
         }
-    });
+    };
 
-    return result;
-};
+    var filter = targetFilters.get(msbuild.version);
+    if (!filter) {
+        events.emit('warn', 'MSBuild v' + msbuild.version + ' is not supported, aborting.');
+        return [];
+    }
+
+    var supportedTargets = targets.filter(filter);
+    // unsupported targets have been detected
+    if (supportedTargets.length !== targets.length) {
+        events.emit('warn', 'Not all desired build targets are compatible with the current build environment. ' +
+            'Please install Visual Studio 2015 for Windows 8.1 and Windows 10, ' +
+            'or Visual Studio 2013 Update 2 for Windows 8.1.');
+    }
+    return supportedTargets;
+}
 
 /**
  * Lists all VS 2017+ instances dirs in ProgramData
@@ -235,29 +337,28 @@ module.exports.getWillowInstallations = function () {
     return installations;
 };
 
-// gets the latest MSBuild version from a list of versions
-module.exports.getLatestMSBuild = function (allMsBuildVersions) {
-    events.emit('verbose', 'getLatestMSBuild');
+// returns an array of available UAP Versions
+// prepare.js
+module.exports.getAvailableUAPVersions = function () {
+    var programFilesFolder = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
+    // No Program Files folder found, so we won't be able to find UAP SDK
+    if (!programFilesFolder) return [];
 
-    var availableVersions = allMsBuildVersions
-        .filter(function (buildTools) {
-            // Sanitize input - filter out tools w/ invalid versions
-            return Version.tryParse(buildTools.version);
-        }).sort(function (a, b) {
-            // Sort tools list - use parsed Version objects for that
-            // to respect both major and minor versions segments
-            var parsedA = Version.fromString(a.version);
-            var parsedB = Version.fromString(b.version);
-
-            if (parsedA.gt(parsedB)) return -1;
-            if (parsedA.eq(parsedB)) return 0;
-            return 1;
-        });
-
-    console.log('availableVersions', availableVersions);
-
-    if (availableVersions.length > 0) {
-        // After sorting the first item will be the highest version available
-        return availableVersions[0];
+    var uapFolderPath = path.join(programFilesFolder, 'Windows Kits', '10', 'Platforms', 'UAP');
+    if (!shell.test('-e', uapFolderPath)) {
+        return []; // No UAP SDK exists on this machine
     }
+
+    var result = [];
+    shell.ls(uapFolderPath).filter(function (uapDir) {
+        return shell.test('-d', path.join(uapFolderPath, uapDir));
+    }).map(function (folder) {
+        return Version.tryParse(folder);
+    }).forEach(function (version, index) {
+        if (version) {
+            result.push(version);
+        }
+    });
+
+    return result;
 };

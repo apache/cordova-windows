@@ -57,20 +57,30 @@ module.exports.run = function run (buildOptions) {
 
     var buildConfig = parseAndValidateArgs(buildOptions);
 
-    return MSBuildTools.findAllAvailableVersions()
-        .then(function (msbuildTools) {
+    // get build targets
+    var selectedBuildTargets = getBuildTargets(buildConfig.win, buildConfig.phone, buildConfig.projVerOverride, buildConfig);
+
+    return MSBuildTools.getLatestMatchingMSBuild(selectedBuildTargets) // get latest msbuild tools
+        .then(function (result) {
+
+            var msbuild = result[0];
+            var myBuildTargets = result[1];
+
             // Apply build related configs
             prepare.updateBuildConfig(buildConfig);
 
             if (buildConfig.publisherId) {
-                updateManifestWithPublisher(msbuildTools, buildConfig);
+                updateManifestWithPublisher(buildConfig, myBuildTargets);
             }
 
             cleanIntermediates();
-            return buildTargets(msbuildTools, buildConfig);
+            // build!
+            return buildTargets(buildConfig, myBuildTargets, msbuild);
         }).then(function (pkg) {
             events.emit('verbose', ' BUILD OUTPUT: ' + pkg.appx);
             return pkg;
+        }).catch(function (error) {
+            return Q.reject(new CordovaError('No valid MSBuild was detected for the selected target: ' + error, error));
         });
 };
 
@@ -120,7 +130,7 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
             }
             break;
         default:
-            throw new Error('Unsupported windows-phone-target-version value: ' + windowsPhoneTargetVersion);
+            throw new CordovaError('Unsupported windows-phone-target-version value: ' + windowsPhoneTargetVersion);
         }
     }
 
@@ -303,12 +313,9 @@ function parseBuildConfig (buildConfigPath, buildType) {
 
 // Note: This function is very narrow and only writes to the app manifest if an update is done.  See CB-9450 for the
 // reasoning of why this is the case.
-function updateManifestWithPublisher (allMsBuildVersions, config) {
+function updateManifestWithPublisher (config, myBuildTargets) {
     if (!config.publisherId) return;
 
-    var selectedBuildTargets = getBuildTargets(config.win, config.phone, config.projVerOverride, config);
-    var msbuild = MSBuildTools.getLatestMSBuild(allMsBuildVersions);
-    var myBuildTargets = filterSupportedTargets(selectedBuildTargets, msbuild);
     var manifestFiles = myBuildTargets.map(function (proj) {
         return projFilesToManifests[proj];
     });
@@ -319,15 +326,7 @@ function updateManifestWithPublisher (allMsBuildVersions, config) {
     });
 }
 
-function buildTargets (allMsBuildVersions, config) {
-    // filter targets to make sure they are supported on this development machine
-    var selectedBuildTargets = getBuildTargets(config.win, config.phone, config.projVerOverride, config);
-    var msbuild = MSBuildTools.getLatestMSBuild(allMsBuildVersions);
-    if (!msbuild) {
-        return Q.reject(new CordovaError('No valid MSBuild was detected for the selected target.'));
-    }
-    events.emit('verbose', 'Using MSBuild v' + msbuild.version + ' from ' + msbuild.path);
-    var myBuildTargets = filterSupportedTargets(selectedBuildTargets, msbuild);
+function buildTargets (config, myBuildTargets, msbuild) {
 
     var buildConfigs = [];
     var bundleTerms = '';
@@ -437,54 +436,6 @@ function clearIntermediatesAndGetPackage (bundleTerms, config, hasAnyCpu) {
     });
 
     return pckage.getPackageFileInfo(finalFile);
-}
-
-// TODO: Fix this so that it outlines supported versions based on version criteria:
-// - v14: Windows 8.1, Windows 10
-// - v12: Windows 8.1
-function msBuild12TargetsFilter (target) {
-    return target === projFiles.win || target === projFiles.phone;
-}
-
-function msBuild14TargetsFilter (target) {
-    return target === projFiles.win || target === projFiles.phone || target === projFiles.win10;
-}
-
-function msBuild15TargetsFilter (target) {
-    return target === projFiles.win || target === projFiles.phone || target === projFiles.win10;
-}
-
-function filterSupportedTargets (targets, msbuild) {
-    if (!targets || targets.length === 0) {
-        events.emit('warn', 'No build targets specified');
-        return [];
-    }
-
-    var targetFilters = {
-        '12.0': msBuild12TargetsFilter,
-        '14.0': msBuild14TargetsFilter,
-        '15.x': msBuild15TargetsFilter,
-        get: function (version) {
-            // Apart from exact match also try to get filter for version range
-            // so we can find for example targets for version '15.1'
-            return this[version] || this[version.replace(/\.\d+$/, '.x')];
-        }
-    };
-
-    var filter = targetFilters.get(msbuild.version);
-    if (!filter) {
-        events.emit('warn', 'MSBuild v' + msbuild.version + ' is not supported, aborting.');
-        return [];
-    }
-
-    var supportedTargets = targets.filter(filter);
-    // unsupported targets have been detected
-    if (supportedTargets.length !== targets.length) {
-        events.emit('warn', 'Not all desired build targets are compatible with the current build environment. ' +
-            'Please install Visual Studio 2015 for Windows 8.1 and Windows 10, ' +
-            'or Visual Studio 2013 Update 2 for Windows 8.1.');
-    }
-    return supportedTargets;
 }
 
 function cleanIntermediates () {
