@@ -72,7 +72,6 @@ MSBuildTools.prototype.buildProject = function (projFile, buildType, buildarch, 
     });
 };
 
-// build.js -> run()
 // check_reqs.js -> checkMSBuild()
 module.exports.findAllAvailableVersions = function () {
     console.log('findAllAvailableVersions');
@@ -185,6 +184,7 @@ function checkMSBuildVersion (version) {
         });
 }
 
+// build.js -> run()
 module.exports.getLatestMatchingMSBuild = function (selectedBuildTargets) {
     events.emit('verbose', 'getLatestMatchingMSBuild');
     console.log('getLatestMatchingMSBuild', selectedBuildTargets);
