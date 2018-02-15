@@ -177,9 +177,7 @@ function getInstalledWindowsSdks () {
 }
 
 /**
- * Gets list of installed Windows Phone SDKs. Separately searches for 8.1 Phone
- *   SDK and Windows 10 SDK, because the latter is needed for both Windows and
- *   Windows Phone applications.
+ * Gets list of installed Windows Phone SDKs.
  *
  * @return  {Version[]}  List of installed Phone SDKs' versions.
  */

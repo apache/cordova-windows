@@ -50,8 +50,6 @@ var TEMPLATE =
 
 var SUPPORTED_IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg'];
 var SPLASH_SCREEN_SIZE_LIMIT = 200 * 1024; // 200 KBytes
-var TARGET_PROJECT_81 = 'TARGET_PROJECT_81';
-var TARGET_PROJECT_WP81 = 'TARGET_PROJECT_WP81';
 var TARGET_PROJECT_10 = 'TARGET_PROJECT_10';
 var SPLASH_SCREEN_DESKTOP_TARGET_NAME = 'SplashScreen';
 var SPLASH_SCREEN_PHONE_TARGET_NAME = 'SplashScreenPhone';
@@ -312,9 +310,7 @@ var PLATFORM_IMAGES = [
     {dest: 'StoreLogo.scale-100', width: 50, height: 50},
     {dest: 'SplashScreen.scale-100', width: 620, height: 300, targetProject: TARGET_PROJECT_10},
     {dest: 'SplashScreen.scale-125', width: 775, height: 375, targetProject: TARGET_PROJECT_10},
-    {dest: 'SplashScreen.scale-140', width: 868, height: 420, targetProject: TARGET_PROJECT_81},
     {dest: 'SplashScreen.scale-150', width: 930, height: 450, targetProject: TARGET_PROJECT_10},
-    {dest: 'SplashScreen.scale-180', width: 1116, height: 540, targetProject: TARGET_PROJECT_81},
     {dest: 'SplashScreen.scale-200', width: 1240, height: 600, targetProject: TARGET_PROJECT_10},
     {dest: 'SplashScreen.scale-400', width: 2480, height: 1200, targetProject: TARGET_PROJECT_10},
     // scaled images are specified here for backward compatibility only so we can find them by size
@@ -328,9 +324,6 @@ var PLATFORM_IMAGES = [
     {dest: 'Square310x310Logo.scale-100', width: 310, height: 310},
     {dest: 'Wide310x150Logo.scale-100', width: 310, height: 150},
     {dest: 'Wide310x150Logo.scale-240', width: 744, height: 360},
-    {dest: 'SplashScreenPhone.scale-100', width: 480, height: 800, targetProject: TARGET_PROJECT_WP81},
-    {dest: 'SplashScreenPhone.scale-140', width: 672, height: 1120, targetProject: TARGET_PROJECT_WP81},
-    {dest: 'SplashScreenPhone.scale-240', width: 1152, height: 1920, targetProject: TARGET_PROJECT_WP81}
 ];
 
 function findPlatformImage (width, height) {
@@ -514,13 +507,7 @@ function getTargetForImage (splash) {
         return;
     }
 
-    if (targetImg.targetProject === TARGET_PROJECT_81 || targetImg.targetProject === TARGET_PROJECT_10) {
-        return SPLASH_SCREEN_DESKTOP_TARGET_NAME;
-    }
-
-    if (targetImg.targetProject === TARGET_PROJECT_WP81) {
-        return SPLASH_SCREEN_PHONE_TARGET_NAME;
-    }
+    return SPLASH_SCREEN_DESKTOP_TARGET_NAME;
 }
 
 // Updates manifests to match the app splash screen image types (PNG/JPG/JPEG)

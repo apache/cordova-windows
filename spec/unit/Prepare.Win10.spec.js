@@ -34,12 +34,7 @@ var applyNavigationWhitelist = prepare.__get__('applyNavigationWhitelist');
 var applyStartPage = prepare.__get__('applyStartPage');
 
 var Win10ManifestPath = 'template/package.windows10.appxmanifest';
-var Win81ManifestPath = 'template/package.windows.appxmanifest';
-var WP81ManifestPath = 'template/package.phone.appxmanifest';
-
 var Win10ManifestName = path.basename(Win10ManifestPath);
-var Win81ManifestName = path.basename(Win81ManifestPath);
-var WP81ManifestName = path.basename(WP81ManifestPath);
 
 /***
   * Unit tests for validating default ms-appx-web:// URI scheme in Win10
@@ -78,7 +73,7 @@ function createMockConfigAndManifestForApplyCoreProperties (startPage, preferenc
         }
     };
 
-    var filePath = win10 ? Win10ManifestPath : Win81ManifestPath;
+    var filePath = Win10ManifestPath;
     var manifest = AppxManifest.get(filePath);
     spyOn(fs, 'writeFileSync');
 
@@ -249,7 +244,7 @@ function createMockConfigAndManifestForApplyAccessRules (isWin10) {
         return [];
     };
 
-    var filePath = isWin10 ? Win10ManifestPath : Win81ManifestPath;
+    var filePath = Win10ManifestPath;
     var manifest = AppxManifest.get(filePath);
     spyOn(fs, 'writeFileSync');
 
@@ -603,20 +598,10 @@ describe('copyIcons method', function () {
         spyOn(fs, 'writeFileSync');
 
         var win10Manifest = AppxManifest.get(Win10ManifestPath);
-        var win81Manifest = AppxManifest.get(Win81ManifestPath);
-        var wp81Manifest = AppxManifest.get(WP81ManifestPath);
 
         spyOn(AppxManifest, 'get').and.callFake(function (manifestPath) {
             if (manifestPath.indexOf(Win10ManifestName) !== -1) {
                 return win10Manifest;
-            }
-
-            if (manifestPath.indexOf(Win81ManifestName) !== -1) {
-                return win81Manifest;
-            }
-
-            if (manifestPath.indexOf(WP81ManifestName) !== -1) {
-                return wp81Manifest;
             }
         });
 
@@ -641,7 +626,5 @@ describe('copyIcons method', function () {
         updateSplashScreenImageExtensions(project, locations);
 
         expect(win10Manifest.getVisualElements().getSplashScreenExtension()).toBe('.jpg');
-        expect(win81Manifest.getVisualElements().getSplashScreenExtension()).toBe('.jpg');
-        expect(wp81Manifest.getVisualElements().getSplashScreenExtension()).toBe('.jpg');
     });
 });

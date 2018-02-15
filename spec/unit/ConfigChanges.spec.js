@@ -219,23 +219,7 @@ describe('generate_plugin_config_munge for windows project', function () {
         var pluginInfoProvider = new PluginInfoProvider();
         var munger = new configChanges.PlatformMunger('windows', tempDir, 'unused', null, pluginInfoProvider);
         var munge = munger.generate_plugin_config_munge(new PluginInfo(configplugin), {});
-        var windows81AppxManifest = munge.files['package.windows.appxmanifest'];
-        var winphone81AppxManifest = munge.files['package.phone.appxmanifest'];
         var windows10AppxManifest = munge.files['package.windows10.appxmanifest'];
-
-        // 1 comes from versions="=8.1.0" + 1 from versions="=8.1.0" device-target="windows"
-        expect(windows81AppxManifest.parents['/Parent/Capabilities'][0].xml).toBe('<Capability Note="should-exist-for-all-appxmanifest-target-files" />');
-        expect(windows81AppxManifest.parents['/Parent/Capabilities'][1].xml).toBe('<Capability Note="should-exist-for-win81-win-and-phone" />');
-        expect(windows81AppxManifest.parents['/Parent/Capabilities'][2].xml).toBe('<Capability Note="should-exist-for-win81-win-only" />');
-        expect(windows81AppxManifest.parents['/Parent/Capabilities'][3].xml).toBe('<Capability Note="should-exist-for-win10-and-win81-win-and-phone" />');
-        expect(windows81AppxManifest.parents['/Parent/Capabilities'].length).toBe(4);
-
-        // 1 comes from versions="=8.1.0" + 1 from versions="=8.1.0" device-target="phone"
-        expect(winphone81AppxManifest.parents['/Parent/Capabilities'][0].xml).toBe('<Capability Note="should-exist-for-all-appxmanifest-target-files" />');
-        expect(winphone81AppxManifest.parents['/Parent/Capabilities'][1].xml).toBe('<Capability Note="should-exist-for-win81-win-and-phone" />');
-        expect(winphone81AppxManifest.parents['/Parent/Capabilities'][2].xml).toBe('<Capability Note="should-exist-for-win81-phone-only" />');
-        expect(winphone81AppxManifest.parents['/Parent/Capabilities'][3].xml).toBe('<Capability Note="should-exist-for-win10-and-win81-win-and-phone" />');
-        expect(winphone81AppxManifest.parents['/Parent/Capabilities'].length).toBe(4);
 
         expect(windows10AppxManifest.parents['/Parent/Capabilities'][0].xml).toBe('<Capability Note="should-exist-for-all-appxmanifest-target-files" />');
         expect(windows10AppxManifest.parents['/Parent/Capabilities'][1].xml).toBe('<Capability Note="should-exist-for-win10-and-win81-win-and-phone" />');

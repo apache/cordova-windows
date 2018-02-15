@@ -156,13 +156,7 @@ function init(config, manifest) {
         extendedSplashImage.classList.add('phone');
     }
 
-    if (isWp81) {
-        extendedSplashProgress.classList.add('extended-splash-progress-phone');
-    } else if (isWp10) {   
-        extendedSplashProgress.classList.add('extended-splash-progress-wp10');
-    } else {
-        extendedSplashProgress.classList.add('extended-splash-progress-desktop');
-    }
+    extendedSplashProgress.classList.add('extended-splash-progress-wp10');
 
     if (!showSplashScreenSpinner) {
         extendedSplashProgress.classList.add('hidden');
@@ -267,12 +261,10 @@ function positionControls() {
         extendedSplashImage.style.top = splash.imageLocation.y + 'px';
     }
 
-    if (!isWp81) {
-        extendedSplashImage.style.height = splash.imageLocation.height + 'px';
-        extendedSplashImage.style.width = splash.imageLocation.width + 'px';
+    extendedSplashImage.style.height = splash.imageLocation.height + 'px';
+    extendedSplashImage.style.width = splash.imageLocation.width + 'px';
 
-        extendedSplashProgress.style.marginTop = Math.min(window.innerHeight - PROGRESSRING_HEIGHT - PROGRESSRING_BOTTOM_MARGIN, splash.imageLocation.y + splash.imageLocation.height + 32) + 'px';
-    }
+    extendedSplashProgress.style.marginTop = Math.min(window.innerHeight - PROGRESSRING_HEIGHT - PROGRESSRING_BOTTOM_MARGIN, splash.imageLocation.y + splash.imageLocation.height + 32) + 'px';
 }
 
 // Updates the location of the extended splash screen image. Should be used to respond to window size changes.
