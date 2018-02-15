@@ -130,7 +130,7 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
             }
             break;
         default:
-            throw new Error('Unsupported windows-phone-target-version value: ' + windowsPhoneTargetVersion);
+            throw new CordovaError('Unsupported windows-phone-target-version value: ' + windowsPhoneTargetVersion);
         }
     }
 
