@@ -30,7 +30,6 @@ var shell = require('shelljs');
 
 var configChanges = require('../../template/cordova/lib/ConfigChanges');
 var tempDir = path.join(os.tmpdir(), 'windows');
-var WINDOWS_MANIFEST = 'package.windows.appxmanifest';
 var WINDOWS10_MANIFEST = 'package.windows10.appxmanifest';
 var FIXTURES = path.join(__dirname, 'fixtures');
 var DUMMY_PLUGIN = 'org.test.plugins.capabilityplugin';
