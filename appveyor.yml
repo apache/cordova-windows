@@ -25,6 +25,10 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
 
     - nodejs_version: "6"
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      MSBUILDDIR: "C:\\Program Files (x86)\\MSBuild\\14.0\\bin\\"
+
+    - nodejs_version: "6"
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
 
     - nodejs_version: "4"
