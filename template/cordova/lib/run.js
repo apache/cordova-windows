@@ -43,7 +43,6 @@ module.exports.run = function (options) {
         'archs': [String],
         'phone': Boolean,
         'win': Boolean,
-        'appx': String,
         'win10tools': Boolean
     }, {'r': '--release'}, options.argv, 0);
 
@@ -68,18 +67,14 @@ module.exports.run = function (options) {
     var buildArchs = archs.map(function (arch) { return arch.toLowerCase(); });
     var deployTarget = options.target ? options.target : (options.emulator ? 'emulator' : 'device');
 
-    var buildTargets = build.getBuildTargets(args.win, args.phone, args.appx);
+    var buildTargets = build.getBuildTargets(args.win, args.phone);
 
     if (!buildTargets || buildTargets.length <= 0) {
         return Q.reject(new CordovaError('Unable to determine deploy target.'));
     }
 
-    // we deploy the first build target so we use buildTargets[0] to determine
-    // what project type we should deploy
-    var projectType = projFileToType(buildTargets[0]);
-
     // if --nobuild isn't specified then build app first
-    var buildPackages = options.nobuild ? packages.getPackage(projectType, buildType, buildArchs[0]) : build.run.call(this, options);
+    var buildPackages = options.nobuild ? packages.getPackage(buildType, buildArchs[0]) : build.run.call(this, options);
 
     // buildPackages also deploys bundles
     return buildPackages

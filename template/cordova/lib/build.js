@@ -58,7 +58,7 @@ module.exports.run = function run (buildOptions) {
     var buildConfig = parseAndValidateArgs(buildOptions);
 
     // get build targets
-    var selectedBuildTargets = getBuildTargets(buildConfig.win, buildConfig.phone, buildConfig.projVerOverride, buildConfig);
+    var selectedBuildTargets = getBuildTargets(buildConfig.win, buildConfig.phone, buildConfig);
 
     return MSBuildTools.getLatestMatchingMSBuild(selectedBuildTargets) // get latest msbuild tools
         .then(function (result) {
@@ -84,8 +84,8 @@ module.exports.run = function run (buildOptions) {
         });
 };
 
-// returns list of projects to be built based on config.xml and additional parameters (-appx)
-function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig) {
+// returns list of projects to be built based on config.xml and additional parameters
+function getBuildTargets (isWinSwitch, isPhoneSwitch, buildConfig) {
     buildConfig = typeof buildConfig !== 'undefined' ? buildConfig : null;
 
     var configXML = new ConfigParser(path.join(ROOT, 'config.xml'));
@@ -130,39 +130,6 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
         }
     }
 
-    // apply build target override if one was specified
-    if (projOverride) {
-        switch (projOverride.toLowerCase()) {
-        case 'uap':
-        case 'uwp':
-            targets = [projFiles.win10];
-            break;
-        default:
-            events.emit('warn', 'Ignoring unrecognized --appx parameter passed to build: "' + projOverride + '"');
-            break;
-        }
-    }
-
-    if (buildConfig !== null) {
-        // As part of reworking how build and package determine the winning project, set the 'target type' project
-        // as part of build configuration.  This will be used for determining the binary to 'run' after build is done.
-        if (targets.length > 0) {
-            switch (targets[0]) {
-            case projFiles.phone:
-                buildConfig.targetProject = 'phone';
-                break;
-            case projFiles.win10:
-                buildConfig.targetProject = 'windows10';
-                break;
-            case projFiles.win:
-                /* falls through */
-            default:
-                buildConfig.targetProject = 'windows';
-                break;
-            }
-        }
-    }
-
     return targets;
 }
 module.exports.getBuildTargets = getBuildTargets;
@@ -180,7 +147,6 @@ function parseAndValidateArgs (options) {
     // parse and validate args
     var args = nopt({
         'archs': [String],
-        'appx': String,
         'phone': Boolean,
         'win': Boolean,
         'bundle': Boolean,
@@ -211,7 +177,7 @@ function parseAndValidateArgs (options) {
 
     config.phone = !!args.phone;
     config.win = !!args.win;
-    config.projVerOverride = args.appx;
+
     // only set config.bundle if architecture is not anycpu
     if (args.bundle) {
         if (config.buildArchs.length > 1 && (config.buildArchs.indexOf('anycpu') > -1 || config.buildArchs.indexOf('any cpu') > -1)) {
@@ -365,7 +331,7 @@ function buildTargets (config, myBuildTargets, msbuild) {
             }
 
             // https://issues.apache.org/jira/browse/CB-12298
-            if (config.targetProject === 'windows10' && config.buildType === 'release') {
+            if (config.buildType === 'release') {
                 otherProperties.push('/p:UapAppxPackageBuildMode=StoreUpload');
             }
 
@@ -379,7 +345,7 @@ function buildTargets (config, myBuildTargets, msbuild) {
         });
     } else {
         return buildsCompleted.then(function () {
-            return pckage.getPackage(config.targetProject, config.buildType, config.buildArchs[0]);
+            return pckage.getPackage(config.buildType, config.buildArchs[0]);
         });
     }
 }

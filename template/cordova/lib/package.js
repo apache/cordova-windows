@@ -28,7 +28,8 @@ var CordovaError = require('cordova-common').CordovaError;
 
 // returns folder that contains package with chip architecture,
 // build and project types specified by script parameters
-module.exports.getPackage = function (projectType, buildtype, buildArch) {
+module.exports.getPackage = function (buildtype, buildArch) {
+    var projectType = 'windows10'; // TODO remove below
     var appPackages = path.resolve(path.join(__dirname, '..', '..', 'AppPackages'));
     // reject promise if AppPackages folder doesn't exist
     if (!fs.existsSync(appPackages)) {
