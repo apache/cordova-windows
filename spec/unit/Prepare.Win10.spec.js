@@ -92,33 +92,6 @@ function addCapabilityDeclarationToMockManifest (manifest, capability) {
     capRoot.append(cap);
 }
 
-describe('Windows 8.1 project', function () {
-
-    it('should not have an HTTP or HTTPS scheme for its startup URI.', function () {
-
-        // arrange
-        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { 'WindowsDefaultUriPrefix': 'http://' }, false);
-
-        // act
-        applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'm2:', false);
-
-        var app = mockConfig.manifest.doc.find('.//Application');
-        expect(app.attrib.StartPage).toBe('www/index.html');
-    });
-
-    it('should not have any scheme for its startup URI.', function () {
-
-        // arrange
-        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { 'WindowsDefaultUriPrefix': 'ms-appx://' }, false);
-
-        // act
-        applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'm2:', false);
-
-        var app = mockConfig.manifest.doc.find('.//Application');
-        expect(app.attrib.StartPage).toBe('www/index.html');
-    });
-});
-
 describe('Windows 10 project', function () {
     it('should default to ms-appx-web for its startup URI.', function () {
 
@@ -285,24 +258,6 @@ function createMockConfigAndManifestForApplyAccessRules (isWin10) {
 
 describe('Access rules management', function () {
     // body...
-    it('A Windows 8.1 project should not have WindowsRuntimeAccess attributes in access rules.', function () {
-
-        var mockConfig = createMockConfigAndManifestForApplyAccessRules(false, 'https://www.contoso.com');
-
-        applyAccessRules(mockConfig.config, mockConfig.manifest);
-
-        var app = mockConfig.manifest.doc.find('.//Application');
-        var accessRules = app.find('.//ApplicationContentUriRules');
-
-        expect(accessRules).toBeDefined();
-        expect(accessRules.len()).toBe(1);
-
-        var rule = accessRules.getItem(0);
-        expect(rule).toBeDefined();
-        expect(rule.attrib.WindowsRuntimeAccess).toBeUndefined();
-
-    });
-
     it('A Windows 10 project should have WindowsRuntimeAccess attributes in access rules.', function () {
 
         var mockConfig = createMockConfigAndManifestForApplyAccessRules(true, 'https://www.contoso.com');
@@ -320,25 +275,6 @@ describe('Access rules management', function () {
         expect(rule.attrib.WindowsRuntimeAccess).toBeDefined();
         expect(rule.attrib.WindowsRuntimeAccess).toBe('all');
 
-    });
-
-    describe('A Windows 8.1 project should reject http:// URI scheme rules.', function () {
-
-        var stringIndex = -1;
-        var searchStr = 'Access rules must begin with "https://", the following rule will be ignored: ';
-
-        beforeEach(function () {
-            require('cordova-common').events.on('warn', function (evt) {
-                stringIndex = evt.indexOf(searchStr);
-            });
-        });
-
-        it('applies access rules and verifies at least one was rejected', function () {
-            var mockConfig = createMockConfigAndManifestForApplyAccessRules(false, 'http://www.contoso.com');
-            applyAccessRules(mockConfig.config, mockConfig.manifest, false);
-
-            expect(stringIndex).toBe(0);
-        });
     });
 
     describe('A Windows 10 project should accept http:// URI access rules.', function () {
