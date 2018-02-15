@@ -107,8 +107,7 @@ describe('AppxManifest', function () {
         });
 
         it('Test #009 : should detect manifest prefix based on "Package" element attributes', function () {
-            expect(AppxManifest.get(WINDOWS_10_MANIFEST).prefix).toEqual('m2:');
-            expect(AppxManifest.get(WINDOWS_10_MANIFEST).prefix).toEqual('m3:');
+            expect(AppxManifest.get(WINDOWS_10_MANIFEST).prefix).toEqual('uap:');
         });
 
         it('Test #010 : should instantiate either AppxManifest or Windows 10 AppxManifest based on manifest prefix', function () {
@@ -186,25 +185,10 @@ describe('AppxManifest', function () {
             expect(refineColor(CSS_COLOR_NAME)).toEqual(CSS_COLOR_NAME);
         });
 
-        it('Test #017 : setForegroundText should change the ForegroundText property on non-Windows 10 platforms', function () {
-            var visualElementsWindows = AppxManifest.get(WINDOWS_10_MANIFEST).getVisualElements();
+        it('Test #017 : setForegroundText do nothing on non-Windows 10 platforms', function () {
             var visualElementsWindows10 = AppxManifest.get(WINDOWS_10_MANIFEST).getVisualElements();
 
             var foregroundTextLight = 'light';
-            var foregroundTextDark = 'dark';
-            var foregroundTextDefault = foregroundTextLight;
-
-            // Set to 'light'
-            visualElementsWindows.setForegroundText(foregroundTextLight);
-            expect(visualElementsWindows.getForegroundText()).toEqual(foregroundTextLight);
-
-            // Set to 'dark'
-            visualElementsWindows.setForegroundText(foregroundTextDark);
-            expect(visualElementsWindows.getForegroundText()).toEqual(foregroundTextDark);
-
-            // Simulate removal of preference, should change back to default vlaue 'light'
-            visualElementsWindows.setForegroundText(undefined);
-            expect(visualElementsWindows.getForegroundText()).toEqual(foregroundTextDefault);
 
             // Returns nothing on Windows 10
             visualElementsWindows10.setForegroundText(foregroundTextLight);

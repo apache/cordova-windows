@@ -344,7 +344,7 @@ describe('Package description', function () {
         var desc = mockConfig.manifest.doc.find('.//Properties/Description');
         expect(desc.text).toBe('My custom description');
 
-        desc = mockConfig.manifest.doc.find('.//Application/m2:VisualElements');
+        desc = mockConfig.manifest.doc.find('.//Application/uap:VisualElements');
         expect(desc.attrib.Description).toBe('My custom description');
     });
 
@@ -355,7 +355,7 @@ describe('Package description', function () {
         var desc = mockConfig.manifest.doc.find('.//Properties/Description');
         expect(desc).toBe(null);
 
-        desc = mockConfig.manifest.doc.find('.//Application/m2:VisualElements');
+        desc = mockConfig.manifest.doc.find('.//Application/uap:VisualElements');
         expect(desc.attrib.Description).toEqual(prepare.__get__('DEFAULT_DESCRIPTION'));
     });
 
@@ -370,7 +370,7 @@ describe('Package description', function () {
         var desc = mockConfig.manifest.doc.find('.//Properties/Description');
         expect(desc.text.length).toBe(2048);
 
-        desc = mockConfig.manifest.doc.find('.//Application/m2:VisualElements');
+        desc = mockConfig.manifest.doc.find('.//Application/uap:VisualElements');
         expect(desc.attrib.Description.length).toBe(2048);
     });
 
@@ -384,7 +384,7 @@ describe('Package description', function () {
         var desc = mockConfig.manifest.doc.find('.//Properties/Description');
         expect(desc).not.toMatch(/\n|\t/);
 
-        desc = mockConfig.manifest.doc.find('.//Application/m2:VisualElements');
+        desc = mockConfig.manifest.doc.find('.//Application/:VisualElements');
         expect(desc.attrib.Description).not.toMatch(/\n|\t/);
     });
 });

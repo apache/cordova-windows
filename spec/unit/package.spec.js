@@ -47,14 +47,14 @@ describe('getPackage method', function () {
     it('spec.1 should find windows anycpu debug package', function (done) {
         var rejected = jasmine.createSpy();
 
-        pkg.getPackage('windows', 'debug', 'anycpu')
+        pkg.getPackage('debug', 'anycpu')
             .then(function (pkgInfo) {
-                expect(pkgInfo.type).toBe('windows');
+                expect(pkgInfo.type).toBe('windows10');
                 expect(pkgInfo.buildtype).toBe('debug');
                 expect(pkgInfo.arch).toBe('anycpu');
                 expect(pkgInfo.script).toBeDefined();
             }, function (err) {
-                console.error(err);
+                console.error('foo', err);
                 rejected();
             })
             .finally(function () {
@@ -66,7 +66,7 @@ describe('getPackage method', function () {
     it('spec.2 should find windows phone anycpu debug package', function (done) {
         var rejected = jasmine.createSpy();
 
-        pkg.getPackage('phone', 'debug', 'anycpu')
+        pkg.getPackage('debug', 'anycpu')
             .then(function (pkgInfo) {
                 expect(pkgInfo.type).toBe('phone');
                 expect(pkgInfo.buildtype).toBe('debug');

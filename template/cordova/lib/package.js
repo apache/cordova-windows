@@ -33,7 +33,7 @@ module.exports.getPackage = function (buildtype, buildArch) {
     var appPackages = path.resolve(path.join(__dirname, '..', '..', 'AppPackages'));
     // reject promise if AppPackages folder doesn't exist
     if (!fs.existsSync(appPackages)) {
-        return Q.reject('AppPackages folder doesn\'t exist');
+        return Q.reject('AppPackages folder doesn\'t exist' + appPackages);
     }
     // find out and resolve paths for all folders inside AppPackages
     var pkgDirs = fs.readdirSync(appPackages).map(function (relative) {
