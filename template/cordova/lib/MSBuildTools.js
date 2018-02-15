@@ -189,7 +189,7 @@ module.exports.getLatestMatchingMSBuild = function (selectedBuildTargets) {
     events.emit('verbose', 'getLatestMatchingMSBuild');
     console.log('getLatestMatchingMSBuild', selectedBuildTargets);
     return this.getLatestMSBuild()
-        .then(function(msbuild) {
+        .then(function (msbuild) {
             // filter targets to make sure they are supported on this development machine
             var myBuildTargets = filterSupportedTargets(selectedBuildTargets, msbuild);
             return [msbuild, myBuildTargets];
@@ -287,7 +287,7 @@ function filterSupportedTargets (targets, msbuild) {
             'or Visual Studio 2013 Update 2 for Windows 8.1.');
     }
     return supportedTargets;
-};
+}
 
 /**
  * Lists all VS 2017+ instances dirs in ProgramData
