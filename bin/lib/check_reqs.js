@@ -41,13 +41,6 @@ try {
 // reference: https://msdn.microsoft.com/en-us/library/bb164659(v=vs.120).aspx
 var VS2013_UPDATE2_RC = new Version(12, 0, 30324);
 var REQUIRED_VERSIONS = {
-    '8.1': {
-        os: '6.3',
-        msbuild: '12.0',
-        visualstudio: '12.0',
-        windowssdk: '8.1',
-        phonesdk: '8.1'
-    },
     '10.0': {
         // Note that Windows 10 target is also supported on Windows 7, so this should look
         // like '6.1 || >=6.3', but due to Version module restricted functionality we handle
@@ -187,18 +180,9 @@ function getInstalledWindowsSdks () {
  */
 function getInstalledPhoneSdks () {
     var installedSdks = [];
-    return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows Phone\\v8.1', '/v', 'InstallationFolder', '/reg:32'])
+    return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v10.0', '/v', 'InstallationFolder', '/reg:32'])
         .fail(function () { return ''; })
         .then(function (output) {
-            var match = /\\Microsoft SDKs\\Windows Phone\\v(\d+\.\d+)\s*InstallationFolder\s+REG_SZ\s+(.*)/gim.exec(output);
-            if (match && shell.test('-e', path.join(match[2], 'SDKManifest.xml'))) {
-                installedSdks.push(Version.tryParse(match[1]));
-            }
-        }).then(function () {
-            return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v10.0', '/v', 'InstallationFolder', '/reg:32']);
-        }).fail(function () {
-            return '';
-        }).then(function (output) {
             var match = /\\Microsoft SDKs\\Windows\\v(\d+\.\d+)\s*InstallationFolder\s+REG_SZ\s+(.*)/gim.exec(output);
             if (match && shell.test('-e', path.join(match[2], 'SDKManifest.xml'))) {
                 installedSdks.push(Version.tryParse(match[1]));

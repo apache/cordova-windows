@@ -119,17 +119,7 @@ module.exports = {
 
         if (!window.WinJS) {
             var scriptElem = document.createElement("script");
-
-            if (navigator.appVersion.indexOf('MSAppHost/3.0') !== -1) {
-                // Windows 10 UWP
-                scriptElem.src = '/www/WinJS/js/base.js';
-            } else if (navigator.appVersion.indexOf("Windows Phone 8.1;") !== -1) {
-                // windows phone 8.1 + Mobile IE 11
-                scriptElem.src = "//Microsoft.Phone.WinJS.2.1/js/base.js";
-            } else if (navigator.appVersion.indexOf("MSAppHost/2.0;") !== -1) {
-                // windows 8.1 + IE 11
-                scriptElem.src = "//Microsoft.WinJS.2.0/js/base.js";
-            }
+            scriptElem.src = '/www/WinJS/js/base.js';
             scriptElem.addEventListener("load", onWinJSReady);
             document.head.appendChild(scriptElem);
         }
@@ -169,21 +159,15 @@ function injectBackButtonHandler() {
         }
     };
 
-    // Only load this code if we're running on Win10 in a non-emulated app frame, otherwise crash \o/
-    if (navigator.appVersion.indexOf('MSAppHost/3.0') !== -1) { // Windows 10 UWP (PC/Tablet/Phone)
-        var navigationManager = Windows.UI.Core.SystemNavigationManager.getForCurrentView();
-        // Inject a listener for the backbutton on the document.
-        backButtonChannel.onHasSubscribersChange = function () {
-            // If we just attached the first handler or detached the last handler,
-            // let native know we need to override the back button.
-            navigationManager.appViewBackButtonVisibility = (this.numHandlers > 0) ?
-                Windows.UI.Core.AppViewBackButtonVisibility.visible :
-                Windows.UI.Core.AppViewBackButtonVisibility.collapsed;
-        };
+    var navigationManager = Windows.UI.Core.SystemNavigationManager.getForCurrentView();
+    // Inject a listener for the backbutton on the document.
+    backButtonChannel.onHasSubscribersChange = function () {
+        // If we just attached the first handler or detached the last handler,
+        // let native know we need to override the back button.
+        navigationManager.appViewBackButtonVisibility = (this.numHandlers > 0) ?
+            Windows.UI.Core.AppViewBackButtonVisibility.visible :
+            Windows.UI.Core.AppViewBackButtonVisibility.collapsed;
+    };
 
-        navigationManager.addEventListener("backrequested", backRequestedHandler, false);
-    } else { // Windows 8.1 Phone
-        // inject new back button handler
-        app.onbackclick = backRequestedHandler;
-    }
+    navigationManager.addEventListener("backrequested", backRequestedHandler, false);
 }

@@ -71,8 +71,7 @@ DeploymentTool.prototype.uninstallAppPackage = function (packageInfo, targetDevi
 };
 
 /**
- * Gets a list of installed apps on the target device.  This function is not supported for
- * Windows Phone 8.1.
+ * Gets a list of installed apps on the target device.
  * @param targetDevice {Object} An object returned from a successful call to enumerateDevices.
  * @returns A Promise for an array of app names.
  */
@@ -95,11 +94,7 @@ DeploymentTool.prototype.launchApp = function (packageInfo, targetDevice) {
  * @param targetOsVersion {String} The version of the
  */
 DeploymentTool.getDeploymentTool = function (targetOsVersion) {
-    if (targetOsVersion === '8.1') {
-        return new AppDeployCmdTool(targetOsVersion);
-    } else {
-        return new WinAppDeployCmdTool(targetOsVersion);
-    }
+    return new WinAppDeployCmdTool(targetOsVersion);
 };
 
 // DeviceInfo is an opaque object passed to install/uninstall.

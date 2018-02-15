@@ -116,9 +116,6 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
     if (isPhoneSwitch || noSwitches) { // if --phone or no arg
         var windowsPhoneTargetVersion = configXML.getWindowsPhoneTargetVersion();
         switch (windowsPhoneTargetVersion.toLowerCase()) {
-        case '8.1':
-            targets.push(projFiles.phone);
-            break;
         case '10.0':
         case 'uap':
         case 'uwp':
@@ -137,15 +134,6 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
     // apply build target override if one was specified
     if (projOverride) {
         switch (projOverride.toLowerCase()) {
-        case '8.1':
-            targets = [projFiles.win, projFiles.phone];
-            break;
-        case '8.1-phone':
-            targets = [projFiles.phone];
-            break;
-        case '8.1-win':
-            targets = [projFiles.win];
-            break;
         case 'uap':
         case 'uwp':
             targets = [projFiles.win10];

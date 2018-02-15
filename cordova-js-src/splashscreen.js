@@ -19,15 +19,14 @@
  *
 */
 
-var isWp81 = navigator.appVersion.indexOf("Windows Phone 8.1") !== -1;
 var isWp10 = navigator.appVersion.indexOf("Windows Phone 10") !== -1;
-var isPhoneDevice = isWp81 || isWp10;
+var isPhoneDevice = isWp10;
 var isWin10UWP = navigator.appVersion.indexOf('MSAppHost/3.0') !== -1;
 var isHosted = window.location.protocol.indexOf('http') === 0;
 var isMsAppxWeb = window.location.protocol.indexOf('ms-appx-web') === 0;
 
 var schema = (isHosted || isWin10UWP && isMsAppxWeb) ? 'ms-appx-web' : 'ms-appx';
-var fileName = isWp81 ? 'splashscreenphone.png' : 'splashscreen.png';
+var fileName = 'splashscreen.png';
 var splashImageSrc = schema + ':///images/' + fileName;
 
 var splashElement = null,

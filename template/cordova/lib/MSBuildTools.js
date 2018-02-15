@@ -59,13 +59,7 @@ MSBuildTools.prototype.buildProject = function (projFile, buildType, buildarch, 
     var promise;
 
     // Check if SDK required to build the respective platform is present. If not present, return with corresponding error, else call msbuild.
-    if (projFile.indexOf('CordovaApp.Phone.jsproj') > -1) {
-        promise = checkPhoneSDK();
-    } else if (projFile.indexOf('CordovaApp.Windows.jsproj') > -1) {
-        promise = checkWinSDK('8.1');
-    } else {
-        promise = checkWinSDK('10.0');
-    }
+    promise = checkWinSDK('10.0');
 
     return promise.then(function () {
         console.log('buildProject spawn:', path.join(that.path, 'msbuild'), [projFile].concat(args), { stdio: 'inherit' });
