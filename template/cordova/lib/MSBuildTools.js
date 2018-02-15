@@ -188,6 +188,10 @@ function checkMSBuildVersion (version) {
 module.exports.getLatestMatchingMSBuild = function (selectedBuildTargets) {
     events.emit('verbose', 'getLatestMatchingMSBuild');
     console.log('getLatestMatchingMSBuild', selectedBuildTargets);
+    // TODO
+    // 1. findAllAvailableVersions
+    // 2. filter down to versions that can build all selectedBuildTargets
+    // 3. filter for latest one of those
     return this.getLatestMSBuild()
         .then(function (msbuild) {
             // filter targets to make sure they are supported on this development machine
