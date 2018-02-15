@@ -50,7 +50,6 @@ var SUPPORTED_IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg'];
 var SPLASH_SCREEN_SIZE_LIMIT = 200 * 1024; // 200 KBytes
 var TARGET_PROJECT_10 = 'TARGET_PROJECT_10';
 var SPLASH_SCREEN_DESKTOP_TARGET_NAME = 'SplashScreen';
-var SPLASH_SCREEN_PHONE_TARGET_NAME = 'SplashScreenPhone';
 
 /** Note: this is only for backward compatibility, since it is being called directly from windows_parser */
 module.exports.applyPlatformConfig = function () {
@@ -321,7 +320,7 @@ var PLATFORM_IMAGES = [
     {dest: 'Square150x150Logo.scale-240', width: 360, height: 360},
     {dest: 'Square310x310Logo.scale-100', width: 310, height: 310},
     {dest: 'Wide310x150Logo.scale-100', width: 310, height: 150},
-    {dest: 'Wide310x150Logo.scale-240', width: 744, height: 360},
+    {dest: 'Wide310x150Logo.scale-240', width: 744, height: 360}
 ];
 
 function findPlatformImage (width, height) {
@@ -555,10 +554,6 @@ function updateSplashScreenImageExtensions (cordovaProject, locations) {
 
     var desktopSplashScreen = splashScreens.filter(function (img) {
         return checkTargetMatchAndUpdateUsedExtensions(img, SPLASH_SCREEN_DESKTOP_TARGET_NAME);
-    })[0];
-
-    var phoneSplashScreen = splashScreens.filter(function (img) {
-        return checkTargetMatchAndUpdateUsedExtensions(img, SPLASH_SCREEN_PHONE_TARGET_NAME);
     })[0];
 
     checkThatExtensionsAreNotMixed();

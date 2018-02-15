@@ -21,7 +21,6 @@ var rewire = require('rewire');
 var deployment = rewire('../../template/cordova/lib/deployment');
 var Q = require('q');
 var path = require('path');
-var AppDeployCmdTool = deployment.__get__('AppDeployCmdTool');
 var WinAppDeployCmdTool = deployment.__get__('WinAppDeployCmdTool');
 
 var TEST_APP_PACKAGE_NAME = '"c:\\testapppackage.appx"';

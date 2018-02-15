@@ -81,7 +81,7 @@ module.exports.run = function (options) {
         .then(function (pkg) {
             events.emit('log', 'Deploying ' + pkg.type + ' package to ' + deployTarget + ':\n' + pkg.appx);
             switch (pkg.type) {
-            case 'phone':
+            case 'phone': // TODO remove I guess?
                 return packages.deployToPhone(pkg, deployTarget, args.win10tools)
                     .catch(function (e) {
                         if (options.target || options.emulator || options.device) {
@@ -100,22 +100,14 @@ module.exports.run = function (options) {
                     }
                     return packages.deployToPhone(pkg, deployTarget, true);
                 } else {
-                    return packages.deployToDesktop(pkg, deployTarget, projectType);
+                    return packages.deployToDesktop(pkg, deployTarget);
                 }
                 break; /* eslint no-unreachable : 0 */
             default: // 'windows'
-                return packages.deployToDesktop(pkg, deployTarget, projectType);
+                return packages.deployToDesktop(pkg, deployTarget);
             }
         });
 };
-
-// TODO remove as only one project type
-// Retrieves project type for the project file specified.
-// @param   {String}  projFile Project file, for example 'CordovaApp.Windows10.jsproj'
-// @returns {String}  Proejct type, for example 'windows10'
-function projFileToType (projFile) {
-    return projFile.replace(/CordovaApp|jsproj|\./gi, '').toLowerCase();
-}
 
 /**
  * Checks if current process is an with administrative permissions (e.g. from

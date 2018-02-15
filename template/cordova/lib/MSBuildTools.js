@@ -41,9 +41,6 @@ MSBuildTools.prototype.buildProject = function (projFile, buildType, buildarch, 
     var checkWinSDK = function (target_platform) {
         return require('./check_reqs').isWinSDKPresent(target_platform);
     };
-    var checkPhoneSDK = function () {
-        return require('./check_reqs').isPhoneSDKPresent();
-    };
 
     // default build args
     var args = ['/clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal', '/nologo',
@@ -275,7 +272,6 @@ function filterSupportedTargets (targets, msbuild) {
     }
 
     var targetFilters = {
-        '12.0': msBuild12TargetsFilter,
         '14.0': msBuild14TargetsFilter,
         '15.x': msBuild15TargetsFilter,
         '15.5': msBuild155TargetsFilter,

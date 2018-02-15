@@ -60,8 +60,8 @@ describe('PlatformMunger', function () {
     describe('apply_file_munge method', function () {
 
         it('should call parent\'s method with the same parameters', function () {
-            munger.apply_file_munge(WINDOWS_MANIFEST, munge, false);
-            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalledWith(WINDOWS_MANIFEST, munge, false);
+            munger.apply_file_munge(WINDOWS10_MANIFEST, munge, false);
+            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalledWith(WINDOWS10_MANIFEST, munge, false);
         });
 
         it('should additionally call parent\'s method with another munge if removing changes from windows 10 appxmanifest', function () {
@@ -96,7 +96,7 @@ describe('Capabilities within package.windows.appxmanifest', function () {
         shell.mkdir('-p', testDir);
         shell.cp('-rf', windowsProject + '/*', testDir);
         windowsPlatform = path.join(testDir, 'platforms/windows');
-        windowsManifest = path.join(windowsPlatform, WINDOWS_MANIFEST);
+        windowsManifest = path.join(windowsPlatform, WINDOWS10_MANIFEST);
         windowsManifest10 = path.join(windowsPlatform, WINDOWS10_MANIFEST);
         dummyPluginInfo = new PluginInfo(dummyPlugin);
         api = new Api();

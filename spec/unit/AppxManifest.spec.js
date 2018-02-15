@@ -47,7 +47,7 @@ describe('AppxManifest', function () {
 
         it('Test #000 : should create a new AppxManifest instance', function () {
             var manifest;
-            expect(function () { manifest = new AppxManifest(WINDOWS_MANIFEST); }).not.toThrow();
+            expect(function () { manifest = new AppxManifest(WINDOWS_10_MANIFEST); }).not.toThrow();
             expect(manifest instanceof AppxManifest).toBe(true);
         });
 
@@ -60,7 +60,7 @@ describe('AppxManifest', function () {
         });
 
         it('Test #003 : should add ":" to manifest prefix if needed', function () {
-            expect(new AppxManifest(WINDOWS_MANIFEST, 'prefix').prefix).toEqual('prefix:');
+            expect(new AppxManifest(WINDOWS_10_MANIFEST, 'prefix').prefix).toEqual('prefix:');
         });
     });
 
@@ -103,12 +103,12 @@ describe('AppxManifest', function () {
     describe('static get() method', function () {
 
         it('Test #008 : should return an AppxManifest instance', function () {
-            expect(AppxManifest.get(WINDOWS_MANIFEST) instanceof AppxManifest).toBe(true);
+            expect(AppxManifest.get(WINDOWS_10_MANIFEST) instanceof AppxManifest).toBe(true);
         });
 
         it('Test #009 : should detect manifest prefix based on "Package" element attributes', function () {
-            expect(AppxManifest.get(WINDOWS_MANIFEST).prefix).toEqual('m2:');
-            expect(AppxManifest.get(WINDOWS_PHONE_MANIFEST).prefix).toEqual('m3:');
+            expect(AppxManifest.get(WINDOWS_10_MANIFEST).prefix).toEqual('m2:');
+            expect(AppxManifest.get(WINDOWS_10_MANIFEST).prefix).toEqual('m3:');
         });
 
         it('Test #010 : should instantiate either AppxManifest or Windows 10 AppxManifest based on manifest prefix', function () {
@@ -155,7 +155,7 @@ describe('AppxManifest', function () {
         var methods = ['getPhoneIdentity', 'getIdentity', 'getProperties', 'getApplication', 'getVisualElements'];
 
         it('Test #014 : should exists', function () {
-            var manifest = AppxManifest.get(WINDOWS_PHONE_MANIFEST);
+            var manifest = AppxManifest.get(WINDOWS_10_MANIFEST);
             var emptyManifest = AppxManifest.get('/no/prefixed');
 
             methods.forEach(function (method) {
@@ -187,7 +187,7 @@ describe('AppxManifest', function () {
         });
 
         it('Test #017 : setForegroundText should change the ForegroundText property on non-Windows 10 platforms', function () {
-            var visualElementsWindows = AppxManifest.get(WINDOWS_MANIFEST).getVisualElements();
+            var visualElementsWindows = AppxManifest.get(WINDOWS_10_MANIFEST).getVisualElements();
             var visualElementsWindows10 = AppxManifest.get(WINDOWS_10_MANIFEST).getVisualElements();
 
             var foregroundTextLight = 'light';

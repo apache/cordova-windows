@@ -330,7 +330,7 @@ function createMockConfigAndManifestForDescription (description) {
         getPreference: function () { }
     };
 
-    var manifest = AppxManifest.get(Win81ManifestPath, /* ignoreCache= */true);
+    var manifest = AppxManifest.get(Win10ManifestPath, /* ignoreCache= */true);
     spyOn(fs, 'writeFileSync');
 
     return { config: config, manifest: manifest };
