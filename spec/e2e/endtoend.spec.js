@@ -239,7 +239,7 @@ describe('Cordova create and build', function () {
 
     // this will be move up again when it is fixed for VS 2017 on AppVeyor
     it('spec.6a should generate appxupload and appxbundle for Windows 10 project bundle release build', function () {
-        shell.exec(buildScriptPath + ' --release --bundle --archs=\"x64 x86 arm\" --buildFlag /clp:Verbosity=detailed', {silent: silent});
+        shell.exec(buildScriptPath + ' --release --bundle --archs=\"x64 x86 arm\" --buildFlag /clp:Verbosity=diagnostic', {silent: silent});
         _expectExist(/.*bundle\.appxupload$/, 3);
         _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_Test', 'CordovaApp.Windows10_1.0.0.0_x64_x86_arm.appxbundle');
     });
