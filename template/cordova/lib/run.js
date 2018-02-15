@@ -109,6 +109,7 @@ module.exports.run = function (options) {
         });
 };
 
+// TODO remove as only one project type
 // Retrieves project type for the project file specified.
 // @param   {String}  projFile Project file, for example 'CordovaApp.Windows10.jsproj'
 // @returns {String}  Proejct type, for example 'windows10'
