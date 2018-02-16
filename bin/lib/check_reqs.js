@@ -31,6 +31,7 @@ module.exports.run = function () {
  * @return Promise<Requirement[]> Array of requirements. Due to implementation, promise is always fulfilled.
  */
 module.exports.check_all = function () {
+    // TODO less drastic as this should also look nice next to the e.g. Android req checks
     return Q.reject(new CordovaError('Embrace the platform (and just use Visual Studio).'));
 };
 
