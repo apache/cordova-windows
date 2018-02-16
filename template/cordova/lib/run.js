@@ -80,30 +80,15 @@ module.exports.run = function (options) {
     return buildPackages
         .then(function (pkg) {
             events.emit('log', 'Deploying ' + pkg.type + ' package to ' + deployTarget + ':\n' + pkg.appx);
-            switch (pkg.type) {
-            case 'phone': // TODO remove I guess?
-                return packages.deployToPhone(pkg, deployTarget, args.win10tools)
-                    .catch(function (e) {
-                        if (options.target || options.emulator || options.device) {
-                            return Q.reject(e); // Explicit target, carry on
-                        }
-                        // 'device' was inferred initially, because no target was specified
-                        return packages.deployToPhone(pkg, 'emulator', args.win10tools);
-                    });
-            case 'windows10':
-                if (args.phone) {
-                    // Win10 emulator launch is not currently supported, always force device
-                    if (options.emulator || options.target === 'emulator') {
-                        events.emit('warn', 'Windows 10 Phone emulator is currently not supported. ' +
-                                'If you want to deploy to emulator, use Visual Studio instead. ' +
-                                'Attempting to deploy to device...');
-                    }
-                    return packages.deployToPhone(pkg, deployTarget, true);
-                } else {
-                    return packages.deployToDesktop(pkg, deployTarget);
+            if (args.phone) {
+                // Win10 emulator launch is not currently supported, always force device
+                if (options.emulator || options.target === 'emulator') {
+                    events.emit('warn', 'Windows 10 Phone emulator is currently not supported. ' +
+                            'If you want to deploy to emulator, use Visual Studio instead. ' +
+                            'Attempting to deploy to device...');
                 }
-                break; /* eslint no-unreachable : 0 */
-            default: // 'windows'
+                return packages.deployToPhone(pkg, deployTarget);
+            } else {
                 return packages.deployToDesktop(pkg, deployTarget);
             }
         });
