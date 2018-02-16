@@ -339,7 +339,7 @@ module.exports.run = function () {
  * @param {String}  target_platorm        Target platform ('8.1' or '10.0')
  */
 module.exports.isWinSDKPresent = function (target_platform) {
-    return checkWinSdk(target_platform, target_platform); 
+    return checkWinSdk(target_platform, target_platform);
 };
 
 // Checks if min SDK required to build Windows Phone 8.1 project is present
