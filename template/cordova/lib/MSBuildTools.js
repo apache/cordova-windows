@@ -297,6 +297,8 @@ function filterSupportedTargets (targets, msbuild) {
     return supportedTargets;
 }
 
+// TODO Move will methods to own VisualStudio.js file as it has nothing to do with MSBuildTools
+
 /**
  * Lists all VS 2017+ instances dirs in ProgramData
  *
@@ -347,6 +349,7 @@ module.exports.getWillowInstallations = function () {
     return installations;
 };
 
+// TODO move wherever it is used and makes sense
 // returns an array of available UAP Versions
 // prepare.js
 module.exports.getAvailableUAPVersions = function () {

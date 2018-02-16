@@ -119,6 +119,7 @@ function getWindowsVersion () {
 function getInstalledVSVersions () {
     // Query all keys with Install value equal to 1, then filter out
     // those, which are not related to VS itself
+    // TODO Move to VisualStudio.js (a la MSBuildTools.js)
     return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\DevDiv\\vs\\Servicing', '/s', '/v', 'Install', '/f', '1', '/d', '/e', '/reg:32'])
         .fail(function () { return ''; })
         .then(function (output) {
@@ -132,11 +133,11 @@ function getInstalledVSVersions () {
             // If there is no VS2013 installed, the we have nothing to do
             if (installedVersions.indexOf('12.0') === -1) return installedVersions;
 
-            // special case for VS 2013. We need to check if VS2013 update 2 is installed
+            // special case for VS 2013. We need to check if at least VS2013 update 2 is installed
             return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\Updates\\Microsoft Visual Studio 2013\\vsupdate_KB2829760', '/v', 'PackageVersion', '/reg:32'])
                 .then(function (output) {
                     var updateVer = Version.fromString(/PackageVersion\s+REG_SZ\s+(.*)/i.exec(output)[1]);
-                    // if update version is lover than Update2, reject the promise
+                    // if update version is lower than Update2, reject the promise
                     if (VS2013_UPDATE2_RC.gte(updateVer)) return Q.reject();
                     return installedVersions;
                 }).fail(function () {
@@ -147,6 +148,7 @@ function getInstalledVSVersions () {
                 });
         })
         .then(function (installedVersions) {
+            // Visual Studio 2017+
             var willowVersions = MSBuildTools.getWillowInstallations().map(function (installation) {
                 return installation.version;
             });
@@ -217,9 +219,10 @@ function mapWindowsVersionToName (version) {
 
 function mapVSVersionToName (version) {
     var map = {
-        '11.0': '2012 Express for Windows',
-        '12.0': '2013 Express for Windows Update2',
-        '14.0': '2015 Community'
+        '11.0': '2012 Express for Windows (11.0)',
+        '12.0': '2013 Express for Windows Update2 (12.0)',
+        '14.0': '2015 Community (14.0)',
+        '15.5': '2017 Community (15.5)'
     };
     var majorMinor = shortenVersion(version);
     return map[majorMinor];
@@ -284,7 +287,7 @@ var checkVS = function (windowsTargetVersion, windowsPhoneTargetVersion) {
         .then(function (installedVersions) {
             var appropriateVersion = getHighestAppropriateVersion(installedVersions, vsRequiredVersion);
             return appropriateVersion
-                ? shortenVersion(appropriateVersion)
+                ? mapVSVersionToName(shortenVersion(appropriateVersion))
                 : Q.reject('Required version of Visual Studio not found. Please install Visual Studio ' +
                     mapVSVersionToName(vsRequiredVersion) +
                     ' or higher from https://www.visualstudio.com/downloads/download-visual-studio-vs');
