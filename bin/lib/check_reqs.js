@@ -347,7 +347,7 @@ module.exports.isWinSDKPresent = function (target_platform) {
 
 // Checks if min SDK required to build Windows Phone 8.1 project is present
 module.exports.isPhoneSDKPresent = function () {
-    return checkPhoneSdk('8.1', '8.1');
+    return checkPhoneSdk('8.1', '8.1'); // TODO
 };
 
 /**

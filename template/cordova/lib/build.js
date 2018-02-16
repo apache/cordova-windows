@@ -84,6 +84,8 @@ module.exports.run = function run (buildOptions) {
 function getBuildTargets (isWinSwitch, isPhoneSwitch, buildConfig) {
     buildConfig = typeof buildConfig !== 'undefined' ? buildConfig : null;
 
+    // TODO This whole method can be super simplified as there is only one target
+ 
     var configXML = new ConfigParser(path.join(ROOT, 'config.xml'));
     var targets = [];
     var noSwitches = !(isPhoneSwitch || isWinSwitch);
@@ -337,6 +339,10 @@ function buildTargets (config, myBuildTargets, msbuild) {
 
     if (shouldBundle) {
         return buildsCompleted.then(function () {
+            // msbuild isn't capable of generating bundles unless you enable bundling for each individual arch
+            // However, that generates intermediate bundles, like "CordovaApp.Windows10_0.0.1.0_x64.appxbundle"
+            // We need to clear the intermediate bundles, or else "cordova run" will fail because of too
+            // many .appxbundle files.
             return clearIntermediatesAndGetPackage(bundleTerms, config, hasAnyCpu);
         });
     } else {
@@ -347,10 +353,6 @@ function buildTargets (config, myBuildTargets, msbuild) {
 }
 
 function clearIntermediatesAndGetPackage (bundleTerms, config, hasAnyCpu) {
-    // msbuild isn't capable of generating bundles unless you enable bundling for each individual arch
-    // However, that generates intermediate bundles, like "CordovaApp.Windows10_0.0.1.0_x64.appxbundle"
-    // We need to clear the intermediate bundles, or else "cordova run" will fail because of too
-    // many .appxbundle files.
     events.emit('verbose', 'Clearing intermediates...');
     var appPackagesPath = path.join(ROOT, 'AppPackages');
     var childDirectories = shell.ls(path.join(appPackagesPath, '*')).map(function (pathName) {

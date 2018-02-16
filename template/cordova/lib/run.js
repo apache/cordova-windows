@@ -58,12 +58,13 @@ module.exports.run = function (options) {
 
     // Get build/deploy options
     var buildType = options.release ? 'release' : 'debug';
+    
     // CB-11478 Allow to specify 'archs' parameter as either cli or platform
     // option i.e. 'cordova run --archs' vs. 'cordova run -- --archs'
     var archs = options.archs || args.archs || ['anycpu'];
     if (typeof archs === 'string') { archs = archs.split(' '); }
-
     var buildArchs = archs.map(function (arch) { return arch.toLowerCase(); });
+
     var deployTarget = options.target ? options.target : (options.emulator ? 'emulator' : 'device');
 
     var buildTargets = build.getBuildTargets(args.win, args.phone);

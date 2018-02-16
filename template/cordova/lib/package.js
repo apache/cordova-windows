@@ -88,7 +88,7 @@ module.exports.getPackageFileInfo = function (packageFile) {
     var props = /.*\.(Phone|Windows|Windows10)_((?:\d*\.)*\d*)*((?:_(AnyCPU|x86|x64|ARM)){1,4})(?:(_Debug))?.(appx|appxbundle)$/i.exec(pkgName);
     if (props) {
         return {
-            type: props[1].toLowerCase(),
+            type: props[1].toLowerCase(), // TODO remove as this can be phone, windows or windows10
             arch: props[3].toLowerCase().substring(1),
             archs: props[3].toLowerCase().substring(1).split('_'),
             buildtype: props[5] ? props[5].substring(1).toLowerCase() : 'release',

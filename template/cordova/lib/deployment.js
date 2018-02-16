@@ -110,6 +110,8 @@ DeviceInfo.prototype.toString = function () {
     return this.index + '. ' + this.name + ' (' + this.type + ')';
 };
 
+// Deploy to Phone
+
 function AppDeployCmdTool (targetOsVersion) {
     if (!(this instanceof AppDeployCmdTool)) { throw new ReferenceError('Only create an AppDeployCmdTool as an instance object.'); }
 
