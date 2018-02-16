@@ -384,7 +384,7 @@ describe('Package description', function () {
         var desc = mockConfig.manifest.doc.find('.//Properties/Description');
         expect(desc).not.toMatch(/\n|\t/);
 
-        desc = mockConfig.manifest.doc.find('.//Application/:VisualElements');
+        desc = mockConfig.manifest.doc.find('.//Application/uap:VisualElements');
         expect(desc.attrib.Description).not.toMatch(/\n|\t/);
     });
 });
