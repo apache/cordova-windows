@@ -156,7 +156,11 @@ function init(config, manifest) {
         extendedSplashImage.classList.add('phone');
     }
 
-    extendedSplashProgress.classList.add('extended-splash-progress-wp10');
+    if (isWp10) {   	
+        extendedSplashProgress.classList.add('extended-splash-progress-wp10');	
+    } else {	
+        extendedSplashProgress.classList.add('extended-splash-progress-desktop');	
+    }
 
     if (!showSplashScreenSpinner) {
         extendedSplashProgress.classList.add('hidden');
