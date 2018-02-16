@@ -69,6 +69,12 @@ describe('Cordova create and build', function () {
         shell.cd(buildDirectory);
         shell.rm('-rf', projectFolder);
     });
+    
+    it('FIRST TEST spec.6a should generate appxupload and appxbundle for Windows 10 project bundle release build', function () {
+        shell.exec(buildScriptPath + ' --release --bundle --archs=\"x64 x86 arm\" --buildFlag /clp:Verbosity=diagnostic', {silent: silent});
+        _expectExist(/.*bundle\.appxupload$/, 3);
+        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_Test', 'CordovaApp.Windows10_1.0.0.0_x64_x86_arm.appxbundle');
+    });
 
     it('spec.1 should create new project', function () {
         expect(fs.existsSync(projectFolder)).toBe(true);
