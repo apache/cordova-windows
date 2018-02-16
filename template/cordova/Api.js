@@ -27,6 +27,8 @@ var PlatformJson = require('cordova-common').PlatformJson;
 var PluginInfo = require('./lib/PluginInfo').PluginInfo;
 var ConfigParser = require('./lib/ConfigParser');
 var PluginInfoProvider = require('cordova-common').PluginInfoProvider;
+var Q = require('q');
+var CordovaError = require('cordova-common').CordovaError;
 
 var PLATFORM = 'windows';
 
@@ -311,12 +313,7 @@ Api.prototype.removePlugin = function (plugin, uninstallOptions) {
  *   arhcitectures is specified.
  */
 Api.prototype.build = function (buildOptions) {
-    // TODO: Should we run check_reqs first? Android does this, but Windows appears doesn't.
-    return require('./lib/build').run.call(this, buildOptions)
-        .then(function (result) {
-            // Wrap result into array according to PlatformApi spec
-            return [result];
-        });
+    return Q.reject(new CordovaError('Embrace the platform (and just use Visual Studio).'));
 };
 
 /**
@@ -332,8 +329,7 @@ Api.prototype.build = function (buildOptions) {
  *   successfully, or rejected with CordovaError.
  */
 Api.prototype.run = function (runOptions) {
-    // TODO: Should we run check_reqs first? Android does this, but Windows appears doesn't.
-    return require('./lib/run').run.call(this, runOptions);
+    return Q.reject(new CordovaError('Embrace the platform (and just use Visual Studio).'));
 };
 
 /**
@@ -348,6 +344,7 @@ Api.prototype.clean = function (cleanOpts) {
         .then(function () {
             return require('./lib/prepare').clean.call(self, cleanOpts);
         });
+    // TODO Why not just clean.clean?
 };
 
 /**

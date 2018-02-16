@@ -17,34 +17,8 @@
        under the License.
 */
 
-var Q = require('q');
 var fs = require('fs');
 var path = require('path');
-var spawn = require('cordova-common').superspawn.spawn;
-var DeploymentTool = require('./deployment');
-
-// unblocks and returns path to WindowsStoreAppUtils.ps1
-// which provides helper functions to install/unistall/start Windows Store app
-module.exports.getAppStoreUtils = function () {
-    var appStoreUtils = path.join(__dirname, 'WindowsStoreAppUtils.ps1');
-    if (!fs.existsSync(appStoreUtils)) {
-        return Q.reject('Can\'t unblock AppStoreUtils script');
-    }
-    return spawn('powershell', ['Unblock-File', module.exports.quote(appStoreUtils)], {stdio: 'ignore'})
-        .thenResolve(appStoreUtils);
-};
-
-// returns path to AppDeploy util from Windows Phone 8.1 SDK
-module.exports.getAppDeployUtils = function (targetWin10) {
-    var version = targetWin10 ? '10.0' : '8.1';
-    var tool = DeploymentTool.getDeploymentTool(version);
-
-    if (!tool.isAvailable()) {
-        return Q.reject('App deployment utilities: "' + tool.path + '", not found.  Ensure the Windows SDK is installed.');
-    }
-
-    return Q.resolve(tool);
-};
 
 // checks to see if a .jsproj file exists in the project root
 module.exports.isCordovaProject = function (platformpath) {

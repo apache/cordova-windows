@@ -25,7 +25,6 @@ var et = require('elementtree');
 var Version = require('./Version');
 var MRTImage = require('./MRTImage');
 var AppxManifest = require('./AppxManifest');
-var MSBuildTools = require('./MSBuildTools');
 var ConfigParser = require('./ConfigParser');
 var events = require('cordova-common').events;
 var xmlHelpers = require('cordova-common').xmlHelpers;
@@ -481,9 +480,35 @@ function applyUAPVersionToProject (projectFilePath, uapVersionInfo) {
     fs.writeFileSync(projectFilePath, xml.write({ indent: 4 }), {});
 }
 
+// returns an array of available UAP Versions
+// prepare.js
+function getAvailableUAPVersions () {
+    var programFilesFolder = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
+    // No Program Files folder found, so we won't be able to find UAP SDK
+    if (!programFilesFolder) return [];
+
+    var uapFolderPath = path.join(programFilesFolder, 'Windows Kits', '10', 'Platforms', 'UAP');
+    if (!shell.test('-e', uapFolderPath)) {
+        return []; // No UAP SDK exists on this machine
+    }
+
+    var result = [];
+    shell.ls(uapFolderPath).filter(function (uapDir) {
+        return shell.test('-d', path.join(uapFolderPath, uapDir));
+    }).map(function (folder) {
+        return Version.tryParse(folder);
+    }).forEach(function (version, index) {
+        if (version) {
+            result.push(version);
+        }
+    });
+
+    return result;
+}
+
 // returns {minUAPVersion: Version, targetUAPVersion: Version} | false
 function getUAPVersions (config) {
-    var baselineVersions = MSBuildTools.getAvailableUAPVersions();
+    var baselineVersions = getAvailableUAPVersions();
     if (!baselineVersions || baselineVersions.length === 0) {
         return false;
     }
