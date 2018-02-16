@@ -69,7 +69,7 @@ describe('Cordova create and build', function () {
         shell.cd(buildDirectory);
         shell.rm('-rf', projectFolder);
     });
-    
+
     it('FIRST TEST spec.6a should generate appxupload and appxbundle for Windows 10 project bundle release build', function () {
         shell.exec(buildScriptPath + ' --release --bundle --archs=\"x64 x86 arm\" --buildFlag /clp:Verbosity=diagnostic', {silent: silent});
         _expectExist(/.*bundle\.appxupload$/, 3);
