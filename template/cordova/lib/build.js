@@ -54,7 +54,7 @@ module.exports.run = function run (buildOptions) {
     var buildConfig = parseAndValidateArgs(buildOptions);
 
     // get build targets
-    var selectedBuildTargets = getBuildTargets(buildConfig.win, buildConfig.phone, buildConfig);
+    var selectedBuildTargets = getBuildTargets(buildConfig.win, buildConfig.phone);
 
     return MSBuildTools.getLatestMatchingMSBuild(selectedBuildTargets) // get latest msbuild tools
         .then(function (result) {
@@ -81,8 +81,7 @@ module.exports.run = function run (buildOptions) {
 };
 
 // returns list of projects to be built based on config.xml and additional parameters
-function getBuildTargets (isWinSwitch, isPhoneSwitch, buildConfig) {
-    buildConfig = typeof buildConfig !== 'undefined' ? buildConfig : null;
+function getBuildTargets (isWinSwitch, isPhoneSwitch) {
 
     // TODO This whole method can be super simplified as there is only one target
  
