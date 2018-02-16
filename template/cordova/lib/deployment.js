@@ -93,8 +93,8 @@ DeploymentTool.prototype.launchApp = function (packageInfo, targetDevice) {
  * Gets a DeploymentTool to deploy to devices or emulators.
  * @param targetOsVersion {String} The version of the
  */
-DeploymentTool.getDeploymentTool = function (targetOsVersion) {
-    return new WinAppDeployCmdTool(targetOsVersion);
+DeploymentTool.getDeploymentTool = function () {
+    return new WinAppDeployCmdTool();
 };
 
 // DeviceInfo is an opaque object passed to install/uninstall.
@@ -200,11 +200,13 @@ AppDeployCmdTool.prototype.launchApp = function (packageInfo, targetDevice) {
     return spawn(this.path, ['/launch', packageInfo, '/targetdevice:' + targetDevice.__shorthand]);
 };
 
-function WinAppDeployCmdTool (targetOsVersion) {
+// Deploy to Desktop
+
+function WinAppDeployCmdTool () {
     if (!(this instanceof WinAppDeployCmdTool)) { throw new ReferenceError('Only create a WinAppDeployCmdTool as an instance object.'); }
 
     DeploymentTool.call(this);
-    this.targetOsVersion = targetOsVersion;
+    this.targetOsVersion = '10.0';
     var programFilesPath = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
     this.path = path.join(programFilesPath, 'Windows Kits', '10', 'bin', 'x86', 'WinAppDeployCmd.exe');
 }

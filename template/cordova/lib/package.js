@@ -184,14 +184,8 @@ function uninstallAppFromPhone (appDeployUtils, pkg, target) {
 }
 
 // deploys specified phone package to device/emulator and launches it
-module.exports.deployToPhone = function (pkg, deployTarget, targetWindows10, deploymentTool) {
-    var deployment;
-    if (deploymentTool) {
-        deployment = Q(deploymentTool);
-    } else {
-        deployment = utils.getAppDeployUtils(targetWindows10);
-    }
-
+module.exports.deployToPhone = function (pkg, deployTarget, deploymentTool) {
+    var deployment = utils.getAppDeployUtils();
     return deployment.then(function (deploymentTool) {
         return module.exports.findDevice(deploymentTool, deployTarget).then(function (target) {
             return uninstallAppFromPhone(deploymentTool, pkg, target)

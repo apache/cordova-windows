@@ -35,9 +35,8 @@ module.exports.getAppStoreUtils = function () {
 };
 
 // returns path to AppDeploy util from Windows Phone 8.1 SDK
-module.exports.getAppDeployUtils = function (targetWin10) {
-    var version = targetWin10 ? '10.0' : '8.1';
-    var tool = DeploymentTool.getDeploymentTool(version);
+module.exports.getAppDeployUtils = function () {
+    var tool = DeploymentTool.getDeploymentTool();
 
     if (!tool.isAvailable()) {
         return Q.reject('App deployment utilities: "' + tool.path + '", not found.  Ensure the Windows SDK is installed.');

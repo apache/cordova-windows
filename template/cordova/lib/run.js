@@ -43,7 +43,6 @@ module.exports.run = function (options) {
         'archs': [String],
         'phone': Boolean,
         'win': Boolean,
-        'win10tools': Boolean
     }, {'r': '--release'}, options.argv, 0);
 
     // Validate args
