@@ -75,7 +75,7 @@ MSBuildTools.prototype.buildProject = function (projFile, buildType, buildarch, 
 
 // check_reqs.js -> checkMSBuild()
 module.exports.findAllAvailableVersions = function () {
-    console.log('findAllAvailableVersions');
+    // console.log('findAllAvailableVersions');
 
     var msBuildPath = '';
 
@@ -111,7 +111,7 @@ module.exports.findAllAvailableVersions = function () {
 };
 
 function findAllAvailableVersionsFallBack () {
-    console.log('findAllAvailableVersionsFALLBACK');
+    // console.log('findAllAvailableVersionsFALLBACK');
 
     var versions = ['15.5', '15.0', '14.0', '12.0', '4.0'];
     events.emit('verbose', 'Searching for available MSBuild versions...');
@@ -129,7 +129,7 @@ module.exports.findAvailableVersion = function () {
     var versions = ['15.5', '15.0', '14.0', '12.0', '4.0'];
 
     return Q.all(versions.map(checkMSBuildVersion)).then(function (versions) {
-        console.log('findAvailableVersion', versions);
+        // console.log('findAvailableVersion', versions);
         // select first msbuild version available, and resolve promise with it
         var msbuildTools = versions[0] || versions[1] || versions[2] || versions[3] || versions[4];
 
@@ -144,7 +144,7 @@ module.exports.findAvailableVersion = function () {
  * @returns  Promise<MSBuildTools>  The MSBuildTools instance at specified location
  */
 module.exports.getMSBuildToolsAt = function (location) {
-    console.log('getMSBuildToolsAt', location);
+    // console.log('getMSBuildToolsAt', location);
     var msbuildExe = path.resolve(location, 'msbuild');
 
     // TODO: can we account on these params availability and printed version format?
@@ -152,13 +152,13 @@ module.exports.getMSBuildToolsAt = function (location) {
         .then(function (output) {
             // MSBuild prints its' version as 14.0.25123.0, so we pick only first 2 segments
             var version = output.match(/^(\d+\.\d+)/)[1];
-            console.log('return new MSBuildTools', version, location);
+            // console.log('return `new MSBuildTools`', version, location);
             return new MSBuildTools(version, location);
         });
 };
 
 function checkMSBuildVersion (version) {
-    console.log('checkMSBuildVersion', version);
+    // console.log('checkMSBuildVersion', version);
 
     // first, check if we have a VS 2017+ with such a version
     var willows = module.exports.getWillowInstallations();
@@ -173,11 +173,11 @@ function checkMSBuildVersion (version) {
         // super hacky: VS2017/Willow is 15.x but MSBuild is always 15.0 in path - so set that here
         version = '15.0';
         var toolsPath = path.join(correspondingWillow.path, 'MSBuild', version, 'Bin');
-        console.log('matching VS:', version, toolsPath);
-        console.log('from list of VS installations: ', correspondingWillows);
+        // console.log('matching VS:', version, toolsPath);
+        // console.log('from list of VS installations: ', correspondingWillows);
         if (shell.test('-e', toolsPath)) {
             var msbuild = module.exports.getMSBuildToolsAt(toolsPath);
-            console.log('selected VS exists:', toolsPath);
+            // console.log('selected VS exists:', toolsPath);
             // TODO check for JavaScript folder
             return msbuild;
         }
@@ -186,7 +186,7 @@ function checkMSBuildVersion (version) {
     // older vs versions that were registered in registry
     return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\' + version, '/v', 'MSBuildToolsPath'])
         .then(function (output) {
-            console.log('spawn', output);
+            // console.log('spawn', output);
             // fetch msbuild path from 'reg' output
             var toolsPath = /MSBuildToolsPath\s+REG_SZ\s+(.*)/i.exec(output);
             if (toolsPath) {
@@ -200,7 +200,7 @@ function checkMSBuildVersion (version) {
                 return new MSBuildTools(version, toolsPath);
             }
         }).catch(function (err) { /* eslint handle-callback-err : 0 */
-            console.log('no registry result for version ' + version);
+            // console.log('no registry result for version ' + version);
             // if 'reg' exits with error, assume that registry key not found
         });
 }
@@ -208,7 +208,7 @@ function checkMSBuildVersion (version) {
 // build.js -> run()
 module.exports.getLatestMatchingMSBuild = function (selectedBuildTargets) {
     events.emit('verbose', 'getLatestMatchingMSBuild');
-    console.log('getLatestMatchingMSBuild', selectedBuildTargets);
+    // console.log('getLatestMatchingMSBuild', selectedBuildTargets);
     // TODO
     // 1. findAllAvailableVersions
     // 2. filter down to versions that can build all selectedBuildTargets
@@ -243,7 +243,7 @@ module.exports.getLatestMSBuild = function () {
                     return 1;
                 });
 
-            console.log('availableVersions', availableVersions);
+            // console.log('availableVersions', availableVersions);
 
             if (availableVersions.length > 0) {
                 // After sorting the first item will be the highest version available
@@ -280,7 +280,7 @@ function msBuild155TargetsFilter (target) {
 }
 
 function filterSupportedTargets (targets, msbuild) {
-    console.log('MSBuildTools->filterSupportedTargets', targets, msbuild);
+    // console.log('MSBuildTools->filterSupportedTargets', targets, msbuild);
     if (!targets || targets.length === 0) {
         events.emit('warn', 'No build targets specified');
         return [];

@@ -269,12 +269,16 @@ var checkOS = function (windowsTargetVersion, windowsPhoneTargetVersion) {
 var checkMSBuild = function (windowsTargetVersion, windowsPhoneTargetVersion) {
     return MSBuildTools.findAllAvailableVersions()
         .then(function (msbuildToolsVersions) {
+            // console.log('msbuildToolsVersions', msbuildToolsVersions);
             var msbuildRequiredVersion = getMinimalRequiredVersionFor('msbuild', windowsTargetVersion, windowsPhoneTargetVersion);
+            // console.log('msbuildRequiredVersion', msbuildRequiredVersion);
             msbuildToolsVersions = msbuildToolsVersions.map(function (msbuildToolsVersion) {
                 return msbuildToolsVersion.version;
             });
+            // console.log('msbuildToolsVersions', msbuildToolsVersions);
 
             var appropriateVersion = getHighestAppropriateVersion(msbuildToolsVersions, msbuildRequiredVersion);
+            // console.log('appropriateVersion', appropriateVersion);
             return appropriateVersion
                 ? shortenVersion(appropriateVersion)
                 : Q.reject('MSBuild tools v.' + shortenVersion(msbuildRequiredVersion) + ' not found. ' +

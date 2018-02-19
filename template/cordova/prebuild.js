@@ -23,7 +23,7 @@
 /* eslint no-useless-escape : 0 */
 
 module.exports = function patch (platform) {
-    console.log('Prebuild: Patching platform `' + platform + '`');
+    console.log('prebuild.js: Patching platform `' + platform + '`');
 
     var shell = require('shelljs');
     var path = require('path');
@@ -75,13 +75,13 @@ module.exports = function patch (platform) {
         var subst = '$1<script type="text/javascript" src="' + basejsSrc + '"></script>\n$1$2';
 
         shell.sed('-i', appendBaseJsRe, subst, startPageFilePath);
-        console.log('Injected `base.js` reference to `' + startPage + '`');
+        console.log('- Injected `base.js` reference to `' + startPage + '`');
 
         // 4. Remove all 'wrong' base.js references, which might left from another project type build:
         for (var plat in basejsSrcMap) {
             if (plat !== platform) {
                 var wrongBaseJsRe = new RegExp('( *)(<script\\s+(?:type="text\\/javascript"\\s+)?src="' + escapedBasejsSrcMap[plat] + '">\\s*<\\/script>)(\\s*)');
-                console.log('Removing ' + wrongBaseJsRe + ' from ' + startPage);
+                console.log('- Removing ' + wrongBaseJsRe + ' from ' + startPage);
                 shell.sed('-i', wrongBaseJsRe, '$1', startPageFilePath);
             }
         }
