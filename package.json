@@ -24,7 +24,7 @@
     "eslint": "eslint bin && eslint template && eslint spec"
   },
   "dependencies": {
-    "cordova-common": "^2.2.1",
+    "cordova-common": "github:brodybits/cordova-common#plist-2-patch",
     "elementtree": "^0.1.7",
     "node-uuid": "^1.4.8",
     "nopt": "^3.0.4",
