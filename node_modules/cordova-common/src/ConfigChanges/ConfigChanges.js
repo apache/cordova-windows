@@ -79,6 +79,8 @@ function PlatformMunger_apply_file_munge (file, munge, remove) {
             if (config_file.exists) {
                 if (remove) config_file.prune_child(selector, munge.parents[selector][xml_child]);
                 else config_file.graft_child(selector, munge.parents[selector][xml_child]);
+            } else {
+                events.emit('warn', 'config file ' + file + ' requested for changes not found at ' + config_file.filepath + ', ignoring');
             }
         }
     }
