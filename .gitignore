@@ -87,6 +87,8 @@ node_modules/yargs/
 
 npm-debug.log
 
+package-lock.json
+
 # Skip testing stuff
 coverage/*
 testcreate*
