@@ -1,5 +1,5 @@
 ﻿// Platform: windows
-// 4450a4cea50616e080a82e8ede9e3d6a1fe3c3ec
+// 61a51908ef1d6e96a92e9e65e3c7166a39192f29
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
  under the License.
 */
 ;(function() {
-var PLATFORM_VERSION_BUILD_LABEL = '6.0.0';
+var PLATFORM_VERSION_BUILD_LABEL = '6.0.1-dev';
 // file: src/scripts/require.js
 
 /* jshint -W079 */
@@ -836,7 +836,7 @@ module.exports = channel;
 
 });
 
-// file: C:/Projects/Cordova/cordova-windows/cordova-js-src/confighelper.js
+// file: /Users/brodybits/Documents/cordova/cordova-windows/cordova-js-src/confighelper.js
 define("cordova/confighelper", function(require, exports, module) {
 
 // config.xml and AppxManifest.xml wrapper (non-node ConfigParser analogue)
@@ -951,7 +951,7 @@ exports.readManifest = readManifest;
 
 });
 
-// file: C:/Projects/Cordova/cordova-windows/cordova-js-src/exec.js
+// file: /Users/brodybits/Documents/cordova/cordova-windows/cordova-js-src/exec.js
 define("cordova/exec", function(require, exports, module) {
 
 /*jslint sloppy:true, plusplus:true*/
@@ -1537,7 +1537,7 @@ exports.reset();
 
 });
 
-// file: C:/Projects/Cordova/cordova-windows/cordova-js-src/platform.js
+// file: /Users/brodybits/Documents/cordova/cordova-windows/cordova-js-src/platform.js
 define("cordova/platform", function(require, exports, module) {
 
 module.exports = {
@@ -1868,7 +1868,7 @@ exports.load = function (callback) {
 
 });
 
-// file: C:/Projects/Cordova/cordova-windows/cordova-js-src/splashscreen.js
+// file: /Users/brodybits/Documents/cordova/cordova-windows/cordova-js-src/splashscreen.js
 define("cordova/splashscreen", function(require, exports, module) {
 
 var isWp81 = navigator.appVersion.indexOf("Windows Phone 8.1") !== -1;
