@@ -1,6 +1,6 @@
 {
   "name": "cordova-windows",
-  "version": "6.0.0",
+  "version": "6.0.1-dev",
   "description": "cordova-windows release",
   "bin": "bin/create",
   "main": "template/cordova/Api.js",
