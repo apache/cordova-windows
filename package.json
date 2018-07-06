@@ -25,13 +25,13 @@
   },
   "dependencies": {
     "cordova-common": "^2.2.1",
-    "elementtree": "^0.1.7",
-    "node-uuid": "^1.4.8",
-    "nopt": "^3.0.4",
-    "q": "^1.5.1",
-    "semver": "^5.5.0",
-    "shelljs": "^0.5.3",
-    "winjs": "^4.4.3"
+    "elementtree": "0.1.7",
+    "node-uuid": "1.4.8",
+    "nopt": "3.0.6",
+    "q": "1.5.1",
+    "semver": "5.5.0",
+    "shelljs": "0.5.3",
+    "winjs": "4.4.3"
   },
   "devDependencies": {
     "eslint": "^4.18.0",
