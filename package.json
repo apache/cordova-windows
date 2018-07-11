@@ -24,13 +24,18 @@
     "eslint": "eslint bin && eslint template && eslint spec"
   },
   "dependencies": {
+    "base64-js": "1.2.0",
     "cordova-common": "2.2.5",
     "elementtree": "0.1.7",
+    "glob": "5.0.15",
     "node-uuid": "1.4.8",
     "nopt": "3.0.6",
+    "plist": "2.1.0",
     "q": "1.5.1",
+    "sax": "0.3.5",
     "semver": "5.5.0",
     "shelljs": "0.5.3",
+    "xmlbuilder": "8.2.2",
     "winjs": "4.4.3"
   },
   "devDependencies": {
