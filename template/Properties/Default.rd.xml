@@ -35,6 +35,9 @@
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     THE SOFTWARE.
+
+    Source:
+    https://github.com/Microsoft/Windows-universal-samples/blob/master/SharedContent/cs/Default.rd.xml
 -->
 
 <Directives xmlns="http://schemas.microsoft.com/netfx/2013/01/metadata">
