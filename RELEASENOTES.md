@@ -20,6 +20,11 @@
 -->
 ## Release Notes for Cordova (Windows) ##
 
+### 6.0.1 (Jul 27, 2018)
+* [CB-14224](https://issues.apache.org/jira/browse/CB-14224) add license text and GitHub link to `template/Properties/Default.rd.xml`
+* [CB-14145](https://issues.apache.org/jira/browse/CB-14145) update dependencies to resolve `npm audit` issues, pinned in 6.0.x only ([GH-281](https://github.com/apache/cordova-windows/pull/281))
+* [CB-9366](https://issues.apache.org/jira/browse/CB-9366) - log `error.stack` in `cordova.js` (update from `cordova-js@4.2.4`) in `6.0.x`
+
 ### 6.0.0 (Feb 19, 2018)
 
 * [CB-12895](https://issues.apache.org/jira/browse/CB-12895) `cordova.js` updates to pass `eslint` (cordova-js@4.2.2)
