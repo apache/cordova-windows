@@ -31,12 +31,6 @@ environment:
     - nodejs_version: "6"
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
 
-    - nodejs_version: "4"
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-
-    - nodejs_version: "4"
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-
 matrix:
   allow_failures:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017

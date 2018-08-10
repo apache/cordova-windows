@@ -45,6 +45,10 @@
     "jasmine": "^2.99.0",
     "rewire": "^2.5.1"
   },
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "engineStrict": true,
   "bundledDependencies": [
     "cordova-common",
     "elementtree",
