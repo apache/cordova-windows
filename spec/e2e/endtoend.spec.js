@@ -31,12 +31,13 @@ var PluginInfo = require('cordova-common').PluginInfo;
 describe('Cordova create and build', function () {
 
     var projectFolder = 'testcreate 応用';
+    var projectTemplateName = 'project template for e2e tests';
     var buildDirectory = path.join(__dirname, '../..');
+    var projectDirectory = path.join(buildDirectory, projectFolder);
+    var projectTemplateDirectory = path.join(buildDirectory, projectTemplateName);
     var appPackagesFolder = path.join(buildDirectory, projectFolder, 'AppPackages');
     var buildScriptPath = '"' + path.join(buildDirectory, projectFolder, 'cordova', 'build') + '"';
     var prepareScriptPath = '"' + path.join(buildDirectory, projectFolder, 'cordova', 'prepare') + '"';
-
-    var silent = false;
 
     function verifySubDirContainsFile (subDirName, fileName, count) {
         count = typeof count !== 'undefined' ? count : 1;
@@ -60,15 +61,51 @@ describe('Cordova create and build', function () {
         verifySubDirContainsFile(subDirName, fileName, count);
     }
 
-    beforeEach(function () {
+    var silent = false;
+
+    // create project once
+    beforeAll(function () {
+        // clean up first
+        shell.cd(buildDirectory);
+        shell.rm('-rf', projectTemplateName);
+        shell.rm('-rf', projectFolder);
+
+        // create and prepare project
         shell.exec(path.join('bin', 'create') + ' "' + projectFolder + '" com.test.app 応用', {silent: silent});
         shell.exec(prepareScriptPath + '', {silent: silent});
+
+        // create template dir
+        shell.cd(buildDirectory);
+        shell.mkdir(projectTemplateName);
+        // copy project over
+        shell.mv(path.join(projectDirectory, '*'), projectTemplateDirectory);
+
+        // remove generated project (but keep it as template)
+        shell.cd(buildDirectory);
+        shell.rm('-rf', projectFolder);
+        console.log('beforeAll end');
+    });
+
+    // copy project over before each test run
+    beforeEach(function () {
+        console.log('beforeEach');
+        shell.cd(buildDirectory);
+        shell.mkdir(projectFolder);
+        shell.cp('-R', path.join(projectTemplateDirectory, '*'), projectDirectory);
     });
 
     afterEach(function () {
         shell.cd(buildDirectory);
         shell.rm('-rf', projectFolder);
     });
+
+    afterAll(function () {
+        // now also remove the template project
+        shell.cd(buildDirectory);
+        shell.rm('-rf', projectTemplateName);
+    });
+
+    // Tests
 
     it('spec.1 should create new project', function () {
         expect(fs.existsSync(projectFolder)).toBe(true);
