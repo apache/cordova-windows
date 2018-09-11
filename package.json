@@ -49,16 +49,6 @@
     "node": ">=6.0.0"
   },
   "engineStrict": true,
-  "bundledDependencies": [
-    "cordova-common",
-    "elementtree",
-    "node-uuid",
-    "nopt",
-    "q",
-    "semver",
-    "shelljs",
-    "winjs"
-  ],
   "author": "Apache Software Foundation",
   "license": "Apache-2.0"
 }
