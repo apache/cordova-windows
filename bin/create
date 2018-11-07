@@ -51,7 +51,8 @@ if (argv.argv.remain[2]) config.setName(argv.argv.remain[2]);
 
 var options = {
     guid: argv.guid,
-    customTemplate: argv.argv.remain[3]
+    customTemplate: argv.argv.remain[3],
+    copyPlatformNodeModules: true
 };
 
 require('../template/cordova/lib/loggingHelper').adjustLoggerLevel(options);

@@ -74,7 +74,7 @@ module.exports.create = function (destinationDir, config, options) {
 
     // copy node_modules to cordova directory
     events.emit('verbose', 'Copying node_modules to ' + projectPath);
-    shell.cp('-r', path.join(root, 'node_modules'), path.join(projectPath, 'cordova'));
+    if (options.copyPlatformNodeModules) shell.cp('-r', path.join(root, 'node_modules'), path.join(projectPath, 'cordova'));
 
     // copy check_reqs module to cordova directory
     shell.cp('-rf', path.join(root, 'bin', 'check_reqs*'), path.join(projectPath, 'cordova'));
