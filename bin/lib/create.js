@@ -73,8 +73,11 @@ module.exports.create = function (destinationDir, config, options) {
     shell.cp('-rf', path.join(root, 'VERSION'), projectPath);
 
     // copy node_modules to cordova directory
-    events.emit('verbose', 'Copying node_modules to ' + projectPath);
-    shell.cp('-r', path.join(root, 'node_modules'), path.join(projectPath, 'cordova'));
+    let nodeModulesDir = path.join(root, 'node_modules');
+    if (fs.existsSync(nodeModulesDir)) {
+        events.emit('verbose', 'Copying node_modules to ' + projectPath);
+        shell.cp('-r', nodeModulesDir, path.join(projectPath, 'cordova'));
+    }
 
     // copy check_reqs module to cordova directory
     shell.cp('-rf', path.join(root, 'bin', 'check_reqs*'), path.join(projectPath, 'cordova'));
