@@ -41,13 +41,6 @@ try {
 // reference: https://msdn.microsoft.com/en-us/library/bb164659(v=vs.120).aspx
 var VS2013_UPDATE2_RC = new Version(12, 0, 30324);
 var REQUIRED_VERSIONS = {
-    '8.1': {
-        os: '6.3',
-        msbuild: '12.0',
-        visualstudio: '12.0',
-        windowssdk: '8.1',
-        phonesdk: '8.1'
-    },
     '10.0': {
         // Note that Windows 10 target is also supported on Windows 7, so this should look
         // like '6.1 || >=6.3', but due to Version module restricted functionality we handle
@@ -68,6 +61,11 @@ function getMinimalRequiredVersionFor (requirement, windowsTargetVersion, window
     if (windowsPhoneTargetVersion === '8' || windowsPhoneTargetVersion === '8.0') {
         throw new CordovaError('8.0 is not a valid version for windows-phone-target-version (use the wp8 Cordova platform instead)');
     }
+
+    if (windowsTargetVersion === '8.1' || windowsPhoneTargetVersion === '8.1') {
+        throw new CordovaError('Windows (Phone) 8.1 projects are deprecated. To use you may downgrade to cordova-windows@6.');
+    }
+
     var windowsReqVersion = Version.tryParse(REQUIRED_VERSIONS[windowsTargetVersion][requirement]);
     var phoneReqVersion = Version.tryParse(REQUIRED_VERSIONS[windowsPhoneTargetVersion][requirement]);
 
@@ -121,6 +119,7 @@ function getWindowsVersion () {
 function getInstalledVSVersions () {
     // Query all keys with Install value equal to 1, then filter out
     // those, which are not related to VS itself
+    // TODO Move to VisualStudio.js (a la MSBuildTools.js)
     return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\DevDiv\\vs\\Servicing', '/s', '/v', 'Install', '/f', '1', '/d', '/e', '/reg:32'])
         .fail(function () { return ''; })
         .then(function (output) {
@@ -134,11 +133,11 @@ function getInstalledVSVersions () {
             // If there is no VS2013 installed, the we have nothing to do
             if (installedVersions.indexOf('12.0') === -1) return installedVersions;
 
-            // special case for VS 2013. We need to check if VS2013 update 2 is installed
+            // special case for VS 2013. We need to check if at least VS2013 update 2 is installed
             return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\Updates\\Microsoft Visual Studio 2013\\vsupdate_KB2829760', '/v', 'PackageVersion', '/reg:32'])
                 .then(function (output) {
                     var updateVer = Version.fromString(/PackageVersion\s+REG_SZ\s+(.*)/i.exec(output)[1]);
-                    // if update version is lover than Update2, reject the promise
+                    // if update version is lower than Update2, reject the promise
                     if (VS2013_UPDATE2_RC.gte(updateVer)) return Q.reject();
                     return installedVersions;
                 }).fail(function () {
@@ -149,6 +148,7 @@ function getInstalledVSVersions () {
                 });
         })
         .then(function (installedVersions) {
+            // Visual Studio 2017+
             var willowVersions = MSBuildTools.getWillowInstallations().map(function (installation) {
                 return installation.version;
             });
@@ -179,26 +179,15 @@ function getInstalledWindowsSdks () {
 }
 
 /**
- * Gets list of installed Windows Phone SDKs. Separately searches for 8.1 Phone
- *   SDK and Windows 10 SDK, because the latter is needed for both Windows and
- *   Windows Phone applications.
+ * Gets list of installed Windows Phone SDKs.
  *
  * @return  {Version[]}  List of installed Phone SDKs' versions.
  */
 function getInstalledPhoneSdks () {
     var installedSdks = [];
-    return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows Phone\\v8.1', '/v', 'InstallationFolder', '/reg:32'])
+    return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v10.0', '/v', 'InstallationFolder', '/reg:32'])
         .fail(function () { return ''; })
         .then(function (output) {
-            var match = /\\Microsoft SDKs\\Windows Phone\\v(\d+\.\d+)\s*InstallationFolder\s+REG_SZ\s+(.*)/gim.exec(output);
-            if (match && shell.test('-e', path.join(match[2], 'SDKManifest.xml'))) {
-                installedSdks.push(Version.tryParse(match[1]));
-            }
-        }).then(function () {
-            return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v10.0', '/v', 'InstallationFolder', '/reg:32']);
-        }).fail(function () {
-            return '';
-        }).then(function (output) {
             var match = /\\Microsoft SDKs\\Windows\\v(\d+\.\d+)\s*InstallationFolder\s+REG_SZ\s+(.*)/gim.exec(output);
             if (match && shell.test('-e', path.join(match[2], 'SDKManifest.xml'))) {
                 installedSdks.push(Version.tryParse(match[1]));
@@ -230,9 +219,10 @@ function mapWindowsVersionToName (version) {
 
 function mapVSVersionToName (version) {
     var map = {
-        '11.0': '2012 Express for Windows',
-        '12.0': '2013 Express for Windows Update2',
-        '14.0': '2015 Community'
+        '11.0': '2012 Express for Windows (11.0)',
+        '12.0': '2013 Express for Windows Update2 (12.0)',
+        '14.0': '2015 Community (14.0)',
+        '15.5': '2017 Community (15.5)'
     };
     var majorMinor = shortenVersion(version);
     return map[majorMinor];
@@ -297,14 +287,14 @@ var checkVS = function (windowsTargetVersion, windowsPhoneTargetVersion) {
         .then(function (installedVersions) {
             var appropriateVersion = getHighestAppropriateVersion(installedVersions, vsRequiredVersion);
             return appropriateVersion
-                ? shortenVersion(appropriateVersion)
+                ? mapVSVersionToName(shortenVersion(appropriateVersion))
                 : Q.reject('Required version of Visual Studio not found. Please install Visual Studio ' +
                     mapVSVersionToName(vsRequiredVersion) +
                     ' or higher from https://www.visualstudio.com/downloads/download-visual-studio-vs');
         });
 };
 
-var checkWinSdk = function (windowsTargetVersion, windowsPhoneTargetVersion) {
+var checkWinSdk = function (windowsTargetVersion, windowsPhoneTargetVersion) { // TODO remove phone?
     return getInstalledWindowsSdks()
         .then(function (installedSdks) {
             var requiredVersion = getMinimalRequiredVersionFor('windowssdk', windowsTargetVersion, windowsPhoneTargetVersion);
@@ -352,12 +342,12 @@ module.exports.run = function () {
  * @param {String}  target_platorm        Target platform ('8.1' or '10.0')
  */
 module.exports.isWinSDKPresent = function (target_platform) {
-    return checkWinSdk(target_platform, '8.1');
+    return checkWinSdk(target_platform, target_platform);
 };
 
 // Checks if min SDK required to build Windows Phone 8.1 project is present
 module.exports.isPhoneSDKPresent = function () {
-    return checkPhoneSdk('8.1', '8.1');
+    return checkPhoneSdk('8.1', '8.1'); // TODO
 };
 
 /**

@@ -71,8 +71,7 @@ DeploymentTool.prototype.uninstallAppPackage = function (packageInfo, targetDevi
 };
 
 /**
- * Gets a list of installed apps on the target device.  This function is not supported for
- * Windows Phone 8.1.
+ * Gets a list of installed apps on the target device.
  * @param targetDevice {Object} An object returned from a successful call to enumerateDevices.
  * @returns A Promise for an array of app names.
  */
@@ -94,12 +93,8 @@ DeploymentTool.prototype.launchApp = function (packageInfo, targetDevice) {
  * Gets a DeploymentTool to deploy to devices or emulators.
  * @param targetOsVersion {String} The version of the
  */
-DeploymentTool.getDeploymentTool = function (targetOsVersion) {
-    if (targetOsVersion === '8.1') {
-        return new AppDeployCmdTool(targetOsVersion);
-    } else {
-        return new WinAppDeployCmdTool(targetOsVersion);
-    }
+DeploymentTool.getDeploymentTool = function () {
+    return new WinAppDeployCmdTool();
 };
 
 // DeviceInfo is an opaque object passed to install/uninstall.
@@ -114,6 +109,8 @@ function DeviceInfo (deviceIndex, deviceName, deviceType) {
 DeviceInfo.prototype.toString = function () {
     return this.index + '. ' + this.name + ' (' + this.type + ')';
 };
+
+// Deploy to Phone
 
 function AppDeployCmdTool (targetOsVersion) {
     if (!(this instanceof AppDeployCmdTool)) { throw new ReferenceError('Only create an AppDeployCmdTool as an instance object.'); }
@@ -205,11 +202,13 @@ AppDeployCmdTool.prototype.launchApp = function (packageInfo, targetDevice) {
     return spawn(this.path, ['/launch', packageInfo, '/targetdevice:' + targetDevice.__shorthand]);
 };
 
-function WinAppDeployCmdTool (targetOsVersion) {
+// Deploy to Desktop
+
+function WinAppDeployCmdTool () {
     if (!(this instanceof WinAppDeployCmdTool)) { throw new ReferenceError('Only create a WinAppDeployCmdTool as an instance object.'); }
 
     DeploymentTool.call(this);
-    this.targetOsVersion = targetOsVersion;
+    this.targetOsVersion = '10.0';
     var programFilesPath = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
     this.path = path.join(programFilesPath, 'Windows Kits', '10', 'bin', 'x86', 'WinAppDeployCmd.exe');
 }

@@ -33,13 +33,9 @@ var events = require('cordova-common').events;
 var CordovaError = require('cordova-common').CordovaError;
 
 var projFiles = {
-    phone: 'CordovaApp.Phone.jsproj',
-    win: 'CordovaApp.Windows.jsproj',
     win10: 'CordovaApp.Windows10.jsproj'
 };
 var projFilesToManifests = {
-    'CordovaApp.Phone.jsproj': 'package.phone.appxmanifest',
-    'CordovaApp.Windows.jsproj': 'package.windows.appxmanifest',
     'CordovaApp.Windows10.jsproj': 'package.windows10.appxmanifest'
 };
 
@@ -58,7 +54,7 @@ module.exports.run = function run (buildOptions) {
     var buildConfig = parseAndValidateArgs(buildOptions);
 
     // get build targets
-    var selectedBuildTargets = getBuildTargets(buildConfig.win, buildConfig.phone, buildConfig.projVerOverride, buildConfig);
+    var selectedBuildTargets = getBuildTargets(buildConfig.win, buildConfig.phone);
 
     return MSBuildTools.getLatestMatchingMSBuild(selectedBuildTargets) // get latest msbuild tools
         .then(function (result) {
@@ -84,9 +80,10 @@ module.exports.run = function run (buildOptions) {
         });
 };
 
-// returns list of projects to be built based on config.xml and additional parameters (-appx)
-function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig) {
-    buildConfig = typeof buildConfig !== 'undefined' ? buildConfig : null;
+// returns list of projects to be built based on config.xml and additional parameters
+function getBuildTargets (isWinSwitch, isPhoneSwitch) {
+
+    // TODO This whole method can be super simplified as there is only one target
 
     var configXML = new ConfigParser(path.join(ROOT, 'config.xml'));
     var targets = [];
@@ -100,8 +97,7 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
         case '8.0':
             throw new CordovaError('windows8 platform is deprecated. To use windows-target-version=8.0 you must downgrade to cordova-windows@4.');
         case '8.1':
-            targets.push(projFiles.win);
-            break;
+            throw new CordovaError('windows8.1 platform is deprecated. To use windows-target-version=8.1 you must downgrade to cordova-windows@6.');
         case '10.0':
         case 'uap':
         case 'uwp':
@@ -116,9 +112,6 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
     if (isPhoneSwitch || noSwitches) { // if --phone or no arg
         var windowsPhoneTargetVersion = configXML.getWindowsPhoneTargetVersion();
         switch (windowsPhoneTargetVersion.toLowerCase()) {
-        case '8.1':
-            targets.push(projFiles.phone);
-            break;
         case '10.0':
         case 'uap':
         case 'uwp':
@@ -131,48 +124,6 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
             break;
         default:
             throw new CordovaError('Unsupported windows-phone-target-version value: ' + windowsPhoneTargetVersion);
-        }
-    }
-
-    // apply build target override if one was specified
-    if (projOverride) {
-        switch (projOverride.toLowerCase()) {
-        case '8.1':
-            targets = [projFiles.win, projFiles.phone];
-            break;
-        case '8.1-phone':
-            targets = [projFiles.phone];
-            break;
-        case '8.1-win':
-            targets = [projFiles.win];
-            break;
-        case 'uap':
-        case 'uwp':
-            targets = [projFiles.win10];
-            break;
-        default:
-            events.emit('warn', 'Ignoring unrecognized --appx parameter passed to build: "' + projOverride + '"');
-            break;
-        }
-    }
-
-    if (buildConfig !== null) {
-        // As part of reworking how build and package determine the winning project, set the 'target type' project
-        // as part of build configuration.  This will be used for determining the binary to 'run' after build is done.
-        if (targets.length > 0) {
-            switch (targets[0]) {
-            case projFiles.phone:
-                buildConfig.targetProject = 'phone';
-                break;
-            case projFiles.win10:
-                buildConfig.targetProject = 'windows10';
-                break;
-            case projFiles.win:
-                /* falls through */
-            default:
-                buildConfig.targetProject = 'windows';
-                break;
-            }
         }
     }
 
@@ -193,7 +144,6 @@ function parseAndValidateArgs (options) {
     // parse and validate args
     var args = nopt({
         'archs': [String],
-        'appx': String,
         'phone': Boolean,
         'win': Boolean,
         'bundle': Boolean,
@@ -224,7 +174,7 @@ function parseAndValidateArgs (options) {
 
     config.phone = !!args.phone;
     config.win = !!args.win;
-    config.projVerOverride = args.appx;
+
     // only set config.bundle if architecture is not anycpu
     if (args.bundle) {
         if (config.buildArchs.length > 1 && (config.buildArchs.indexOf('anycpu') > -1 || config.buildArchs.indexOf('any cpu') > -1)) {
@@ -378,7 +328,7 @@ function buildTargets (config, myBuildTargets, msbuild) {
             }
 
             // https://issues.apache.org/jira/browse/CB-12298
-            if (config.targetProject === 'windows10' && config.buildType === 'release') {
+            if (config.buildType === 'release') {
                 otherProperties.push('/p:UapAppxPackageBuildMode=StoreUpload');
             }
 
@@ -388,20 +338,20 @@ function buildTargets (config, myBuildTargets, msbuild) {
 
     if (shouldBundle) {
         return buildsCompleted.then(function () {
+            // msbuild isn't capable of generating bundles unless you enable bundling for each individual arch
+            // However, that generates intermediate bundles, like "CordovaApp.Windows10_0.0.1.0_x64.appxbundle"
+            // We need to clear the intermediate bundles, or else "cordova run" will fail because of too
+            // many .appxbundle files.
             return clearIntermediatesAndGetPackage(bundleTerms, config, hasAnyCpu);
         });
     } else {
         return buildsCompleted.then(function () {
-            return pckage.getPackage(config.targetProject, config.buildType, config.buildArchs[0]);
+            return pckage.getPackage(config.buildType, config.buildArchs[0]);
         });
     }
 }
 
 function clearIntermediatesAndGetPackage (bundleTerms, config, hasAnyCpu) {
-    // msbuild isn't capable of generating bundles unless you enable bundling for each individual arch
-    // However, that generates intermediate bundles, like "CordovaApp.Windows10_0.0.1.0_x64.appxbundle"
-    // We need to clear the intermediate bundles, or else "cordova run" will fail because of too
-    // many .appxbundle files.
     events.emit('verbose', 'Clearing intermediates...');
     var appPackagesPath = path.join(ROOT, 'AppPackages');
     var childDirectories = shell.ls(path.join(appPackagesPath, '*')).map(function (pathName) {

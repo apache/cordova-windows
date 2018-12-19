@@ -265,15 +265,15 @@ describe('run method', function () {
 
         run.run({ nobuild: true, argv: ['--archs=arm'] })
             .then(function () {
-                expect(packages.getPackage).toHaveBeenCalledWith(anyString, anyString, 'arm');
-                expect(packages.deployToDesktop).toHaveBeenCalledWith(expectedDeployOptions, anyString, anyString);
+                expect(packages.getPackage).toHaveBeenCalledWith(anyString, 'arm');
+                expect(packages.deployToDesktop).toHaveBeenCalledWith(expectedDeployOptions, anyString);
             })
             .then(function () {
                 return run.run({ nobuild: true, archs: 'arm' });
             })
             .then(function () {
-                expect(packages.getPackage).toHaveBeenCalledWith(anyString, anyString, 'arm');
-                expect(packages.deployToDesktop).toHaveBeenCalledWith(expectedDeployOptions, anyString, anyString);
+                expect(packages.getPackage).toHaveBeenCalledWith(anyString, 'arm');
+                expect(packages.deployToDesktop).toHaveBeenCalledWith(expectedDeployOptions, anyString);
             })
             .catch(fail)
             .finally(function () {
@@ -295,8 +295,8 @@ describe('run method', function () {
 
         run.run({nobuild: true})
             .then(function () {
-                expect(packages.getPackage).toHaveBeenCalledWith(anyString, anyString, 'anycpu');
-                expect(packages.deployToDesktop).toHaveBeenCalledWith(expectedDeployOptions, anyString, anyString);
+                expect(packages.getPackage).toHaveBeenCalledWith(anyString, 'anycpu');
+                expect(packages.deployToDesktop).toHaveBeenCalledWith(expectedDeployOptions, anyString);
             })
             .catch(fail)
             .finally(function () {

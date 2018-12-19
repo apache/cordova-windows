@@ -30,7 +30,6 @@ var shell = require('shelljs');
 
 var configChanges = require('../../template/cordova/lib/ConfigChanges');
 var tempDir = path.join(os.tmpdir(), 'windows');
-var WINDOWS_MANIFEST = 'package.windows.appxmanifest';
 var WINDOWS10_MANIFEST = 'package.windows10.appxmanifest';
 var FIXTURES = path.join(__dirname, 'fixtures');
 var DUMMY_PLUGIN = 'org.test.plugins.capabilityplugin';
@@ -61,8 +60,8 @@ describe('PlatformMunger', function () {
     describe('apply_file_munge method', function () {
 
         it('should call parent\'s method with the same parameters', function () {
-            munger.apply_file_munge(WINDOWS_MANIFEST, munge, false);
-            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalledWith(WINDOWS_MANIFEST, munge, false);
+            munger.apply_file_munge(WINDOWS10_MANIFEST, munge, false);
+            expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalledWith(WINDOWS10_MANIFEST, munge, false);
         });
 
         it('should additionally call parent\'s method with another munge if removing changes from windows 10 appxmanifest', function () {
@@ -90,15 +89,14 @@ describe('PlatformMunger', function () {
 
 describe('Capabilities within package.windows.appxmanifest', function () {
 
-    var testDir, windowsPlatform, windowsManifest, windowsManifest10, dummyPluginInfo, api;
+    var testDir, windowsPlatform, windows10Manifest, dummyPluginInfo, api;
 
     beforeEach(function () {
         testDir = path.join(__dirname, 'testDir');
         shell.mkdir('-p', testDir);
         shell.cp('-rf', windowsProject + '/*', testDir);
         windowsPlatform = path.join(testDir, 'platforms/windows');
-        windowsManifest = path.join(windowsPlatform, WINDOWS_MANIFEST);
-        windowsManifest10 = path.join(windowsPlatform, WINDOWS10_MANIFEST);
+        windows10Manifest = path.join(windowsPlatform, WINDOWS10_MANIFEST);
         dummyPluginInfo = new PluginInfo(dummyPlugin);
         api = new Api();
         api.root = windowsPlatform;
@@ -128,11 +126,11 @@ describe('Capabilities within package.windows.appxmanifest', function () {
         api.addPlugin(dummyPluginInfo)
             .then(function () {
                 //  There is the one default capability in manifest with 'internetClient' name
-                expect(getManifestCapabilities(windowsManifest).length).toBe(getPluginCapabilities(dummyPluginInfo).length + 1);
+                expect(getManifestCapabilities(windows10Manifest).length).toBe(getPluginCapabilities(dummyPluginInfo).length + 1);
                 api.removePlugin(dummyPluginInfo);
             })
             .then(function () {
-                expect(getManifestCapabilities(windowsManifest).length).toBe(1);
+                expect(getManifestCapabilities(windows10Manifest).length).toBe(1);
             })
             .catch(fail)
             .finally(function () {
@@ -145,7 +143,7 @@ describe('Capabilities within package.windows.appxmanifest', function () {
         api.addPlugin(dummyPluginInfo)
             .then(function () {
                 //  There is the one default capability in manifest with 'internetClient' name
-                var manifestCapabilities = getManifestCapabilities(windowsManifest10);
+                var manifestCapabilities = getManifestCapabilities(windows10Manifest);
                 expect(manifestCapabilities.length).toBe(getPluginCapabilities(dummyPluginInfo).length + 1);
 
                 //  Count 'uap' prefixed capabilities
@@ -157,7 +155,7 @@ describe('Capabilities within package.windows.appxmanifest', function () {
                 api.removePlugin(dummyPluginInfo);
             })
             .then(function () {
-                expect(getManifestCapabilities(windowsManifest10).length).toBe(1);
+                expect(getManifestCapabilities(windows10Manifest).length).toBe(1);
             })
             .catch(fail)
             .finally(function () {
@@ -189,13 +187,11 @@ describe('Capabilities within package.windows.appxmanifest', function () {
 
         api.addPlugin(dummyPluginInfo)
             .then(function () {
-                checkCapabilitiesAfterInstall(windowsManifest);
-                checkCapabilitiesAfterInstall(windowsManifest10);
+                checkCapabilitiesAfterInstall(windows10Manifest);
                 api.removePlugin(dummyPluginInfo);
             })
             .then(function () {
-                checkCapabilitiesAfterRemove(windowsManifest);
-                checkCapabilitiesAfterRemove(windowsManifest10);
+                checkCapabilitiesAfterRemove(windows10Manifest);
             })
             .catch(fail)
             .finally(function () {
@@ -219,23 +215,7 @@ describe('generate_plugin_config_munge for windows project', function () {
         var pluginInfoProvider = new PluginInfoProvider();
         var munger = new configChanges.PlatformMunger('windows', tempDir, 'unused', null, pluginInfoProvider);
         var munge = munger.generate_plugin_config_munge(new PluginInfo(configplugin), {});
-        var windows81AppxManifest = munge.files['package.windows.appxmanifest'];
-        var winphone81AppxManifest = munge.files['package.phone.appxmanifest'];
         var windows10AppxManifest = munge.files['package.windows10.appxmanifest'];
-
-        // 1 comes from versions="=8.1.0" + 1 from versions="=8.1.0" device-target="windows"
-        expect(windows81AppxManifest.parents['/Parent/Capabilities'][0].xml).toBe('<Capability Note="should-exist-for-all-appxmanifest-target-files" />');
-        expect(windows81AppxManifest.parents['/Parent/Capabilities'][1].xml).toBe('<Capability Note="should-exist-for-win81-win-and-phone" />');
-        expect(windows81AppxManifest.parents['/Parent/Capabilities'][2].xml).toBe('<Capability Note="should-exist-for-win81-win-only" />');
-        expect(windows81AppxManifest.parents['/Parent/Capabilities'][3].xml).toBe('<Capability Note="should-exist-for-win10-and-win81-win-and-phone" />');
-        expect(windows81AppxManifest.parents['/Parent/Capabilities'].length).toBe(4);
-
-        // 1 comes from versions="=8.1.0" + 1 from versions="=8.1.0" device-target="phone"
-        expect(winphone81AppxManifest.parents['/Parent/Capabilities'][0].xml).toBe('<Capability Note="should-exist-for-all-appxmanifest-target-files" />');
-        expect(winphone81AppxManifest.parents['/Parent/Capabilities'][1].xml).toBe('<Capability Note="should-exist-for-win81-win-and-phone" />');
-        expect(winphone81AppxManifest.parents['/Parent/Capabilities'][2].xml).toBe('<Capability Note="should-exist-for-win81-phone-only" />');
-        expect(winphone81AppxManifest.parents['/Parent/Capabilities'][3].xml).toBe('<Capability Note="should-exist-for-win10-and-win81-win-and-phone" />');
-        expect(winphone81AppxManifest.parents['/Parent/Capabilities'].length).toBe(4);
 
         expect(windows10AppxManifest.parents['/Parent/Capabilities'][0].xml).toBe('<Capability Note="should-exist-for-all-appxmanifest-target-files" />');
         expect(windows10AppxManifest.parents['/Parent/Capabilities'][1].xml).toBe('<Capability Note="should-exist-for-win10-and-win81-win-and-phone" />');
@@ -246,15 +226,12 @@ describe('generate_plugin_config_munge for windows project', function () {
     it('should not process change w/o target package.appxmanifest', function () {
         var testChanges = [
             {
-                target: 'package.windows.appxmanifest'
-            },
-            {
-                target: 'package.appxmanifest'
+                target: 'package.windows10.appxmanifest'
             }
         ];
 
         var changes = AppxManifest.processChanges(testChanges);
-        expect(changes.length).toBe(4);
+        expect(changes.length).toBe(1);
         expect(changes[0].target).toBe(testChanges[0].target);
     });
 
@@ -265,9 +242,7 @@ describe('generate_plugin_config_munge for windows project', function () {
         }];
 
         var changes = AppxManifest.processChanges(testChanges);
-        expect(changes.length).toBe(3);
-        expect(changes[0].target).toBe('package.windows.appxmanifest');
-        expect(changes[1].target).toBe('package.phone.appxmanifest');
-        expect(changes[2].target).toBe('package.windows10.appxmanifest');
+        expect(changes.length).toBe(1);
+        expect(changes[0].target).toBe('package.windows10.appxmanifest');
     });
 });

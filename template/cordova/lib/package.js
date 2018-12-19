@@ -28,11 +28,12 @@ var CordovaError = require('cordova-common').CordovaError;
 
 // returns folder that contains package with chip architecture,
 // build and project types specified by script parameters
-module.exports.getPackage = function (projectType, buildtype, buildArch) {
+module.exports.getPackage = function (buildtype, buildArch) {
+    var projectType = 'windows10'; // TODO remove below
     var appPackages = path.resolve(path.join(__dirname, '..', '..', 'AppPackages'));
     // reject promise if AppPackages folder doesn't exist
     if (!fs.existsSync(appPackages)) {
-        return Q.reject('AppPackages folder doesn\'t exist');
+        return Q.reject('AppPackages folder doesn\'t exist' + appPackages);
     }
     // find out and resolve paths for all folders inside AppPackages
     var pkgDirs = fs.readdirSync(appPackages).map(function (relative) {
@@ -87,7 +88,7 @@ module.exports.getPackageFileInfo = function (packageFile) {
     var props = /.*\.(Phone|Windows|Windows10)_((?:\d*\.)*\d*)*((?:_(AnyCPU|x86|x64|ARM)){1,4})(?:(_Debug))?.(appx|appxbundle)$/i.exec(pkgName);
     if (props) {
         return {
-            type: props[1].toLowerCase(),
+            type: props[1].toLowerCase(), // TODO remove as this can be phone, windows or windows10
             arch: props[3].toLowerCase().substring(1),
             archs: props[3].toLowerCase().substring(1).split('_'),
             buildtype: props[5] ? props[5].substring(1).toLowerCase() : 'release',
@@ -183,14 +184,8 @@ function uninstallAppFromPhone (appDeployUtils, pkg, target) {
 }
 
 // deploys specified phone package to device/emulator and launches it
-module.exports.deployToPhone = function (pkg, deployTarget, targetWindows10, deploymentTool) {
-    var deployment;
-    if (deploymentTool) {
-        deployment = Q(deploymentTool);
-    } else {
-        deployment = utils.getAppDeployUtils(targetWindows10);
-    }
-
+module.exports.deployToPhone = function (pkg, deployTarget, deploymentTool) {
+    var deployment = utils.getAppDeployUtils();
     return deployment.then(function (deploymentTool) {
         return module.exports.findDevice(deploymentTool, deployTarget).then(function (target) {
             return uninstallAppFromPhone(deploymentTool, pkg, target)

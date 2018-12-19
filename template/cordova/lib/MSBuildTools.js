@@ -41,9 +41,6 @@ MSBuildTools.prototype.buildProject = function (projFile, buildType, buildarch, 
     var checkWinSDK = function (target_platform) {
         return require('./check_reqs').isWinSDKPresent(target_platform);
     };
-    var checkPhoneSDK = function () {
-        return require('./check_reqs').isPhoneSDKPresent();
-    };
 
     // default build args
     var args = ['/clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal', '/nologo',
@@ -59,13 +56,7 @@ MSBuildTools.prototype.buildProject = function (projFile, buildType, buildarch, 
     var promise;
 
     // Check if SDK required to build the respective platform is present. If not present, return with corresponding error, else call msbuild.
-    if (projFile.indexOf('CordovaApp.Phone.jsproj') > -1) {
-        promise = checkPhoneSDK();
-    } else if (projFile.indexOf('CordovaApp.Windows.jsproj') > -1) {
-        promise = checkWinSDK('8.1');
-    } else {
-        promise = checkWinSDK('10.0');
-    }
+    promise = checkWinSDK('10.0');
 
     return promise.then(function () {
         console.log('buildProject spawn:', path.join(that.path, 'msbuild'), [projFile].concat(args), { stdio: 'inherit' });
@@ -255,24 +246,18 @@ module.exports.getLatestMSBuild = function () {
 };
 
 var projFiles = {
-    phone: 'CordovaApp.Phone.jsproj',
-    win: 'CordovaApp.Windows.jsproj',
     win10: 'CordovaApp.Windows10.jsproj'
 };
 
 // TODO: Fix this so that it outlines supported versions based on version criteria:
 // - v14: Windows 8.1, Windows 10
 // - v12: Windows 8.1
-function msBuild12TargetsFilter (target) {
-    return target === projFiles.win || target === projFiles.phone;
-}
-
 function msBuild14TargetsFilter (target) {
-    return target === projFiles.win || target === projFiles.phone || target === projFiles.win10;
+    return target === projFiles.win10;
 }
 
 function msBuild15TargetsFilter (target) {
-    return target === projFiles.win || target === projFiles.phone || target === projFiles.win10;
+    return target === projFiles.win10;
 }
 
 function msBuild155TargetsFilter (target) {
@@ -287,7 +272,6 @@ function filterSupportedTargets (targets, msbuild) {
     }
 
     var targetFilters = {
-        '12.0': msBuild12TargetsFilter,
         '14.0': msBuild14TargetsFilter,
         '15.x': msBuild15TargetsFilter,
         '15.5': msBuild155TargetsFilter,
@@ -308,11 +292,12 @@ function filterSupportedTargets (targets, msbuild) {
     // unsupported targets have been detected
     if (supportedTargets.length !== targets.length) {
         events.emit('warn', 'Not all desired build targets are compatible with the current build environment. ' +
-            'Please install Visual Studio 2015 for Windows 8.1 and Windows 10, ' +
-            'or Visual Studio 2013 Update 2 for Windows 8.1.');
+            'Please install Visual Studio 2017.');
     }
     return supportedTargets;
 }
+
+// TODO Move will methods to own VisualStudio.js file as it has nothing to do with MSBuildTools
 
 /**
  * Lists all VS 2017+ instances dirs in ProgramData
@@ -364,6 +349,7 @@ module.exports.getWillowInstallations = function () {
     return installations;
 };
 
+// TODO move wherever it is used and makes sense
 // returns an array of available UAP Versions
 // prepare.js
 module.exports.getAvailableUAPVersions = function () {

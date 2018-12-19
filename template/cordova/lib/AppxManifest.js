@@ -43,20 +43,17 @@ var KNOWN_ORIENTATIONS = {
 
 var MANIFESTS = {
     'windows': {
-        '8.1.0': 'package.windows.appxmanifest',
         '10.0.0': 'package.windows10.appxmanifest'
     },
     'phone': {
-        '8.1.0': 'package.phone.appxmanifest',
         '10.0.0': 'package.windows10.appxmanifest'
     },
     'all': {
-        '8.1.0': ['package.windows.appxmanifest', 'package.phone.appxmanifest'],
         '10.0.0': 'package.windows10.appxmanifest'
     }
 };
 
-var SUBSTS = ['package.phone.appxmanifest', 'package.windows.appxmanifest', 'package.windows10.appxmanifest'];
+var SUBSTS = ['package.windows10.appxmanifest'];
 var TARGETS = ['windows', 'phone', 'all'];
 
 /**

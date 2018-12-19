@@ -41,11 +41,6 @@ if (['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(args[2]) > -1) {
     console.log('                    architectures are used.');
     console.log('    --phone, --win');
     console.log('                  : Specifies project type to deploy');
-    console.log('    --appx=<8.1-win|8.1-phone|uap|uwp>');
-    console.log('                  : Overrides windows-target-version to build Windows 8.1, ');
-    console.log('                              Windows Phone 8.1, or Windows 10.');
-    console.log('    --win10tools  : Uses Windows 10 deployment tools (used for a Windows 8.1 app when');
-    console.log('                         being deployed to a Windows 10 device)');
     console.log('Examples:');
     console.log('    run');
     console.log('    run --emulator');
@@ -54,7 +49,6 @@ if (['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(args[2]) > -1) {
     console.log('    run --device --release');
     console.log('    run --emulator --debug');
     console.log('    run --archs="x64 x86 arm" --no-bundle');
-    console.log('    run --device --appx=phone-8.1');
     console.log('    run --device --archs="x64 x86 arm"');
     console.log('');
 

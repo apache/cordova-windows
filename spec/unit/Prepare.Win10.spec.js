@@ -34,12 +34,7 @@ var applyNavigationWhitelist = prepare.__get__('applyNavigationWhitelist');
 var applyStartPage = prepare.__get__('applyStartPage');
 
 var Win10ManifestPath = 'template/package.windows10.appxmanifest';
-var Win81ManifestPath = 'template/package.windows.appxmanifest';
-var WP81ManifestPath = 'template/package.phone.appxmanifest';
-
 var Win10ManifestName = path.basename(Win10ManifestPath);
-var Win81ManifestName = path.basename(Win81ManifestPath);
-var WP81ManifestName = path.basename(WP81ManifestPath);
 
 /***
   * Unit tests for validating default ms-appx-web:// URI scheme in Win10
@@ -78,7 +73,7 @@ function createMockConfigAndManifestForApplyCoreProperties (startPage, preferenc
         }
     };
 
-    var filePath = win10 ? Win10ManifestPath : Win81ManifestPath;
+    var filePath = Win10ManifestPath;
     var manifest = AppxManifest.get(filePath);
     spyOn(fs, 'writeFileSync');
 
@@ -91,33 +86,6 @@ function addCapabilityDeclarationToMockManifest (manifest, capability) {
     cap.attrib.Name = capability;
     capRoot.append(cap);
 }
-
-describe('Windows 8.1 project', function () {
-
-    it('should not have an HTTP or HTTPS scheme for its startup URI.', function () {
-
-        // arrange
-        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { 'WindowsDefaultUriPrefix': 'http://' }, false);
-
-        // act
-        applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'm2:', false);
-
-        var app = mockConfig.manifest.doc.find('.//Application');
-        expect(app.attrib.StartPage).toBe('www/index.html');
-    });
-
-    it('should not have any scheme for its startup URI.', function () {
-
-        // arrange
-        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { 'WindowsDefaultUriPrefix': 'ms-appx://' }, false);
-
-        // act
-        applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'm2:', false);
-
-        var app = mockConfig.manifest.doc.find('.//Application');
-        expect(app.attrib.StartPage).toBe('www/index.html');
-    });
-});
 
 describe('Windows 10 project', function () {
     it('should default to ms-appx-web for its startup URI.', function () {
@@ -276,7 +244,7 @@ function createMockConfigAndManifestForApplyAccessRules (isWin10) {
         return [];
     };
 
-    var filePath = isWin10 ? Win10ManifestPath : Win81ManifestPath;
+    var filePath = Win10ManifestPath;
     var manifest = AppxManifest.get(filePath);
     spyOn(fs, 'writeFileSync');
 
@@ -285,24 +253,6 @@ function createMockConfigAndManifestForApplyAccessRules (isWin10) {
 
 describe('Access rules management', function () {
     // body...
-    it('A Windows 8.1 project should not have WindowsRuntimeAccess attributes in access rules.', function () {
-
-        var mockConfig = createMockConfigAndManifestForApplyAccessRules(false, 'https://www.contoso.com');
-
-        applyAccessRules(mockConfig.config, mockConfig.manifest);
-
-        var app = mockConfig.manifest.doc.find('.//Application');
-        var accessRules = app.find('.//ApplicationContentUriRules');
-
-        expect(accessRules).toBeDefined();
-        expect(accessRules.len()).toBe(1);
-
-        var rule = accessRules.getItem(0);
-        expect(rule).toBeDefined();
-        expect(rule.attrib.WindowsRuntimeAccess).toBeUndefined();
-
-    });
-
     it('A Windows 10 project should have WindowsRuntimeAccess attributes in access rules.', function () {
 
         var mockConfig = createMockConfigAndManifestForApplyAccessRules(true, 'https://www.contoso.com');
@@ -320,25 +270,6 @@ describe('Access rules management', function () {
         expect(rule.attrib.WindowsRuntimeAccess).toBeDefined();
         expect(rule.attrib.WindowsRuntimeAccess).toBe('all');
 
-    });
-
-    describe('A Windows 8.1 project should reject http:// URI scheme rules.', function () {
-
-        var stringIndex = -1;
-        var searchStr = 'Access rules must begin with "https://", the following rule will be ignored: ';
-
-        beforeEach(function () {
-            require('cordova-common').events.on('warn', function (evt) {
-                stringIndex = evt.indexOf(searchStr);
-            });
-        });
-
-        it('applies access rules and verifies at least one was rejected', function () {
-            var mockConfig = createMockConfigAndManifestForApplyAccessRules(false, 'http://www.contoso.com');
-            applyAccessRules(mockConfig.config, mockConfig.manifest, false);
-
-            expect(stringIndex).toBe(0);
-        });
     });
 
     describe('A Windows 10 project should accept http:// URI access rules.', function () {
@@ -399,7 +330,7 @@ function createMockConfigAndManifestForDescription (description) {
         getPreference: function () { }
     };
 
-    var manifest = AppxManifest.get(Win81ManifestPath, /* ignoreCache= */true);
+    var manifest = AppxManifest.get(Win10ManifestPath, /* ignoreCache= */true);
     spyOn(fs, 'writeFileSync');
 
     return { config: config, manifest: manifest };
@@ -413,7 +344,7 @@ describe('Package description', function () {
         var desc = mockConfig.manifest.doc.find('.//Properties/Description');
         expect(desc.text).toBe('My custom description');
 
-        desc = mockConfig.manifest.doc.find('.//Application/m2:VisualElements');
+        desc = mockConfig.manifest.doc.find('.//Application/uap:VisualElements');
         expect(desc.attrib.Description).toBe('My custom description');
     });
 
@@ -424,7 +355,7 @@ describe('Package description', function () {
         var desc = mockConfig.manifest.doc.find('.//Properties/Description');
         expect(desc).toBe(null);
 
-        desc = mockConfig.manifest.doc.find('.//Application/m2:VisualElements');
+        desc = mockConfig.manifest.doc.find('.//Application/uap:VisualElements');
         expect(desc.attrib.Description).toEqual(prepare.__get__('DEFAULT_DESCRIPTION'));
     });
 
@@ -439,7 +370,7 @@ describe('Package description', function () {
         var desc = mockConfig.manifest.doc.find('.//Properties/Description');
         expect(desc.text.length).toBe(2048);
 
-        desc = mockConfig.manifest.doc.find('.//Application/m2:VisualElements');
+        desc = mockConfig.manifest.doc.find('.//Application/uap:VisualElements');
         expect(desc.attrib.Description.length).toBe(2048);
     });
 
@@ -453,7 +384,7 @@ describe('Package description', function () {
         var desc = mockConfig.manifest.doc.find('.//Properties/Description');
         expect(desc).not.toMatch(/\n|\t/);
 
-        desc = mockConfig.manifest.doc.find('.//Application/m2:VisualElements');
+        desc = mockConfig.manifest.doc.find('.//Application/uap:VisualElements');
         expect(desc.attrib.Description).not.toMatch(/\n|\t/);
     });
 });
@@ -667,20 +598,10 @@ describe('copyIcons method', function () {
         spyOn(fs, 'writeFileSync');
 
         var win10Manifest = AppxManifest.get(Win10ManifestPath);
-        var win81Manifest = AppxManifest.get(Win81ManifestPath);
-        var wp81Manifest = AppxManifest.get(WP81ManifestPath);
 
         spyOn(AppxManifest, 'get').and.callFake(function (manifestPath) {
             if (manifestPath.indexOf(Win10ManifestName) !== -1) {
                 return win10Manifest;
-            }
-
-            if (manifestPath.indexOf(Win81ManifestName) !== -1) {
-                return win81Manifest;
-            }
-
-            if (manifestPath.indexOf(WP81ManifestName) !== -1) {
-                return wp81Manifest;
             }
         });
 
@@ -705,7 +626,5 @@ describe('copyIcons method', function () {
         updateSplashScreenImageExtensions(project, locations);
 
         expect(win10Manifest.getVisualElements().getSplashScreenExtension()).toBe('.jpg');
-        expect(win81Manifest.getVisualElements().getSplashScreenExtension()).toBe('.jpg');
-        expect(wp81Manifest.getVisualElements().getSplashScreenExtension()).toBe('.jpg');
     });
 });

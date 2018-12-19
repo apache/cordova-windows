@@ -19,15 +19,14 @@
  *
 */
 
-var isWp81 = navigator.appVersion.indexOf("Windows Phone 8.1") !== -1;
 var isWp10 = navigator.appVersion.indexOf("Windows Phone 10") !== -1;
-var isPhoneDevice = isWp81 || isWp10;
+var isPhoneDevice = isWp10;
 var isWin10UWP = navigator.appVersion.indexOf('MSAppHost/3.0') !== -1;
 var isHosted = window.location.protocol.indexOf('http') === 0;
 var isMsAppxWeb = window.location.protocol.indexOf('ms-appx-web') === 0;
 
 var schema = (isHosted || isWin10UWP && isMsAppxWeb) ? 'ms-appx-web' : 'ms-appx';
-var fileName = isWp81 ? 'splashscreenphone.png' : 'splashscreen.png';
+var fileName = 'splashscreen.png';
 var splashImageSrc = schema + ':///images/' + fileName;
 
 var splashElement = null,
@@ -157,12 +156,10 @@ function init(config, manifest) {
         extendedSplashImage.classList.add('phone');
     }
 
-    if (isWp81) {
-        extendedSplashProgress.classList.add('extended-splash-progress-phone');
-    } else if (isWp10) {   
-        extendedSplashProgress.classList.add('extended-splash-progress-wp10');
-    } else {
-        extendedSplashProgress.classList.add('extended-splash-progress-desktop');
+    if (isWp10) {   	
+        extendedSplashProgress.classList.add('extended-splash-progress-wp10');	
+    } else {	
+        extendedSplashProgress.classList.add('extended-splash-progress-desktop');	
     }
 
     if (!showSplashScreenSpinner) {
@@ -268,12 +265,10 @@ function positionControls() {
         extendedSplashImage.style.top = splash.imageLocation.y + 'px';
     }
 
-    if (!isWp81) {
-        extendedSplashImage.style.height = splash.imageLocation.height + 'px';
-        extendedSplashImage.style.width = splash.imageLocation.width + 'px';
+    extendedSplashImage.style.height = splash.imageLocation.height + 'px';
+    extendedSplashImage.style.width = splash.imageLocation.width + 'px';
 
-        extendedSplashProgress.style.marginTop = Math.min(window.innerHeight - PROGRESSRING_HEIGHT - PROGRESSRING_BOTTOM_MARGIN, splash.imageLocation.y + splash.imageLocation.height + 32) + 'px';
-    }
+    extendedSplashProgress.style.marginTop = Math.min(window.innerHeight - PROGRESSRING_HEIGHT - PROGRESSRING_BOTTOM_MARGIN, splash.imageLocation.y + splash.imageLocation.height + 32) + 'px';
 }
 
 // Updates the location of the extended splash screen image. Should be used to respond to window size changes.

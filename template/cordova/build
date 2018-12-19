@@ -41,10 +41,6 @@ if(['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(process.argv[2]) >= 
     console.log('                                  architectures (`anycpu`, `arm`, `x86`, `x64`).');
     console.log('                                  Separate multiple choices with spaces and if');
     console.log('                                  passing multiple choices, enclose with " ".');
-    console.log('    --appx=<8.1-win|8.1-phone|uap|uwp>');
-    console.log('                                : Overrides windows-target-version to build');
-    console.log('                                  Windows 8.1, Windows Phone 8.1, or');
-    console.log('                                  Windows 10 Universal.');
     console.log('    --packageCertificateKeyFile : Builds the project using provided certificate.');
     console.log('    --packageThumbprint         : Thumbprint associated with the certificate.');
     console.log('    --publisherId               : Sets publisher id field in manifest.');
@@ -56,7 +52,7 @@ if(['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(process.argv[2]) >= 
     console.log('    build --debug');
     console.log('    build --release');
     console.log('    build --release --archs="arm x86" --bundle');
-    console.log('    build --appx=8.1-phone -r');
+    console.log('    build -r');
     console.log('    build --packageCertificateKeyFile="CordovaApp_TemporaryKey.pfx"');
     console.log('    build --publisherId="CN=FakeCorp, C=US"');
     console.log('    build --buildConfig="build.json"');

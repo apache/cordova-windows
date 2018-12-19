@@ -42,9 +42,7 @@ module.exports.run = function (options) {
     var args = nopt({
         'archs': [String],
         'phone': Boolean,
-        'win': Boolean,
-        'appx': String,
-        'win10tools': Boolean
+        'win': Boolean
     }, {'r': '--release'}, options.argv, 0);
 
     // Validate args
@@ -60,66 +58,41 @@ module.exports.run = function (options) {
 
     // Get build/deploy options
     var buildType = options.release ? 'release' : 'debug';
+
     // CB-11478 Allow to specify 'archs' parameter as either cli or platform
     // option i.e. 'cordova run --archs' vs. 'cordova run -- --archs'
     var archs = options.archs || args.archs || ['anycpu'];
     if (typeof archs === 'string') { archs = archs.split(' '); }
-
     var buildArchs = archs.map(function (arch) { return arch.toLowerCase(); });
+
     var deployTarget = options.target ? options.target : (options.emulator ? 'emulator' : 'device');
 
-    var buildTargets = build.getBuildTargets(args.win, args.phone, args.appx);
+    var buildTargets = build.getBuildTargets(args.win, args.phone);
 
     if (!buildTargets || buildTargets.length <= 0) {
         return Q.reject(new CordovaError('Unable to determine deploy target.'));
     }
 
-    // we deploy the first build target so we use buildTargets[0] to determine
-    // what project type we should deploy
-    var projectType = projFileToType(buildTargets[0]);
-
     // if --nobuild isn't specified then build app first
-    var buildPackages = options.nobuild ? packages.getPackage(projectType, buildType, buildArchs[0]) : build.run.call(this, options);
+    var buildPackages = options.nobuild ? packages.getPackage(buildType, buildArchs[0]) : build.run.call(this, options);
 
     // buildPackages also deploys bundles
     return buildPackages
         .then(function (pkg) {
             events.emit('log', 'Deploying ' + pkg.type + ' package to ' + deployTarget + ':\n' + pkg.appx);
-            switch (pkg.type) {
-            case 'phone':
-                return packages.deployToPhone(pkg, deployTarget, args.win10tools)
-                    .catch(function (e) {
-                        if (options.target || options.emulator || options.device) {
-                            return Q.reject(e); // Explicit target, carry on
-                        }
-                        // 'device' was inferred initially, because no target was specified
-                        return packages.deployToPhone(pkg, 'emulator', args.win10tools);
-                    });
-            case 'windows10':
-                if (args.phone) {
-                    // Win10 emulator launch is not currently supported, always force device
-                    if (options.emulator || options.target === 'emulator') {
-                        events.emit('warn', 'Windows 10 Phone emulator is currently not supported. ' +
-                                'If you want to deploy to emulator, use Visual Studio instead. ' +
-                                'Attempting to deploy to device...');
-                    }
-                    return packages.deployToPhone(pkg, deployTarget, true);
-                } else {
-                    return packages.deployToDesktop(pkg, deployTarget, projectType);
+            if (args.phone) {
+                // Win10 emulator launch is not currently supported, always force device
+                if (options.emulator || options.target === 'emulator') {
+                    events.emit('warn', 'Windows 10 Phone emulator is currently not supported. ' +
+                            'If you want to deploy to emulator, use Visual Studio instead. ' +
+                            'Attempting to deploy to device...');
                 }
-                break; /* eslint no-unreachable : 0 */
-            default: // 'windows'
-                return packages.deployToDesktop(pkg, deployTarget, projectType);
+                return packages.deployToPhone(pkg, deployTarget);
+            } else {
+                return packages.deployToDesktop(pkg, deployTarget);
             }
         });
 };
-
-// Retrieves project type for the project file specified.
-// @param   {String}  projFile Project file, for example 'CordovaApp.Windows10.jsproj'
-// @returns {String}  Proejct type, for example 'windows10'
-function projFileToType (projFile) {
-    return projFile.replace(/CordovaApp|jsproj|\./gi, '').toLowerCase();
-}
 
 /**
  * Checks if current process is an with administrative permissions (e.g. from
