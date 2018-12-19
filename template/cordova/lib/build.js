@@ -84,7 +84,7 @@ module.exports.run = function run (buildOptions) {
 function getBuildTargets (isWinSwitch, isPhoneSwitch) {
 
     // TODO This whole method can be super simplified as there is only one target
- 
+
     var configXML = new ConfigParser(path.join(ROOT, 'config.xml'));
     var targets = [];
     var noSwitches = !(isPhoneSwitch || isWinSwitch);
