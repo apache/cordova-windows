@@ -30,7 +30,7 @@ module.exports.getAppStoreUtils = function () {
     if (!fs.existsSync(appStoreUtils)) {
         return Q.reject('Can\'t unblock AppStoreUtils script');
     }
-    return spawn('powershell', ['Unblock-File', module.exports.quote(appStoreUtils)], {stdio: 'ignore'})
+    return spawn('powershell', ['Unblock-File', module.exports.quote(appStoreUtils)], { stdio: 'ignore' })
         .thenResolve(appStoreUtils);
 };
 

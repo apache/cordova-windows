@@ -53,5 +53,5 @@ module.exports.update = function (destinationDir, options) {
     } catch (e) { /* ignore IO errors */ }
 
     shell.rm('-rf', destinationDir);
-    return create.create(destinationDir, config, {guid: guid}, events);
+    return create.create(destinationDir, config, { guid: guid }, events);
 };

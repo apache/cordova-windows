@@ -49,7 +49,7 @@ describe('PlatformMunger', function () {
         shell.mkdir('-p', tempDir);
         munge = { parents: { 'foo/bar': [
             { before: undefined, count: 1, xml: '<DummyElement name="Dummy" />' }
-        ]}};
+        ] } };
         munger = new PlatformMunger('windows', tempDir);
         spyOn(BaseMunger.prototype, 'apply_file_munge').and.callThrough();
     });
@@ -76,12 +76,12 @@ describe('PlatformMunger', function () {
                 // Emulate capability that was initially added with uap prefix
                 { before: undefined, count: 1, xml: '<uap:Capability Name=\"privateNetworkClientServer\">' }, /* eslint no-useless-escape : 0 */
                 { before: undefined, count: 1, xml: '<Capability Name=\"enterpriseAuthentication\">' } /* eslint no-useless-escape : 0 */
-            ]}};
+            ] } };
 
             var capabilitiesMunge = { parents: { '/Package/Capabilities': [
                 { before: undefined, count: 1, xml: '<uap:Capability Name=\"privateNetworkClientServer\">' },
                 { before: undefined, count: 1, xml: '<uap:Capability Name=\"enterpriseAuthentication\">' }
-            ]}};
+            ] } };
             munger.apply_file_munge(WINDOWS10_MANIFEST, baseMunge, /* remove= */true);
             expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalledWith(WINDOWS10_MANIFEST, capabilitiesMunge, true);
         });

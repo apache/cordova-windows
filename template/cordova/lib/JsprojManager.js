@@ -219,7 +219,7 @@ jsprojManager.prototype = {
 
         // There may be multiple solution files (for different VS versions) - process them all
         getSolutionPaths(this.projectFolder).forEach(function (solutionPath) {
-            var solText = fs.readFileSync(solutionPath, {encoding: 'utf8'});
+            var solText = fs.readFileSync(solutionPath, { encoding: 'utf8' });
 
             if (useProjItems) {
                 // Insert a project dependency into every jsproj in the solution.
@@ -250,7 +250,7 @@ jsprojManager.prototype = {
             pos += 10; // Move pos to the end of EndProject text
             solText = solText.slice(0, pos) + postInsertText + solText.slice(pos);
 
-            fs.writeFileSync(solutionPath, solText, {encoding: 'utf8'});
+            fs.writeFileSync(solutionPath, solText, { encoding: 'utf8' });
         });
 
         // Add the ItemGroup/ProjectReference to each matching cordova project :
@@ -285,7 +285,7 @@ jsprojManager.prototype = {
 
         // There may be multiple solutions (for different VS versions) - process them all
         getSolutionPaths(this.projectFolder).forEach(function (solutionPath) {
-            var solText = fs.readFileSync(solutionPath, {encoding: 'utf8'});
+            var solText = fs.readFileSync(solutionPath, { encoding: 'utf8' });
 
             // To be safe (to handle subtle changes in formatting, for example), use a RegExp to find and remove
             // preInsertText and postInsertText
@@ -298,7 +298,7 @@ jsprojManager.prototype = {
                 return '';
             });
 
-            fs.writeFileSync(solutionPath, solText, {encoding: 'utf8'});
+            fs.writeFileSync(solutionPath, solText, { encoding: 'utf8' });
         });
 
         this._getMatchingProjects(targetConditions).forEach(function (project) {
@@ -460,7 +460,7 @@ function proj (location) {
 
 proj.prototype = {
     write: function () {
-        fs.writeFileSync(this.location, this.xml.write({indent: 4}), 'utf-8');
+        fs.writeFileSync(this.location, this.xml.write({ indent: 4 }), 'utf-8');
     },
 
     appendToRoot: function (element) {

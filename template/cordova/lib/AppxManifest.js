@@ -361,7 +361,7 @@ AppxManifest.prototype.getApplication = function () {
             application.append(appUriRules);
 
             rules.forEach(function (rule) {
-                appUriRules.append(new et.Element('Rule', {Match: rule, Type: 'include'}));
+                appUriRules.append(new et.Element('Rule', { Match: rule, Type: 'include' }));
             });
 
             return this;
@@ -415,7 +415,7 @@ AppxManifest.prototype.getVisualElements = function () {
 
             var orientations = KNOWN_ORIENTATIONS[orientation] || orientation.split(',');
             orientations.forEach(function (orientation) {
-                var el = new et.Element(self.prefix + 'Rotation', {Preference: orientation});
+                var el = new et.Element(self.prefix + 'Rotation', { Preference: orientation });
                 rotationPreferenceRoot.append(el);
             });
 
@@ -608,7 +608,7 @@ AppxManifest.prototype.setAppName = function (name) {
 AppxManifest.prototype.write = function (destPath) {
     // sort Capability elements as per CB-5350 Windows8 build fails due to invalid 'Capabilities' definition
     sortCapabilities(this.doc);
-    fs.writeFileSync(destPath || this.path, this.doc.write({indent: 4}), 'utf-8');
+    fs.writeFileSync(destPath || this.path, this.doc.write({ indent: 4 }), 'utf-8');
 };
 
 /**
@@ -782,7 +782,7 @@ Win10AppxManifest.prototype.writeToString = function () {
     ensureUniqueCapabilities(this.doc.find('.//Capabilities'));
     // sort Capability elements as per CB-5350 Windows8 build fails due to invalid 'Capabilities' definition
     sortCapabilities(this.doc);
-    return this.doc.write({indent: 4});
+    return this.doc.write({ indent: 4 });
 };
 
 /**

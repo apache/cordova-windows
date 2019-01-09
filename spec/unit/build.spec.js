@@ -86,7 +86,7 @@ describe('run method', function () {
         var originalBuildMethod = build.run;
         spyOn(build, 'run').and.callFake(function () {
             // Bind original build to custom 'this' object to mock platform's locations property
-            return originalBuildMethod.apply({locations: {www: 'some/path'}}, arguments);
+            return originalBuildMethod.apply({ locations: { www: 'some/path' } }, arguments);
         });
 
         spyOn(utils, 'isCordovaProject').and.returnValue(true);
@@ -131,7 +131,7 @@ describe('run method', function () {
         createFindAvailableVersionMock('14.0', testPath, buildSpy);
 
         expect(function () {
-            build.run({release: true, debug: true});
+            build.run({ release: true, debug: true });
         }).toThrow();
     });
 
@@ -141,7 +141,7 @@ describe('run method', function () {
         createFindAvailableVersionMock('14.0', testPath, buildSpy);
 
         expect(function () {
-            build.run({argv: [ '--phone', '--win' ]});
+            build.run({ argv: [ '--phone', '--win' ] });
         }).toThrow();
     });
 
@@ -261,7 +261,7 @@ describe('run method', function () {
         createFindAllAvailableVersionsMock([{ version: '4.0', buildProject: buildSpy, path: testPath }]);
         createConfigParserMock('8.0');
 
-        build.run({argv: ['--win']})
+        build.run({ argv: ['--win'] })
             .fail(function (error) {
                 errorSpy();
                 expect(error).toBeDefined();
@@ -279,7 +279,7 @@ describe('run method', function () {
         createFindAllAvailableVersionsMock([{ version: '14.0', buildProject: buildSpy, path: testPath }]);
         createConfigParserMock('8.1');
 
-        build.run({argv: ['--win']})
+        build.run({ argv: ['--win'] })
             .finally(function () {
                 expect(buildSpy).toHaveBeenCalled();
                 done();
@@ -293,7 +293,7 @@ describe('run method', function () {
         createFindAvailableVersionMock('14.0', testPath, buildSpy);
         createConfigParserMock('unsupported value here');
 
-        build.run({argv: ['--win']})
+        build.run({ argv: ['--win'] })
             .fail(function (error) {
                 errorSpy();
                 expect(error).toBeDefined();
@@ -311,7 +311,7 @@ describe('run method', function () {
         createFindAllAvailableVersionsMock([{ version: '14.0', buildProject: buildSpy, path: testPath }]);
         createConfigParserMock(null, '8.1');
 
-        build.run({argv: ['--phone']})
+        build.run({ argv: ['--phone'] })
             .finally(function () {
                 expect(buildSpy).toHaveBeenCalled();
                 done();
@@ -325,7 +325,7 @@ describe('run method', function () {
         createFindAvailableVersionMock('14.0', testPath, buildSpy);
         createConfigParserMock(null, 'unsupported value here');
 
-        build.run({argv: ['--phone']})
+        build.run({ argv: ['--phone'] })
             .fail(function (error) {
                 errorSpy();
                 expect(error).toBeDefined();
@@ -347,7 +347,7 @@ describe('run method', function () {
         // provision config to target Windows 8.1
         createConfigParserMock('8.1', '8.1');
         // explicitly specify Windows 10 as target
-        build.run({argv: ['--appx=uap']})
+        build.run({ argv: ['--appx=uap'] })
             .finally(function () {
                 expect(buildSpy).toHaveBeenCalled();
                 done();
@@ -364,7 +364,7 @@ describe('run method', function () {
         // provision config to target Windows 8.1
         createConfigParserMock('8.1', '8.1');
         // explicitly specify Windows 10 as target
-        build.run({argv: ['--appx=uwp']})
+        build.run({ argv: ['--appx=uwp'] })
             .finally(function () {
                 expect(buildSpy).toHaveBeenCalled();
                 done();
@@ -436,7 +436,7 @@ describe('run method', function () {
 
         createFindAllAvailableVersionsMock([buildTools14, buildTools15, buildTools151]);
         // explicitly specify Windows 10 as target
-        build.run({argv: ['--appx=uap']})
+        build.run({ argv: ['--appx=uap'] })
             .fail(fail)
             .finally(function () {
                 expect(fail).not.toHaveBeenCalled();
@@ -453,7 +453,7 @@ describe('run method', function () {
 
         createFindAllAvailableVersionsMock([buildTools14, buildTools15, buildTools151]);
         // explicitly specify Windows 10 as target
-        build.run({argv: ['--appx=uwp']})
+        build.run({ argv: ['--appx=uwp'] })
             .fail(fail)
             .finally(function () {
                 expect(fail).not.toHaveBeenCalled();

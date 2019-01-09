@@ -45,7 +45,7 @@ module.exports.run = function (options) {
         'win': Boolean,
         'appx': String,
         'win10tools': Boolean
-    }, {'r': '--release'}, options.argv, 0);
+    }, { 'r': '--release' }, options.argv, 0);
 
     // Validate args
     if (options.debug && options.release) {
@@ -131,7 +131,7 @@ function ranWithElevatedPermissions () {
     try {
         // Check if ran from admin prompt and fail quickly if CLI has administrative permissions
         // http://stackoverflow.com/a/11995662/64949
-        execSync('net session', {'stdio': 'ignore'});
+        execSync('net session', { 'stdio': 'ignore' });
         return true;
     } catch (e) {
         return false;
