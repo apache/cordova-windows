@@ -27,7 +27,7 @@
     "cordova-common": "^3.1.0",
     "elementtree": "^0.1.7",
     "node-uuid": "^1.4.8",
-    "nopt": "^3.0.4",
+    "nopt": "^4.0.1",
     "q": "^1.5.1",
     "semver": "^5.5.0",
     "shelljs": "^0.5.3",
