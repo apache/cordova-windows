@@ -9,7 +9,7 @@
     "url": "https://github.com/apache/cordova-windows"
   },
   "bugs": {
-    "url": "https://issues.apache.org/jira/browse/CB"
+    "url": "https://github.com/apache/cordova-windows/issues"
   },
   "keywords": [
     "windows",
