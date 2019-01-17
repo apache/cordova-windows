@@ -256,7 +256,7 @@ describe('run method', function () {
         spyOn(packages, 'deployToDesktop').and.returnValue(Q());
 
         var anyString = jasmine.any(String);
-        var expectedDeployOptions = jasmine.objectContaining({arch: 'arm'});
+        var expectedDeployOptions = jasmine.objectContaining({ arch: 'arm' });
 
         var fail = jasmine.createSpy('fail')
             .and.callFake(function (err) {
@@ -289,11 +289,11 @@ describe('run method', function () {
         spyOn(packages, 'deployToDesktop').and.returnValue(Q());
 
         var anyString = jasmine.any(String);
-        var expectedDeployOptions = jasmine.objectContaining({arch: 'anycpu'});
+        var expectedDeployOptions = jasmine.objectContaining({ arch: 'anycpu' });
 
         var fail = jasmine.createSpy('fail');
 
-        run.run({nobuild: true})
+        run.run({ nobuild: true })
             .then(function () {
                 expect(packages.getPackage).toHaveBeenCalledWith(anyString, anyString, 'anycpu');
                 expect(packages.deployToDesktop).toHaveBeenCalledWith(expectedDeployOptions, anyString, anyString);

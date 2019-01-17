@@ -118,7 +118,7 @@ module.exports.updateBuildConfig = function (buildConfig) {
         path.join(projectRoot, 'CordovaAppRelease.projitems') :
         path.join(projectRoot, 'CordovaAppDebug.projitems');
 
-    fs.writeFileSync(buildConfigFileName, TEMPLATE + buildConfigXML.write({indent: 2, xml_declaration: false}), 'utf-8');
+    fs.writeFileSync(buildConfigFileName, TEMPLATE + buildConfigXML.write({ indent: 2, xml_declaration: false }), 'utf-8');
 };
 
 function updateManifestFile (config, manifestPath) {
@@ -307,30 +307,30 @@ function applyNavigationWhitelist (config, manifest) {
 
 // Platform default images
 var PLATFORM_IMAGES = [
-    {dest: 'Square150x150Logo.scale-100', width: 150, height: 150},
-    {dest: 'Square30x30Logo.scale-100', width: 30, height: 30},
-    {dest: 'StoreLogo.scale-100', width: 50, height: 50},
-    {dest: 'SplashScreen.scale-100', width: 620, height: 300, targetProject: TARGET_PROJECT_10},
-    {dest: 'SplashScreen.scale-125', width: 775, height: 375, targetProject: TARGET_PROJECT_10},
-    {dest: 'SplashScreen.scale-140', width: 868, height: 420, targetProject: TARGET_PROJECT_81},
-    {dest: 'SplashScreen.scale-150', width: 930, height: 450, targetProject: TARGET_PROJECT_10},
-    {dest: 'SplashScreen.scale-180', width: 1116, height: 540, targetProject: TARGET_PROJECT_81},
-    {dest: 'SplashScreen.scale-200', width: 1240, height: 600, targetProject: TARGET_PROJECT_10},
-    {dest: 'SplashScreen.scale-400', width: 2480, height: 1200, targetProject: TARGET_PROJECT_10},
+    { dest: 'Square150x150Logo.scale-100', width: 150, height: 150 },
+    { dest: 'Square30x30Logo.scale-100', width: 30, height: 30 },
+    { dest: 'StoreLogo.scale-100', width: 50, height: 50 },
+    { dest: 'SplashScreen.scale-100', width: 620, height: 300, targetProject: TARGET_PROJECT_10 },
+    { dest: 'SplashScreen.scale-125', width: 775, height: 375, targetProject: TARGET_PROJECT_10 },
+    { dest: 'SplashScreen.scale-140', width: 868, height: 420, targetProject: TARGET_PROJECT_81 },
+    { dest: 'SplashScreen.scale-150', width: 930, height: 450, targetProject: TARGET_PROJECT_10 },
+    { dest: 'SplashScreen.scale-180', width: 1116, height: 540, targetProject: TARGET_PROJECT_81 },
+    { dest: 'SplashScreen.scale-200', width: 1240, height: 600, targetProject: TARGET_PROJECT_10 },
+    { dest: 'SplashScreen.scale-400', width: 2480, height: 1200, targetProject: TARGET_PROJECT_10 },
     // scaled images are specified here for backward compatibility only so we can find them by size
-    {dest: 'StoreLogo.scale-240', width: 120, height: 120},
-    {dest: 'Square44x44Logo.scale-100', width: 44, height: 44},
-    {dest: 'Square44x44Logo.scale-240', width: 106, height: 106},
-    {dest: 'Square70x70Logo.scale-100', width: 70, height: 70},
-    {dest: 'Square71x71Logo.scale-100', width: 71, height: 71},
-    {dest: 'Square71x71Logo.scale-240', width: 170, height: 170},
-    {dest: 'Square150x150Logo.scale-240', width: 360, height: 360},
-    {dest: 'Square310x310Logo.scale-100', width: 310, height: 310},
-    {dest: 'Wide310x150Logo.scale-100', width: 310, height: 150},
-    {dest: 'Wide310x150Logo.scale-240', width: 744, height: 360},
-    {dest: 'SplashScreenPhone.scale-100', width: 480, height: 800, targetProject: TARGET_PROJECT_WP81},
-    {dest: 'SplashScreenPhone.scale-140', width: 672, height: 1120, targetProject: TARGET_PROJECT_WP81},
-    {dest: 'SplashScreenPhone.scale-240', width: 1152, height: 1920, targetProject: TARGET_PROJECT_WP81}
+    { dest: 'StoreLogo.scale-240', width: 120, height: 120 },
+    { dest: 'Square44x44Logo.scale-100', width: 44, height: 44 },
+    { dest: 'Square44x44Logo.scale-240', width: 106, height: 106 },
+    { dest: 'Square70x70Logo.scale-100', width: 70, height: 70 },
+    { dest: 'Square71x71Logo.scale-100', width: 71, height: 71 },
+    { dest: 'Square71x71Logo.scale-240', width: 170, height: 170 },
+    { dest: 'Square150x150Logo.scale-240', width: 360, height: 360 },
+    { dest: 'Square310x310Logo.scale-100', width: 310, height: 310 },
+    { dest: 'Wide310x150Logo.scale-100', width: 310, height: 150 },
+    { dest: 'Wide310x150Logo.scale-240', width: 744, height: 360 },
+    { dest: 'SplashScreenPhone.scale-100', width: 480, height: 800, targetProject: TARGET_PROJECT_WP81 },
+    { dest: 'SplashScreenPhone.scale-140', width: 672, height: 1120, targetProject: TARGET_PROJECT_WP81 },
+    { dest: 'SplashScreenPhone.scale-240', width: 1152, height: 1920, targetProject: TARGET_PROJECT_WP81 }
 ];
 
 function findPlatformImage (width, height) {
