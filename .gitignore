@@ -18,3 +18,4 @@ coverage/*
 testcreate*
 coverage/
 .nyc_output/
+temp/*

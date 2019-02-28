@@ -44,7 +44,7 @@ opts.noPrepare = true;
 
 require('./lib/loggingHelper').adjustLoggerLevel(opts);
 
-var projectRoot = path.join(__dirname, '..');
+var projectRoot = path.join(__dirname, '../../..');
 var project = {
     root: projectRoot,
     projectConfig: new ConfigParser(path.join(projectRoot, 'config.xml')),

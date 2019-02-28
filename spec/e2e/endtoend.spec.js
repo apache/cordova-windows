@@ -17,7 +17,7 @@
     under the License.
 */
 var shell = require('shelljs');
-var fs = require('fs');
+var fs = require('fs-extra');
 var path = require('path');
 
 var FIXTURES = path.join(__dirname, '../unit/fixtures');
@@ -30,8 +30,10 @@ var PluginInfo = require('cordova-common').PluginInfo;
 
 describe('Cordova create and build', function () {
 
+    var templateDir = path.join(__dirname, '../../template');
     var projectFolder = 'testcreate 応用';
-    var buildDirectory = path.join(__dirname, '../..');
+    var workingDirectory = path.join(__dirname, '../../temp');
+    var buildDirectory = path.join(workingDirectory, 'platforms');
     var appPackagesFolder = path.join(buildDirectory, projectFolder, 'AppPackages');
     var buildScriptPath = '"' + path.join(buildDirectory, projectFolder, 'cordova', 'build') + '"';
     var prepareScriptPath = '"' + path.join(buildDirectory, projectFolder, 'cordova', 'prepare') + '"';
@@ -61,17 +63,19 @@ describe('Cordova create and build', function () {
     }
 
     beforeEach(function () {
-        shell.exec(path.join('bin', 'create') + ' "' + projectFolder + '" com.test.app 応用', { silent: silent });
+        fs.ensureDirSync(buildDirectory);
+        fs.copySync(path.join(templateDir, 'www'), path.join(workingDirectory, 'www'));
+        fs.copySync(path.join(templateDir, 'config.xml'), path.join(workingDirectory, 'config.xml'));
+        shell.exec(path.join('bin', 'create') + ' "' + path.join(buildDirectory, projectFolder) + '" com.test.app 応用', { silent: silent });
         shell.exec(prepareScriptPath + '', { silent: silent });
     });
 
     afterEach(function () {
-        shell.cd(buildDirectory);
-        shell.rm('-rf', projectFolder);
+        fs.removeSync(workingDirectory);
     });
 
     it('spec.1 should create new project', function () {
-        expect(fs.existsSync(projectFolder)).toBe(true);
+        expect(fs.existsSync(path.join(buildDirectory, projectFolder))).toBe(true);
     });
 
     // default
@@ -159,9 +163,9 @@ describe('Cordova create and build', function () {
 
         extensionsPluginInfo = new PluginInfo(extensionsPlugin);
         api = new Api();
-        api.root = projectFolder;
-        api.locations.root = projectFolder;
-        api.locations.www = path.join(projectFolder, 'www');
+        api.root = path.join(buildDirectory, projectFolder);
+        api.locations.root = path.join(buildDirectory, projectFolder);
+        api.locations.www = path.join(buildDirectory, projectFolder, 'www');
 
         var fail = jasmine.createSpy('fail')
             .and.callFake(function (err) {
@@ -185,9 +189,9 @@ describe('Cordova create and build', function () {
 
         extensionsPluginInfo = new PluginInfo(extensionsPlugin);
         api = new Api();
-        api.root = projectFolder;
-        api.locations.root = projectFolder;
-        api.locations.www = path.join(projectFolder, 'www');
+        api.root = path.join(buildDirectory, projectFolder);
+        api.locations.root = path.join(buildDirectory, projectFolder);
+        api.locations.www = path.join(buildDirectory, projectFolder, 'www');
 
         var fail = jasmine.createSpy('fail')
             .and.callFake(function (err) {
