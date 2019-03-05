@@ -24,6 +24,15 @@ Update these notes using: git log --pretty=format:'* %s' --topo-order --no-merge
 
 cordova-windows is a library that enables developers to create Windows 8/8.1/10 and WP8.1 application projects that support Cordova APIs.
 
+### 7.0.0 (Mar 05, 2019)
+* [GH-324](https://github.com/apache/cordova-windows/pull/324) Change Temporary Directories for Tests
+* [GH-319](https://github.com/apache/cordova-windows/pull/319) Windows Platform Release Preparation (Cordova 9)
+* [GH-317](https://github.com/apache/cordova-windows/pull/317) Copy `node_modules` if the directory exists
+* [GH-293](https://github.com/apache/cordova-windows/pull/293) Remove Bundled Dependencies
+* [GH-286](https://github.com/apache/cordova-windows/pull/286) [CB-14225](https://issues.apache.org/jira/browse/CB-14225) Fix Sample Namespace Serialize Attribute in `template/Properties/Default.rd.xml`
+* [GH-289](https://github.com/apache/cordova-windows/pull/293) [CB-14075](https://issues.apache.org/jira/browse/CB-14075) Remove Node 4 from CI
+* [GH-284](https://github.com/apache/cordova-windows/pull/284) [CB-14224](https://issues.apache.org/jira/browse/CB-14224) `Default.rd.xml` hhader fixes
+
 ### 6.0.0 (Feb 19, 2018)
 * [CB-13889](https://issues.apache.org/jira/browse/CB-13889) Allow test failures for Visual Studio 2017 environments (#263)
 * [CB-13878](https://issues.apache.org/jira/browse/CB-13878) MSBUILDDIR env variable (#262)
