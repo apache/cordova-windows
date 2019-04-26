@@ -91,7 +91,7 @@ module.exports.create = function (destinationDir, config, options) {
     // Copy base.js into the target project directory
     var destinationDirectory = path.join(projectPath, 'platform_www', 'WinJS', 'js');
     var destBaseJsPath = path.join(destinationDirectory, 'base.js');
-    var srcBaseJsPath = path.join(root, 'node_modules', 'winjs', 'js', 'base.js');
+    var srcBaseJsPath = require.resolve('winjs/js/base');
     recursiveCreateDirectory(destinationDirectory);
     shell.cp('-f', srcBaseJsPath, destBaseJsPath);
 
