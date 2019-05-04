@@ -113,7 +113,7 @@ module.exports.findAllAvailableVersions = function () {
 function findAllAvailableVersionsFallBack () {
     // console.log('findAllAvailableVersionsFALLBACK');
 
-    var versions = ['15.5', '15.0', '14.0', '12.0', '4.0'];
+    var versions = ['15.9', '15.5', '15.0', '14.0', '12.0', '4.0'];
     events.emit('verbose', 'Searching for available MSBuild versions...');
 
     return Q.all(versions.map(checkMSBuildVersion)).then(function (unprocessedResults) {
