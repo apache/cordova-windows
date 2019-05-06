@@ -510,7 +510,7 @@ function getTargetForImage (splash) {
 
     // Fall back on find by size for old non-MRT syntax:
     var targetImg = findPlatformImage(splash.width, splash.height);
-    if (!targetImg.targetProject) {
+    if (!targetImg || !targetImg.targetProject) {
         return;
     }
 
