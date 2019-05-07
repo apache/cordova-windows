@@ -708,7 +708,7 @@ function updateConfigFilesFrom (sourceConfig, configMunger, locations) {
     var defaultConfig = locations.defaultConfigXml;
     var ownConfig = locations.configXml;
     var sourceCfg = sourceConfig.path;
-    
+
     // First cleanup current config and merge project's one into own
     // If defaults.xml is present, overwrite platform config.xml with it.
     // Otherwise save whatever is there as defaults so it can be
