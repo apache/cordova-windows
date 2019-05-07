@@ -705,10 +705,11 @@ module.exports.addBOMToFile = addBOMToFile;
  *   configuration is already dumped to appropriate config.xml file.
  */
 function updateConfigFilesFrom (sourceConfig, configMunger, locations) {
-    // First cleanup current config and merge project's one into own
     var defaultConfig = locations.defaultConfigXml;
     var ownConfig = locations.configXml;
     var sourceCfg = sourceConfig.path;
+    
+    // First cleanup current config and merge project's one into own
     // If defaults.xml is present, overwrite platform config.xml with it.
     // Otherwise save whatever is there as defaults so it can be
     // restored or copy project config into platform if none exists.
