@@ -1,5 +1,5 @@
-language: node_js
 sudo: false
+language: node_js
 
 git:
   depth: 10
@@ -9,6 +9,11 @@ node_js:
   - 8
   - 10
   - 12
+  
+matrix:
+  - include:
+    - os: windows
+    - os: linux
 
 install:
   - npm install
