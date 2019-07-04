@@ -22,7 +22,6 @@ install:
   
 script:
   - npm run eslint
-  - npm run cover
   - npm test
 
 after_script:
