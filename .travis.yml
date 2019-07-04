@@ -16,10 +16,12 @@ install:
   - npm --version
   #- msbuild -version -nologo # no global msbuild on Travis it seems
   #- where msbuild # no where as well it seems
-  - cmd.exe /C '"%ProgramFiles(x86)%/Microsoft Visual Studio/Installer/vswhere" -property installationPath -products * -all'
-  - cmd.exe /C '"%ProgramFiles(x86)%/Microsoft Visual Studio/Installer/vswhere" -property installationPath -all'
-  - cmd.exe /C '"%ProgramFiles(x86)%/Microsoft Visual Studio/Installer/vswhere" -property installationPath -legacy'
-  
+  - export PATH="$PATH:/c/Program Files (x86)/Microsoft Visual Studio/Installer/"
+  - export MSVC=$(vswhere -latest -products "*" -requires Microsoft.Component.MSBuild -property installationPath)
+  - export MSVC=$(echo /$MSVC | sed -e 's/\\/\//g' -e 's/://')
+  - export PATH="$PATH:$MSVC/MSBuild/15.0/Bin/"
+  - echo $PATH
+
 script:
   - npm run eslint
   - npm test
