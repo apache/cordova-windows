@@ -80,7 +80,7 @@ module.exports.run = function run (buildOptions) {
             events.emit('verbose', ' BUILD OUTPUT: ' + pkg.appx);
             return pkg;
         }).catch(function (error) {
-            return Q.reject(new CordovaError('No valid MSBuild was detected for the selected target: ' + error, error));
+            return Q.reject(new CordovaError('Build failed', error));
         });
 };
 
