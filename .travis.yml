@@ -16,9 +16,9 @@ install:
   - npm --version
   #- msbuild -version -nologo # no global msbuild on Travis it seems
   #- where msbuild # no where as well it seems
-  - "%ProgramFiles(x86)%/Microsoft Visual Studio/Installer/vswhere" -property installationPath -products * -all
-  - "%ProgramFiles(x86)%/Microsoft Visual Studio/Installer/vswhere" -property installationPath -all
-  - "%ProgramFiles(x86)%/Microsoft Visual Studio/Installer/vswhere" -property installationPath -legacy
+  - cmd.exe /C '"%ProgramFiles(x86)%/Microsoft Visual Studio/Installer/vswhere" -property installationPath -products * -all'
+  - cmd.exe /C '"%ProgramFiles(x86)%/Microsoft Visual Studio/Installer/vswhere" -property installationPath -all'
+  - cmd.exe /C '"%ProgramFiles(x86)%/Microsoft Visual Studio/Installer/vswhere" -property installationPath -legacy'
   
 script:
   - npm run eslint
