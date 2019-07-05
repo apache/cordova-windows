@@ -23,7 +23,7 @@ install:
   - echo $PATH
 
 before_script:
-  - certutil -user -importpfx -p "" template/CordovaApp_TemporaryKey.pfx
+  - cmd.exe /C 'certutil -user -importpfx -p "" template/CordovaApp_TemporaryKey.pfx'
 
 script:
   - npm run eslint
