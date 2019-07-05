@@ -23,6 +23,7 @@ install:
   - echo $PATH
 
 before_script:
+  - dir # where are we?
   - cmd.exe /C 'certutil -user -importpfx -p "" template/CordovaApp_TemporaryKey.pfx'
 
 script:
