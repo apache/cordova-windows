@@ -22,6 +22,9 @@ install:
   - export PATH="$PATH:$MSVC/MSBuild/15.0/Bin/"
   - echo $PATH
 
+before_script:
+  - certutil -user -importpfx -p "" template/CordovaApp_TemporaryKey.pfx
+
 script:
   - npm run eslint
   - npm test
