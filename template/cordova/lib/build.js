@@ -333,6 +333,10 @@ function buildTargets (config, myBuildTargets, msbuild) {
     var hasAnyCpu = false;
     var shouldBundle = !!config.bundle;
 
+    if (myBuildTargets.length === 0) {
+        throw new CordovaError('No build configuration (pairs of project to build and target architecture) to build');
+    }
+
     // collect all build configurations (pairs of project to build and target architecture)
     myBuildTargets.forEach(function (buildTarget) {
         config.buildArchs.forEach(function (buildArch) {
