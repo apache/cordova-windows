@@ -24,7 +24,8 @@ install:
 
 before_script:
   - dir template # where are we?
-  - yes "" | certutil -user -importpfx templateCordovaApp_TemporaryKey.pfx
+  - Import-PfxCertificate -FilePath template/CordovaApp_TemporaryKey.pfx -CertStoreLocation Cert:\LocalMachine\My
+  - yes "" | certutil -user -importpfx template/CordovaApp_TemporaryKey.pfx
 
 script:
   - npm run eslint
