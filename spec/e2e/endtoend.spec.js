@@ -78,6 +78,8 @@ describe('Cordova create and build', function () {
         expect(fs.existsSync(path.join(buildDirectory, projectFolder))).toBe(true);
     });
 
+    describe('Windows 10', function () {
+
     // default
 
     it('spec.2a should build default (win10) project', function () {
@@ -97,6 +99,79 @@ describe('Cordova create and build', function () {
         _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_anycpu_debug_Test', 'CordovaApp.Windows10_1.0.0.0_anycpu_debug.appx');
     });
 
+        // --archs
+
+        it('spec.3a should build project for particular CPU', function () {
+            shell.exec(buildScriptPath + ' --archs=\"x64\"', { silent: silent }); /* eslint no-useless-escape : 0 */
+            _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_x64_debug_Test', 'CordovaApp.Windows10_1.0.0.0_x64_debug.appx');
+        });
+
+        it('spec.4a should build project for CPUs separated by whitespaces', function () {
+            shell.exec(buildScriptPath + ' --archs=\"x64 x86 arm anycpu\"', { silent: silent }); /* eslint no-useless-escape : 0 */
+            _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_x64_debug_Test', 'CordovaApp.Windows10_1.0.0.0_x64_debug.appx');
+            _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_x86_debug_Test', 'CordovaApp.Windows10_1.0.0.0_x86_debug.appx');
+            _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_arm_debug_Test', 'CordovaApp.Windows10_1.0.0.0_arm_debug.appx');
+            _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_anycpu_debug_Test', 'CordovaApp.Windows10_1.0.0.0_anycpu_debug.appx');
+        });
+
+        // "InProcessServer extension"
+
+        it('spec.5a should build project containing plugin with InProcessServer extension', function (done) {
+            var extensionsPluginInfo, api;
+
+            extensionsPluginInfo = new PluginInfo(extensionsPlugin);
+            api = new Api();
+            api.root = path.join(buildDirectory, projectFolder);
+            api.locations.root = path.join(buildDirectory, projectFolder);
+            api.locations.www = path.join(buildDirectory, projectFolder, 'www');
+
+            var fail = jasmine.createSpy('fail')
+                .and.callFake(function (err) {
+                    console.error(err);
+                });
+
+            api.addPlugin(extensionsPluginInfo)
+                .then(function () {
+                    shell.exec(buildScriptPath, { silent: silent });
+                    _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_anycpu_debug_Test', 'CordovaApp.Windows10_1.0.0.0_anycpu_debug.appx');
+                })
+                .catch(fail)
+                .finally(function () {
+                    expect(fail).not.toHaveBeenCalled();
+                    done();
+                });
+        });
+
+        // --release --bundle
+
+        it('spec.6a should generate appxupload and appxbundle for Windows 10 project bundle release build', function () {
+            // FIXME Fails for VS 2017 on AppVeyor
+            if (process.env.APPVEYOR_BUILD_WORKER_IMAGE === 'Visual Studio 2017') {
+                pending('This test is broken for VS 2017 on AppVeyor');
+            }
+
+            shell.exec(buildScriptPath + ' --release --bundle --archs=\"x64 x86 arm\"', { silent: silent });
+            _expectExist(/.*bundle\.appxupload$/, 3);
+            _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_Test', 'CordovaApp.Windows10_1.0.0.0_x64_x86_arm.appxbundle');
+        });
+
+        // --release (non-bundle)
+
+        it('spec.7 should generate appxupload for Windows 10 project non-bundle release build', function () {
+            shell.exec(buildScriptPath + ' --release --archs=\"x64 x86 arm\"', { silent: silent });
+            _expectExist(/.*\.appxupload$/, 3);
+            // CB-12416 Should build appx in separate dirs for each architecture
+            // Should contain a subdirectory for each of the architectures
+            // These subdirectories should contain corresponding appx files
+            _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_arm_Test', 'CordovaApp.Windows10_1.0.0.0_arm.appx');
+            _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_x64_Test', 'CordovaApp.Windows10_1.0.0.0_x64.appx');
+            _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_x86_Test', 'CordovaApp.Windows10_1.0.0.0_x86.appx');
+        });
+
+    });
+
+    describe('Windows 8.1', function () {
+
     it('spec.2d should build 8.1 win project', function () {
         shell.exec(buildScriptPath + ' --appx=8.1-win', { silent: silent });
         _expectExist(/.*Windows.*\.appxupload/);
@@ -115,11 +190,6 @@ describe('Cordova create and build', function () {
 
     // --archs
 
-    it('spec.3a should build project for particular CPU', function () {
-        shell.exec(buildScriptPath + ' --archs=\"x64\"', { silent: silent }); /* eslint no-useless-escape : 0 */
-        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_x64_debug_Test', 'CordovaApp.Windows10_1.0.0.0_x64_debug.appx');
-    });
-
     it('spec.3b should build project (8.1) for particular CPU', function () {
         shell.exec(buildScriptPath + ' --appx=8.1 --archs=\"x64\"', { silent: silent }); /* eslint no-useless-escape : 0 */
         _expectExist(/.*Phone.*x64.*\.appxupload/);
@@ -136,14 +206,6 @@ describe('Cordova create and build', function () {
         _expectExist(/.*Phone.*x64.*\.appxupload/);
     });
 
-    it('spec.4a should build project for CPUs separated by whitespaces', function () {
-        shell.exec(buildScriptPath + ' --archs=\"x64 x86 arm anycpu\"', { silent: silent }); /* eslint no-useless-escape : 0 */
-        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_x64_debug_Test', 'CordovaApp.Windows10_1.0.0.0_x64_debug.appx');
-        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_x86_debug_Test', 'CordovaApp.Windows10_1.0.0.0_x86_debug.appx');
-        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_arm_debug_Test', 'CordovaApp.Windows10_1.0.0.0_arm_debug.appx');
-        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_anycpu_debug_Test', 'CordovaApp.Windows10_1.0.0.0_anycpu_debug.appx');
-    });
-
     it('spec.4b should build project (8.1) for CPUs separated by whitespaces', function () {
         shell.exec(buildScriptPath + ' --appx=8.1 --archs=\"x64 x86 arm anycpu\"', { silent: silent }); /* eslint no-useless-escape : 0 */
         _expectExist(/.*Phone.*x86.*\.appxupload/);
@@ -157,32 +219,6 @@ describe('Cordova create and build', function () {
     });
 
     // "InProcessServer extension"
-
-    it('spec.5a should build project containing plugin with InProcessServer extension', function (done) {
-        var extensionsPluginInfo, api;
-
-        extensionsPluginInfo = new PluginInfo(extensionsPlugin);
-        api = new Api();
-        api.root = path.join(buildDirectory, projectFolder);
-        api.locations.root = path.join(buildDirectory, projectFolder);
-        api.locations.www = path.join(buildDirectory, projectFolder, 'www');
-
-        var fail = jasmine.createSpy('fail')
-            .and.callFake(function (err) {
-                console.error(err);
-            });
-
-        api.addPlugin(extensionsPluginInfo)
-            .then(function () {
-                shell.exec(buildScriptPath, { silent: silent });
-                _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_anycpu_debug_Test', 'CordovaApp.Windows10_1.0.0.0_anycpu_debug.appx');
-            })
-            .catch(fail)
-            .finally(function () {
-                expect(fail).not.toHaveBeenCalled();
-                done();
-            });
-    });
 
     it('spec.5b should build project (8.1) containing plugin with InProcessServer extension', function (done) {
         var extensionsPluginInfo, api;
@@ -213,17 +249,6 @@ describe('Cordova create and build', function () {
 
     // --release --bundle
 
-    it('spec.6a should generate appxupload and appxbundle for Windows 10 project bundle release build', function () {
-        // FIXME Fails for VS 2017 on AppVeyor
-        if (process.env.APPVEYOR_BUILD_WORKER_IMAGE === 'Visual Studio 2017') {
-            pending('This test is broken for VS 2017 on AppVeyor');
-        }
-
-        shell.exec(buildScriptPath + ' --release --bundle --archs=\"x64 x86 arm\"', { silent: silent });
-        _expectExist(/.*bundle\.appxupload$/, 3);
-        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_Test', 'CordovaApp.Windows10_1.0.0.0_x64_x86_arm.appxbundle');
-    });
-
     it('spec.6b should generate appxupload and appxbundle for Windows Phone 8.1 project bundle release build', function () {
         shell.exec(buildScriptPath + ' --release --appx=8.1-phone --bundle --archs=\"x64 x86 arm\"', { silent: silent });
         _expectExist(/.*bundle\.appxupload$/, 3);
@@ -232,21 +257,13 @@ describe('Cordova create and build', function () {
 
     // --release (non-bundle)
 
-    it('spec.7 should generate appxupload for Windows 10 project non-bundle release build', function () {
-        shell.exec(buildScriptPath + ' --release --archs=\"x64 x86 arm\"', { silent: silent });
-        _expectExist(/.*\.appxupload$/, 3);
-        // CB-12416 Should build appx in separate dirs for each architecture
-        // Should contain a subdirectory for each of the architectures
-        // These subdirectories should contain corresponding appx files
-        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_arm_Test', 'CordovaApp.Windows10_1.0.0.0_arm.appx');
-        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_x64_Test', 'CordovaApp.Windows10_1.0.0.0_x64.appx');
-        _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_x86_Test', 'CordovaApp.Windows10_1.0.0.0_x86.appx');
-    });
-
     it('spec.8 for a non-bundle case for Windows Phone 8.1 it should build appx in separate dirs for each architecture', function () {
         shell.exec(buildScriptPath + ' --release --appx=8.1-phone --phone --archs=\"x86 arm\"', { silent: silent });
         _expectExist(/.*\.appxupload$/, 2);
         _expectSubdirAndFileExist('CordovaApp.Phone_1.0.0.0_arm_Test', 'CordovaApp.Phone_1.0.0.0_arm.appx');
         _expectSubdirAndFileExist('CordovaApp.Phone_1.0.0.0_x86_Test', 'CordovaApp.Phone_1.0.0.0_x86.appx');
     });
+
+    });
+
 });
