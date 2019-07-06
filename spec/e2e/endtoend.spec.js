@@ -176,7 +176,7 @@ describe('Cordova create and build', function () {
             pending('Windows 8.1 builds are not supported by Visual Studio 2017: https://docs.microsoft.com/en-us/visualstudio/productinfo/vs2017-compatibility-vs#windows-store-and-windows-phone-apps');
             /*
                 via https://issues.apache.org/jira/browse/CB-13874
-                > Projects for Windows Store 8.1 and 8.0, and Windows Phone 8.1 and 8.0 are not supported in this release. 
+                > Projects for Windows Store 8.1 and 8.0, and Windows Phone 8.1 and 8.0 are not supported in this release.
                 > To maintain these apps, continue to use Visual Studio 2015
             */
         }
