@@ -25,6 +25,7 @@ install:
 before_script:
   - dir template # where are we?
   - powershell Import-PfxCertificate -FilePath template/CordovaApp_TemporaryKey.pfx -CertStoreLocation "Cert:\LocalMachine\My"
+  - powershell Import-PfxCertificate -FilePath template/CordovaApp_TemporaryKey.pfx -CertStoreLocation "Cert:\CurrentUser\My"  
   #- yes "" | certutil -user -importpfx template/CordovaApp_TemporaryKey.pfx
 
 script:
