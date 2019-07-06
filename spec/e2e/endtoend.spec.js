@@ -195,7 +195,7 @@ describe('Cordova create and build', function () {
             _expectExist(/.*Phone.*x64.*\.appxupload/);
             _expectExist(/.*Windows.*x64.*\.appxupload/);
         });
-        
+
         it('spec.3c should build project (8.1-win) for particular CPU', function () {
             shell.exec(buildScriptPath + ' --appx=8.1-win --archs=\"x64\"', { silent: silent }); /* eslint no-useless-escape : 0 */
             _expectExist(/.*Windows.*x64.*\.appxupload/);
