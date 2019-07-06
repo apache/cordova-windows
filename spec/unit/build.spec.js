@@ -254,7 +254,7 @@ describe('run method', function () {
             });
     });
 
-    xit('spec.8 should fail buildProject if built with MSBuildTools version 4.0', function (done) {
+    it('spec.8 should fail buildProject if built with MSBuildTools version 4.0', function (done) {
         var buildSpy = jasmine.createSpy();
         var errorSpy = jasmine.createSpy();
 
@@ -286,7 +286,7 @@ describe('run method', function () {
             });
     });
 
-    xit('spec.10 should throw an error if windows-target-version has unsupported value', function (done) {
+    it('spec.10 should throw an error if windows-target-version has unsupported value', function (done) {
         var buildSpy = jasmine.createSpy();
         var errorSpy = jasmine.createSpy();
 
@@ -318,7 +318,7 @@ describe('run method', function () {
             });
     });
 
-    xit('spec.12 should throw an error if windows-phone-target-version has unsupported value', function (done) {
+    it('spec.12 should throw an error if windows-phone-target-version has unsupported value', function (done) {
         var buildSpy = jasmine.createSpy();
         var errorSpy = jasmine.createSpy();
 
