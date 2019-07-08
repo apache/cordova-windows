@@ -172,7 +172,7 @@ describe('Cordova create and build', function () {
 
     describe('Windows 8.1', function () {
 
-        beforeAll(function () {
+        beforeEach(function () {
             if (process.env.APPVEYOR_BUILD_WORKER_IMAGE === 'Visual Studio 2017') {
                 pending('Windows 8.1 builds are not supported by Visual Studio 2017: https://docs.microsoft.com/en-us/visualstudio/productinfo/vs2017-compatibility-vs#windows-store-and-windows-phone-apps');
                 /*
