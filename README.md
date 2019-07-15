@@ -35,6 +35,8 @@ This repo contains the code for an [Apache Cordova](http://cordova.apache.org) p
 
 See https://cordova.apache.org/docs/en/dev/guide/platforms/windows/index.html#requirements-and-support
 
+Note that Visual Studio 2019 is not supported, as discussed in [cordova-windows issue #327](https://github.com/apache/cordova-windows/issues/327).
+
 # Getting started
 
 The best way to use this is to install the [Cordova CLI](https://www.npmjs.com/package/cordova), create a project, add the windows platform, and run the app:
