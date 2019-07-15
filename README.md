@@ -74,5 +74,5 @@ Report them [right here at GitHub using the "Issues" tab](https://github.com/apa
 
 # Further Reading
 
-- [Windows Platform Guide](http://cordova.apache.org/docs/en/latest/guide/platforms/win8/index.html)
+- [Windows Platform Guide](https://cordova.apache.org/docs/en/latest/guide/platforms/windows/index.html)
 - [Apache Cordova Documentation](http://docs.cordova.io)
