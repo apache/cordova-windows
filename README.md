@@ -33,13 +33,7 @@ This repo contains the code for an [Apache Cordova](http://cordova.apache.org) p
 
 # Requirements
 
-**Target OS:** Windows 8.1, Windows Phone 8.1, Windows 10
-
-**Host OS:** Windows 8.1 or Windows 10
-
-Install the tools: [Visual Studio 2015 or Visual Studio 2017 from older downloads page](https://visualstudio.microsoft.com/vs/older-downloads/) (it *may* be possible to use Visual Studio 2013 Express for Windows 8.1 projects but this is no longer supported)
-
-Note that Visual Studio 2019 is not supported as it dropped support for UWP JavaScript projects (see [issue #327](https://github.com/apache/cordova-windows/issues/327) for more details).
+See https://cordova.apache.org/docs/en/dev/guide/platforms/windows/index.html#requirements-and-support
 
 # Getting started
 
