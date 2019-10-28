@@ -43,72 +43,48 @@ describe('getPackage method', function () {
         shell.cp('-R', testPkgPath, pkgRoot);
     });
 
-    it('spec.1 should find windows anycpu debug package', function (done) {
-        var rejected = jasmine.createSpy();
-
-        pkg.getPackage('windows', 'debug', 'anycpu')
+    it('spec.1 should find windows anycpu debug package', function () {
+        return pkg.getPackage('windows', 'debug', 'anycpu')
             .then(function (pkgInfo) {
                 expect(pkgInfo.type).toBe('windows');
                 expect(pkgInfo.buildtype).toBe('debug');
                 expect(pkgInfo.arch).toBe('anycpu');
                 expect(pkgInfo.script).toBeDefined();
-            }, function (err) {
-                console.error(err);
-                rejected();
-            })
-            .finally(function () {
-                expect(rejected).not.toHaveBeenCalled();
-                done();
             });
     });
 
-    it('spec.2 should find windows phone anycpu debug package', function (done) {
-        var rejected = jasmine.createSpy();
-
-        pkg.getPackage('phone', 'debug', 'anycpu')
+    it('spec.2 should find windows phone anycpu debug package', function () {
+        return pkg.getPackage('phone', 'debug', 'anycpu')
             .then(function (pkgInfo) {
                 expect(pkgInfo.type).toBe('phone');
                 expect(pkgInfo.buildtype).toBe('debug');
                 expect(pkgInfo.arch).toBe('anycpu');
                 expect(pkgInfo.script).toBeDefined();
-            }, rejected)
-            .finally(function () {
-                expect(rejected).not.toHaveBeenCalled();
-                done();
             });
     });
 
-    it('spec.3 should not find windows 10 anycpu debug package', function (done) {
-        var resolved = jasmine.createSpy();
-
-        pkg.getPackage('windows10', 'debug', 'anycpu')
-            .then(resolved)
-            .finally(function () {
-                expect(resolved).not.toHaveBeenCalled();
-                done();
-            });
+    it('spec.3 should not find windows 10 anycpu debug package', function () {
+        return pkg.getPackage('windows10', 'debug', 'anycpu')
+            .then(
+                () => fail('Expected promise to be rejected'),
+                () => expect().nothing()
+            );
     });
 
-    it('spec.4 should not find windows anycpu release package', function (done) {
-        var resolved = jasmine.createSpy();
-
-        pkg.getPackage('windows', 'release', 'anycpu')
-            .then(resolved)
-            .finally(function () {
-                expect(resolved).not.toHaveBeenCalled();
-                done();
-            });
+    it('spec.4 should not find windows anycpu release package', function () {
+        return pkg.getPackage('windows', 'release', 'anycpu')
+            .then(
+                () => fail('Expected promise to be rejected'),
+                () => expect().nothing()
+            );
     });
 
-    it('spec.5 should not find windows x86 debug package', function (done) {
-        var resolved = jasmine.createSpy();
-
-        pkg.getPackage('windows', 'debug', 'x86')
-            .then(resolved)
-            .finally(function () {
-                expect(resolved).not.toHaveBeenCalled();
-                done();
-            });
+    it('spec.5 should not find windows x86 debug package', function () {
+        return pkg.getPackage('windows', 'debug', 'x86')
+            .then(
+                () => fail('Expected promise to be rejected'),
+                () => expect().nothing()
+            );
     });
 
     it('end', function () {

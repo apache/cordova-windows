@@ -116,7 +116,7 @@ describe('Cordova create and build', function () {
 
         // "InProcessServer extension"
 
-        it('spec.5a should build project containing plugin with InProcessServer extension', function (done) {
+        it('spec.5a should build project containing plugin with InProcessServer extension', function () {
             var extensionsPluginInfo, api;
 
             extensionsPluginInfo = new PluginInfo(extensionsPlugin);
@@ -125,20 +125,10 @@ describe('Cordova create and build', function () {
             api.locations.root = path.join(buildDirectory, projectFolder);
             api.locations.www = path.join(buildDirectory, projectFolder, 'www');
 
-            var fail = jasmine.createSpy('fail')
-                .and.callFake(function (err) {
-                    console.error(err);
-                });
-
-            api.addPlugin(extensionsPluginInfo)
+            return api.addPlugin(extensionsPluginInfo)
                 .then(function () {
                     shell.exec(buildScriptPath, { silent: silent });
                     _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_anycpu_debug_Test', 'CordovaApp.Windows10_1.0.0.0_anycpu_debug.appx');
-                })
-                .catch(fail)
-                .finally(function () {
-                    expect(fail).not.toHaveBeenCalled();
-                    done();
                 });
         });
 
@@ -231,7 +221,7 @@ describe('Cordova create and build', function () {
 
         // "InProcessServer extension"
 
-        it('spec.5b should build project (8.1) containing plugin with InProcessServer extension', function (done) {
+        it('spec.5b should build project (8.1) containing plugin with InProcessServer extension', function () {
             var extensionsPluginInfo, api;
 
             extensionsPluginInfo = new PluginInfo(extensionsPlugin);
@@ -240,21 +230,11 @@ describe('Cordova create and build', function () {
             api.locations.root = path.join(buildDirectory, projectFolder);
             api.locations.www = path.join(buildDirectory, projectFolder, 'www');
 
-            var fail = jasmine.createSpy('fail')
-                .and.callFake(function (err) {
-                    console.error(err);
-                });
-
-            api.addPlugin(extensionsPluginInfo)
+            return api.addPlugin(extensionsPluginInfo)
                 .then(function () {
                     shell.exec(buildScriptPath + ' --appx=8.1', { silent: silent });
                     _expectExist(/.*Windows.*\.appxupload/);
                     _expectExist(/.*Phone.*\.appxupload/);
-                })
-                .catch(fail)
-                .finally(function () {
-                    expect(fail).not.toHaveBeenCalled();
-                    done();
                 });
         });
 

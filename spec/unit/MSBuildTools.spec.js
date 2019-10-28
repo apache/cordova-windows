@@ -36,17 +36,14 @@ describe('findAvailableVersion method', function () {
         return (availableVersions.indexOf(version) >= 0) ? Q.resolve(new MSBuildTools(version, fakeToolsPath(version))) : Q.resolve(null);
     };
 
-    var versionTest = function (availableVersions, version, done) {
+    var versionTest = function (availableVersions, version) {
         buildTools.__set__('checkMSBuildVersion', checkMSBuildVersionFake.bind(null, availableVersions));
-        buildTools.findAvailableVersion().then(function (msbuildTools) {
+        return buildTools.findAvailableVersion().then(function (msbuildTools) {
             expect(msbuildTools).not.toBeNull();
             expect(msbuildTools.version).toBeDefined();
             expect(msbuildTools.path).toBeDefined();
             expect(msbuildTools.version).toBe(version);
             expect(msbuildTools.path).toBe(fakeToolsPath(version));
-            if (typeof done === 'function') {
-                done();
-            }
         });
     };
 
@@ -58,34 +55,28 @@ describe('findAvailableVersion method', function () {
         buildTools.__set__('checkMSBuildVersion', checkMSBuildVersionOriginal);
     });
 
-    it('spec.1 should find 14.0 available version if 12.0 is unavailable', function (done) {
-        versionTest(['14.0'], '14.0', done);
+    it('spec.1 should find 14.0 available version if 12.0 is unavailable', function () {
+        return versionTest(['14.0'], '14.0');
     });
 
-    it('spec.2 should select 14.0 available version even if 12.0 is also available', function (done) {
-        versionTest(['14.0', '12.0', '4.0'], '14.0', done);
+    it('spec.2 should select 14.0 available version even if 12.0 is also available', function () {
+        return versionTest(['14.0', '12.0', '4.0'], '14.0');
     });
 
-    it('spec.3 should find 12.0 available version if 14.0 is unavailable', function (done) {
-        versionTest(['12.0', '4.0'], '12.0', done);
+    it('spec.3 should find 12.0 available version if 14.0 is unavailable', function () {
+        return versionTest(['12.0', '4.0'], '12.0');
     });
 
-    it('spec.4 should find 4.0 available version if neither 12.0 nor 14.0 are available', function (done) {
-        versionTest(['4.0'], '4.0', done);
+    it('spec.4 should find 4.0 available version if neither 12.0 nor 14.0 are available', function () {
+        return versionTest(['4.0'], '4.0');
     });
 
-    it('spec.5 should produce an error if there is no available versions', function (done) {
-        var resolveSpy = jasmine.createSpy();
-
+    it('spec.5 should produce an error if there is no available versions', function () {
         buildTools.__set__('checkMSBuildVersion', checkMSBuildVersionFake.bind(null, []));
-        buildTools.findAvailableVersion()
-            .then(resolveSpy, function (error) {
-                expect(error).toBeDefined();
-            })
-            .finally(function () {
-                expect(resolveSpy).not.toHaveBeenCalled();
-                done();
-            });
+        return buildTools.findAvailableVersion().then(
+            () => fail('Expected promise to be rejected'),
+            error => expect(error).toBeDefined()
+        );
     });
 });
 
@@ -206,9 +197,6 @@ describe('getMSBuildToolsAt method', function () {
     var fakeVersion = '22.0.12635.5';
     var fakeVersionParsed = '22.0';
 
-    var fail = jasmine.createSpy('fail');
-    var success = jasmine.createSpy('success');
-
     var spawnOriginal = buildTools.__get__('spawn');
     var spawnSpy = jasmine.createSpy('spawn');
 
@@ -220,29 +208,23 @@ describe('getMSBuildToolsAt method', function () {
         buildTools.__set__('spawn', spawnOriginal);
     });
 
-    it('should return MSBuildTools instance', function (done) {
+    it('should return MSBuildTools instance', function () {
         spawnSpy.and.returnValue(Q(fakeVersion));
 
-        buildTools.getMSBuildToolsAt(fakePath)
+        return buildTools.getMSBuildToolsAt(fakePath)
             .then(function (tools) {
                 expect(tools).toEqual(jasmine.any(MSBuildTools));
                 expect(tools.version).toBe(fakeVersionParsed);
                 expect(tools.path).toBe(fakePath);
-            }, fail)
-            .done(function () {
-                expect(fail).not.toHaveBeenCalled();
-                done();
             });
     });
 
-    it('should reject promise if no msbuild found', function (done) {
+    it('should reject promise if no msbuild found', function () {
         spawnSpy.and.returnValue(Q.reject());
 
-        buildTools.getMSBuildToolsAt(messyPath)
-            .then(success, fail)
-            .done(function () {
-                expect(success).not.toHaveBeenCalled();
-                done();
-            });
+        return buildTools.getMSBuildToolsAt(messyPath).then(
+            () => fail('Expected promise to be rejected'),
+            () => expect().nothing()
+        );
     });
 });
