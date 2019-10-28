@@ -113,7 +113,7 @@ describe('Windows 10 deployment interacts with the file system as expected.', fu
         var deploymentTool = deployment.getDeploymentTool('10.0');
         return deploymentTool.enumerateDevices()
             .then(function (deviceList) {
-                deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /* shouldLaunch */ false, /* shouldUpdate */ false);
+                return deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /* shouldLaunch */ false, /* shouldUpdate */ false);
             });
     });
 
@@ -121,7 +121,7 @@ describe('Windows 10 deployment interacts with the file system as expected.', fu
         var deploymentTool = deployment.getDeploymentTool('10.0');
         return deploymentTool.enumerateDevices()
             .then(function (deviceList) {
-                deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /* shouldLaunch */ false, /* shouldUpdate */ true);
+                return deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /* shouldLaunch */ false, /* shouldUpdate */ true);
             });
     });
 
@@ -197,7 +197,7 @@ describe('Windows 8.1 deployment interacts with the file system as expected.', f
         var deploymentTool = deployment.getDeploymentTool('8.1');
         return deploymentTool.enumerateDevices()
             .then(function (deviceList) {
-                deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /* shouldLaunch */ false, /* shouldUpdate */ false);
+                return deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /* shouldLaunch */ false, /* shouldUpdate */ false);
             });
     });
 
@@ -205,7 +205,7 @@ describe('Windows 8.1 deployment interacts with the file system as expected.', f
         var deploymentTool = deployment.getDeploymentTool('8.1');
         return deploymentTool.enumerateDevices()
             .then(function (deviceList) {
-                deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /* shouldLaunch */ false, /* shouldUpdate */ true);
+                return deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /* shouldLaunch */ false, /* shouldUpdate */ true);
             });
     });
 
@@ -213,7 +213,7 @@ describe('Windows 8.1 deployment interacts with the file system as expected.', f
         var deploymentTool = deployment.getDeploymentTool('8.1');
         return deploymentTool.enumerateDevices()
             .then(function (deviceList) {
-                deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /* shouldLaunch */ true, /* shouldUpdate */ false);
+                return deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /* shouldLaunch */ true, /* shouldUpdate */ false);
             });
     });
 
@@ -221,7 +221,7 @@ describe('Windows 8.1 deployment interacts with the file system as expected.', f
         var deploymentTool = deployment.getDeploymentTool('8.1');
         return deploymentTool.enumerateDevices()
             .then(function (deviceList) {
-                deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /* shouldLaunch */ true, /* shouldUpdate */ true);
+                return deploymentTool.installAppPackage(TEST_APP_PACKAGE_NAME, deviceList[0], /* shouldLaunch */ true, /* shouldUpdate */ true);
             });
     });
 
@@ -229,7 +229,7 @@ describe('Windows 8.1 deployment interacts with the file system as expected.', f
         var deploymentTool = deployment.getDeploymentTool('8.1');
         return deploymentTool.enumerateDevices()
             .then(function (deviceList) {
-                deploymentTool.uninstallAppPackage(TEST_APP_PACKAGE_ID, deviceList[5]);
+                return deploymentTool.uninstallAppPackage(TEST_APP_PACKAGE_ID, deviceList[5]);
             });
     });
 });

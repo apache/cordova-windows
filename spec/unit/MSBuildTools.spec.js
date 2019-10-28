@@ -102,7 +102,7 @@ describe('checkMSBuildVersion method', function () {
             'MSBuildToolsPath\tREG_SZ\t' + fakeToolsPath(version) + '\r\n\r\n')
         );
 
-        checkMSBuildVersion(version).then(function (actual) {
+        return checkMSBuildVersion(version).then(function (actual) {
             expect(actual.version).toBe(version);
             expect(actual.path).toBe(fakeToolsPath(version));
         });
@@ -111,7 +111,7 @@ describe('checkMSBuildVersion method', function () {
     it('spec.7 should return null if no tools found for version', function () {
         spawnSpy.and.returnValue(Q.resolve('ERROR: The system was unable to find the specified registry key or value.'));
 
-        checkMSBuildVersion('14.0').then(function (actual) {
+        return checkMSBuildVersion('14.0').then(function (actual) {
             expect(actual).not.toBeDefined();
         });
     });
@@ -119,7 +119,7 @@ describe('checkMSBuildVersion method', function () {
     it('spec.8 should return null on internal error', function () {
         spawnSpy.and.returnValue(Q.reject());
 
-        checkMSBuildVersion('14.0').then(function (actual) {
+        return checkMSBuildVersion('14.0').then(function (actual) {
             expect(actual).not.toBeDefined();
         });
     });
