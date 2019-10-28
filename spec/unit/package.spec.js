@@ -156,19 +156,6 @@ describe('getPackageFileInfo method', function () {
 });
 
 describe('getAppId method', function () {
-    it('spec.10 should properly get phoneProductId value from manifest', function (done) {
-        var resolve = jasmine.createSpy();
-
-        Q(pkg.getAppId(pkgRoot))
-            .then(resolve)
-            .finally(function () {
-                expect(resolve).toHaveBeenCalledWith('$guid1$');
-                done();
-            });
-    });
-});
-
-describe('getPackageName method', function () {
     it('spec.11 should properly get Application Id value from manifest', function (done) {
         var resolve = jasmine.createSpy();
 
