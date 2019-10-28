@@ -19,7 +19,6 @@
 var path = require('path');
 var rewire = require('rewire');
 var shell = require('shelljs');
-var Q = require('q');
 var platformRoot = '../../template';
 var pkgRoot = './template/';
 var pkgPath = path.join(pkgRoot, 'AppPackages');
@@ -156,14 +155,7 @@ describe('getPackageFileInfo method', function () {
 });
 
 describe('getAppId method', function () {
-    it('spec.11 should properly get Application Id value from manifest', function (done) {
-        var resolve = jasmine.createSpy();
-
-        Q(pkg.getAppId(pkgRoot))
-            .then(resolve)
-            .finally(function () {
-                expect(resolve).toHaveBeenCalledWith('$guid1$');
-                done();
-            });
+    it('spec.11 should properly get Application Id value from manifest', function () {
+        expect(pkg.getAppId(pkgRoot)).toBe('$guid1$');
     });
 });
