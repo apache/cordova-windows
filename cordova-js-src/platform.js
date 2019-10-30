@@ -21,36 +21,36 @@
 
 module.exports = {
     id: 'windows',
-    bootstrap:function() {
-        var cordova = require('cordova'),
-            exec = require('cordova/exec'),
-            channel = cordova.require('cordova/channel'),
-            platform = require('cordova/platform'),
-            modulemapper = require('cordova/modulemapper'),
-            utils = require('cordova/utils');
+    bootstrap: function () {
+        var cordova = require('cordova');
+        var exec = require('cordova/exec');
+        var channel = cordova.require('cordova/channel');
+        var platform = require('cordova/platform');
+        var modulemapper = require('cordova/modulemapper');
+        var utils = require('cordova/utils');
 
         modulemapper.clobbers('cordova/exec/proxy', 'cordova.commandProxy');
 
         // we will make sure we get this channel
         // TODO: remove this once other platforms catch up.
-        if(!channel.onActivated) {
+        if (!channel.onActivated) {
             channel.onActivated = cordova.addDocumentEventHandler('activated');
         }
         channel.onNativeReady.fire();
 
         var onWinJSReady = function () {
-            var app = WinJS.Application,
-                splashscreen = require('cordova/splashscreen'),
-                configHelper = require('cordova/confighelper');
+            var app = WinJS.Application;
+            var splashscreen = require('cordova/splashscreen');
+            var configHelper = require('cordova/confighelper');
 
             modulemapper.clobbers('cordova/splashscreen', 'navigator.splashscreen');
 
-            var checkpointHandler = function checkpointHandler() {
-                cordova.fireDocumentEvent('pause',null,true);
+            var checkpointHandler = function checkpointHandler () {
+                cordova.fireDocumentEvent('pause', null, true);
             };
 
-            var resumingHandler = function resumingHandler() {
-                cordova.fireDocumentEvent('resume',null,true);
+            var resumingHandler = function resumingHandler () {
+                cordova.fireDocumentEvent('resume', null, true);
             };
 
             // activation args are available via the activated event
@@ -58,15 +58,15 @@ module.exports = {
             // activationContext:{type: actType, args: args};
             var activationHandler = function (e) {
                 // Making all the details available as activationContext
-                platform.activationContext = utils.clone(e.detail);         /* CB-10653 to avoid losing detail properties for some activation kinds */
-                platform.activationContext.raw = e.detail;                  /* CB-11522 to preserve types */
-                platform.activationContext.args = e.detail.arguments;       /* for backwards compatibility */
+                platform.activationContext = utils.clone(e.detail); /* CB-10653 to avoid losing detail properties for some activation kinds */
+                platform.activationContext.raw = e.detail; /* CB-11522 to preserve types */
+                platform.activationContext.args = e.detail.arguments; /* for backwards compatibility */
 
-                function makePromise(fn) {
-                    return new WinJS.Promise(function init(completeDispatch, errorDispatch) {
-                        fn(function successCb(results) {
+                function makePromise (fn) {
+                    return new WinJS.Promise(function init (completeDispatch, errorDispatch) {
+                        fn(function successCb (results) {
                             completeDispatch(results);
-                        }, function errorCb(error) {
+                        }, function errorCb (error) {
                             errorDispatch(error);
                         });
                     });
@@ -84,14 +84,14 @@ module.exports = {
                     manifest = manifestTmp;
                     return makePromise(configHelper.readConfig);
                 })
-                .then(function (config) {
-                    splashscreen.firstShow(config, manifest, e);
-                }).then(function () {
+                    .then(function (config) {
+                        splashscreen.firstShow(config, manifest, e);
+                    }).then(function () {
                     // Avoids splashimage flicker on Windows Phone 8.1/10
-                    return WinJS.Promise.timeout();
-                }).then(function () {
-                    cordova.fireDocumentEvent('activated', platform.activationContext, true);
-                }));
+                        return WinJS.Promise.timeout();
+                    }).then(function () {
+                        cordova.fireDocumentEvent('activated', platform.activationContext, true);
+                    }));
             };
 
             // CB-12193 CoreWindow and some WinRT APIs are not available in webview
@@ -102,9 +102,9 @@ module.exports = {
             } catch (e) { }
 
             if (isCoreWindowAvailable) {
-                app.addEventListener("checkpoint", checkpointHandler);
-                app.addEventListener("activated", activationHandler, false);
-                Windows.UI.WebUI.WebUIApplication.addEventListener("resuming", resumingHandler, false);
+                app.addEventListener('checkpoint', checkpointHandler);
+                app.addEventListener('activated', activationHandler, false);
+                Windows.UI.WebUI.WebUIApplication.addEventListener('resuming', resumingHandler, false);
 
                 injectBackButtonHandler();
 
@@ -112,34 +112,33 @@ module.exports = {
             }
         };
 
-        function appendScript(scriptElem, loadedCb) {
-            scriptElem.addEventListener("load", loadedCb);
+        function appendScript (scriptElem, loadedCb) {
+            scriptElem.addEventListener('load', loadedCb);
             document.head.appendChild(scriptElem);
         }
 
         if (!window.WinJS) {
-            var scriptElem = document.createElement("script");
+            var scriptElem = document.createElement('script');
 
             if (navigator.appVersion.indexOf('MSAppHost/3.0') !== -1) {
                 // Windows 10 UWP
                 scriptElem.src = '/www/WinJS/js/base.js';
-            } else if (navigator.appVersion.indexOf("Windows Phone 8.1;") !== -1) {
+            } else if (navigator.appVersion.indexOf('Windows Phone 8.1;') !== -1) {
                 // windows phone 8.1 + Mobile IE 11
-                scriptElem.src = "//Microsoft.Phone.WinJS.2.1/js/base.js";
-            } else if (navigator.appVersion.indexOf("MSAppHost/2.0;") !== -1) {
+                scriptElem.src = '//Microsoft.Phone.WinJS.2.1/js/base.js';
+            } else if (navigator.appVersion.indexOf('MSAppHost/2.0;') !== -1) {
                 // windows 8.1 + IE 11
-                scriptElem.src = "//Microsoft.WinJS.2.0/js/base.js";
+                scriptElem.src = '//Microsoft.WinJS.2.0/js/base.js';
             }
-            scriptElem.addEventListener("load", onWinJSReady);
+            scriptElem.addEventListener('load', onWinJSReady);
             document.head.appendChild(scriptElem);
-        }
-        else {
+        } else {
             onWinJSReady();
         }
     }
 };
 
-function injectBackButtonHandler() {
+function injectBackButtonHandler () {
 
     var app = WinJS.Application;
 
@@ -150,7 +149,7 @@ function injectBackButtonHandler() {
     // `false` as a result will trigger system default behaviour
     var defaultBackButtonHandler = app.onbackclick || function () { return false; };
 
-    var backRequestedHandler = function backRequestedHandler(evt) {
+    var backRequestedHandler = function backRequestedHandler (evt) {
         // check if listeners are registered, if yes use custom backbutton event
         // NOTE: On Windows Phone 8.1 backbutton handlers have to throw an exception in order to exit the app
         if (backButtonChannel.numHandlers >= 1) {
@@ -158,8 +157,7 @@ function injectBackButtonHandler() {
                 cordova.fireDocumentEvent('backbutton', evt, true);
                 evt.handled = true; // Windows Mobile requires handled to be set as well;
                 return true;
-            }
-            catch (e) {
+            } catch (e) {
                 return false;
             }
         }
@@ -181,7 +179,7 @@ function injectBackButtonHandler() {
                 Windows.UI.Core.AppViewBackButtonVisibility.collapsed;
         };
 
-        navigationManager.addEventListener("backrequested", backRequestedHandler, false);
+        navigationManager.addEventListener('backrequested', backRequestedHandler, false);
     } else { // Windows 8.1 Phone
         // inject new back button handler
         app.onbackclick = backRequestedHandler;

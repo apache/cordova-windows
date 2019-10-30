@@ -63,16 +63,16 @@ if (['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(args[2]) > -1) {
 
 // Do some basic argument parsing
 var runOpts = nopt({
-    'silent' : Boolean,
-    'verbose' : Boolean,
-    'debug' : Boolean,
-    'release' : Boolean,
+    'silent': Boolean,
+    'verbose': Boolean,
+    'debug': Boolean,
+    'release': Boolean,
     'nobuild': Boolean,
     'device': Boolean,
     'emulator': Boolean,
     'target': String,
-    'buildConfig' : path
-}, { d : '--verbose', r: '--release' });
+    'buildConfig': path
+}, { d: '--verbose', r: '--release' });
 
 // Make buildOptions compatible with PlatformApi build method spec
 runOpts.argv = runOpts.argv.original;

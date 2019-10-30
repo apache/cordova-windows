@@ -21,10 +21,10 @@
 
 var Api = require('../template/cordova/Api');
 var args = require('nopt')({
-    'help' : Boolean,
+    'help': Boolean,
     'silent': Boolean,
     'verbose': Boolean
-}, { 'd' : '--verbose' });
+}, { 'd': '--verbose' });
 
 if (args.help || args.argv.remain.length === 0) {
     console.log('WARNING : Make sure to back up your project before updating!');

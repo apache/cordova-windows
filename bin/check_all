@@ -25,10 +25,10 @@ var check_reqs = require('./lib/check_reqs');
 if (['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(process.argv[2]) > -1) {
     check_reqs.help();
 } else {
-  check_reqs.check_all().done(function success(result) {
-      console.log('check_all', result);
-  }, function (err) {
-      console.error('Error: ' + err);
-      process.exit(2);
-  });
+    check_reqs.check_all().done(function success (result) {
+        console.log('check_all', result);
+    }, function (err) {
+        console.error('Error: ' + err);
+        process.exit(2);
+    });
 }

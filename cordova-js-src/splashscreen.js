@@ -1,4 +1,4 @@
-﻿/*
+/*
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,8 +19,8 @@
  *
 */
 
-var isWp81 = navigator.appVersion.indexOf("Windows Phone 8.1") !== -1;
-var isWp10 = navigator.appVersion.indexOf("Windows Phone 10") !== -1;
+var isWp81 = navigator.appVersion.indexOf('Windows Phone 8.1') !== -1;
+var isWp10 = navigator.appVersion.indexOf('Windows Phone 10') !== -1;
 var isPhoneDevice = isWp81 || isWp10;
 var isWin10UWP = navigator.appVersion.indexOf('MSAppHost/3.0') !== -1;
 var isHosted = window.location.protocol.indexOf('http') === 0;
@@ -30,32 +30,32 @@ var schema = (isHosted || isWin10UWP && isMsAppxWeb) ? 'ms-appx-web' : 'ms-appx'
 var fileName = isWp81 ? 'splashscreenphone.png' : 'splashscreen.png';
 var splashImageSrc = schema + ':///images/' + fileName;
 
-var splashElement = null,
-    extendedSplashImage = null,
-    extendedSplashProgress = null,
-    extendedSplashImageHelper = null;
+var splashElement = null;
+var extendedSplashImage = null;
+var extendedSplashProgress = null;
+var extendedSplashImageHelper = null;
 
-//// <Config and initialization>
-var DEFAULT_SPLASHSCREEN_DURATION = 3000, // in milliseconds
-    DEFAULT_FADE_DURATION = 500, // in milliseconds
-    FPS = 60, // frames per second used by requestAnimationFrame
-    PROGRESSRING_HEIGHT = 40,
-    PROGRESSRING_BOTTOM_MARGIN = 10; // needed for windows 10 min height window
+/// / <Config and initialization>
+var DEFAULT_SPLASHSCREEN_DURATION = 3000; // in milliseconds
+var DEFAULT_FADE_DURATION = 500; // in milliseconds
+var FPS = 60; // frames per second used by requestAnimationFrame
+var PROGRESSRING_HEIGHT = 40;
+var PROGRESSRING_BOTTOM_MARGIN = 10; // needed for windows 10 min height window
 
-var bgColor = "#464646",
-    isBgColorTransparent = false,
-    titleInitialBgColor,
-    titleBgColor,
-    autoHideSplashScreen = true,
-    splashScreenDelay = DEFAULT_SPLASHSCREEN_DURATION,
-    fadeSplashScreen = true,
-    fadeSplashScreenDuration = DEFAULT_FADE_DURATION,
-    showSplashScreenSpinner = true,
-    splashScreenSpinnerColor; // defaults to system accent color
+var bgColor = '#464646';
+var isBgColorTransparent = false;
+var titleInitialBgColor;
+var titleBgColor;
+var autoHideSplashScreen = true;
+var splashScreenDelay = DEFAULT_SPLASHSCREEN_DURATION;
+var fadeSplashScreen = true;
+var fadeSplashScreenDuration = DEFAULT_FADE_DURATION;
+var showSplashScreenSpinner = true;
+var splashScreenSpinnerColor; // defaults to system accent color
 
 var effectiveSplashDuration;
 
-function readBoolFromCfg(preferenceName, defaultValue, cfg) {
+function readBoolFromCfg (preferenceName, defaultValue, cfg) {
     var value = cfg.getPreferenceValue(preferenceName);
     if (typeof value !== 'undefined') {
         return value === 'true';
@@ -64,7 +64,7 @@ function readBoolFromCfg(preferenceName, defaultValue, cfg) {
     }
 }
 
-function readPreferencesFromCfg(cfg, manifest) {
+function readPreferencesFromCfg (cfg, manifest) {
     try {
         // Update splashscreen image path to match application manifest
         splashImageSrc = schema + ':///' + manifest.getSplashScreenImagePath().replace(/\\/g, '/');
@@ -103,24 +103,24 @@ function readPreferencesFromCfg(cfg, manifest) {
     }
 }
 
-function isPortrait() {
+function isPortrait () {
     return window.innerHeight > window.innerWidth;
 }
 
-function init(config, manifest) {
+function init (config, manifest) {
     readPreferencesFromCfg(config, manifest);
 
-    var splashscreenStyles = document.createElement("link");
+    var splashscreenStyles = document.createElement('link');
     splashscreenStyles.rel = 'stylesheet';
     splashscreenStyles.type = 'text/css';
     splashscreenStyles.href = '/www/css/splashscreen.css';
     document.head.appendChild(splashscreenStyles);
 
     // Windows 8.1 Desktop
-    //<div id='extendedSplashScreen' class='extendedSplashScreen hidden'>
+    // <div id='extendedSplashScreen' class='extendedSplashScreen hidden'>
     //    <img id='extendedSplashImage' src='/images/SplashScreen.png' alt='Splash screen image' />
     //    <progress id='extendedSplashProgress' class='win-medium win-ring'></progress>
-    //</div>
+    // </div>
     splashElement = document.createElement('div');
     splashElement.id = 'extendedSplashScreen';
     splashElement.classList.add('extendedSplashScreen');
@@ -139,7 +139,7 @@ function init(config, manifest) {
     draggableAttr.value = 'false';
     extendedSplashImage.attributes.setNamedItem(draggableAttr);
 
-    // This helps prevent flickering by making the system wait until your image has been rendered 
+    // This helps prevent flickering by making the system wait until your image has been rendered
     // before it switches to your extended splash screen.
     var onloadAttr = document.createAttribute('onload');
     onloadAttr.value = '';
@@ -159,7 +159,7 @@ function init(config, manifest) {
 
     if (isWp81) {
         extendedSplashProgress.classList.add('extended-splash-progress-phone');
-    } else if (isWp10) {   
+    } else if (isWp10) {
         extendedSplashProgress.classList.add('extended-splash-progress-wp10');
     } else {
         extendedSplashProgress.classList.add('extended-splash-progress-desktop');
@@ -178,12 +178,12 @@ function init(config, manifest) {
 
     document.body.appendChild(splashElement);
 }
-//// </Config and initialization>
+/// / </Config and initialization>
 
-//// <UI>
+/// / <UI>
 var origOverflow, origZooming;
 
-function disableUserInteraction() {
+function disableUserInteraction () {
     origOverflow = document.documentElement.style.overflow;
     document.documentElement.style.overflow = 'hidden';
 
@@ -191,13 +191,13 @@ function disableUserInteraction() {
     document.body.style['-ms-content-zooming'] = 'none';
 }
 
-function enableUserInteraction() {
+function enableUserInteraction () {
     document.documentElement.style.overflow = origOverflow;
     document.body.style['-ms-content-zooming'] = origZooming;
 }
 
 // Enter fullscreen mode
-function enterFullScreen() {
+function enterFullScreen () {
     if (Windows.UI.ViewManagement.ApplicationViewBoundsMode) { // else crash on 8.1
         var view = Windows.UI.ViewManagement.ApplicationView.getForCurrentView();
         view.setDesiredBoundsMode(Windows.UI.ViewManagement.ApplicationViewBoundsMode.useCoreWindow);
@@ -206,7 +206,7 @@ function enterFullScreen() {
 }
 
 // Exit fullscreen mode
-function exitFullScreen() {
+function exitFullScreen () {
     if (Windows.UI.ViewManagement.ApplicationViewBoundsMode) { // else crash on 8.1
         var view = Windows.UI.ViewManagement.ApplicationView.getForCurrentView();
         view.setDesiredBoundsMode(Windows.UI.ViewManagement.ApplicationViewBoundsMode.useVisible);
@@ -215,7 +215,7 @@ function exitFullScreen() {
 }
 
 // Make title bg color match splashscreen bg color
-function colorizeTitleBar() {
+function colorizeTitleBar () {
     var appView = Windows.UI.ViewManagement.ApplicationView.getForCurrentView();
     if (isWin10UWP && !isBgColorTransparent) {
         titleInitialBgColor = appView.titleBar.backgroundColor;
@@ -226,7 +226,7 @@ function colorizeTitleBar() {
 }
 
 // Revert title bg color
-function revertTitleBarColor() {
+function revertTitleBarColor () {
     var appView = Windows.UI.ViewManagement.ApplicationView.getForCurrentView();
     if (isWin10UWP && !isBgColorTransparent) {
         appView.titleBar.backgroundColor = titleInitialBgColor;
@@ -235,7 +235,7 @@ function revertTitleBarColor() {
 }
 
 // Displays the extended splash screen. Pass the splash screen object retrieved during activation.
-function show() {
+function show () {
     enterFullScreen();
     colorizeTitleBar();
     disableUserInteraction();
@@ -245,12 +245,12 @@ function show() {
     WinJS.Utilities.removeClass(splashElement, 'hidden');
 }
 
-function positionControls() {
+function positionControls () {
     if (isWp10) {
         // Resize happens twice sometimes, ensure the image is properly positioned
         if (splash.imageLocation.y !== 0) {
             if (isPortrait()) {
-                extendedSplashProgress.style.top = window.innerHeight * (2/3 + 1/6) - PROGRESSRING_HEIGHT / 2 + 'px';
+                extendedSplashProgress.style.top = window.innerHeight * (2 / 3 + 1 / 6) - PROGRESSRING_HEIGHT / 2 + 'px';
             } else {
                 extendedSplashProgress.style.top = Math.min(window.innerHeight - PROGRESSRING_HEIGHT - PROGRESSRING_BOTTOM_MARGIN, splash.imageLocation.y + splash.imageLocation.height + 32) + 'px';
             }
@@ -277,22 +277,22 @@ function positionControls() {
 }
 
 // Updates the location of the extended splash screen image. Should be used to respond to window size changes.
-function updateImageLocation() {
+function updateImageLocation () {
     if (isVisible()) {
         positionControls();
     }
 }
 
 // Checks whether the extended splash screen is visible and returns a boolean.
-function isVisible() {
+function isVisible () {
     return !(WinJS.Utilities.hasClass(splashElement, 'hidden'));
 }
 
-function fadeOut(el, duration, finishCb) {
+function fadeOut (el, duration, finishCb) {
     var opacityDelta = 1 / (FPS * duration / 1000);
     el.style.opacity = 1;
 
-    (function fade() {
+    (function fade () {
         if ((el.style.opacity -= opacityDelta) < 0) {
             finishCb();
         } else {
@@ -302,14 +302,14 @@ function fadeOut(el, duration, finishCb) {
 }
 
 // Removes the extended splash screen if it is currently visible.
-function hide() {
+function hide () {
     if (isVisible()) {
         var hideFinishCb = function () {
             WinJS.Utilities.addClass(splashElement, 'hidden');
             splashElement.style.opacity = 1;
             enableUserInteraction();
             exitFullScreen();
-        }
+        };
 
         // Color reversion before fading is over looks better:
         revertTitleBarColor();
@@ -329,43 +329,43 @@ function hide() {
         }
     }
 }
-//// </UI>
+/// / </UI>
 
-//// <Events>
-var splash = null; // Variable to hold the splash screen object. 
-var coordinates = { x: 0, y: 0, width: 0, height: 0 }; // Object to store splash screen image coordinates. It will be initialized during activation. 
+/// / <Events>
+var splash = null; // Variable to hold the splash screen object.
+var coordinates = { x: 0, y: 0, width: 0, height: 0 }; // Object to store splash screen image coordinates. It will be initialized during activation.
 
-function activated(eventObject) {
-    // Retrieve splash screen object 
+function activated (eventObject) {
+    // Retrieve splash screen object
     splash = eventObject.detail.splashScreen;
 
-    // Retrieve the window coordinates of the splash screen image. 
+    // Retrieve the window coordinates of the splash screen image.
     coordinates = splash.imageLocation;
 
-    // Register an event handler to be executed when the splash screen has been dismissed. 
+    // Register an event handler to be executed when the splash screen has been dismissed.
     splash.addEventListener('dismissed', onSplashScreenDismissed, false);
 
-    // Listen for window resize events to reposition the extended splash screen image accordingly. 
-    // This is important to ensure that the extended splash screen is formatted properly in response to snapping, unsnapping, rotation, etc... 
+    // Listen for window resize events to reposition the extended splash screen image accordingly.
+    // This is important to ensure that the extended splash screen is formatted properly in response to snapping, unsnapping, rotation, etc...
     window.addEventListener('resize', onResize, false);
 }
 
-function onSplashScreenDismissed() {
-    // Include code to be executed when the system has transitioned from the splash screen to the extended splash screen (application's first view). 
+function onSplashScreenDismissed () {
+    // Include code to be executed when the system has transitioned from the splash screen to the extended splash screen (application's first view).
     if (autoHideSplashScreen) {
         window.setTimeout(hide, effectiveSplashDuration);
     }
 }
 
-function onResize() {
-    // Safely update the extended splash screen image coordinates. This function will be fired in response to snapping, unsnapping, rotation, etc... 
+function onResize () {
+    // Safely update the extended splash screen image coordinates. This function will be fired in response to snapping, unsnapping, rotation, etc...
     if (splash) {
-        // Update the coordinates of the splash screen image. 
+        // Update the coordinates of the splash screen image.
         coordinates = splash.imageLocation;
         updateImageLocation(splash);
     }
 }
-//// </Events>
+/// / </Events>
 
 module.exports = {
     firstShow: function (config, manifest, activatedEventArgs) {

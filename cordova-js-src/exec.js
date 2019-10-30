@@ -19,8 +19,8 @@
  *
 */
 
-/*jslint sloppy:true, plusplus:true*/
-/*global require, module, console */
+/* jslint sloppy:true, plusplus:true */
+/* global require, module, console */
 
 var cordova = require('cordova');
 var execProxy = require('cordova/exec/proxy');
@@ -43,7 +43,7 @@ module.exports = function (success, fail, service, action, args) {
 
     // Handle the case when we have an old version of splashscreen plugin to avoid the API calls failures
     if (service === 'SplashScreen') {
-        var pluginsVersions = require("cordova/plugin_list").metadata;
+        var pluginsVersions = require('cordova/plugin_list').metadata;
         var splashscreenVersion = pluginsVersions['cordova-plugin-splashscreen'];
         var MIN_SPLASHSCREEN_SUPPORTED_VER = 4;
         if (splashscreenVersion && ((parseInt(splashscreenVersion.split('.')[0], 10) || 0) < MIN_SPLASHSCREEN_SUPPORTED_VER)) {
@@ -55,18 +55,18 @@ module.exports = function (success, fail, service, action, args) {
         }
     }
 
-    var proxy = execProxy.get(service, action),
-        callbackId,
-        onSuccess,
-        onError;
+    var proxy = execProxy.get(service, action);
+    var callbackId;
+    var onSuccess;
+    var onError;
 
     args = args || [];
 
     if (proxy) {
         callbackId = service + cordova.callbackId++;
         // console.log("EXEC:" + service + " : " + action);
-        if (typeof success === "function" || typeof fail === "function") {
-            cordova.callbacks[callbackId] = {success: success, fail: fail};
+        if (typeof success === 'function' || typeof fail === 'function') {
+            cordova.callbacks[callbackId] = { success: success, fail: fail };
         }
         try {
             // callbackOptions param represents additional optional parameters command could pass back, like keepCallback or
@@ -81,8 +81,7 @@ module.exports = function (success, fail, service, action, args) {
                 // see CB-8996 Mobilespec app hang on windows
                 if (callbackOptions.status !== undefined && callbackOptions.status !== null) {
                     callbackStatus = callbackOptions.status;
-                }
-                else {
+                } else {
                     callbackStatus = cordova.callbackStatus.OK;
                 }
                 cordova.callbackSuccess(callbackOptions.callbackId || callbackId,
@@ -101,8 +100,7 @@ module.exports = function (success, fail, service, action, args) {
                 // see CB-8996 Mobilespec app hang on windows
                 if (callbackOptions.status !== undefined && callbackOptions.status !== null) {
                     callbackStatus = callbackOptions.status;
-                }
-                else {
+                } else {
                     callbackStatus = cordova.callbackStatus.OK;
                 }
                 cordova.callbackError(callbackOptions.callbackId || callbackId,
@@ -115,11 +113,11 @@ module.exports = function (success, fail, service, action, args) {
             proxy(onSuccess, onError, args);
 
         } catch (e) {
-            console.log("Exception calling native with command :: " + service + " :: " + action  + " ::exception=" + e);
+            console.log('Exception calling native with command :: ' + service + ' :: ' + action + ' ::exception=' + e);
         }
     } else {
-        if (typeof fail === "function") {
-            fail("Missing Command Error");
+        if (typeof fail === 'function') {
+            fail('Missing Command Error');
         }
     }
 };
