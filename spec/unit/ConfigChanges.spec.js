@@ -27,6 +27,7 @@ var AppxManifest = require('../../template/cordova/lib/AppxManifest');
 var os = require('os');
 var path = require('path');
 var shell = require('shelljs');
+var EventEmitter = require('events');
 
 var configChanges = require('../../template/cordova/lib/ConfigChanges');
 var tempDir = path.join(os.tmpdir(), 'windows');
@@ -100,7 +101,7 @@ describe('Capabilities within package.windows.appxmanifest', function () {
         windowsManifest = path.join(windowsPlatform, WINDOWS_MANIFEST);
         windowsManifest10 = path.join(windowsPlatform, WINDOWS10_MANIFEST);
         dummyPluginInfo = new PluginInfo(dummyPlugin);
-        api = new Api();
+        api = new Api(null, null, new EventEmitter());
         api.root = windowsPlatform;
         api.locations.root = windowsPlatform;
         api.locations.www = path.join(windowsPlatform, 'www');
