@@ -32,7 +32,7 @@ describe('Cordova clean command', function () {
         shell.rm('-rf', currentProject);
     });
 
-    it('spec 1. should remove icons when ran inside Cordova project', function (done) {
+    it('spec 1. should remove icons when ran inside Cordova project', function () {
         var config = {
             platform: 'windows',
             root: currentProject,
@@ -43,17 +43,9 @@ describe('Cordova clean command', function () {
             }
         };
 
-        var rejected = jasmine.createSpy().and.callFake(function (err) {
-            // Log error:
-            expect(err).not.toBeDefined();
-        });
-        prepareModule.clean.call(config)
+        return prepareModule.clean.call(config)
             .then(function () {
                 expect(fs.existsSync(iconPath)).toBeFalsy();
-            }, rejected)
-            .finally(function () {
-                expect(rejected).not.toHaveBeenCalled();
-                done();
             });
     });
 });

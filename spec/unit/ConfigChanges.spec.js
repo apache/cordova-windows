@@ -119,13 +119,8 @@ describe('Capabilities within package.windows.appxmanifest', function () {
         return appxmanifest.getCapabilities();
     }
 
-    var fail = jasmine.createSpy('fail')
-        .and.callFake(function (err) {
-            console.error(err);
-        });
-
-    it('should be removed using overriden PlatformMunger', function (done) {
-        api.addPlugin(dummyPluginInfo)
+    it('should be removed using overriden PlatformMunger', function () {
+        return api.addPlugin(dummyPluginInfo)
             .then(function () {
                 //  There is the one default capability in manifest with 'internetClient' name
                 expect(getManifestCapabilities(windowsManifest).length).toBe(getPluginCapabilities(dummyPluginInfo).length + 1);
@@ -133,16 +128,11 @@ describe('Capabilities within package.windows.appxmanifest', function () {
             })
             .then(function () {
                 expect(getManifestCapabilities(windowsManifest).length).toBe(1);
-            })
-            .catch(fail)
-            .finally(function () {
-                expect(fail).not.toHaveBeenCalled();
-                done();
             });
     });
 
-    it('should be added with uap prefixes when install plugin', function (done) {
-        api.addPlugin(dummyPluginInfo)
+    it('should be added with uap prefixes when install plugin', function () {
+        return api.addPlugin(dummyPluginInfo)
             .then(function () {
                 //  There is the one default capability in manifest with 'internetClient' name
                 var manifestCapabilities = getManifestCapabilities(windowsManifest10);
@@ -158,15 +148,10 @@ describe('Capabilities within package.windows.appxmanifest', function () {
             })
             .then(function () {
                 expect(getManifestCapabilities(windowsManifest10).length).toBe(1);
-            })
-            .catch(fail)
-            .finally(function () {
-                expect(fail).not.toHaveBeenCalled();
-                done();
             });
     });
 
-    it('should be added as DeviceCapabilities when install plugin', function (done) {
+    it('should be added as DeviceCapabilities when install plugin', function () {
         function isDeviceCapability (capability) {
             return capability.type === 'DeviceCapability';
         }
@@ -187,7 +172,7 @@ describe('Capabilities within package.windows.appxmanifest', function () {
             expect(manifestCapabilities.length).toBe(1);
         }
 
-        api.addPlugin(dummyPluginInfo)
+        return api.addPlugin(dummyPluginInfo)
             .then(function () {
                 checkCapabilitiesAfterInstall(windowsManifest);
                 checkCapabilitiesAfterInstall(windowsManifest10);
@@ -196,11 +181,6 @@ describe('Capabilities within package.windows.appxmanifest', function () {
             .then(function () {
                 checkCapabilitiesAfterRemove(windowsManifest);
                 checkCapabilitiesAfterRemove(windowsManifest10);
-            })
-            .catch(fail)
-            .finally(function () {
-                expect(fail).not.toHaveBeenCalled();
-                done();
             });
     });
 });
