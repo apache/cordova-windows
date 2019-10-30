@@ -83,7 +83,7 @@ module.exports.findAllAvailableVersions = function () {
     // MSBUILDDIR = C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin
     // MSBUILDDIR = C:\Program Files (x86)\MSBuild\14.0\bin\
     if (process.env.MSBUILDDIR) {
-        console.log('ENV var MSBUILDDIR is set', process.env.MSBUILDDIR);
+        events.emit('log', 'ENV var MSBUILDDIR is set', process.env.MSBUILDDIR);
         msBuildPath = process.env.MSBUILDDIR;
         return module.exports.getMSBuildToolsAt(msBuildPath)
             .then(function (msBuildTools) {
@@ -96,7 +96,7 @@ module.exports.findAllAvailableVersions = function () {
 
     // CB-11548 use VSINSTALLDIR environment if defined to find MSBuild.
     if (process.env.VSINSTALLDIR) {
-        console.log('ENV var VSINSTALLDIR is set', process.env.VSINSTALLDIR);
+        events.emit('log', 'ENV var VSINSTALLDIR is set', process.env.VSINSTALLDIR);
         msBuildPath = path.join(process.env.VSINSTALLDIR, 'MSBuild/15.0/Bin');
         return module.exports.getMSBuildToolsAt(msBuildPath)
             .then(function (msBuildTools) {
