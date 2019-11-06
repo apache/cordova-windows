@@ -26,7 +26,7 @@ var isWin10UWP = navigator.appVersion.indexOf('MSAppHost/3.0') !== -1;
 var isHosted = window.location.protocol.indexOf('http') === 0;
 var isMsAppxWeb = window.location.protocol.indexOf('ms-appx-web') === 0;
 
-var schema = (isHosted || isWin10UWP && isMsAppxWeb) ? 'ms-appx-web' : 'ms-appx';
+var schema = isHosted || (isWin10UWP && isMsAppxWeb) ? 'ms-appx-web' : 'ms-appx';
 var fileName = isWp81 ? 'splashscreenphone.png' : 'splashscreen.png';
 var splashImageSrc = schema + ':///images/' + fileName;
 
@@ -333,14 +333,10 @@ function hide () {
 
 /// / <Events>
 var splash = null; // Variable to hold the splash screen object.
-var coordinates = { x: 0, y: 0, width: 0, height: 0 }; // Object to store splash screen image coordinates. It will be initialized during activation.
 
 function activated (eventObject) {
     // Retrieve splash screen object
     splash = eventObject.detail.splashScreen;
-
-    // Retrieve the window coordinates of the splash screen image.
-    coordinates = splash.imageLocation;
 
     // Register an event handler to be executed when the splash screen has been dismissed.
     splash.addEventListener('dismissed', onSplashScreenDismissed, false);
@@ -361,7 +357,6 @@ function onResize () {
     // Safely update the extended splash screen image coordinates. This function will be fired in response to snapping, unsnapping, rotation, etc...
     if (splash) {
         // Update the coordinates of the splash screen image.
-        coordinates = splash.imageLocation;
         updateImageLocation(splash);
     }
 }

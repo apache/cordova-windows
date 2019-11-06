@@ -23,7 +23,6 @@ module.exports = {
     id: 'windows',
     bootstrap: function () {
         var cordova = require('cordova');
-        var exec = require('cordova/exec');
         var channel = cordova.require('cordova/channel');
         var platform = require('cordova/platform');
         var modulemapper = require('cordova/modulemapper');
@@ -112,11 +111,6 @@ module.exports = {
             }
         };
 
-        function appendScript (scriptElem, loadedCb) {
-            scriptElem.addEventListener('load', loadedCb);
-            document.head.appendChild(scriptElem);
-        }
-
         if (!window.WinJS) {
             var scriptElem = document.createElement('script');
 
@@ -160,9 +154,8 @@ function injectBackButtonHandler () {
             } catch (e) {
                 return false;
             }
-        }
-        // if not listeners are active, use default implementation (backwards compatibility)
-        else {
+        } else {
+            // if no listeners are active, use default implementation (backwards compatibility)
             return defaultBackButtonHandler.apply(app, arguments);
         }
     };

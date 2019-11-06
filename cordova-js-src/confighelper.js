@@ -23,7 +23,7 @@
 var configCache = {};
 var utils = require('cordova/utils');
 
-var isPhone = (cordova.platformId == 'windows') && WinJS.Utilities.isPhone;
+var isPhone = (cordova.platformId === 'windows') && WinJS.Utilities.isPhone;
 var isWin10UWP = navigator.appVersion.indexOf('MSAppHost/3.0') !== -1;
 var splashScreenTagName = isWin10UWP ? 'SplashScreen' : (isPhone ? 'm3:SplashScreen' : 'm2:SplashScreen');
 
@@ -71,8 +71,8 @@ function requestFile (filePath, success, error) {
     }
 
     var xhrStatusChangeHandler = function () {
-        if (xhr.readyState == 4) {
-            if (xhr.status == 200 || xhr.status == 304 || xhr.status == 0 /* file:// */) {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200 || xhr.status === 304 || xhr.status === 0 /* file:// */) {
                 configCache[filePath] = xhr.responseText;
                 success(xhr.responseText);
             } else {
