@@ -24,11 +24,11 @@ var ConfigParser = require('cordova-common').ConfigParser;
 var Api = require('../template/cordova/Api');
 
 var argv = require('nopt')({
-    'help' : Boolean,
+    'help': Boolean,
     'guid': String,
     'silent': Boolean,
     'verbose': Boolean
-}, { 'd' : '--verbose' });
+}, { 'd': '--verbose' });
 
 if (argv.help || argv.argv.remain.length === 0) {
     console.log('Usage: create PathToProject [ PackageName [ AppName [ CustomTemplate ] ] ] [--guid=<GUID string>]');

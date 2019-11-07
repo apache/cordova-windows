@@ -21,7 +21,7 @@
     "test-unit": "jasmine",
     "test-e2e": "jasmine spec/e2e/endtoend.spec.js",
     "cover": "nyc jasmine",
-    "eslint": "eslint bin && eslint template && eslint spec"
+    "eslint": "eslint . \"+(bin|template)/**/!(*.*)\""
   },
   "dependencies": {
     "cordova-common": "^3.2.0",
