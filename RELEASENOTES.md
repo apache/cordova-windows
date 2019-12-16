@@ -24,6 +24,20 @@ Update these notes using: git log --pretty=format:'* %s' --topo-order --no-merge
 
 cordova-windows is a library that enables developers to create Windows 8/8.1/10 and WP8.1 application projects that support Cordova APIs.
 
+### 7.1.0 (Dec 15, 2019)
+* Lint everything ([#368](https://github.com/apache/cordova-windows/pull/368))
+* Requirements link in README.md ([#360](https://github.com/apache/cordova-windows/pull/360))
+* Fix link to platform guide in README.md ([#359](https://github.com/apache/cordova-windows/pull/359))
+* cordova-common@^3.2.0 update in dependencies ([#356](https://github.com/apache/cordova-windows/pull/356))
+* fix: fail on no build config / msbuild to build ([#351](https://github.com/apache/cordova-windows/pull/351))
+* fix: Better build error ([#348](https://github.com/apache/cordova-windows/pull/348))
+* create empty defaults.xml ([#335](https://github.com/apache/cordova-windows/pull/335))
+* Workaround for unknown splashscreen ([#301](https://github.com/apache/cordova-windows/pull/301))
+* Support latest Visual Studio 2017 (15.9.x) ([#329](https://github.com/apache/cordova-windows/pull/329))
+* Fix path to winjs dependency ([#331](https://github.com/apache/cordova-windows/pull/331))
+* chore: remove deprecated `engineStrict` ([#328](https://github.com/apache/cordova-windows/pull/328))
+* update cordova.js from cordova-js@2d56086 (based on cordova-js version 5.0.0)
+
 ### 7.0.0 (Mar 05, 2019)
 * [GH-324](https://github.com/apache/cordova-windows/pull/324) Change Temporary Directories for Tests
 * [GH-319](https://github.com/apache/cordova-windows/pull/319) Windows Platform Release Preparation (Cordova 9)
