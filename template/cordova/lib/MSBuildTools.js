@@ -261,12 +261,9 @@ var projFiles = {
 };
 
 // TODO: Fix this so that it outlines supported versions based on version criteria:
+// - v15.5: Windows 10 only
+// - v15.x: TBD
 // - v14: Windows 8.1, Windows 10
-// - v12: Windows 8.1
-function msBuild12TargetsFilter (target) {
-    return target === projFiles.win || target === projFiles.phone;
-}
-
 function msBuild14TargetsFilter (target) {
     return target === projFiles.win || target === projFiles.phone || target === projFiles.win10;
 }
@@ -287,7 +284,6 @@ function filterSupportedTargets (targets, msbuild) {
     }
 
     var targetFilters = {
-        '12.0': msBuild12TargetsFilter,
         '14.0': msBuild14TargetsFilter,
         '15.x': msBuild15TargetsFilter,
         '15.5': msBuild155TargetsFilter,
