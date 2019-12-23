@@ -224,7 +224,9 @@ function parseAndValidateArgs (options) {
 
     config.phone = !!args.phone;
     config.win = !!args.win;
+
     config.projVerOverride = args.appx;
+
     // only set config.bundle if architecture is not anycpu
     if (args.bundle) {
         if (config.buildArchs.length > 1 && (config.buildArchs.indexOf('anycpu') > -1 || config.buildArchs.indexOf('any cpu') > -1)) {
