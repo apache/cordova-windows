@@ -255,20 +255,19 @@ module.exports.getLatestMSBuild = function () {
 };
 
 var projFiles = {
-    win: 'CordovaApp.Windows.jsproj',
     win10: 'CordovaApp.Windows10.jsproj'
 };
 
 // TODO: Fix this so that it outlines supported versions based on version criteria:
 // - v15.5: Windows 10 only
 // - v15.x: TBD
-// - v14: Windows 8.1, Windows 10
+// - v14: Windows 8.1 (no longer supported), Windows 10
 function msBuild14TargetsFilter (target) {
-    return target === projFiles.win || target === projFiles.win10;
+    return target === projFiles.win10;
 }
 
 function msBuild15TargetsFilter (target) {
-    return target === projFiles.win || target === projFiles.win10;
+    return target === projFiles.win10;
 }
 
 function msBuild155TargetsFilter (target) {

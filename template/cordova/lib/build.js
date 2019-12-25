@@ -33,11 +33,9 @@ var events = require('cordova-common').events;
 var CordovaError = require('cordova-common').CordovaError;
 
 var projFiles = {
-    win: 'CordovaApp.Windows.jsproj',
     win10: 'CordovaApp.Windows10.jsproj'
 };
 var projFilesToManifests = {
-    'CordovaApp.Windows.jsproj': 'package.windows.appxmanifest',
     'CordovaApp.Windows10.jsproj': 'package.windows10.appxmanifest'
 };
 
@@ -152,8 +150,6 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
             case projFiles.win10:
                 buildConfig.targetProject = 'windows10';
                 break;
-            case projFiles.win:
-                /* falls through */
             default:
                 buildConfig.targetProject = 'windows';
                 break;
