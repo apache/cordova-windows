@@ -257,7 +257,7 @@ describe('run method', function () {
         );
     });
 
-    it('spec.9 should call buildProject of MSBuildTools if built for windows 8.1', function () {
+    xit('spec.9 should call buildProject of MSBuildTools if built for windows 8.1', function () {
         var buildSpy = jasmine.createSpy();
 
         createFindAllAvailableVersionsMock([{ version: '14.0', buildProject: buildSpy, path: testPath }]);
@@ -284,7 +284,7 @@ describe('run method', function () {
         );
     });
 
-    it('spec.11 should call buildProject of MSBuildTools if built for windows phone 8.1', function () {
+    xit('spec.11 should call buildProject of MSBuildTools if built for windows phone 8.1', function () {
         var buildSpy = jasmine.createSpy();
 
         createFindAllAvailableVersionsMock([{ version: '14.0', buildProject: buildSpy, path: testPath }]);
@@ -311,7 +311,7 @@ describe('run method', function () {
         );
     });
 
-    it('spec.13a should be able to override target via --appx parameter', function () {
+    xit('spec.13a should be able to override target via --appx parameter', function () {
         var buildSpy = jasmine.createSpy().and.callFake(function (solutionFile, buildType, buildArch) {
             // check that we build Windows 10 and not Windows 8.1
             expect(solutionFile.toLowerCase()).toMatch('cordovaapp.windows10.jsproj');
@@ -327,7 +327,7 @@ describe('run method', function () {
             });
     });
 
-    it('spec.13b should be able to override target via --appx parameter', function () {
+    xit('spec.13b should be able to override target via --appx parameter', function () {
         var buildSpy = jasmine.createSpy().and.callFake(function (solutionFile, buildType, buildArch) {
             // check that we build Windows 10 and not Windows 8.1
             expect(solutionFile.toLowerCase()).toMatch('cordovaapp.windows10.jsproj');

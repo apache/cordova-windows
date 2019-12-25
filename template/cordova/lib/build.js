@@ -100,8 +100,7 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
         case '8.0':
             throw new CordovaError('windows8 platform is deprecated. To use windows-target-version=8.0 you must downgrade to cordova-windows@4.');
         case '8.1':
-            targets.push(projFiles.win);
-            break;
+            throw new CordovaError('windows8.1 platform is deprecated. To use windows-target-version=8.1 you must downgrade to cordova-windows@7.');
         case '10.0':
         case 'uap':
         case 'uwp':
@@ -117,8 +116,7 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
         var windowsPhoneTargetVersion = configXML.getWindowsPhoneTargetVersion();
         switch (windowsPhoneTargetVersion.toLowerCase()) {
         case '8.1':
-            targets.push(projFiles.phone);
-            break;
+            throw new CordovaError('windows-phone 8.1 platform is deprecated - to use, downgrade to cordova-windows@7.');
         case '10.0':
         case 'uap':
         case 'uwp':
@@ -137,15 +135,6 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
     // apply build target override if one was specified
     if (projOverride) {
         switch (projOverride.toLowerCase()) {
-        case '8.1':
-            targets = [projFiles.win, projFiles.phone];
-            break;
-        case '8.1-phone':
-            targets = [projFiles.phone];
-            break;
-        case '8.1-win':
-            targets = [projFiles.win];
-            break;
         case 'uap':
         case 'uwp':
             targets = [projFiles.win10];
