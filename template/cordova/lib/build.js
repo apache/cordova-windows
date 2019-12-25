@@ -32,6 +32,9 @@ var fs = require('fs');
 var events = require('cordova-common').events;
 var CordovaError = require('cordova-common').CordovaError;
 
+// NOTE that these used to be larger mapping objects to
+// support Windows 8.1, Windows Phone 8.1, & Windows 10.
+// FUTURE TBD consider refactoring these.
 var projFiles = {
     win10: 'CordovaApp.Windows10.jsproj'
 };

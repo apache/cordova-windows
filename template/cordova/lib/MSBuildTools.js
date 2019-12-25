@@ -254,6 +254,9 @@ module.exports.getLatestMSBuild = function () {
         });
 };
 
+// NOTE that this used to be a larger mapping objects to
+// support Windows 8.1, Windows Phone 8.1, & Windows 10.
+// FUTURE TBD consider possible refactoring.
 var projFiles = {
     win10: 'CordovaApp.Windows10.jsproj'
 };
