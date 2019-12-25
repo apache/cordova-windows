@@ -255,7 +255,6 @@ module.exports.getLatestMSBuild = function () {
 };
 
 var projFiles = {
-    phone: 'CordovaApp.Phone.jsproj',
     win: 'CordovaApp.Windows.jsproj',
     win10: 'CordovaApp.Windows10.jsproj'
 };
@@ -265,11 +264,11 @@ var projFiles = {
 // - v15.x: TBD
 // - v14: Windows 8.1, Windows 10
 function msBuild14TargetsFilter (target) {
-    return target === projFiles.win || target === projFiles.phone || target === projFiles.win10;
+    return target === projFiles.win || target === projFiles.win10;
 }
 
 function msBuild15TargetsFilter (target) {
-    return target === projFiles.win || target === projFiles.phone || target === projFiles.win10;
+    return target === projFiles.win || target === projFiles.win10;
 }
 
 function msBuild155TargetsFilter (target) {

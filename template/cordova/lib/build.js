@@ -33,12 +33,10 @@ var events = require('cordova-common').events;
 var CordovaError = require('cordova-common').CordovaError;
 
 var projFiles = {
-    phone: 'CordovaApp.Phone.jsproj',
     win: 'CordovaApp.Windows.jsproj',
     win10: 'CordovaApp.Windows10.jsproj'
 };
 var projFilesToManifests = {
-    'CordovaApp.Phone.jsproj': 'package.phone.appxmanifest',
     'CordovaApp.Windows.jsproj': 'package.windows.appxmanifest',
     'CordovaApp.Windows10.jsproj': 'package.windows10.appxmanifest'
 };
@@ -150,9 +148,6 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
         // as part of build configuration.  This will be used for determining the binary to 'run' after build is done.
         if (targets.length > 0) {
             switch (targets[0]) {
-            case projFiles.phone:
-                buildConfig.targetProject = 'phone';
-                break;
             case projFiles.win10:
                 buildConfig.targetProject = 'windows10';
                 break;
