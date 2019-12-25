@@ -148,10 +148,8 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
         if (targets.length > 0) {
             switch (targets[0]) {
             case projFiles.win10:
-                buildConfig.targetProject = 'windows10';
-                break;
             default:
-                buildConfig.targetProject = 'windows';
+                buildConfig.targetProject = 'windows10';
                 break;
             }
         }
