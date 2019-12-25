@@ -28,13 +28,6 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       MSBUILDDIR: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\"
 
-    - nodejs_version: "6"
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      MSBUILDDIR: "C:\\Program Files (x86)\\MSBuild\\14.0\\bin\\"
-
-    - nodejs_version: "6"
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-
 install:
   - ps: Install-Product node $env:nodejs_version
   - npm install
