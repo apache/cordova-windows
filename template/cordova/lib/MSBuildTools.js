@@ -261,14 +261,6 @@ var projFiles = {
     win10: 'CordovaApp.Windows10.jsproj'
 };
 
-// TODO: Fix this so that it outlines supported versions based on version criteria:
-// - v15.5: Windows 10 only
-// - v15.x: TBD
-// - v14: Windows 8.1 (no longer supported), Windows 10
-function msBuild14TargetsFilter (target) {
-    return target === projFiles.win10;
-}
-
 function msBuild15TargetsFilter (target) {
     return target === projFiles.win10;
 }
@@ -285,7 +277,6 @@ function filterSupportedTargets (targets, msbuild) {
     }
 
     var targetFilters = {
-        '14.0': msBuild14TargetsFilter,
         '15.x': msBuild15TargetsFilter,
         '15.5': msBuild155TargetsFilter,
         get: function (version) {
@@ -305,8 +296,7 @@ function filterSupportedTargets (targets, msbuild) {
     // unsupported targets have been detected
     if (supportedTargets.length !== targets.length) {
         events.emit('warn', 'Not all desired build targets are compatible with the current build environment. ' +
-            'Please install Visual Studio 2015 for Windows 8.1 and Windows 10, ' +
-            'or Visual Studio 2013 Update 2 for Windows 8.1.');
+            'Please install Visual Studio 2017.');
     }
     return supportedTargets;
 }
