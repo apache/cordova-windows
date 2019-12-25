@@ -43,6 +43,7 @@ module.exports.update = function (destinationDir, options) {
     var guid;
     var config = new ConfigParser(projectConfig);
 
+    // TODO find a better way to handle the guid than the old WP 8.1 appxmanifest (!!)
     // guid param is used only when adding a platform, and isn't saved anywhere.
     // The only place, where it is being persisted - phone/win10 appxmanifest file,
     // but since win10 introduced just recently, we can't rely on its manifest
