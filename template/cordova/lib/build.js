@@ -109,6 +109,7 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
         }
     }
 
+    // FUTURE TBD consider deprecating `phone` option for future removal
     // Windows Phone
     if (isPhoneSwitch || noSwitches) { // if --phone or no arg
         var windowsPhoneTargetVersion = configXML.getWindowsPhoneTargetVersion();
@@ -178,6 +179,7 @@ function parseAndValidateArgs (options) {
     var args = nopt({
         'archs': [String],
         'appx': String,
+        // FUTURE TBD consider deprecating `phone` option for future removal
         'phone': Boolean,
         'win': Boolean,
         'bundle': Boolean,
@@ -206,6 +208,7 @@ function parseAndValidateArgs (options) {
     var archs = options.archs || args.archs;
     config.buildArchs = archs ? archs.toLowerCase().split(' ') : ['anycpu'];
 
+    // FUTURE TBD consider deprecating `phone` option for future removal
     config.phone = !!args.phone;
     config.win = !!args.win;
 
