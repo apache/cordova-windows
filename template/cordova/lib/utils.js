@@ -51,7 +51,7 @@ module.exports.isCordovaProject = function (platformpath) {
     if (fs.existsSync(platformpath)) {
         var files = fs.readdirSync(platformpath);
         for (var i in files) {
-            if (path.extname(files[i]) === '.shproj') {
+            if (path.extname(files[i]) === '.jsproj') {
                 return true;
             }
         }
