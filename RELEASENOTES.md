@@ -24,6 +24,10 @@ Update these notes using: git log --pretty=format:'* %s' --topo-order --no-merge
 
 cordova-windows is a library that enables developers to create Windows 8/8.1/10 and WP8.1 application projects that support Cordova APIs.
 
+### 7.0.1 (Dec 31, 2019)
+* Support latest Visual Studio 2017 (15.9.x) ([#329](https://github.com/apache/cordova-windows/pull/329))
+* Fix path to `winjs` dependency ([#331](https://github.com/apache/cordova-windows/pull/331))
+
 ### 7.0.0 (Mar 05, 2019)
 * [GH-324](https://github.com/apache/cordova-windows/pull/324) Change Temporary Directories for Tests
 * [GH-319](https://github.com/apache/cordova-windows/pull/319) Windows Platform Release Preparation (Cordova 9)
