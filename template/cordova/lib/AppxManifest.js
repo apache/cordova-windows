@@ -56,7 +56,9 @@ var MANIFESTS = {
     }
 };
 
+// TODO remove old Windows 8.1 & WP 8.1 appxmanifest files
 var SUBSTS = ['package.phone.appxmanifest', 'package.windows.appxmanifest', 'package.windows10.appxmanifest'];
+
 var TARGETS = ['windows', 'phone', 'all'];
 
 /**

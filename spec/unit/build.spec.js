@@ -113,7 +113,7 @@ describe('run method', function () {
 
         // utils.isCordovaProject is a spy, so we can call andReturn directly on it
         utils.isCordovaProject.and.returnValue(false);
-        createFindAllAvailableVersionsMock([{ version: '14.0', buildProject: buildSpy, path: testPath }]);
+        createFindAllAvailableVersionsMock([{ version: '15.0', buildProject: buildSpy, path: testPath }]);
 
         return build.run([ 'node', buildPath, '--release', '--debug' ]).then(
             () => fail('Expected promise to be rejected'),
@@ -143,7 +143,7 @@ describe('run method', function () {
 
     it('should respect build configuration from \'buildConfig\' option', function () {
 
-        createFindAllAvailableVersionsMock([{ version: '14.0', buildProject: jasmine.createSpy(), path: testPath }]);
+        createFindAllAvailableVersionsMock([{ version: '15.0', buildProject: jasmine.createSpy(), path: testPath }]);
         var buildConfigPath = path.resolve(__dirname, 'fixtures/fakeBuildConfig.json');
 
         return build.run({ buildConfig: buildConfigPath })
@@ -167,7 +167,7 @@ describe('run method', function () {
             expect(buildType).toBe('release');
         });
 
-        createFindAllAvailableVersionsMock([{ version: '14.0', buildProject: buildSpy, path: testPath }]);
+        createFindAllAvailableVersionsMock([{ version: '15.0', buildProject: buildSpy, path: testPath }]);
 
         return build.run({ release: true })
             .finally(function () {
@@ -180,7 +180,7 @@ describe('run method', function () {
             expect(buildType).toBe('debug');
         });
 
-        createFindAllAvailableVersionsMock([{ version: '14.0', buildProject: buildSpy, path: testPath }]);
+        createFindAllAvailableVersionsMock([{ version: '15.0', buildProject: buildSpy, path: testPath }]);
 
         return build.run([ 'node', buildPath ])
             .finally(function () {
@@ -193,7 +193,7 @@ describe('run method', function () {
             expect(buildArch).toBe('arm');
         });
 
-        createFindAllAvailableVersionsMock([{ version: '14.0', buildProject: buildSpy, path: testPath }]);
+        createFindAllAvailableVersionsMock([{ version: '15.0', buildProject: buildSpy, path: testPath }]);
 
         return build.run({ archs: 'arm' })
             .finally(function () {
@@ -209,7 +209,7 @@ describe('run method', function () {
 
         createFindAllAvailableVersionsMock([
             {
-                version: '14.0',
+                version: '15.0',
                 path: testPath,
                 buildProject: function (solutionFile, buildType, buildArch) {
                     expect(buildArch).toMatch(/^arm$|^any\s?cpu$|^x86$|^x64$/);
@@ -257,7 +257,7 @@ describe('run method', function () {
         );
     });
 
-    it('spec.9 should call buildProject of MSBuildTools if built for windows 8.1', function () {
+    xit('spec.9 should call buildProject of MSBuildTools if built for windows 8.1', function () {
         var buildSpy = jasmine.createSpy();
 
         createFindAllAvailableVersionsMock([{ version: '14.0', buildProject: buildSpy, path: testPath }]);
@@ -284,7 +284,7 @@ describe('run method', function () {
         );
     });
 
-    it('spec.11 should call buildProject of MSBuildTools if built for windows phone 8.1', function () {
+    xit('spec.11 should call buildProject of MSBuildTools if built for windows phone 8.1', function () {
         var buildSpy = jasmine.createSpy();
 
         createFindAllAvailableVersionsMock([{ version: '14.0', buildProject: buildSpy, path: testPath }]);
@@ -311,7 +311,7 @@ describe('run method', function () {
         );
     });
 
-    it('spec.13a should be able to override target via --appx parameter', function () {
+    xit('spec.13a should be able to override target via --appx parameter', function () {
         var buildSpy = jasmine.createSpy().and.callFake(function (solutionFile, buildType, buildArch) {
             // check that we build Windows 10 and not Windows 8.1
             expect(solutionFile.toLowerCase()).toMatch('cordovaapp.windows10.jsproj');
@@ -327,7 +327,7 @@ describe('run method', function () {
             });
     });
 
-    it('spec.13b should be able to override target via --appx parameter', function () {
+    xit('spec.13b should be able to override target via --appx parameter', function () {
         var buildSpy = jasmine.createSpy().and.callFake(function (solutionFile, buildType, buildArch) {
             // check that we build Windows 10 and not Windows 8.1
             expect(solutionFile.toLowerCase()).toMatch('cordovaapp.windows10.jsproj');
@@ -395,7 +395,7 @@ describe('run method', function () {
     });
 
     it('spec.15a should choose latest version if there are multiple versions available with minor version difference', function () {
-        var buildTools14 = { version: '14.0', buildProject: jasmine.createSpy('buildTools14'), path: testPath };
+        var buildTools14 = { version: '15.0', buildProject: jasmine.createSpy('buildTools14'), path: testPath };
         var buildTools15 = { version: '15.0', buildProject: jasmine.createSpy('buildTools15'), path: testPath };
         var buildTools151 = { version: '15.1', buildProject: jasmine.createSpy('buildTools151'), path: testPath };
 
@@ -408,7 +408,7 @@ describe('run method', function () {
     });
 
     it('spec.15b should choose latest version if there are multiple versions available with minor version difference', function () {
-        var buildTools14 = { version: '14.0', buildProject: jasmine.createSpy('buildTools14'), path: testPath };
+        var buildTools14 = { version: '15.0', buildProject: jasmine.createSpy('buildTools14'), path: testPath };
         var buildTools15 = { version: '15.0', buildProject: jasmine.createSpy('buildTools15'), path: testPath };
         var buildTools151 = { version: '15.1', buildProject: jasmine.createSpy('buildTools151'), path: testPath };
 
@@ -461,7 +461,7 @@ describe('buildFlags', function () {
         });
 
         it('should pass buildFlags directly to MSBuild', function () {
-            var buildTools = { version: '14.0', buildProject: jasmine.createSpy('buildProject').and.returnValue(Q()), path: testPath };
+            var buildTools = { version: '15.0', buildProject: jasmine.createSpy('buildProject').and.returnValue(Q()), path: testPath };
             var buildOptions = {
                 argv: ['--buildFlag', 'foo=bar']
             };

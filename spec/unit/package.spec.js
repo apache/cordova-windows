@@ -102,7 +102,7 @@ describe('getPackageFileInfo method', function () {
         expect(pkgInfo.buildtype).toBe('debug');
     });
 
-    it('spec.7 should get file info correctly for windows 8.1 anycpu debug package', function () {
+    it('spec.7 should get file info correctly for windows anycpu debug package', function () {
         var packageFile = path.join(pkgPath, 'CordovaApp.Windows_0.0.1.0_anycpu_debug_Test', 'CordovaApp.Windows_0.0.1.0_anycpu_debug.appx');
         var pkgInfo = pkg.getPackageFileInfo(packageFile);
 
@@ -111,7 +111,7 @@ describe('getPackageFileInfo method', function () {
         expect(pkgInfo.buildtype).toBe('debug');
     });
 
-    it('spec.8 should get file info correctly for windows 8.1 x64 release package', function () {
+    it('spec.8 should get file info correctly for windows x64 release package', function () {
         var packageFile = path.join(pkgPath, 'CordovaApp.Windows_0.0.1.0_x64_Test', 'CordovaApp.Windows_0.0.1.0_x64.appx');
         var pkgInfo = pkg.getPackageFileInfo(packageFile);
 
@@ -120,7 +120,7 @@ describe('getPackageFileInfo method', function () {
         expect(pkgInfo.buildtype).toBe('release');
     });
 
-    it('spec.9 should get file info correctly for windows 8.1 x86 release package', function () {
+    it('spec.9 should get file info correctly for windows x86 release package', function () {
         var packageFile = path.join(pkgPath, 'CordovaApp.Windows_0.0.1.0_x86_Test', 'CordovaApp.Windows_0.0.1.0_x86.appx');
         var pkgInfo = pkg.getPackageFileInfo(packageFile);
 

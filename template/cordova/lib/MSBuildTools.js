@@ -254,25 +254,15 @@ module.exports.getLatestMSBuild = function () {
         });
 };
 
+// NOTE that this used to be a larger mapping objects to
+// support Windows 8.1, Windows Phone 8.1, & Windows 10.
+// FUTURE TBD consider possible refactoring.
 var projFiles = {
-    phone: 'CordovaApp.Phone.jsproj',
-    win: 'CordovaApp.Windows.jsproj',
     win10: 'CordovaApp.Windows10.jsproj'
 };
 
-// TODO: Fix this so that it outlines supported versions based on version criteria:
-// - v14: Windows 8.1, Windows 10
-// - v12: Windows 8.1
-function msBuild12TargetsFilter (target) {
-    return target === projFiles.win || target === projFiles.phone;
-}
-
-function msBuild14TargetsFilter (target) {
-    return target === projFiles.win || target === projFiles.phone || target === projFiles.win10;
-}
-
 function msBuild15TargetsFilter (target) {
-    return target === projFiles.win || target === projFiles.phone || target === projFiles.win10;
+    return target === projFiles.win10;
 }
 
 function msBuild155TargetsFilter (target) {
@@ -287,8 +277,6 @@ function filterSupportedTargets (targets, msbuild) {
     }
 
     var targetFilters = {
-        '12.0': msBuild12TargetsFilter,
-        '14.0': msBuild14TargetsFilter,
         '15.x': msBuild15TargetsFilter,
         '15.5': msBuild155TargetsFilter,
         get: function (version) {
@@ -308,8 +296,7 @@ function filterSupportedTargets (targets, msbuild) {
     // unsupported targets have been detected
     if (supportedTargets.length !== targets.length) {
         events.emit('warn', 'Not all desired build targets are compatible with the current build environment. ' +
-            'Please install Visual Studio 2015 for Windows 8.1 and Windows 10, ' +
-            'or Visual Studio 2013 Update 2 for Windows 8.1.');
+            'Please install Visual Studio 2017.');
     }
     return supportedTargets;
 }

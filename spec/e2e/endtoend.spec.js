@@ -173,17 +173,17 @@ describe('Cordova create and build', function () {
             }
         });
 
-        it('spec.2d should build 8.1 win project', function () {
+        xit('spec.2d should build 8.1 win project', function () {
             shell.exec(buildScriptPath + ' --appx=8.1-win', { silent: silent });
             _expectExist(/.*Windows.*\.appxupload/);
         });
 
-        it('spec.2e should build 8.1 phone project', function () {
+        xit('spec.2e should build 8.1 phone project', function () {
             shell.exec(buildScriptPath + ' --appx=8.1-phone', { silent: silent });
             _expectExist(/.*Phone.*\.appxupload/);
         });
 
-        it('spec.2f should build 8.1 win + phone project', function () {
+        xit('spec.2f should build 8.1 win + phone project', function () {
             shell.exec(buildScriptPath + ' --appx=8.1', { silent: silent });
             _expectExist(/.*Windows.*\.appxupload/);
             _expectExist(/.*Phone.*\.appxupload/);
@@ -191,23 +191,23 @@ describe('Cordova create and build', function () {
 
         // --archs
 
-        it('spec.3b should build project (8.1) for particular CPU', function () {
+        xit('spec.3b should build project (8.1) for particular CPU', function () {
             shell.exec(buildScriptPath + ' --appx=8.1 --archs=\"x64\"', { silent: silent }); /* eslint no-useless-escape : 0 */
             _expectExist(/.*Phone.*x64.*\.appxupload/);
             _expectExist(/.*Windows.*x64.*\.appxupload/);
         });
 
-        it('spec.3c should build project (8.1-win) for particular CPU', function () {
+        xit('spec.3c should build project (8.1-win) for particular CPU', function () {
             shell.exec(buildScriptPath + ' --appx=8.1-win --archs=\"x64\"', { silent: silent }); /* eslint no-useless-escape : 0 */
             _expectExist(/.*Windows.*x64.*\.appxupload/);
         });
 
-        it('spec.3d should build project (8.1-phone) for particular CPU', function () {
+        xit('spec.3d should build project (8.1-phone) for particular CPU', function () {
             shell.exec(buildScriptPath + ' --appx=8.1-phone --archs=\"x64\"', { silent: silent }); /* eslint no-useless-escape : 0 */
             _expectExist(/.*Phone.*x64.*\.appxupload/);
         });
 
-        it('spec.4b should build project (8.1) for CPUs separated by whitespaces', function () {
+        xit('spec.4b should build project (8.1) for CPUs separated by whitespaces', function () {
             shell.exec(buildScriptPath + ' --appx=8.1 --archs=\"x64 x86 arm anycpu\"', { silent: silent }); /* eslint no-useless-escape : 0 */
             _expectExist(/.*Phone.*x86.*\.appxupload/);
             _expectExist(/.*Phone.*x64.*\.appxupload/);
@@ -221,7 +221,7 @@ describe('Cordova create and build', function () {
 
         // "InProcessServer extension"
 
-        it('spec.5b should build project (8.1) containing plugin with InProcessServer extension', function () {
+        xit('spec.5b should build project (8.1) containing plugin with InProcessServer extension', function () {
             var extensionsPluginInfo, api;
 
             extensionsPluginInfo = new PluginInfo(extensionsPlugin);
@@ -240,7 +240,7 @@ describe('Cordova create and build', function () {
 
         // --release --bundle
 
-        it('spec.6b should generate appxupload and appxbundle for Windows Phone 8.1 project bundle release build', function () {
+        xit('spec.6b should generate appxupload and appxbundle for Windows Phone 8.1 project bundle release build', function () {
             shell.exec(buildScriptPath + ' --release --appx=8.1-phone --bundle --archs=\"x64 x86 arm\"', { silent: silent });
             _expectExist(/.*bundle\.appxupload$/, 3);
             _expectSubdirAndFileExist('CordovaApp.Phone_1.0.0.0_Test', 'CordovaApp.Phone_1.0.0.0_x64_x86_arm.appxbundle');
@@ -248,7 +248,7 @@ describe('Cordova create and build', function () {
 
         // --release (non-bundle)
 
-        it('spec.8 for a non-bundle case for Windows Phone 8.1 it should build appx in separate dirs for each architecture', function () {
+        xit('spec.8 for a non-bundle case for Windows Phone 8.1 it should build appx in separate dirs for each architecture', function () {
             shell.exec(buildScriptPath + ' --release --appx=8.1-phone --phone --archs=\"x86 arm\"', { silent: silent });
             _expectExist(/.*\.appxupload$/, 2);
             _expectSubdirAndFileExist('CordovaApp.Phone_1.0.0.0_arm_Test', 'CordovaApp.Phone_1.0.0.0_arm.appx');

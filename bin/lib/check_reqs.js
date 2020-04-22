@@ -68,6 +68,11 @@ function getMinimalRequiredVersionFor (requirement, windowsTargetVersion, window
     if (windowsPhoneTargetVersion === '8' || windowsPhoneTargetVersion === '8.0') {
         throw new CordovaError('8.0 is not a valid version for windows-phone-target-version (use the wp8 Cordova platform instead)');
     }
+
+    if (windowsTargetVersion === '8.1' || windowsPhoneTargetVersion === '8.1') {
+        throw new CordovaError('Windows (Phone) 8.1 projects are deprecated. To use you may downgrade to cordova-windows@7.');
+    }
+
     var windowsReqVersion = Version.tryParse(REQUIRED_VERSIONS[windowsTargetVersion][requirement]);
     var phoneReqVersion = Version.tryParse(REQUIRED_VERSIONS[windowsPhoneTargetVersion][requirement]);
 
@@ -352,7 +357,7 @@ module.exports.run = function () {
  * @param {String}  target_platorm        Target platform ('8.1' or '10.0')
  */
 module.exports.isWinSDKPresent = function (target_platform) {
-    return checkWinSdk(target_platform, '8.1');
+    return checkWinSdk(target_platform, target_platform);
 };
 
 // Checks if min SDK required to build Windows Phone 8.1 project is present

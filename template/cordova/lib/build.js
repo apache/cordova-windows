@@ -32,14 +32,13 @@ var fs = require('fs');
 var events = require('cordova-common').events;
 var CordovaError = require('cordova-common').CordovaError;
 
+// NOTE that these used to be larger mapping objects to
+// support Windows 8.1, Windows Phone 8.1, & Windows 10.
+// FUTURE TBD consider refactoring these.
 var projFiles = {
-    phone: 'CordovaApp.Phone.jsproj',
-    win: 'CordovaApp.Windows.jsproj',
     win10: 'CordovaApp.Windows10.jsproj'
 };
 var projFilesToManifests = {
-    'CordovaApp.Phone.jsproj': 'package.phone.appxmanifest',
-    'CordovaApp.Windows.jsproj': 'package.windows.appxmanifest',
     'CordovaApp.Windows10.jsproj': 'package.windows10.appxmanifest'
 };
 
@@ -100,8 +99,7 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
         case '8.0':
             throw new CordovaError('windows8 platform is deprecated. To use windows-target-version=8.0 you must downgrade to cordova-windows@4.');
         case '8.1':
-            targets.push(projFiles.win);
-            break;
+            throw new CordovaError('windows8.1 platform is deprecated. To use windows-target-version=8.1 you must downgrade to cordova-windows@7.');
         case '10.0':
         case 'uap':
         case 'uwp':
@@ -112,13 +110,13 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
         }
     }
 
+    // FUTURE TBD consider deprecating `phone` option for future removal
     // Windows Phone
     if (isPhoneSwitch || noSwitches) { // if --phone or no arg
         var windowsPhoneTargetVersion = configXML.getWindowsPhoneTargetVersion();
         switch (windowsPhoneTargetVersion.toLowerCase()) {
         case '8.1':
-            targets.push(projFiles.phone);
-            break;
+            throw new CordovaError('windows-phone 8.1 platform is deprecated - to use, downgrade to cordova-windows@7.');
         case '10.0':
         case 'uap':
         case 'uwp':
@@ -137,15 +135,6 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
     // apply build target override if one was specified
     if (projOverride) {
         switch (projOverride.toLowerCase()) {
-        case '8.1':
-            targets = [projFiles.win, projFiles.phone];
-            break;
-        case '8.1-phone':
-            targets = [projFiles.phone];
-            break;
-        case '8.1-win':
-            targets = [projFiles.win];
-            break;
         case 'uap':
         case 'uwp':
             targets = [projFiles.win10];
@@ -161,16 +150,9 @@ function getBuildTargets (isWinSwitch, isPhoneSwitch, projOverride, buildConfig)
         // as part of build configuration.  This will be used for determining the binary to 'run' after build is done.
         if (targets.length > 0) {
             switch (targets[0]) {
-            case projFiles.phone:
-                buildConfig.targetProject = 'phone';
-                break;
             case projFiles.win10:
-                buildConfig.targetProject = 'windows10';
-                break;
-            case projFiles.win:
-                /* falls through */
             default:
-                buildConfig.targetProject = 'windows';
+                buildConfig.targetProject = 'windows10';
                 break;
             }
         }
@@ -194,6 +176,7 @@ function parseAndValidateArgs (options) {
     var args = nopt({
         'archs': [String],
         'appx': String,
+        // FUTURE TBD consider deprecating `phone` option for future removal
         'phone': Boolean,
         'win': Boolean,
         'bundle': Boolean,
@@ -222,9 +205,12 @@ function parseAndValidateArgs (options) {
     var archs = options.archs || args.archs;
     config.buildArchs = archs ? archs.toLowerCase().split(' ') : ['anycpu'];
 
+    // FUTURE TBD consider deprecating `phone` option for future removal
     config.phone = !!args.phone;
     config.win = !!args.win;
+
     config.projVerOverride = args.appx;
+
     // only set config.bundle if architecture is not anycpu
     if (args.bundle) {
         if (config.buildArchs.length > 1 && (config.buildArchs.indexOf('anycpu') > -1 || config.buildArchs.indexOf('any cpu') > -1)) {
