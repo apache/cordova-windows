@@ -17,14 +17,13 @@
     under the License.
 */
 
+const path = require('path');
 var rewire = require('rewire');
-var et = require('elementtree');
-var xml = require('cordova-common').xmlHelpers;
 var ConfigParser = require('../../template/cordova/lib/ConfigParser');
 var ConfigParserOrig = require('cordova-common').ConfigParser;
 var AppxManifest = require('../../template/cordova/lib/AppxManifest');
 
-var TEST_XML = '<?xml version="1.0" encoding="UTF-8"?><widget/>';
+const dummyProjectConfigXml = path.join(`${__dirname}/fixtures/DummyProject/config.xml`);
 
 describe('Windows ConfigParser', function () {
     it('should extend ConfigParser from cordova-common', function () {
@@ -41,9 +40,7 @@ describe('getAllMinMaxUAPVersions method', function () {
 
     var mockConfig;
     beforeEach(function () {
-        spyOn(xml, 'parseElementtreeSync').and.returnValue(new et.ElementTree(et.XML(TEST_XML)));
-
-        mockConfig = new ConfigParser('/some/file');
+        mockConfig = new ConfigParser(dummyProjectConfigXml);
     });
 
     it('should correctly transform all versions as a baseline.', function () {
@@ -106,12 +103,12 @@ describe('getAllMinMaxUAPVersions method', function () {
 describe('getConfigFiles method', function () {
     var mockConfig;
     beforeEach(function () {
-        spyOn(xml, 'parseElementtreeSync').and.returnValue(new et.ElementTree(et.XML(TEST_XML)));
-        mockConfig = new ConfigParser('/some/file');
+        mockConfig = new ConfigParser(dummyProjectConfigXml);
     });
 
     it('should call AppxManifest.processChanges to distribute changes across manifests', function () {
         spyOn(AppxManifest, 'processChanges').and.callThrough();
+        console.log(mockConfig);
         mockConfig.getConfigFiles('windows');
         expect(AppxManifest.processChanges).toHaveBeenCalled();
     });

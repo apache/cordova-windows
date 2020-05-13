@@ -21,9 +21,6 @@ var Q = require('q');
 var path = require('path');
 var rewire = require('rewire');
 var binPath = '../../bin';
-var et = require('elementtree');
-var xml = require('cordova-common').xmlHelpers;
-var TEST_XML = '<?xml version="1.0" encoding="UTF-8"?><widget/>';
 var ConfigParser = require('../../template/cordova/lib/ConfigParser');
 var check_reqs = rewire(path.join(binPath, 'lib/check_reqs.js'));
 
@@ -79,8 +76,8 @@ describe('check_reqs module', function () {
                 checkSpy.and.returnValue(Q('2.0')),
                 checkSpy.and.returnValue(Q('3.0'))
             ];
-            spyOn(xml, 'parseElementtreeSync').and.returnValue(new et.ElementTree(et.XML(TEST_XML)));
-            fakeConfig = new ConfigParser('/some/file');
+            const dummyProjectConfigXml = path.join(`${__dirname}/fixtures/DummyProject/config.xml`);
+            fakeConfig = new ConfigParser(dummyProjectConfigXml);
         });
 
         afterEach(function () {

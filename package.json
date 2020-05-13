@@ -24,7 +24,7 @@
     "eslint": "eslint . \"+(bin|template)/**/!(*.*)\""
   },
   "dependencies": {
-    "cordova-common": "^3.2.0",
+    "cordova-common": "^4.0.0",
     "elementtree": "^0.1.7",
     "fs-extra": "^9.0.0",
     "node-uuid": "^1.4.8",
