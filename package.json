@@ -28,10 +28,10 @@
     "elementtree": "^0.1.7",
     "fs-extra": "^9.0.0",
     "node-uuid": "^1.4.8",
-    "nopt": "^4.0.1",
+    "nopt": "^4.0.3",
     "q": "^1.5.1",
-    "semver": "^5.5.0",
-    "shelljs": "^0.5.3",
+    "semver": "^7.3.2",
+    "shelljs": "^0.8.4",
     "winjs": "^4.4.3"
   },
   "devDependencies": {

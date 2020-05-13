@@ -55,9 +55,11 @@ describe('JsprojManager', function () {
     });
 
     it('should throw if project is not a windows project', function () {
+        shell.config.silent = true; // disabeling print out temporarily
         shell.ls.and.callThrough();
         expect(function () {
             JsprojManager.getProject(INVALID_PROJECT_PATH);
+            shell.config.silent = false;
         }).toThrow();
     });
 
