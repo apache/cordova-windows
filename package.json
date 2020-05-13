@@ -26,6 +26,7 @@
   "dependencies": {
     "cordova-common": "^3.2.0",
     "elementtree": "^0.1.7",
+    "fs-extra": "^9.0.0",
     "node-uuid": "^1.4.8",
     "nopt": "^4.0.1",
     "q": "^1.5.1",
@@ -41,7 +42,6 @@
     "eslint-plugin-node": "^8.0.1",
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
-    "fs-extra": "^8.1.0",
     "jasmine": "3.1.0",
     "nyc": "^14.1.1",
     "rewire": "^4.0.1"
