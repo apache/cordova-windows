@@ -35,12 +35,10 @@ var FAKE_MANIFEST = new et.ElementTree(et.XML(
     '</Package>'));
 
 describe('JsprojManager', function () {
-
     var project;
     var origProj = JsprojManager.__get__('proj');
 
     beforeEach(function () {
-
         JsprojManager.__set__('proj', jasmine.createSpy('proj'));
 
         spyOn(shell, 'ls').and.returnValue([PROJECT_PATH + '/CordovaApp.projitems']);

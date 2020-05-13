@@ -110,11 +110,11 @@ function readManifest (success, error) {
  * @param {String} preferenceName Preference name to read */
 Config.prototype.getPreferenceValue = function (preferenceName) {
     var preferenceItem = this.preferences && this.preferences.filter(function (item) {
-        return item.attributes['name'].value === preferenceName;
+        return item.attributes.name.value === preferenceName;
     });
 
-    if (preferenceItem && preferenceItem[0] && preferenceItem[0].attributes && preferenceItem[0].attributes['value']) {
-        return preferenceItem[0].attributes['value'].value;
+    if (preferenceItem && preferenceItem[0] && preferenceItem[0].attributes && preferenceItem[0].attributes.value) {
+        return preferenceItem[0].attributes.value.value;
     }
 };
 
@@ -122,7 +122,7 @@ Config.prototype.getPreferenceValue = function (preferenceName) {
  * Reads SplashScreen image path
  */
 Manifest.prototype.getSplashScreenImagePath = function () {
-    return this.splashScreen.attributes['Image'].value;
+    return this.splashScreen.attributes.Image.value;
 };
 
 exports.readConfig = readConfig;

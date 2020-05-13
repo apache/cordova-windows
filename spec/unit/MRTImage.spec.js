@@ -20,7 +20,6 @@
 var MRTImage = require('../../template/cordova/lib/MRTImage');
 
 describe('MRTImage class', function () {
-
     it('should be constructable', function () {
         expect(new MRTImage('some/path/Image.scale-240.png')).toBeDefined();
     });

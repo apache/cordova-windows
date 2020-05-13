@@ -68,13 +68,13 @@ if (['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(process.argv[2]) >=
 
 // Do some basic argument parsing
 var buildOpts = nopt({
-    'silent': Boolean,
-    'verbose': Boolean,
-    'debug': Boolean,
-    'release': Boolean,
-    'nobuild': Boolean,
-    'buildConfig': path,
-    'buildFlag': [String, Array]
+    silent: Boolean,
+    verbose: Boolean,
+    debug: Boolean,
+    release: Boolean,
+    nobuild: Boolean,
+    buildConfig: path,
+    buildFlag: [String, Array]
 }, { d: '--verbose', r: '--release' });
 
 // Make buildOptions compatible with PlatformApi build method spec

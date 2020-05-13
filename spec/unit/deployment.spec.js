@@ -28,7 +28,6 @@ var TEST_APP_PACKAGE_NAME = '"c:\\testapppackage.appx"';
 var TEST_APP_PACKAGE_ID = '12121212-3434-3434-3434-567856785678';
 
 describe('The correct version of the app deployment tool is obtained.', function () {
-
     var mockedProgramFiles = process.env['ProgramFiles(x86)'];
 
     beforeEach(function () {
@@ -44,22 +43,17 @@ describe('The correct version of the app deployment tool is obtained.', function
     });
 
     it('Test #000 : Provides an AppDeployCmdTool when 8.1 is requested.', function () {
-
         var tool = deployment.getDeploymentTool('8.1');
         expect(tool instanceof AppDeployCmdTool).toBe(true);
-
     });
 
     it('Test #001 : Provides a WinAppDeployCmdTool when 10.0 is requested.', function () {
-
         var tool = deployment.getDeploymentTool('10.0');
         expect(tool instanceof WinAppDeployCmdTool).toBe(true);
-
     });
 });
 
 describe('Windows 10 deployment interacts with the file system as expected.', function () {
-
     function fakeSpawn (cmd, args, cwd) {
         expect(cmd).toBe(path.join('c:/Program Files (x86)/Windows Kits/10/bin/x86/WinAppDeployCmd.exe'));
         switch (args[0]) {
@@ -77,7 +71,6 @@ describe('Windows 10 deployment interacts with the file system as expected.', fu
             expect(args[2]).toBe(TEST_APP_PACKAGE_ID);
             expect(args[4]).toBe('10.120.68.150');
             return Q('');
-
         }
     }
 
@@ -135,7 +128,6 @@ describe('Windows 10 deployment interacts with the file system as expected.', fu
 });
 
 describe('Windows 8.1 deployment interacts with the file system as expected.', function () {
-
     function fakeSpawn (cmd, args, cwd) {
         expect(cmd).toBe(path.join('c:/Program Files (x86)/Microsoft SDKs/Windows Phone/v8.1/Tools/AppDeploy/AppDeployCmd.exe'));
         switch (args[0]) {
@@ -158,7 +150,6 @@ describe('Windows 8.1 deployment interacts with the file system as expected.', f
 
         default:
             throw new Error('Unrecognized AppDeployCmd parameter "' + args[0] + '"');
-
         }
     }
 

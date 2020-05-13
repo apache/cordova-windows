@@ -28,7 +28,6 @@ var ConfigParser = require('../../template/cordova/lib/ConfigParser');
 var check_reqs = rewire(path.join(binPath, 'lib/check_reqs.js'));
 
 describe('check_reqs module', function () {
-
     describe('has Requirement object', function () {
         var Requirement;
         beforeEach(function () {
@@ -145,5 +144,4 @@ describe('check_reqs module', function () {
                 });
         });
     });
-
 });

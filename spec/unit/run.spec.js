@@ -77,7 +77,7 @@ describe('run method', function () {
             return Q.reject(); // rejecting to break run chain
         });
 
-        return run.run([ 'node', buildPath ]).then(
+        return run.run(['node', buildPath]).then(
             () => fail('Expected promise to be rejected'),
             () => expect(buildRun).not.toHaveBeenCalled()
         );
@@ -162,7 +162,7 @@ describe('run method', function () {
             return Q();
         });
 
-        return run.run([ 'node', buildPath, '--phone', '--break' ])
+        return run.run(['node', buildPath, '--phone', '--break'])
             .then(() => {
                 expect(build).toHaveBeenCalled();
                 expect(deployToPhone).toHaveBeenCalled();
@@ -204,7 +204,7 @@ describe('run method', function () {
             return Q();
         });
 
-        return run.run([ 'node', buildPath ])
+        return run.run(['node', buildPath])
             .finally(function () {
                 expect(build).toHaveBeenCalled();
                 expect(deployToDesktop).toHaveBeenCalled();
@@ -240,7 +240,6 @@ describe('run method', function () {
     });
 
     it('spec.8 should accept --archs parameter either as cli or as platform arg', function () {
-
         spyOn(utils, 'isCordovaProject').and.returnValue(true);
         spyOn(packages, 'getPackage').and.returnValue(Q({ arch: 'arm' }));
         spyOn(packages, 'deployToDesktop').and.returnValue(Q());
@@ -263,7 +262,6 @@ describe('run method', function () {
     });
 
     it('spec.9 should fall back to anycpu if --archs parameter is not specified', function () {
-
         spyOn(utils, 'isCordovaProject').and.returnValue(true);
         spyOn(packages, 'getPackage').and.returnValue(Q({ arch: 'anycpu' }));
         spyOn(packages, 'deployToDesktop').and.returnValue(Q());

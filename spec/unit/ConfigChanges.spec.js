@@ -48,9 +48,13 @@ describe('PlatformMunger', function () {
 
     beforeEach(function () {
         shell.mkdir('-p', tempDir);
-        munge = { parents: { 'foo/bar': [
-            { before: undefined, count: 1, xml: '<DummyElement name="Dummy" />' }
-        ] } };
+        munge = {
+            parents: {
+                'foo/bar': [
+                    { before: undefined, count: 1, xml: '<DummyElement name="Dummy" />' }
+                ]
+            }
+        };
         munger = new PlatformMunger('windows', tempDir);
         spyOn(BaseMunger.prototype, 'apply_file_munge').and.callThrough();
     });
@@ -60,7 +64,6 @@ describe('PlatformMunger', function () {
     });
 
     describe('apply_file_munge method', function () {
-
         it('should call parent\'s method with the same parameters', function () {
             munger.apply_file_munge(WINDOWS_MANIFEST, munge, false);
             expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalledWith(WINDOWS_MANIFEST, munge, false);
@@ -73,16 +76,24 @@ describe('PlatformMunger', function () {
 
         it('should remove uap: capabilities added by windows prepare step', function () {
             // Generate a munge that contain non-prefixed capabilities changes
-            var baseMunge = { parents: { '/Package/Capabilities': [
-                // Emulate capability that was initially added with uap prefix
-                { before: undefined, count: 1, xml: '<uap:Capability Name=\"privateNetworkClientServer\">' }, /* eslint no-useless-escape : 0 */
-                { before: undefined, count: 1, xml: '<Capability Name=\"enterpriseAuthentication\">' } /* eslint no-useless-escape : 0 */
-            ] } };
+            var baseMunge = {
+                parents: {
+                    '/Package/Capabilities': [
+                        // Emulate capability that was initially added with uap prefix
+                        { before: undefined, count: 1, xml: '<uap:Capability Name=\"privateNetworkClientServer\">' }, /* eslint no-useless-escape : 0 */
+                        { before: undefined, count: 1, xml: '<Capability Name=\"enterpriseAuthentication\">' } /* eslint no-useless-escape : 0 */
+                    ]
+                }
+            };
 
-            var capabilitiesMunge = { parents: { '/Package/Capabilities': [
-                { before: undefined, count: 1, xml: '<uap:Capability Name=\"privateNetworkClientServer\">' },
-                { before: undefined, count: 1, xml: '<uap:Capability Name=\"enterpriseAuthentication\">' }
-            ] } };
+            var capabilitiesMunge = {
+                parents: {
+                    '/Package/Capabilities': [
+                        { before: undefined, count: 1, xml: '<uap:Capability Name=\"privateNetworkClientServer\">' },
+                        { before: undefined, count: 1, xml: '<uap:Capability Name=\"enterpriseAuthentication\">' }
+                    ]
+                }
+            };
             munger.apply_file_munge(WINDOWS10_MANIFEST, baseMunge, /* remove= */true);
             expect(BaseMunger.prototype.apply_file_munge).toHaveBeenCalledWith(WINDOWS10_MANIFEST, capabilitiesMunge, true);
         });
@@ -90,7 +101,6 @@ describe('PlatformMunger', function () {
 });
 
 describe('Capabilities within package.windows.appxmanifest', function () {
-
     var testDir, windowsPlatform, windowsManifest, windowsManifest10, dummyPluginInfo, api;
 
     beforeEach(function () {

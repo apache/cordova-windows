@@ -227,7 +227,6 @@ module.exports.getLatestMSBuild = function () {
 
     return this.findAllAvailableVersions()
         .then(function (allMsBuildVersions) {
-
             var availableVersions = allMsBuildVersions
                 .filter(function (buildTools) {
                     // Sanitize input - filter out tools w/ invalid versions
@@ -290,7 +289,7 @@ function filterSupportedTargets (targets, msbuild) {
         '12.0': msBuild12TargetsFilter,
         '14.0': msBuild14TargetsFilter,
         '15.x': msBuild15TargetsFilter,
-        '15.5': msBuild155TargetsFilter,
+        15.5: msBuild155TargetsFilter,
         get: function (version) {
             // Apart from exact match also try to get filter for version range
             // so we can find for example targets for version '15.1'
@@ -367,7 +366,7 @@ module.exports.getWillowInstallations = function () {
 // returns an array of available UAP Versions
 // prepare.js
 module.exports.getAvailableUAPVersions = function () {
-    var programFilesFolder = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
+    var programFilesFolder = process.env['ProgramFiles(x86)'] || process.env.ProgramFiles;
     // No Program Files folder found, so we won't be able to find UAP SDK
     if (!programFilesFolder) return [];
 

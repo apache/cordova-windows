@@ -1,9 +1,0 @@
-env:
-    node: false
-    commonjs: true
-    browser: true
-
-globals:
-    cordova: readonly
-    WinJS: readonly
-    Windows: readonly

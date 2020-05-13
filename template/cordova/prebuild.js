@@ -30,20 +30,20 @@ module.exports = function patch (platform) {
     var url = require('url');
 
     var basejsSrcMap = {
-        '10': '/www/WinJS/js/base.js',
-        '8.1': '//Microsoft.WinJS.2.0/js/base.js',
+        10: '/www/WinJS/js/base.js',
+        8.1: '//Microsoft.WinJS.2.0/js/base.js',
         'phone-8.1': '//Microsoft.Phone.WinJS.2.1/js/base.js'
     };
     var escapedBasejsSrcMap = {
-        '10': '\/www\/WinJS\/js\/base\.js',
-        '8.1': '\/\/Microsoft\.WinJS\.2\.0\/js\/base\.js',
+        10: '\/www\/WinJS\/js\/base\.js',
+        8.1: '\/\/Microsoft\.WinJS\.2\.0\/js\/base\.js',
         'phone-8.1': '\/\/Microsoft\.Phone\.WinJS\.2\.1\/js\/base\.js'
     };
     var basejsSrc = basejsSrcMap[platform];
 
     var appxmanifestMap = {
-        '10': 'package.windows10.appxmanifest',
-        '8.1': 'package.windows.appxmanifest',
+        10: 'package.windows10.appxmanifest',
+        8.1: 'package.windows.appxmanifest',
         'phone-8.1': 'package.phone.appxmanifest'
     };
 

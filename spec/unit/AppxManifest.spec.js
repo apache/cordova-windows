@@ -30,7 +30,6 @@ var WINDOWS_PHONE_MANIFEST = 'template/package.phone.appxmanifest';
 var CSS_COLOR_NAME = 'turquoise';
 
 describe('AppxManifest', function () {
-
     var XMLS = {
         '/no/prefixed': new et.ElementTree(et.XML('<?xml version="1.0" encoding="UTF-8"?><Package/>')),
         '/uap/prefixed': new et.ElementTree(et.XML('<?xml version="1.0" encoding="UTF-8"?><Package xmlns:uap=""/>'))
@@ -46,7 +45,6 @@ describe('AppxManifest', function () {
     });
 
     describe('constructor', function () {
-
         it('Test #000 : should create a new AppxManifest instance', function () {
             var manifest;
             expect(function () { manifest = new AppxManifest(WINDOWS_MANIFEST); }).not.toThrow();
@@ -103,7 +101,6 @@ describe('AppxManifest', function () {
     });
 
     describe('static get() method', function () {
-
         it('Test #008 : should return an AppxManifest instance', function () {
             expect(AppxManifest.get(WINDOWS_MANIFEST) instanceof AppxManifest).toBe(true);
         });
@@ -174,8 +171,8 @@ describe('AppxManifest', function () {
         it('Test #015 : should not write duplicate UAP capability declarations', function () {
             var manifest = AppxManifest.get(WINDOWS_10_MANIFEST);
             var capabilities = manifest.doc.find('.//Capabilities');
-            capabilities.append(new et.Element('uap:Capability', { 'Name': 'enterpriseAuthentication' }));
-            capabilities.append(new et.Element('uap:Capability', { 'Name': 'enterpriseAuthentication' }));
+            capabilities.append(new et.Element('uap:Capability', { Name: 'enterpriseAuthentication' }));
+            capabilities.append(new et.Element('uap:Capability', { Name: 'enterpriseAuthentication' }));
 
             var xml = manifest.writeToString();
 

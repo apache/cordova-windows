@@ -24,6 +24,7 @@ var ConfigParser = require('./ConfigParser.js');
 var nopt = require('nopt');
 
 var spawn = require('cordova-common').superspawn.spawn;
+const { CordovaError } = require('cordova-common');
 var execSync = require('child_process').execSync;
 
 // paths
@@ -50,8 +51,8 @@ var appName;
  * and prints them to console
  */
 module.exports.run = function (args) {
-    var knownOpts = { 'minutes': Number, 'dump': Boolean, 'help': Boolean };
-    var shortHands = { 'mins': ['--minutes'], 'h': ['--help'] };
+    var knownOpts = { minutes: Number, dump: Boolean, help: Boolean };
+    var shortHands = { mins: ['--minutes'], h: ['--help'] };
     var parsedOpts = nopt(knownOpts, shortHands, args, 0);
 
     if (parsedOpts.help) {
@@ -88,7 +89,7 @@ module.exports.run = function (args) {
         }
     }).then(function () {
         if (!adminCurrentState && !appTracingCurrentState) {
-            throw 'No log channels enabled. Exiting...';
+            throw new CordovaError('No log channels enabled. Exiting...');
         }
         try {
             var config = new ConfigParser(configPath);
@@ -289,7 +290,7 @@ function formatField (event, fieldName, fieldShownName, offset) {
         multiLineWhitespace += ' ';
     }
 
-    if (event.hasOwnProperty(fieldName) && (typeof event[fieldName] !== 'undefined')) {
+    if (Object.prototype.hasOwnProperty.call(event, fieldName) && (typeof event[fieldName] !== 'undefined')) {
         event[fieldName] = event[fieldName].replace(/\n\s*/g, '\n' + multiLineWhitespace);
         return ('\n' + fieldShownName + ':' + whitespace + event[fieldName]).replace(/\n$/m, '');
     }
