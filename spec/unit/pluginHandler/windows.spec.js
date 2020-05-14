@@ -17,7 +17,7 @@
  under the License.
  */
 
-var fs = require('fs');
+var fs = require('fs-extra');
 var os = require('os');
 var et = require('elementtree');
 var path = require('path');
@@ -931,7 +931,7 @@ describe('windows project handler', function () {
                 wwwDest = path.resolve(dummyProject.www, 'plugins', dummyPluginInfo.id, jsModule.src);
                 platformWwwDest = path.resolve(dummyProject.platformWww, 'plugins', dummyPluginInfo.id, jsModule.src);
 
-                spyOn(shell, 'rm');
+                spyOn(fs, 'removeSync');
 
                 var existsSyncOrig = fs.existsSync;
                 spyOn(fs, 'existsSync').and.callFake(function (file) {
@@ -942,14 +942,14 @@ describe('windows project handler', function () {
 
             it('Test #047 : should put module to both www and platform_www when options.usePlatformWww flag is specified', function () {
                 uninstall(jsModule, dummyPluginInfo, dummyProject, { usePlatformWww: true });
-                expect(shell.rm).toHaveBeenCalledWith(jasmine.any(String), wwwDest);
-                expect(shell.rm).toHaveBeenCalledWith(jasmine.any(String), platformWwwDest);
+                expect(fs.removeSync).toHaveBeenCalledWith(wwwDest);
+                expect(fs.removeSync).toHaveBeenCalledWith(platformWwwDest);
             });
 
             it('Test #048 : should put module to www only when options.usePlatformWww flag is not specified', function () {
                 uninstall(jsModule, dummyPluginInfo, dummyProject);
-                expect(shell.rm).toHaveBeenCalledWith(jasmine.any(String), wwwDest);
-                expect(shell.rm).not.toHaveBeenCalledWith(jasmine.any(String), platformWwwDest);
+                expect(fs.removeSync).toHaveBeenCalledWith(wwwDest);
+                expect(fs.removeSync).not.toHaveBeenCalledWith(platformWwwDest);
             });
         });
 

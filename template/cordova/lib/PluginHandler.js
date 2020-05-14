@@ -17,7 +17,7 @@
  *
  */
 
-var fs = require('fs');
+var fs = require('fs-extra');
 var path = require('path');
 var shell = require('shelljs');
 var events = require('cordova-common').events;
@@ -255,7 +255,7 @@ function removeFileAndParents (baseDir, destFile, stopper) {
     var file = path.resolve(baseDir, destFile);
     if (!fs.existsSync(file)) return;
 
-    shell.rm('-rf', file);
+    fs.removeSync(file);
 
     // check if directory is empty
     var curDir = path.dirname(file);

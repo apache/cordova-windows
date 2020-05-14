@@ -19,7 +19,7 @@
 var rewire = require('rewire');
 var common = rewire('../../../template/cordova/lib/PluginHandler');
 var path = require('path');
-var fs = require('fs');
+var fs = require('fs-extra');
 var os = require('os');
 var shell = require('shelljs');
 
@@ -123,14 +123,13 @@ describe('common platform handler', function () {
     });
 
     describe('deleteJava', function () {
-        it('Test #008 : should call fs.unlinkSync on the provided paths', function () {
+        it('Test #008 : source file should have been removed.', function () {
             shell.mkdir('-p', java_dir);
             fs.writeFileSync(java_file, 'contents', 'utf-8');
 
-            var s = spyOn(fs, 'unlinkSync').and.callThrough();
+            expect(fs.existsSync(java_file)).toBe(true);
             removeFileAndParents(project_dir, java_file);
-            expect(s).toHaveBeenCalled();
-            expect(s).toHaveBeenCalledWith(path.resolve(project_dir, java_file));
+            expect(fs.existsSync(java_file)).toBe(false);
 
             shell.rm('-rf', java_dir);
         });
