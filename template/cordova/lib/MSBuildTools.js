@@ -289,7 +289,7 @@ function filterSupportedTargets (targets, msbuild) {
         '12.0': msBuild12TargetsFilter,
         '14.0': msBuild14TargetsFilter,
         '15.x': msBuild15TargetsFilter,
-        15.5: msBuild155TargetsFilter,
+        '15.5': msBuild155TargetsFilter, // eslint-disable-line quote-props
         get: function (version) {
             // Apart from exact match also try to get filter for version range
             // so we can find for example targets for version '15.1'
