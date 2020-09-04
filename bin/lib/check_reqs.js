@@ -41,7 +41,7 @@ try {
 // reference: https://msdn.microsoft.com/en-us/library/bb164659(v=vs.120).aspx
 var VS2013_UPDATE2_RC = new Version(12, 0, 30324);
 var REQUIRED_VERSIONS = {
-    8.1: {
+    '8.1': { // eslint-disable-line quote-props
         os: '6.3',
         msbuild: '12.0',
         visualstudio: '12.0',
@@ -220,8 +220,8 @@ function shortenVersion (version) {
 
 function mapWindowsVersionToName (version) {
     var map = {
-        6.2: 'Windows 8',
-        6.3: 'Windows 8.1',
+        '6.2': 'Windows 8', // eslint-disable-line quote-props
+        '6.3': 'Windows 8.1', // eslint-disable-line quote-props
         '10.0': 'Windows 10'
     };
     var majorMinor = shortenVersion(version);
