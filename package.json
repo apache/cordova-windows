@@ -5,9 +5,7 @@
   "bin": "bin/create",
   "main": "template/cordova/Api.js",
   "repository": "github:apache/cordova-windows",
-  "bugs": {
-    "url": "https://github.com/apache/cordova-windows/issues"
-  },
+  "bugs": "https://github.com/apache/cordova-windows/issues",
   "keywords": [
     "windows",
     "cordova",
