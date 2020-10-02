@@ -25,7 +25,6 @@ var fs = require('fs');
 var et = require('elementtree');
 var events = require('cordova-common').events;
 var path = require('path');
-var xml = require('cordova-common').xmlHelpers;
 var FileUpdater = require('cordova-common').FileUpdater;
 var updateManifestFile = prepare.__get__('updateManifestFile');
 var applyCoreProperties = prepare.__get__('applyCoreProperties');
@@ -196,7 +195,11 @@ describe('A Windows 10 project should warn if it supports remote mode and restri
     var searchStr = 'documentsLibrary';
 
     beforeEach(function () {
-        mockConfig = createMockConfigAndManifestForApplyAccessRules(true, 'http://www.bing.com/*');
+        mockConfig = {
+            config: new ConfigParser(path.join(`${__dirname}/fixtures/config-manifest-access-rules/win10-http-wildcard.xml`)),
+            manifest: createMockManifest(true)
+        };
+
         addCapabilityDeclarationToMockManifest(mockConfig.manifest, 'documentsLibrary');
 
         spyOn(AppxManifest, 'get').and.returnValue(mockConfig.manifest);
@@ -221,73 +224,20 @@ describe('A Windows 10 project should warn if it supports remote mode and restri
   * (for the function applyAccessRules) from prepare.js.
   **/
 
-function createMockConfigAndManifestForApplyAccessRules (isWin10) {
-    var rules = [];
-    for (var i = 1; i < arguments.length; i++) {
-        rules.push(arguments[i]);
-    }
-
-    var TEST_XML = '<?xml version="1.0" encoding="UTF-8"?>\n' +
-    '<widget xmlns     = "http://www.w3.org/ns/widgets"\n' +
-    '        xmlns:cdv = "http://cordova.apache.org/ns/1.0"\n' +
-    '        id        = "org.apache.cordova.HelloCordova"\n' +
-    '        version   = "1.0.0.0">\n' +
-    '    <name>HelloCordova</name>\n' +
-    '    <author href="http://cordova.io" email="dev@cordova.apache.org">\n' +
-    '        Apache\n' +
-    '    </author>\n' +
-    '    <content src="index.html" />\n' +
-    '</widget>\n';
-
-    var origParseElementtreeSync = xml.parseElementtreeSync;
-    spyOn(xml, 'parseElementtreeSync').and.callFake(function (path) {
-        if (path === 'config.xml') return new et.ElementTree(et.XML(TEST_XML));
-        return origParseElementtreeSync(path);
-    });
-
-    var config = new ConfigParser('config.xml');
-
-    var origGetPreference = config.getPreference;
-    spyOn(config, 'getPreference').and.callFake(function (prefName) {
-        if (prefName === 'WindowsDefaultUriPrefix') {
-            return isWin10 ? 'ms-appx-web://' : 'ms-appx://';
-        }
-
-        return origGetPreference.call(config, prefName);
-    });
-
-    config.getAccesses = function () {
-        if (isWin10) {
-            return [];
-        }
-
-        return rules.map(function (rule) {
-            return { 'origin': rule };
-        });
-    };
-
-    config.getAllowNavigations = function () {
-        if (isWin10) {
-            return rules.map(function (rule) {
-                return { 'href': rule };
-            });
-        }
-
-        return [];
-    };
-
-    var filePath = isWin10 ? Win10ManifestPath : Win81ManifestPath;
-    var manifest = AppxManifest.get(filePath);
+function createMockManifest (isWin10) {
     spyOn(fs, 'writeFileSync');
 
-    return { config: config, manifest: manifest };
+    var filePath = isWin10 ? Win10ManifestPath : Win81ManifestPath;
+    return AppxManifest.get(filePath);
 }
 
 describe('Access rules management', function () {
     // body...
     it('A Windows 8.1 project should not have WindowsRuntimeAccess attributes in access rules.', function () {
-
-        var mockConfig = createMockConfigAndManifestForApplyAccessRules(false, 'https://www.contoso.com');
+        const mockConfig = {
+            config: new ConfigParser(path.join(`${__dirname}/fixtures/config-manifest-access-rules/win8-https.xml`)),
+            manifest: createMockManifest(false)
+        };
 
         applyAccessRules(mockConfig.config, mockConfig.manifest);
 
@@ -304,8 +254,10 @@ describe('Access rules management', function () {
     });
 
     it('A Windows 10 project should have WindowsRuntimeAccess attributes in access rules.', function () {
-
-        var mockConfig = createMockConfigAndManifestForApplyAccessRules(true, 'https://www.contoso.com');
+        const mockConfig = {
+            config: new ConfigParser(path.join(`${__dirname}/fixtures/config-manifest-access-rules/win10-https.xml`)),
+            manifest: createMockManifest(true)
+        };
 
         applyNavigationWhitelist(mockConfig.config, mockConfig.manifest, true);
 
@@ -334,7 +286,10 @@ describe('Access rules management', function () {
         });
 
         it('applies access rules and verifies at least one was rejected', function () {
-            var mockConfig = createMockConfigAndManifestForApplyAccessRules(false, 'http://www.contoso.com');
+            const mockConfig = {
+                config: new ConfigParser(path.join(`${__dirname}/fixtures/config-manifest-access-rules/win8-http.xml`)),
+                manifest: createMockManifest(false)
+            };
             applyAccessRules(mockConfig.config, mockConfig.manifest, false);
 
             expect(stringIndex).toBe(0);
@@ -352,7 +307,10 @@ describe('Access rules management', function () {
         });
 
         it('applies access rules and verifies they were accepted', function () {
-            var mockConfig = createMockConfigAndManifestForApplyAccessRules(true, 'http://www.contoso.com');
+            const mockConfig = {
+                config: new ConfigParser(path.join(`${__dirname}/fixtures/config-manifest-access-rules/win10-http.xml`)),
+                manifest: createMockManifest(true)
+            };
             applyAccessRules(mockConfig.config, mockConfig.manifest, true);
 
             expect(stringIndex).toBe(-1);
@@ -365,7 +323,12 @@ describe('A Windows 10 project should apply the uap: namespace prefix to certain
     var manifest;
 
     beforeEach(function () {
-        manifest = createMockConfigAndManifestForApplyAccessRules(true, 'https://www.contoso.com').manifest;
+        const mockConfig = {
+            config: new ConfigParser(path.join(`${__dirname}/fixtures/config-manifest-access-rules/win10-https.xml`)),
+            manifest: createMockManifest(true)
+        };
+
+        manifest = mockConfig.manifest;
         var element = manifest.doc.find('.//Capabilities');
         element.clear();
         element.append(new et.Element('Capability', { Name: 'internetClient' }));

@@ -24,22 +24,16 @@ A class for holidng the information currently stored in plugin.xml
 It's inherited from cordova-common's PluginInfo class
 In addition it overrides getConfigFiles, getEditConfigs, getFrameworks methods to use windows-specific logic
  */
-function PluginInfo (dirname) {
-    //  We're not using `util.inherit' because original PluginInfo defines
-    //  its' methods inside of constructor
-    CommonPluginInfo.apply(this, arguments);
-    var parentGetConfigFiles = this.getConfigFiles;
-    var parentGetEditConfigs = this.getEditConfigs;
-
-    this.getEditConfigs = function (platform) {
-        var editConfigs = parentGetEditConfigs(platform);
+class PluginInfo extends CommonPluginInfo {
+    getEditConfigs (platform) {
+        var editConfigs = super.getEditConfigs(platform);
         return AppxManifest.processChanges(editConfigs);
-    };
+    }
 
-    this.getConfigFiles = function (platform) {
-        var configFiles = parentGetConfigFiles(platform);
+    getConfigFiles (platform) {
+        var configFiles = super.getConfigFiles(platform);
         return AppxManifest.processChanges(configFiles);
-    };
+    }
 }
 
 exports.PluginInfo = PluginInfo;

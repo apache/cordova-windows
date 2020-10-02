@@ -14,53 +14,49 @@
  *
 */
 
-var util = require('util');
 var path = require('path');
-var CommonMunger = require('cordova-common').ConfigChanges.PlatformMunger;
+const { ConfigChanges: { PlatformMunger } } = require('cordova-common');
 var CapsNeedUapPrefix = require(path.join(__dirname, 'AppxManifest')).CapsNeedUapPrefix;
 
 var CAPS_SELECTOR = '/Package/Capabilities';
 var WINDOWS10_MANIFEST = 'package.windows10.appxmanifest';
 
-function PlatformMunger (platform, project_dir, platformJson, pluginInfoProvider) {
-    CommonMunger.apply(this, arguments);
-}
+class WindowsPlatformMunger extends PlatformMunger {
 
-util.inherits(PlatformMunger, CommonMunger);
+    /**
+     * This is an override of apply_file_munge method from cordova-common's PlatformMunger class.
+     * In addition to parent's method logic also removes capabilities with 'uap:' prefix that were
+     * added by AppxManifest class
+     *
+     * @param {String}  file   A file name to apply munge to
+     * @param {Object}  munge  Serialized changes that need to be applied to the file
+     * @param {Boolean} [remove=false] Flag that specifies whether the changes
+     *   need to be removed or added to the file
+     */
+    apply_file_munge (file, munge, remove) {
 
-/**
- * This is an override of apply_file_munge method from cordova-common's PlatformMunger class.
- * In addition to parent's method logic also removes capabilities with 'uap:' prefix that were
- * added by AppxManifest class
- *
- * @param {String}  file   A file name to apply munge to
- * @param {Object}  munge  Serialized changes that need to be applied to the file
- * @param {Boolean} [remove=false] Flag that specifies whether the changes
- *   need to be removed or added to the file
- */
-PlatformMunger.prototype.apply_file_munge = function (file, munge, remove) {
+        // Create a copy to avoid modification of original munge
+        var mungeCopy = cloneObject(munge);
+        var capabilities = mungeCopy.parents[CAPS_SELECTOR];
 
-    // Create a copy to avoid modification of original munge
-    var mungeCopy = cloneObject(munge);
-    var capabilities = mungeCopy.parents[CAPS_SELECTOR];
+        if (capabilities) {
+            // Add 'uap' prefixes for windows 10 manifest
+            if (file === WINDOWS10_MANIFEST) {
+                capabilities = generateUapCapabilities(capabilities);
+            }
 
-    if (capabilities) {
-        // Add 'uap' prefixes for windows 10 manifest
-        if (file === WINDOWS10_MANIFEST) {
-            capabilities = generateUapCapabilities(capabilities);
+            // Remove duplicates and sort capabilities when installing plugin
+            if (!remove) {
+                capabilities = getUniqueCapabilities(capabilities).sort(compareCapabilities);
+            }
+
+            // Put back capabilities into munge's copy
+            mungeCopy.parents[CAPS_SELECTOR] = capabilities;
         }
 
-        // Remove duplicates and sort capabilities when installing plugin
-        if (!remove) {
-            capabilities = getUniqueCapabilities(capabilities).sort(compareCapabilities);
-        }
-
-        // Put back capabilities into munge's copy
-        mungeCopy.parents[CAPS_SELECTOR] = capabilities;
+        super.apply_file_munge(file, mungeCopy, remove);
     }
-
-    PlatformMunger.super_.prototype.apply_file_munge.call(this, file, mungeCopy, remove);
-};
+}
 
 // Recursive function to clone an object
 function cloneObject (obj) {
@@ -160,4 +156,4 @@ function generateUapCapabilities (capabilities) {
 
 }
 
-exports.PlatformMunger = PlatformMunger;
+exports.PlatformMunger = WindowsPlatformMunger;
