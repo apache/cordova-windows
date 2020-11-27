@@ -12,11 +12,11 @@
     "apache"
   ],
   "scripts": {
-    "test": "npm run eslint && npm run test-unit && npm run test-e2e",
+    "test": "npm run lint && npm run test-unit && npm run test-e2e",
     "test-unit": "jasmine",
     "test-e2e": "jasmine spec/e2e/endtoend.spec.js",
     "cover": "nyc jasmine",
-    "eslint": "eslint . \"+(bin|template)/**/!(*.*)\""
+    "lint": "eslint . \"+(bin|template)/**/!(*.*|gitignore)\""
   },
   "dependencies": {
     "cordova-common": "^3.2.0",
@@ -30,13 +30,7 @@
     "winjs": "^4.4.3"
   },
   "devDependencies": {
-    "eslint": "^5.12.0",
-    "eslint-config-semistandard": "^13.0.0",
-    "eslint-config-standard": "^12.0.0",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-node": "^8.0.1",
-    "eslint-plugin-promise": "^4.0.1",
-    "eslint-plugin-standard": "^4.0.0",
+    "@cordova/eslint-config": "^3.0.0",
     "jasmine": "^3.5.0",
     "nyc": "^15.0.1",
     "rewire": "^5.0.0"

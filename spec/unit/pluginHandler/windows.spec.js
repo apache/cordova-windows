@@ -128,7 +128,6 @@ describe('windows project handler', function () {
         });
 
         function validateInstalledProjects (tag, elementToInstall, xpath, supportedPlatforms) {
-
             var projects = copyArray(dummyProject.projects);
             projects.push(dummyProject.master);
 
@@ -196,7 +195,6 @@ describe('windows project handler', function () {
         }
 
         describe('of <source-file> elements', function () {
-
             var install = PluginHandler.getInstaller('source-file');
 
             it('Test #000 : should copy stuff from one location to another by calling common.copyFile', function () {
@@ -251,7 +249,6 @@ describe('windows project handler', function () {
             it('Test #006 : should write to correct project files when conditions are specified with reference', function () {
                 var xpath = 'Content[@Include="' + computeResourcePath(resourcereferenceFiles[0]) + '"][@Condition="\'$(Platform)\'==\'x86\'"]';
                 validateInstalledProjects('resource-file', resourcereferenceFiles[0], xpath, ['all']);
-
             });
 
             it('Test #007 : should write to correct project files when conditions are specified with reference', function () {
@@ -526,7 +523,6 @@ describe('windows project handler', function () {
         });
 
         function validateUninstalledProjects (tag, elementToUninstall, xmlPath, incText, targetConditions, supportedPlatforms) {
-
             var projects = copyArray(dummyProject.projects);
             projects.push(dummyProject.master);
 

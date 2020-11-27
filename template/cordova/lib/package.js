@@ -166,12 +166,10 @@ module.exports.findDevice = function (deploymentTool, target) {
 
 // returns array of available devices names
 module.exports.listDevices = function (deploymentTool) {
-
     return deploymentTool.enumerateDevices().then(function (deviceList) {
         return deviceList.map(function (device) {
             return device.toString();
         });
-
     }, function (e) {
         events.emit('error', new Error('Failed to list devices: ' + e));
     });
@@ -223,7 +221,6 @@ module.exports.deployToDesktop = function (pkg, deployTarget) {
 
     return utils.getAppStoreUtils().then(function (appStoreUtils) {
         return getPackageName(path.join(__dirname, '..', '..')).then(function (pkgname) {
-
             var oldArch;
             // uninstalls previous application instance (if exists)
             events.emit('log', 'Attempting to uninstall previous application version...');

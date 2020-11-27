@@ -73,7 +73,7 @@ module.exports.create = function (destinationDir, config, options) {
     shell.cp('-rf', path.join(root, 'VERSION'), projectPath);
 
     // copy node_modules to cordova directory
-    let nodeModulesDir = path.join(root, 'node_modules');
+    const nodeModulesDir = path.join(root, 'node_modules');
     if (fs.existsSync(nodeModulesDir)) {
         events.emit('verbose', 'Copying node_modules to ' + projectPath);
         shell.cp('-r', nodeModulesDir, path.join(projectPath, 'cordova'));
@@ -101,8 +101,8 @@ module.exports.create = function (destinationDir, config, options) {
 
     // replace specific values in manifests' templates
     events.emit('verbose', 'Updating manifest files with project configuration.');
-    [ 'package.windows.appxmanifest', 'package.phone.appxmanifest',
-        'package.windows10.appxmanifest' ]
+    ['package.windows.appxmanifest', 'package.phone.appxmanifest',
+        'package.windows10.appxmanifest']
         .forEach(function (item) {
             var manifest = AppxManifest.get(path.join(projectPath, item));
             if (manifest.hasPhoneIdentity) {

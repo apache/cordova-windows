@@ -143,18 +143,18 @@ describe('getAvailableUAPVersions method', function () {
     var availableVersions = ['10.0.10030.0', '10.0.10166.0', '10.0.10078.0'];
     var shellTest, shellLs;
     var programFilesx86Orig = process.env['ProgramFiles(x86)'];
-    var programFilesOrig = process.env['ProgramFiles'];
+    var programFilesOrig = process.env.ProgramFiles;
 
     beforeEach(function () {
         shellTest = spyOn(shell, 'test').and.returnValue(true);
         shellLs = spyOn(shell, 'ls').and.returnValue(availableVersions);
         process.env['ProgramFiles(x86)'] = '/';
-        process.env['ProgramFiles'] = '/';
+        process.env.ProgramFiles = '/';
     });
 
     afterEach(function () {
         process.env['ProgramFiles(x86)'] = programFilesx86Orig;
-        process.env['ProgramFiles'] = programFilesOrig;
+        process.env.ProgramFiles = programFilesOrig;
     });
 
     it('should return list of available versions', function () {
@@ -172,7 +172,7 @@ describe('getAvailableUAPVersions method', function () {
 
     it('should return empty array if it isn\'t able to detect SDK location', function () {
         delete process.env['ProgramFiles(x86)'];
-        delete process.env['ProgramFiles'];
+        delete process.env.ProgramFiles;
         expect(buildTools.getAvailableUAPVersions().length).toEqual(0);
     });
 
@@ -191,7 +191,6 @@ describe('getAvailableUAPVersions method', function () {
 });
 
 describe('getMSBuildToolsAt method', function () {
-
     var fakePath = '/some/fake/path';
     var messyPath = '/another/fake/path';
     var fakeVersion = '22.0.12635.5';

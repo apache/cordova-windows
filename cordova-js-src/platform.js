@@ -71,8 +71,8 @@ module.exports = {
                     });
                 }
 
-                if (e.detail.previousExecutionState === Windows.ApplicationModel.Activation.ApplicationExecutionState.running
-                        || e.detail.previousExecutionState === Windows.ApplicationModel.Activation.ApplicationExecutionState.suspended) {
+                if (e.detail.previousExecutionState === Windows.ApplicationModel.Activation.ApplicationExecutionState.running ||
+                        e.detail.previousExecutionState === Windows.ApplicationModel.Activation.ApplicationExecutionState.suspended) {
                     cordova.fireDocumentEvent('activated', platform.activationContext, true);
                     return;
                 }
@@ -133,7 +133,6 @@ module.exports = {
 };
 
 function injectBackButtonHandler () {
-
     var app = WinJS.Application;
 
     // create document event handler for backbutton
@@ -167,9 +166,9 @@ function injectBackButtonHandler () {
         backButtonChannel.onHasSubscribersChange = function () {
             // If we just attached the first handler or detached the last handler,
             // let native know we need to override the back button.
-            navigationManager.appViewBackButtonVisibility = (this.numHandlers > 0) ?
-                Windows.UI.Core.AppViewBackButtonVisibility.visible :
-                Windows.UI.Core.AppViewBackButtonVisibility.collapsed;
+            navigationManager.appViewBackButtonVisibility = (this.numHandlers > 0)
+                ? Windows.UI.Core.AppViewBackButtonVisibility.visible
+                : Windows.UI.Core.AppViewBackButtonVisibility.collapsed;
         };
 
         navigationManager.addEventListener('backrequested', backRequestedHandler, false);

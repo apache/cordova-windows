@@ -36,21 +36,21 @@ var CAPS_NEEDING_UAPNS = ['documentsLibrary', 'picturesLibrary', 'videosLibrary'
     'phoneCall', 'blockedChatMessages', 'objects3D'];
 
 var KNOWN_ORIENTATIONS = {
-    'default': ['portrait', 'landscape', 'landscapeFlipped'],
-    'portrait': ['portrait'],
-    'landscape': ['landscape', 'landscapeFlipped']
+    default: ['portrait', 'landscape', 'landscapeFlipped'],
+    portrait: ['portrait'],
+    landscape: ['landscape', 'landscapeFlipped']
 };
 
 var MANIFESTS = {
-    'windows': {
+    windows: {
         '8.1.0': 'package.windows.appxmanifest',
         '10.0.0': 'package.windows10.appxmanifest'
     },
-    'phone': {
+    phone: {
         '8.1.0': 'package.phone.appxmanifest',
         '10.0.0': 'package.windows10.appxmanifest'
     },
-    'all': {
+    all: {
         '8.1.0': ['package.windows.appxmanifest', 'package.phone.appxmanifest'],
         '10.0.0': 'package.windows10.appxmanifest'
     }
@@ -113,7 +113,6 @@ Object.defineProperty(AppxManifest, 'CapsNeedUapPrefix', {
  * @return  {AppxManifest|Win10AppxManifest}  Manifest instance
  */
 AppxManifest.get = function (fileName, ignoreCache) {
-
     if (!ignoreCache && manifestCache[fileName]) {
         return manifestCache[fileName];
     }
@@ -289,7 +288,6 @@ AppxManifest.prototype.getProperties = function () {
             return description && description.text;
         },
         setDescription: function (text) {
-
             var description = properties.find('./Description');
 
             if (!text || text.length === 0) {
@@ -617,7 +615,6 @@ AppxManifest.prototype.write = function (destPath) {
  *   appxmanifest
  */
 function sortCapabilities (manifest) {
-
     // removes namespace prefix (m3:Capability -> Capability)
     // this is required since elementtree returns qualified name with namespace
     function extractLocalName (tag) {

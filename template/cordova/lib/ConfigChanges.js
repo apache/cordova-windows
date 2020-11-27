@@ -39,7 +39,6 @@ util.inherits(PlatformMunger, CommonMunger);
  *   need to be removed or added to the file
  */
 PlatformMunger.prototype.apply_file_munge = function (file, munge, remove) {
-
     // Create a copy to avoid modification of original munge
     var mungeCopy = cloneObject(munge);
     var capabilities = mungeCopy.parents[CAPS_SELECTOR];
@@ -93,7 +92,6 @@ function getCapabilityName (capability) {
  */
 function getUniqueCapabilities (capabilities) {
     return capabilities.reduce(function (uniqueCaps, currCap) {
-
         var isRepeated = uniqueCaps.some(function (cap) {
             return getCapabilityName(cap) === getCapabilityName(currCap);
         });
@@ -133,7 +131,6 @@ function compareCapabilities (firstCap, secondCap) {
  * @return {Object} A list with 'uap'-prefixed capabilities
  */
 function generateUapCapabilities (capabilities) {
-
     function hasCapabilityChange (change) {
         return /^\s*<(\w+:)?(Device)?Capability\s/.test(change.xml);
     }
@@ -157,7 +154,6 @@ function generateUapCapabilities (capabilities) {
         .filter(hasCapabilityChange)
         // ... and create a duplicate with 'uap:' prefix
         .map(createPrefixedCapabilityChange);
-
 }
 
 exports.PlatformMunger = PlatformMunger;

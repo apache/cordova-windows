@@ -93,11 +93,9 @@ function addCapabilityDeclarationToMockManifest (manifest, capability) {
 }
 
 describe('Windows 8.1 project', function () {
-
     it('should not have an HTTP or HTTPS scheme for its startup URI.', function () {
-
         // arrange
-        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { 'WindowsDefaultUriPrefix': 'http://' }, false);
+        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { WindowsDefaultUriPrefix: 'http://' }, false);
 
         // act
         applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'm2:', false);
@@ -107,9 +105,8 @@ describe('Windows 8.1 project', function () {
     });
 
     it('should not have any scheme for its startup URI.', function () {
-
         // arrange
-        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { 'WindowsDefaultUriPrefix': 'ms-appx://' }, false);
+        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { WindowsDefaultUriPrefix: 'ms-appx://' }, false);
 
         // act
         applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'm2:', false);
@@ -121,7 +118,6 @@ describe('Windows 8.1 project', function () {
 
 describe('Windows 10 project', function () {
     it('should default to ms-appx-web for its startup URI.', function () {
-
         // arrange
         var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { }, true);
 
@@ -137,9 +133,8 @@ describe('Windows 10 project', function () {
     });
 
     it('should allow ms-appx as its startup URI, and it gets removed from the final output.', function () {
-
         // arrange
-        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { 'WindowsDefaultUriPrefix': 'ms-appx://' }, true);
+        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('index.html', { WindowsDefaultUriPrefix: 'ms-appx://' }, true);
 
         // act
         applyStartPage(mockConfig.config, mockConfig.manifest, true);
@@ -149,9 +144,8 @@ describe('Windows 10 project', function () {
     });
 
     it('should allow an HTTP or HTTPS scheme for its startup URI.', function () {
-
         // arrange
-        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('www.contoso.com/', { 'WindowsDefaultUriPrefix': 'http://' }, true);
+        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('www.contoso.com/', { WindowsDefaultUriPrefix: 'http://' }, true);
 
         // act
         applyStartPage(mockConfig.config, mockConfig.manifest, true);
@@ -162,11 +156,9 @@ describe('Windows 10 project', function () {
 });
 
 describe('Windows Store preference', function () {
-
     it('"WindowsStoreDisplayName" should be reflected in the manifest.', function () {
-
         // arrange
-        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('www.contoso.com/', { 'WindowsDefaultUriPrefix': 'http://', 'WindowsStoreDisplayName': 'ContosoApp' }, true);
+        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('www.contoso.com/', { WindowsDefaultUriPrefix: 'http://', WindowsStoreDisplayName: 'ContosoApp' }, true);
 
         // act
         applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'uap:', true);
@@ -176,9 +168,8 @@ describe('Windows Store preference', function () {
     });
 
     it('"WindowsStorePublisherName" should be reflected in the manifest.', function () {
-
         // arrange
-        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('www.contoso.com/', { 'WindowsDefaultUriPrefix': 'http://', 'WindowsStorePublisherName': 'Contoso Inc' }, true);
+        var mockConfig = createMockConfigAndManifestForApplyCoreProperties('www.contoso.com/', { WindowsDefaultUriPrefix: 'http://', WindowsStorePublisherName: 'Contoso Inc' }, true);
 
         // act
         applyCoreProperties(mockConfig.config, mockConfig.manifest, 'fake-path', 'uap:', true);
@@ -189,7 +180,6 @@ describe('Windows Store preference', function () {
 });
 
 describe('A Windows 10 project should warn if it supports remote mode and restricted capabilities.', function () {
-
     // arrange
     var mockConfig;
     var stringFound = false;
@@ -262,14 +252,14 @@ function createMockConfigAndManifestForApplyAccessRules (isWin10) {
         }
 
         return rules.map(function (rule) {
-            return { 'origin': rule };
+            return { origin: rule };
         });
     };
 
     config.getAllowNavigations = function () {
         if (isWin10) {
             return rules.map(function (rule) {
-                return { 'href': rule };
+                return { href: rule };
             });
         }
 
@@ -286,7 +276,6 @@ function createMockConfigAndManifestForApplyAccessRules (isWin10) {
 describe('Access rules management', function () {
     // body...
     it('A Windows 8.1 project should not have WindowsRuntimeAccess attributes in access rules.', function () {
-
         var mockConfig = createMockConfigAndManifestForApplyAccessRules(false, 'https://www.contoso.com');
 
         applyAccessRules(mockConfig.config, mockConfig.manifest);
@@ -300,11 +289,9 @@ describe('Access rules management', function () {
         var rule = accessRules.getItem(0);
         expect(rule).toBeDefined();
         expect(rule.attrib.WindowsRuntimeAccess).toBeUndefined();
-
     });
 
     it('A Windows 10 project should have WindowsRuntimeAccess attributes in access rules.', function () {
-
         var mockConfig = createMockConfigAndManifestForApplyAccessRules(true, 'https://www.contoso.com');
 
         applyNavigationWhitelist(mockConfig.config, mockConfig.manifest, true);
@@ -319,11 +306,9 @@ describe('Access rules management', function () {
         expect(rule).toBeDefined();
         expect(rule.attrib.WindowsRuntimeAccess).toBeDefined();
         expect(rule.attrib.WindowsRuntimeAccess).toBe('all');
-
     });
 
     describe('A Windows 8.1 project should reject http:// URI scheme rules.', function () {
-
         var stringIndex = -1;
         var searchStr = 'Access rules must begin with "https://", the following rule will be ignored: ';
 
@@ -342,7 +327,6 @@ describe('Access rules management', function () {
     });
 
     describe('A Windows 10 project should accept http:// URI access rules.', function () {
-
         var stringIndex = -1;
         var searchStr = 'The following navigation rule had an invalid URI scheme and is ignored:';
         beforeEach(function () {
@@ -361,7 +345,6 @@ describe('Access rules management', function () {
 });
 
 describe('A Windows 10 project should apply the uap: namespace prefix to certain capabilities.', function () {
-
     var manifest;
 
     beforeEach(function () {

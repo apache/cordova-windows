@@ -115,7 +115,7 @@ describe('run method', function () {
         utils.isCordovaProject.and.returnValue(false);
         createFindAllAvailableVersionsMock([{ version: '14.0', buildProject: buildSpy, path: testPath }]);
 
-        return build.run([ 'node', buildPath, '--release', '--debug' ]).then(
+        return build.run(['node', buildPath, '--release', '--debug']).then(
             () => fail('Expected promise to be rejected'),
             () => expect(buildSpy).not.toHaveBeenCalled()
         );
@@ -137,12 +137,11 @@ describe('run method', function () {
         createFindAvailableVersionMock('14.0', testPath, buildSpy);
 
         expect(function () {
-            build.run({ argv: [ '--phone', '--win' ] });
+            build.run({ argv: ['--phone', '--win'] });
         }).toThrow();
     });
 
     it('should respect build configuration from \'buildConfig\' option', function () {
-
         createFindAllAvailableVersionsMock([{ version: '14.0', buildProject: jasmine.createSpy(), path: testPath }]);
         var buildConfigPath = path.resolve(__dirname, 'fixtures/fakeBuildConfig.json');
 
@@ -182,7 +181,7 @@ describe('run method', function () {
 
         createFindAllAvailableVersionsMock([{ version: '14.0', buildProject: buildSpy, path: testPath }]);
 
-        return build.run([ 'node', buildPath ])
+        return build.run(['node', buildPath])
             .finally(function () {
                 expect(buildSpy).toHaveBeenCalled();
             });
@@ -422,7 +421,6 @@ describe('run method', function () {
 });
 
 describe('buildFlags', function () {
-
     describe('parseAndValidateArgs method', function () {
         var parseAndValidateArgs;
         var readFileSync;
@@ -441,7 +439,7 @@ describe('buildFlags', function () {
                 argv: ['--buildFlag', 'foo=bar', '--buildFlag', 'bar=baz', '--buildConfig', 'buildConfig.json']
             };
 
-            expect(parseAndValidateArgs(buildOptions).buildFlags).toEqual([ 'baz="quux"', 'foo=bar', 'bar=baz' ]);
+            expect(parseAndValidateArgs(buildOptions).buildFlags).toEqual(['baz="quux"', 'foo=bar', 'bar=baz']);
         });
     });
 
@@ -472,7 +470,7 @@ describe('buildFlags', function () {
                 .then(() => {
                     // CB-12416 AppxBundle=Never is present because we are not building a bundle
                     expect(buildTools.buildProject).toHaveBeenCalledWith(jasmine.any(String),
-                        jasmine.any(String), jasmine.any(String), [ 'foo=bar', '/p:AppxBundle=Never' ]);
+                        jasmine.any(String), jasmine.any(String), ['foo=bar', '/p:AppxBundle=Never']);
                 });
         });
     });

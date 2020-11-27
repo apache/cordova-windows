@@ -171,7 +171,7 @@ WindowsConfigParser.prototype.getAllMinMaxUAPVersions = function () {
 
 // Returns the widget defaultLocale
 WindowsConfigParser.prototype.defaultLocale = function () {
-    return this.doc.getroot().attrib['defaultlocale'];
+    return this.doc.getroot().attrib.defaultlocale;
 };
 
 /**

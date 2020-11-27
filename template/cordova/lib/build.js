@@ -48,7 +48,6 @@ var ROOT = path.resolve(__dirname, '../..');
 // builds cordova-windows application with parameters provided.
 // See 'help' function for args list
 module.exports.run = function run (buildOptions) {
-
     ROOT = this.root || ROOT;
 
     if (!utils.isCordovaProject(this.root)) {
@@ -62,7 +61,6 @@ module.exports.run = function run (buildOptions) {
 
     return MSBuildTools.getLatestMatchingMSBuild(selectedBuildTargets) // get latest msbuild tools
         .then(function (result) {
-
             var msbuild = result[0];
             var myBuildTargets = result[1];
 
@@ -192,16 +190,16 @@ module.exports.getBuildTargets = getBuildTargets;
 function parseAndValidateArgs (options) {
     // parse and validate args
     var args = nopt({
-        'archs': [String],
-        'appx': String,
-        'phone': Boolean,
-        'win': Boolean,
-        'bundle': Boolean,
-        'packageCertificateKeyFile': String,
-        'packageThumbprint': String,
-        'publisherId': String,
-        'buildConfig': String,
-        'buildFlag': [String, Array]
+        archs: [String],
+        appx: String,
+        phone: Boolean,
+        win: Boolean,
+        bundle: Boolean,
+        packageCertificateKeyFile: String,
+        packageThumbprint: String,
+        publisherId: String,
+        buildConfig: String,
+        buildFlag: [String, Array]
     }, {}, options.argv, 0);
 
     var config = {};
@@ -327,7 +325,6 @@ function updateManifestWithPublisher (config, myBuildTargets) {
 }
 
 function buildTargets (config, myBuildTargets, msbuild) {
-
     var buildConfigs = [];
     var bundleTerms = '';
     var hasAnyCpu = false;

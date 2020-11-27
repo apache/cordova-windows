@@ -121,7 +121,7 @@ function AppDeployCmdTool (targetOsVersion) {
     DeploymentTool.call(this);
     this.targetOsVersion = targetOsVersion;
 
-    var programFilesPath = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
+    var programFilesPath = process.env['ProgramFiles(x86)'] || process.env.ProgramFiles;
     this.path = path.join(programFilesPath, 'Microsoft SDKs', 'Windows Phone', 'v' + this.targetOsVersion, 'Tools', 'AppDeploy', 'AppDeployCmd.exe');
 }
 
@@ -210,7 +210,7 @@ function WinAppDeployCmdTool (targetOsVersion) {
 
     DeploymentTool.call(this);
     this.targetOsVersion = targetOsVersion;
-    var programFilesPath = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
+    var programFilesPath = process.env['ProgramFiles(x86)'] || process.env.ProgramFiles;
     this.path = path.join(programFilesPath, 'Windows Kits', '10', 'bin', 'x86', 'WinAppDeployCmd.exe');
 }
 
