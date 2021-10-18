@@ -17,7 +17,6 @@
        under the License.
 */
 
-var Q = require('q');
 var os = require('os');
 var path = require('path');
 var shell = require('shelljs');
@@ -107,7 +106,7 @@ function getWindowsVersion () {
     return spawn('ver').then(function (output) {
         var match = /\[Version (.*)\]\s*$/.exec(output);
         return Version.fromString(match[1]);
-    }).fail(function () {
+    }).catch(function () {
         return Version.fromString(os.release());
     });
 }
@@ -122,7 +121,7 @@ function getInstalledVSVersions () {
     // Query all keys with Install value equal to 1, then filter out
     // those, which are not related to VS itself
     return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\DevDiv\\vs\\Servicing', '/s', '/v', 'Install', '/f', '1', '/d', '/e', '/reg:32'])
-        .fail(function () { return ''; })
+        .catch(function () { return ''; })
         .then(function (output) {
             return output.split('\n')
                 .reduce(function (installedVersions, line) {
@@ -139,9 +138,9 @@ function getInstalledVSVersions () {
                 .then(function (output) {
                     var updateVer = Version.fromString(/PackageVersion\s+REG_SZ\s+(.*)/i.exec(output)[1]);
                     // if update version is lover than Update2, reject the promise
-                    if (VS2013_UPDATE2_RC.gte(updateVer)) return Q.reject();
+                    if (VS2013_UPDATE2_RC.gte(updateVer)) return Promise.reject();
                     return installedVersions;
-                }).fail(function () {
+                }).catch(function () {
                     // if we got any errors on previous steps, we're assuming that
                     // required VS update is not installed.
                     installedVersions.splice(installedVersions.indexOf('12.0'), 1);
@@ -164,7 +163,7 @@ function getInstalledVSVersions () {
 function getInstalledWindowsSdks () {
     var installedSdks = [];
     return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows', '/s', '/v', 'InstallationFolder', '/reg:32'])
-        .fail(function () { return ''; })
+        .catch(function () { return ''; })
         .then(function (output) {
             var re = /\\Microsoft SDKs\\Windows\\v(\d+\.\d+)\s*InstallationFolder\s+REG_SZ\s+(.*)/gim;
             var match;
@@ -175,7 +174,7 @@ function getInstalledWindowsSdks () {
                     installedSdks.push(Version.tryParse(match[1]));
                 }
             }
-        }).thenResolve(installedSdks);
+        }).then(() => installedSdks);
 }
 
 /**
@@ -188,7 +187,7 @@ function getInstalledWindowsSdks () {
 function getInstalledPhoneSdks () {
     var installedSdks = [];
     return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows Phone\\v8.1', '/v', 'InstallationFolder', '/reg:32'])
-        .fail(function () { return ''; })
+        .catch(function () { return ''; })
         .then(function (output) {
             var match = /\\Microsoft SDKs\\Windows Phone\\v(\d+\.\d+)\s*InstallationFolder\s+REG_SZ\s+(.*)/gim.exec(output);
             if (match && shell.test('-e', path.join(match[2], 'SDKManifest.xml'))) {
@@ -196,14 +195,14 @@ function getInstalledPhoneSdks () {
             }
         }).then(function () {
             return spawn('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v10.0', '/v', 'InstallationFolder', '/reg:32']);
-        }).fail(function () {
+        }).catch(function () {
             return '';
         }).then(function (output) {
             var match = /\\Microsoft SDKs\\Windows\\v(\d+\.\d+)\s*InstallationFolder\s+REG_SZ\s+(.*)/gim.exec(output);
             if (match && shell.test('-e', path.join(match[2], 'SDKManifest.xml'))) {
                 installedSdks.push(Version.tryParse(match[1]));
             }
-        }).thenResolve(installedSdks);
+        }).then(() => installedSdks);
 }
 
 /**
@@ -245,7 +244,7 @@ function mapVSVersionToName (version) {
 var checkOS = function (windowsTargetVersion, windowsPhoneTargetVersion) {
     if (process.platform !== 'win32') {
         // Build Universal windows apps available for windows platform only, so we reject on others platforms
-        return Q.reject('Cordova tooling for Windows requires Windows OS to build project');
+        return Promise.reject('Cordova tooling for Windows requires Windows OS to build project');
     }
 
     return getWindowsVersion().then(function (actualVersion) {
@@ -256,7 +255,7 @@ var checkOS = function (windowsTargetVersion, windowsPhoneTargetVersion) {
             return mapWindowsVersionToName(actualVersion);
         }
 
-        return Q.reject('Current Windows version doesn\'t support building this project. ' +
+        return Promise.reject('Current Windows version doesn\'t support building this project. ' +
             'Consider upgrading your OS to ' + mapWindowsVersionToName(requiredOsVersion));
     });
 };
@@ -281,7 +280,7 @@ var checkMSBuild = function (windowsTargetVersion, windowsPhoneTargetVersion) {
             // console.log('appropriateVersion', appropriateVersion);
             return appropriateVersion
                 ? shortenVersion(appropriateVersion)
-                : Q.reject('MSBuild tools v.' + shortenVersion(msbuildRequiredVersion) + ' not found. ' +
+                : Promise.reject('MSBuild tools v.' + shortenVersion(msbuildRequiredVersion) + ' not found. ' +
                     'Please install Visual Studio ' + mapVSVersionToName(getMinimalRequiredVersionFor('visualstudio', windowsTargetVersion, windowsPhoneTargetVersion)) +
                     ' or higher from https://www.visualstudio.com/downloads/download-visual-studio-vs');
         });
@@ -291,14 +290,14 @@ var checkVS = function (windowsTargetVersion, windowsPhoneTargetVersion) {
     var vsRequiredVersion = getMinimalRequiredVersionFor('visualstudio', windowsTargetVersion, windowsPhoneTargetVersion);
 
     if (process.env.VSINSTALLDIR) {
-        return Q('(user-specified via VSINSTALLDIR)');
+        return Promise.resolve('(user-specified via VSINSTALLDIR)');
     }
     return getInstalledVSVersions()
         .then(function (installedVersions) {
             var appropriateVersion = getHighestAppropriateVersion(installedVersions, vsRequiredVersion);
             return appropriateVersion
                 ? shortenVersion(appropriateVersion)
-                : Q.reject('Required version of Visual Studio not found. Please install Visual Studio ' +
+                : Promise.reject('Required version of Visual Studio not found. Please install Visual Studio ' +
                     mapVSVersionToName(vsRequiredVersion) +
                     ' or higher from https://www.visualstudio.com/downloads/download-visual-studio-vs');
         });
@@ -312,7 +311,7 @@ var checkWinSdk = function (windowsTargetVersion, windowsPhoneTargetVersion) {
                 return installedSdk.eq(requiredVersion);
             });
             if (!hasSdkInstalled) {
-                return Q.reject('Windows SDK not found. Ensure that you have installed ' +
+                return Promise.reject('Windows SDK not found. Ensure that you have installed ' +
                     'Windows ' + shortenVersion(requiredVersion) + ' SDK along with Visual Studio or install ' +
                     'Windows ' + shortenVersion(requiredVersion) + ' SDK separately from ' +
                     'https://dev.windows.com/en-us/downloads');
@@ -332,10 +331,10 @@ var checkPhoneSdk = function (windowsTargetVersion, windowsPhoneTargetVersion) {
 
             return hasSdkInstalled
                 ? shortenVersion(requiredVersion)
-                : Q.reject();
+                : Promise.reject();
         })
-        .fail(function () {
-            return Q.reject('Windows Phone SDK not found. Ensure that you have installed ' +
+        .catch(function () {
+            return Promise.reject('Windows Phone SDK not found. Ensure that you have installed ' +
                 'Windows Phone ' + shortenVersion(requiredVersion) + ' SDK along with Visual Studio or install ' +
                 'Windows Phone ' + shortenVersion(requiredVersion) + ' SDK separately from ' +
                 'https://dev.windows.com/develop/download-phone-sdk');
@@ -390,15 +389,15 @@ var config = null;
 function getConfig () {
     try {
         config = config || new ConfigParser(path.join(__dirname, '../../config.xml'));
-        return Q(config);
+        return Promise.resolve(config);
     } catch (e) {
         // try again to cover case of being called from command line
         try {
             config = config || new ConfigParser(path.join(__dirname, '../../template/config.xml'));
-            return Q(config);
+            return Promise.resolve(config);
         } catch (e) {
             // yeah, really no config.xml
-            return Q.reject(new CordovaError('Can\'t check requirements for Windows platform.' +
+            return Promise.reject(new CordovaError('Can\'t check requirements for Windows platform.' +
                 'The config.xml file is either missing or malformed.'));
         }
     }
@@ -418,7 +417,7 @@ module.exports.check_all = function () {
         return promise.then(function () {
             // If fatal requirement is failed,
             // we don't need to check others
-            if (fatalIsHit) return Q();
+            if (fatalIsHit) return;
             var requirement = requirements[idx];
             return getConfig()
                 .then(function (config) {
@@ -434,7 +433,7 @@ module.exports.check_all = function () {
                         });
                 });
         });
-    }, Q())
+    }, Promise.resolve())
         .then(function () {
             // When chain is completed, return requirements array to upstream API
             return result;

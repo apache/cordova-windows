@@ -37,4 +37,7 @@ if (args.help || args.argv.remain.length === 0) {
 
 require('../template/cordova/lib/loggingHelper').adjustLoggerLevel(args);
 
-Api.updatePlatform(args.argv.remain[0]).done();
+Api.updatePlatform(args.argv.remain[0]).catch(err => {
+    console.error(err);
+    process.exit(2);
+});

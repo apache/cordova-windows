@@ -16,7 +16,6 @@
     specific language governing permissions and limitations
     under the License.
 */
-var Q = require('q');
 var fs = require('fs');
 var path = require('path');
 var rewire = require('rewire');
@@ -33,14 +32,14 @@ var MSBuildTools = require(platformRoot + '/cordova/lib/MSBuildTools');
 
 function createFindAvailableVersionMock (version, path, buildSpy) {
     build.__set__('MSBuildTools.findAvailableVersion', function () {
-        return Q.resolve({
+        return Promise.resolve({
             version: version,
             path: path,
             buildProject: function (solutionFile, buildType, buildArch) {
                 if (typeof buildSpy === 'function') {
                     buildSpy(solutionFile, buildType, buildArch);
                 }
-                return Q.reject(); // rejecting here to stop build process
+                return Promise.reject(); // rejecting here to stop build process
             }
         });
     });
@@ -48,7 +47,7 @@ function createFindAvailableVersionMock (version, path, buildSpy) {
 
 function createFindAllAvailableVersionsMock (versionSet) {
     build.__set__('MSBuildTools.findAllAvailableVersions', function () {
-        return Q.resolve(versionSet);
+        return Promise.resolve(versionSet);
     });
 }
 
@@ -92,7 +91,7 @@ describe('run method', function () {
         spyOn(utils, 'isCordovaProject').and.returnValue(true);
         spyOn(prepare, 'applyPlatformConfig');
         spyOn(prepare, 'updateBuildConfig');
-        spyOn(pkg, 'getPackage').and.returnValue(Q({}));
+        spyOn(pkg, 'getPackage').and.returnValue(Promise.resolve({}));
 
         spyOn(AppxManifest, 'get').and.returnValue({
             getIdentity: function () {
@@ -215,19 +214,19 @@ describe('run method', function () {
                     switch (buildArch) {
                     case 'arm':
                         armBuild();
-                        return Q();
+                        return Promise.resolve();
                     case 'x86':
                         x86Build();
-                        return Q();
+                        return Promise.resolve();
                     case 'anycpu':
                     case 'any cpu':
                         anyCpuBuild();
-                        return Q();
+                        return Promise.resolve();
                     case 'x64':
                         x64Build();
-                        return Q();
+                        return Promise.resolve();
                     default:
-                        return Q.reject();
+                        return Promise.reject();
                     }
                 }
             }]);
@@ -352,10 +351,10 @@ describe('run method', function () {
         delete process.env.MSBUILDDIR;
 
         spyOn(MSBuildTools, 'getMSBuildToolsAt')
-            .and.returnValue(Q({
+            .and.returnValue(Promise.resolve({
                 path: customMSBuildPath,
                 version: customMSBuildVersion,
-                buildProject: jasmine.createSpy('buildProject').and.returnValue(Q())
+                buildProject: jasmine.createSpy('buildProject').and.returnValue(Promise.resolve())
             }));
 
         return build.run({})
@@ -377,10 +376,10 @@ describe('run method', function () {
         delete process.env.VSINSTALLDIR;
 
         spyOn(MSBuildTools, 'getMSBuildToolsAt')
-            .and.returnValue(Q({
+            .and.returnValue(Promise.resolve({
                 path: msBuildBinPath,
                 version: customMSBuildVersion,
-                buildProject: jasmine.createSpy('buildProject').and.returnValue(Q())
+                buildProject: jasmine.createSpy('buildProject').and.returnValue(Promise.resolve())
             }));
 
         return build.run({})
@@ -448,7 +447,7 @@ describe('buildFlags', function () {
             spyOn(utils, 'isCordovaProject').and.returnValue(true);
             spyOn(prepare, 'applyPlatformConfig');
             spyOn(prepare, 'updateBuildConfig');
-            spyOn(pkg, 'getPackage').and.returnValue(Q({}));
+            spyOn(pkg, 'getPackage').and.returnValue(Promise.resolve({}));
 
             spyOn(AppxManifest, 'get').and.returnValue({
                 getIdentity: function () {
@@ -459,7 +458,7 @@ describe('buildFlags', function () {
         });
 
         it('should pass buildFlags directly to MSBuild', function () {
-            var buildTools = { version: '14.0', buildProject: jasmine.createSpy('buildProject').and.returnValue(Q()), path: testPath };
+            var buildTools = { version: '14.0', buildProject: jasmine.createSpy('buildProject').and.returnValue(Promise.resolve()), path: testPath };
             var buildOptions = {
                 argv: ['--buildFlag', 'foo=bar']
             };

@@ -17,7 +17,6 @@
        under the License.
 */
 
-var Q = require('q');
 var fs = require('fs');
 var path = require('path');
 var shell = require('shelljs');
@@ -31,12 +30,12 @@ var AppxManifest = require('../../template/cordova/lib/AppxManifest');
 module.exports.update = function (destinationDir, options) {
     if (!fs.existsSync(destinationDir)) {
         // if specified project path is not valid then reject promise
-        return Q.reject(new CordovaError('The given path to the project does not exist: ' + destinationDir));
+        return Promise.reject(new CordovaError('The given path to the project does not exist: ' + destinationDir));
     }
 
     var projectConfig = path.join(destinationDir, 'config.xml');
     if (!fs.existsSync(projectConfig)) {
-        return Q.reject(new CordovaError('Can\'t update project at ' + destinationDir +
+        return Promise.reject(new CordovaError('Can\'t update project at ' + destinationDir +
             '. config.xml does not exist in destination directory'));
     }
 

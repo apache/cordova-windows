@@ -17,7 +17,6 @@
        under the License.
 */
 
-var Q = require('q');
 var path = require('path');
 var nopt = require('nopt');
 var shell = require('shelljs');
@@ -51,7 +50,7 @@ module.exports.run = function run (buildOptions) {
     ROOT = this.root || ROOT;
 
     if (!utils.isCordovaProject(this.root)) {
-        return Q.reject(new CordovaError('Could not find project at ' + this.root));
+        return Promise.reject(new CordovaError('Could not find project at ' + this.root));
     }
 
     var buildConfig = parseAndValidateArgs(buildOptions);
@@ -78,7 +77,7 @@ module.exports.run = function run (buildOptions) {
             events.emit('verbose', ' BUILD OUTPUT: ' + pkg.appx);
             return pkg;
         }).catch(function (error) {
-            return Q.reject(new CordovaError('Build failed', error));
+            return Promise.reject(new CordovaError('Build failed', error));
         });
 };
 
@@ -385,7 +384,7 @@ function buildTargets (config, myBuildTargets, msbuild) {
 
             return msbuild.buildProject(path.join(ROOT, build.target), config.buildType, build.arch, otherProperties);
         });
-    }, Q());
+    }, Promise.resolve());
 
     if (shouldBundle) {
         return buildsCompleted.then(function () {
@@ -453,5 +452,5 @@ module.exports.clean = function () {
         .forEach(function (dir) {
             shell.rm('-rf', path.join(projectPath, dir));
         });
-    return Q.resolve();
+    return Promise.resolve();
 };

@@ -16,7 +16,6 @@
     specific language governing permissions and limitations
     under the License.
 */
-var Q = require('q');
 var shell = require('shelljs');
 var rewire = require('rewire');
 var platformRoot = '../../template';
@@ -33,7 +32,7 @@ describe('findAvailableVersion method', function () {
 
     var checkMSBuildVersionFake = function (availableVersions, version) {
         var MSBuildTools = buildTools.__get__('MSBuildTools');
-        return (availableVersions.indexOf(version) >= 0) ? Q.resolve(new MSBuildTools(version, fakeToolsPath(version))) : Q.resolve(null);
+        return (availableVersions.indexOf(version) >= 0) ? Promise.resolve(new MSBuildTools(version, fakeToolsPath(version))) : Promise.resolve(null);
     };
 
     var versionTest = function (availableVersions, version) {
@@ -97,7 +96,7 @@ describe('checkMSBuildVersion method', function () {
     it('spec.6 should return valid version and path', function () {
         var version = '14.0';
 
-        spawnSpy.and.returnValue(Q.resolve(
+        spawnSpy.and.returnValue(Promise.resolve(
             '\r\nHKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\12.0\r\n\t' +
             'MSBuildToolsPath\tREG_SZ\t' + fakeToolsPath(version) + '\r\n\r\n')
         );
@@ -109,7 +108,7 @@ describe('checkMSBuildVersion method', function () {
     });
 
     it('spec.7 should return null if no tools found for version', function () {
-        spawnSpy.and.returnValue(Q.resolve('ERROR: The system was unable to find the specified registry key or value.'));
+        spawnSpy.and.returnValue(Promise.resolve('ERROR: The system was unable to find the specified registry key or value.'));
 
         return checkMSBuildVersion('14.0').then(function (actual) {
             expect(actual).not.toBeDefined();
@@ -117,7 +116,7 @@ describe('checkMSBuildVersion method', function () {
     });
 
     it('spec.8 should return null on internal error', function () {
-        spawnSpy.and.returnValue(Q.reject());
+        spawnSpy.and.returnValue(Promise.reject());
 
         return checkMSBuildVersion('14.0').then(function (actual) {
             expect(actual).not.toBeDefined();
@@ -208,7 +207,7 @@ describe('getMSBuildToolsAt method', function () {
     });
 
     it('should return MSBuildTools instance', function () {
-        spawnSpy.and.returnValue(Q(fakeVersion));
+        spawnSpy.and.returnValue(Promise.resolve(fakeVersion));
 
         return buildTools.getMSBuildToolsAt(fakePath)
             .then(function (tools) {
@@ -219,7 +218,7 @@ describe('getMSBuildToolsAt method', function () {
     });
 
     it('should reject promise if no msbuild found', function () {
-        spawnSpy.and.returnValue(Q.reject());
+        spawnSpy.and.returnValue(Promise.reject());
 
         return buildTools.getMSBuildToolsAt(messyPath).then(
             () => fail('Expected promise to be rejected'),

@@ -25,7 +25,7 @@ var check_reqs = require('./lib/check_reqs');
 if (['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(process.argv[2]) > -1) {
     check_reqs.help();
 } else {
-    check_reqs.run().done(function success (msbuild) {
+    check_reqs.run().then(function success (msbuild) {
         console.log('Environment is supported; found MSBuild Tools version ' + msbuild.version + ' at ' + msbuild.path);
     }, function (err) {
         console.error('Environment is not supported: ' + err);

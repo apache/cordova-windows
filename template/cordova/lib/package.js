@@ -17,7 +17,6 @@
        under the License.
 */
 
-var Q = require('q');
 var fs = require('fs');
 var path = require('path');
 var utils = require('./utils');
@@ -32,7 +31,7 @@ module.exports.getPackage = function (projectType, buildtype, buildArch) {
     var appPackages = path.resolve(path.join(__dirname, '..', '..', 'AppPackages'));
     // reject promise if AppPackages folder doesn't exist
     if (!fs.existsSync(appPackages)) {
-        return Q.reject('AppPackages folder doesn\'t exist');
+        return Promise.reject('AppPackages folder doesn\'t exist');
     }
     // find out and resolve paths for all folders inside AppPackages
     var pkgDirs = fs.readdirSync(appPackages).map(function (relative) {
@@ -62,13 +61,13 @@ module.exports.getPackage = function (projectType, buildtype, buildArch) {
                 (pkgInfo.archs && pkgInfo.archs.indexOf(buildArch) > -1))) {
                 // if package's properties match properties provided
                 // resolve the promise with this package's info
-                return Q.resolve(pkgInfo);
+                return Promise.resolve(pkgInfo);
             }
         }
     }
 
     // reject because seems that no corresponding packages found
-    return Q.reject('Package with specified parameters not found in AppPackages folder');
+    return Promise.reject('Package with specified parameters not found in AppPackages folder');
 };
 
 function getPackagePhoneProductId (packageFile) {
@@ -117,10 +116,10 @@ function getPackageName (platformPath) {
     // because the function is only used for desktop deployment, which always has the same
     // package name when uninstalling / reinstalling
     try {
-        return Q.when(AppxManifest.get(path.join(platformPath, 'package.windows.appxmanifest'))
+        return Promise.resolve(AppxManifest.get(path.join(platformPath, 'package.windows.appxmanifest'))
             .getIdentity().getName());
     } catch (e) {
-        return Q.reject('Can\'t read package name from manifest ' + e);
+        return Promise.reject('Can\'t read package name from manifest ' + e);
     }
 }
 
@@ -140,11 +139,11 @@ module.exports.findDevice = function (deploymentTool, target) {
             for (var idx in sortedList) {
                 if (sortedList[idx].toString().toLowerCase().indexOf(target) > -1) {
                     // we should return index based on original list
-                    return Q.resolve(sortedList[idx]);
+                    return Promise.resolve(sortedList[idx]);
                 }
             }
         } else if (target === 'device') {
-            return Q.resolve(deviceList[0]);
+            return Promise.resolve(deviceList[0]);
         } else {
             var candidateList = deviceList.filter(function (device) {
                 if (device.index === parseInt(target, 10)) {
@@ -160,7 +159,7 @@ module.exports.findDevice = function (deploymentTool, target) {
                 return candidateList[0];
             }
         }
-        return Q.reject('Specified device not found');
+        return Promise.reject('Specified device not found');
     });
 };
 
@@ -184,7 +183,7 @@ function uninstallAppFromPhone (appDeployUtils, pkg, target) {
 module.exports.deployToPhone = function (pkg, deployTarget, targetWindows10, deploymentTool) {
     var deployment;
     if (deploymentTool) {
-        deployment = Q(deploymentTool);
+        deployment = Promise.resolve(deploymentTool);
     } else {
         deployment = utils.getAppDeployUtils(targetWindows10);
     }
@@ -216,7 +215,7 @@ module.exports.deployToPhone = function (pkg, deployTarget, targetWindows10, dep
 // deploys specified package to desktop
 module.exports.deployToDesktop = function (pkg, deployTarget) {
     if (deployTarget !== 'device' && deployTarget !== 'emulator') {
-        return Q.reject('Deploying desktop apps to specific target not supported');
+        return Promise.reject('Deploying desktop apps to specific target not supported');
     }
 
     return utils.getAppStoreUtils().then(function (appStoreUtils) {

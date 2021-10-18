@@ -17,7 +17,6 @@
        under the License.
 */
 
-var Q = require('q');
 var fs = require('fs');
 var path = require('path');
 var shell = require('shelljs');
@@ -29,11 +28,11 @@ var pkg = require('../../package');
 
 // Creates cordova-windows project at specified path with specified namespace, app name and GUID
 module.exports.create = function (destinationDir, config, options) {
-    if (!destinationDir) return Q.reject('No destination directory specified.');
+    if (!destinationDir) return Promise.reject('No destination directory specified.');
 
     var projectPath = path.resolve(destinationDir);
     if (fs.existsSync(projectPath)) {
-        return Q.reject(new CordovaError('Project directory already exists:\n\t' + projectPath));
+        return Promise.reject(new CordovaError('Project directory already exists:\n\t' + projectPath));
     }
 
     // Set parameters/defaults for create
@@ -120,7 +119,7 @@ module.exports.create = function (destinationDir, config, options) {
     });
 
     events.emit('log', 'Windows project created with ' + pkg.name + '@' + pkg.version);
-    return Q.resolve();
+    return Promise.resolve();
 };
 
 function recursiveCreateDirectory (targetPath, previousPath) {

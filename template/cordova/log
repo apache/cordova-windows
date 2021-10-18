@@ -20,11 +20,10 @@
 */
 
 var log = require('./lib/log');
-var Q = require('q');
 var args = process.argv;
 
 // Usage support for when args are given
-Q().then(function () {
+Promise.resolve().then(function () {
     var argsToPass = [];
     if (args.length > 2) {
         argsToPass = args.slice(2);
