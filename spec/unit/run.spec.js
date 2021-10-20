@@ -17,7 +17,6 @@
     under the License.
 */
 
-var Q = require('q');
 var path = require('path');
 var rewire = require('rewire');
 var platformRoot = '../../template';
@@ -74,7 +73,7 @@ describe('run method', function () {
         run.__set__('utils.isCordovaProject', isCordovaProjectFalse);
         run.__set__('build.run', function () {
             buildRun();
-            return Q.reject(); // rejecting to break run chain
+            return Promise.reject(); // rejecting to break run chain
         });
 
         return run.run(['node', buildPath]).then(
@@ -89,7 +88,7 @@ describe('run method', function () {
         run.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         run.__set__('build.run', function () {
             buildRun();
-            return Q.reject(); // rejecting to break run chain
+            return Promise.reject(); // rejecting to break run chain
         });
 
         return run.run({ release: true, debug: true }).then(
@@ -104,7 +103,7 @@ describe('run method', function () {
         run.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         run.__set__('build.run', function () {
             buildRun();
-            return Q.reject(); // rejecting to break run chain
+            return Promise.reject(); // rejecting to break run chain
         });
 
         return run.run({ device: true, emulator: true }).then(
@@ -119,7 +118,7 @@ describe('run method', function () {
         run.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         run.__set__('build.run', function () {
             buildRun();
-            return Q.reject(); // rejecting to break run chain
+            return Promise.reject(); // rejecting to break run chain
         });
 
         return run.run({ device: true, target: 'sometargethere' }).then(
@@ -145,21 +144,21 @@ describe('run method', function () {
                 script: 'testfile.ps1',
                 phoneId: 'undefined'
             };
-            return Q(buildResult);
+            return Promise.resolve(buildResult);
         });
         run.__set__('packages.getPackage', function () {
-            return Q({
+            return Promise.resolve({
                 type: 'phone',
                 file: 'testfile'
             });
         });
         run.__set__('packages.deployToPhone', function () {
             deployToPhone();
-            return Q();
+            return Promise.resolve();
         });
         run.__set__('packages.deployToDesktop', function () {
             deployToDesktop();
-            return Q();
+            return Promise.resolve();
         });
 
         return run.run(['node', buildPath, '--phone', '--break'])
@@ -187,21 +186,21 @@ describe('run method', function () {
                 script: 'testfile.ps1',
                 phoneId: 'undefined'
             };
-            return Q(buildResult);
+            return Promise.resolve(buildResult);
         });
         run.__set__('packages.getPackage', function () {
-            return Q({
+            return Promise.resolve({
                 type: 'windows',
                 file: 'testfile'
             });
         });
         run.__set__('packages.deployToPhone', function () {
             deployToPhone();
-            return Q();
+            return Promise.resolve();
         });
         run.__set__('packages.deployToDesktop', function () {
             deployToDesktop();
-            return Q();
+            return Promise.resolve();
         });
 
         return run.run(['node', buildPath])
@@ -219,17 +218,17 @@ describe('run method', function () {
         run.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         run.__set__('build.run', function () {
             build();
-            return Q.reject(); // rejecting to break run chain
+            return Promise.reject(); // rejecting to break run chain
         });
         run.__set__('packages.getPackage', function () {
-            return Q({
+            return Promise.resolve({
                 type: 'windows',
                 file: 'testfile'
             });
         });
         run.__set__('packages.deployToDesktop', function () {
             deployToDesktop();
-            return Q();
+            return Promise.resolve();
         });
 
         return run.run({ nobuild: true })
@@ -241,8 +240,8 @@ describe('run method', function () {
 
     it('spec.8 should accept --archs parameter either as cli or as platform arg', function () {
         spyOn(utils, 'isCordovaProject').and.returnValue(true);
-        spyOn(packages, 'getPackage').and.returnValue(Q({ arch: 'arm' }));
-        spyOn(packages, 'deployToDesktop').and.returnValue(Q());
+        spyOn(packages, 'getPackage').and.returnValue(Promise.resolve({ arch: 'arm' }));
+        spyOn(packages, 'deployToDesktop').and.returnValue(Promise.resolve());
 
         var anyString = jasmine.any(String);
         var expectedDeployOptions = jasmine.objectContaining({ arch: 'arm' });
@@ -263,8 +262,8 @@ describe('run method', function () {
 
     it('spec.9 should fall back to anycpu if --archs parameter is not specified', function () {
         spyOn(utils, 'isCordovaProject').and.returnValue(true);
-        spyOn(packages, 'getPackage').and.returnValue(Q({ arch: 'anycpu' }));
-        spyOn(packages, 'deployToDesktop').and.returnValue(Q());
+        spyOn(packages, 'getPackage').and.returnValue(Promise.resolve({ arch: 'anycpu' }));
+        spyOn(packages, 'deployToDesktop').and.returnValue(Promise.resolve());
 
         var anyString = jasmine.any(String);
         var expectedDeployOptions = jasmine.objectContaining({ arch: 'anycpu' });

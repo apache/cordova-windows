@@ -17,7 +17,6 @@
        under the License.
 */
 
-var Q = require('q');
 var path = require('path');
 var shell = require('shelljs');
 
@@ -29,5 +28,5 @@ module.exports.run = function (argv) {
     ['AppPackages', 'build'].forEach(function (dir) {
         shell.rm('-rf', path.join(projectPath, dir));
     });
-    return Q.resolve();
+    return Promise.resolve();
 };

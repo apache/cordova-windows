@@ -79,4 +79,7 @@ runOpts.argv = runOpts.argv.original;
 
 require('./lib/loggingHelper').adjustLoggerLevel(runOpts);
 
-new Api().run(runOpts).done();
+new Api().run(runOpts).catch(err => {
+    console.error(err);
+    process.exit(2);
+});

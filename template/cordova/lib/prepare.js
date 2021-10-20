@@ -17,7 +17,6 @@
        under the License.
 */
 
-var Q = require('q');
 var fs = require('fs');
 var path = require('path');
 var shell = require('shelljs');
@@ -606,7 +605,7 @@ module.exports.prepare = function (cordovaProject, options) {
     AppxManifest.purgeCache();
 
     // Update own www dir with project's www assets and plugins' assets and js-files
-    return Q.when(updateWww(cordovaProject, this.locations))
+    return Promise.resolve(updateWww(cordovaProject, this.locations))
         .then(function () {
             // update project according to config.xml changes.
             return updateProjectAccordingTo(self._config, self.locations);
@@ -636,13 +635,13 @@ module.exports.clean = function (options) {
     var projectConfigFile = path.join(projectRoot, 'config.xml');
     if ((options && options.noPrepare) || !fs.existsSync(projectConfigFile) ||
             !fs.existsSync(this.locations.configXml)) {
-        return Q();
+        return Promise.resolve();
     }
 
     var projectConfig = new ConfigParser(this.locations.configXml);
 
     var self = this;
-    return Q().then(function () {
+    return Promise.resolve().then(function () {
         cleanWww(projectRoot, self.locations);
         cleanImages(projectRoot, projectConfig, self.locations);
     });

@@ -17,7 +17,6 @@
        under the License.
 */
 
-var Q = require('q');
 var path = require('path');
 var fs = require('fs');
 var shell = require('shelljs');
@@ -116,7 +115,7 @@ function findAllAvailableVersionsFallBack () {
     var versions = ['15.9', '15.5', '15.0', '14.0', '12.0', '4.0'];
     events.emit('verbose', 'Searching for available MSBuild versions...');
 
-    return Q.all(versions.map(checkMSBuildVersion)).then(function (unprocessedResults) {
+    return Promise.all(versions.map(checkMSBuildVersion)).then(function (unprocessedResults) {
         return unprocessedResults.filter(function (item) {
             return !!item;
         });
@@ -128,12 +127,12 @@ function findAllAvailableVersionsFallBack () {
 module.exports.findAvailableVersion = function () {
     var versions = ['15.5', '15.0', '14.0', '12.0', '4.0'];
 
-    return Q.all(versions.map(checkMSBuildVersion)).then(function (versions) {
+    return Promise.all(versions.map(checkMSBuildVersion)).then(function (versions) {
         // console.log('findAvailableVersion', versions);
         // select first msbuild version available, and resolve promise with it
         var msbuildTools = versions[0] || versions[1] || versions[2] || versions[3] || versions[4];
 
-        return msbuildTools ? Q.resolve(msbuildTools) : Q.reject('MSBuild tools not found');
+        return msbuildTools ? Promise.resolve(msbuildTools) : Promise.reject('MSBuild tools not found');
     });
 };
 

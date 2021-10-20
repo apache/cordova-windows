@@ -17,7 +17,6 @@
        under the License.
 */
 
-var Q = require('q');
 var nopt = require('nopt');
 var build = require('./build');
 var utils = require('./utils');
@@ -28,13 +27,13 @@ var events = require('cordova-common').events;
 
 module.exports.run = function (options) {
     if (!utils.isCordovaProject(this.root)) {
-        return Q.reject(new CordovaError('Could not find project at ' + this.root));
+        return Promise.reject(new CordovaError('Could not find project at ' + this.root));
     }
 
     // Check if ran from admin prompt and fail quickly if CLI has administrative permissions
     // http://stackoverflow.com/a/11995662/64949
     if (ranWithElevatedPermissions()) {
-        return Q.reject(new CordovaError('Can not run this platform with administrative ' +
+        return Promise.reject(new CordovaError('Can not run this platform with administrative ' +
             'permissions. Must be run from a non-admin prompt.'));
     }
 
@@ -49,13 +48,13 @@ module.exports.run = function (options) {
 
     // Validate args
     if (options.debug && options.release) {
-        return Q.reject(new CordovaError('Only one of "debug"/"release" options should be specified'));
+        return Promise.reject(new CordovaError('Only one of "debug"/"release" options should be specified'));
     }
     if ((options.device && options.emulator) || ((options.device || options.emulator) && options.target)) {
-        return Q.reject(new CordovaError('Only one of "device"/"emulator"/"target" options should be specified'));
+        return Promise.reject(new CordovaError('Only one of "device"/"emulator"/"target" options should be specified'));
     }
     if (args.phone && args.win) {
-        return Q.reject(new CordovaError('Only one of "phone"/"win" options should be specified'));
+        return Promise.reject(new CordovaError('Only one of "phone"/"win" options should be specified'));
     }
 
     // Get build/deploy options
@@ -71,7 +70,7 @@ module.exports.run = function (options) {
     var buildTargets = build.getBuildTargets(args.win, args.phone, args.appx);
 
     if (!buildTargets || buildTargets.length <= 0) {
-        return Q.reject(new CordovaError('Unable to determine deploy target.'));
+        return Promise.reject(new CordovaError('Unable to determine deploy target.'));
     }
 
     // we deploy the first build target so we use buildTargets[0] to determine
@@ -90,7 +89,7 @@ module.exports.run = function (options) {
                 return packages.deployToPhone(pkg, deployTarget, args.win10tools)
                     .catch(function (e) {
                         if (options.target || options.emulator || options.device) {
-                            return Q.reject(e); // Explicit target, carry on
+                            return Promise.reject(e); // Explicit target, carry on
                         }
                         // 'device' was inferred initially, because no target was specified
                         return packages.deployToPhone(pkg, 'emulator', args.win10tools);

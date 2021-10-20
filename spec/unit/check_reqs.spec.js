@@ -17,7 +17,6 @@
     under the License.
 */
 
-var Q = require('q');
 var path = require('path');
 var rewire = require('rewire');
 var binPath = '../../bin';
@@ -74,9 +73,9 @@ describe('check_reqs module', function () {
 
             checkSpy = jasmine.createSpy('checkSpy');
             fakeCheckFns = [
-                checkSpy.and.returnValue(Q('1.0')),
-                checkSpy.and.returnValue(Q('2.0')),
-                checkSpy.and.returnValue(Q('3.0'))
+                checkSpy.and.returnValue(Promise.resolve('1.0')),
+                checkSpy.and.returnValue(Promise.resolve('2.0')),
+                checkSpy.and.returnValue(Promise.resolve('3.0'))
             ];
             spyOn(xml, 'parseElementtreeSync').and.returnValue(new et.ElementTree(et.XML(TEST_XML)));
             fakeConfig = new ConfigParser('/some/file');
@@ -92,9 +91,7 @@ describe('check_reqs module', function () {
             check_reqs.__set__('requirements', fakeRequirements);
             check_reqs.__set__('checkFns', fakeCheckFns);
             check_reqs.__set__('config', fakeConfig);
-            var checkResult = check_reqs.check_all();
-            expect(Q.isPromise(checkResult)).toBeTruthy();
-            return checkResult.then(function (result) {
+            return check_reqs.check_all().then(function (result) {
                 expect(result instanceof Array).toBeTruthy();
                 expect(result.length).toBe(3);
                 result.forEach(function (resultItem) {
@@ -106,7 +103,7 @@ describe('check_reqs module', function () {
 
         it('Test #003 : that should not reject if one of requirements is not installed', function () {
             check_reqs.__set__('requirements', fakeRequirements);
-            fakeCheckFns[0] = function () { return Q.reject('Error message'); };
+            fakeCheckFns[0] = function () { return Promise.reject('Error message'); };
             check_reqs.__set__('checkFns', fakeCheckFns);
             check_reqs.__set__('config', fakeConfig);
 
@@ -132,7 +129,7 @@ describe('check_reqs module', function () {
         it('Test #005 : that should not run other requirements checks if `fatal` requirement isn\'t installed', function () {
             check_reqs.__set__('requirements', fakeRequirements);
             // The second requirement is fatal, so we're setting up second check to fail
-            fakeCheckFns[1] = checkSpy.and.returnValue(Q.reject('Error message'));
+            fakeCheckFns[1] = checkSpy.and.returnValue(Promise.reject('Error message'));
             check_reqs.__set__('checkFns', fakeCheckFns);
             check_reqs.__set__('config', fakeConfig);
 
