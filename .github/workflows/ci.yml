@@ -27,8 +27,8 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 14.x, 16.x]
-        os: [windows-latest]
+        node-version: [14.x]
+        os: [windows-2016]
 
     steps:
       - uses: actions/checkout@v2
@@ -37,11 +37,15 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+          
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.3
 
       - name: Environment Information
         run: |
           node --version
           npm --version
+          msbuild -version
 
       - name: npm install and test
         run: |
