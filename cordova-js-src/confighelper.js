@@ -25,7 +25,7 @@ var utils = require('cordova/utils');
 
 var isPhone = (cordova.platformId === 'windows') && WinJS.Utilities.isPhone;
 var isWin10UWP = navigator.appVersion.indexOf('MSAppHost/3.0') !== -1;
-var splashScreenTagName = isWin10UWP ? 'SplashScreen' : (isPhone ? 'm3:SplashScreen' : 'm2:SplashScreen');
+var splashScreenTagName = isWin10UWP ? "uap:SplashScreen" : (isPhone ? "m3:SplashScreen" : "m2:SplashScreen");
 
 function XmlFile (text) {
     this.text = text;
