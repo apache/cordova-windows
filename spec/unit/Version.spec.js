@@ -20,7 +20,6 @@
 var Version = require('../../template/cordova/lib/Version.js');
 
 describe('Version constructor', function () {
-
     it('Test #000 : should behave correctly', function () {
         var v1 = new Version(1);
         expect(v1.major).toBe(1);
@@ -46,7 +45,6 @@ describe('Version constructor', function () {
 });
 
 describe('Version parse functions work as expected.', function () {
-
     it('Test #001 : should behave correctly', function () {
         var version = Version.fromString('1.2.4.7');
         expect(version.major).toBe(1);

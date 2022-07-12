@@ -17,7 +17,6 @@
        under the License.
 */
 
-var Q = require('q');
 var fs = require('fs');
 var path = require('path');
 var spawn = require('cordova-common').superspawn.spawn;
@@ -44,7 +43,7 @@ DeploymentTool.prototype.isAvailable = function () {
  *    specific to the deployment tool which created them and are likely used internally.
  */
 DeploymentTool.prototype.enumerateDevices = function () {
-    return Q.reject('May not use DeploymentTool directly, instead get an instance from DeploymentTool.getDeploymentTool()');
+    return Promise.reject('May not use DeploymentTool directly, instead get an instance from DeploymentTool.getDeploymentTool()');
 };
 
 /**
@@ -57,7 +56,7 @@ DeploymentTool.prototype.enumerateDevices = function () {
  * @pin Optionally provided if the device requires pairing for deployment.
  */
 DeploymentTool.prototype.installAppPackage = function (pathToAppxPackage, targetDevice, shouldLaunch, shouldUpdate, pin) {
-    return Q.reject('May not use DeploymentTool directly, instead get an instance from DeploymentTool.getDeploymentTool()');
+    return Promise.reject('May not use DeploymentTool directly, instead get an instance from DeploymentTool.getDeploymentTool()');
 };
 
 /**
@@ -67,7 +66,7 @@ DeploymentTool.prototype.installAppPackage = function (pathToAppxPackage, target
  * @param targetDevice An object returned from a successful call to enumerateDevices.
  */
 DeploymentTool.prototype.uninstallAppPackage = function (packageInfo, targetDevice) {
-    return Q.reject('Unable to uninstall any app packages because that feature is not supported.');
+    return Promise.reject('Unable to uninstall any app packages because that feature is not supported.');
 };
 
 /**
@@ -77,7 +76,7 @@ DeploymentTool.prototype.uninstallAppPackage = function (packageInfo, targetDevi
  * @returns A Promise for an array of app names.
  */
 DeploymentTool.prototype.getInstalledApps = function (targetDevice) {
-    return Q.reject('Unable to get installed apps because that feature is not supported.');
+    return Promise.reject('Unable to get installed apps because that feature is not supported.');
 };
 
 /**
@@ -87,7 +86,7 @@ DeploymentTool.prototype.getInstalledApps = function (targetDevice) {
  * @returns A Promise for when the app is launched.
  */
 DeploymentTool.prototype.launchApp = function (packageInfo, targetDevice) {
-    return Q.reject('Unable to launch an app because that feature is not supported.');
+    return Promise.reject('Unable to launch an app because that feature is not supported.');
 };
 
 /**
@@ -121,7 +120,7 @@ function AppDeployCmdTool (targetOsVersion) {
     DeploymentTool.call(this);
     this.targetOsVersion = targetOsVersion;
 
-    var programFilesPath = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
+    var programFilesPath = process.env['ProgramFiles(x86)'] || process.env.ProgramFiles;
     this.path = path.join(programFilesPath, 'Microsoft SDKs', 'Windows Phone', 'v' + this.targetOsVersion, 'Tools', 'AppDeploy', 'AppDeployCmd.exe');
 }
 
@@ -210,7 +209,7 @@ function WinAppDeployCmdTool (targetOsVersion) {
 
     DeploymentTool.call(this);
     this.targetOsVersion = targetOsVersion;
-    var programFilesPath = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
+    var programFilesPath = process.env['ProgramFiles(x86)'] || process.env.ProgramFiles;
     this.path = path.join(programFilesPath, 'Windows Kits', '10', 'bin', 'x86', 'WinAppDeployCmd.exe');
 }
 

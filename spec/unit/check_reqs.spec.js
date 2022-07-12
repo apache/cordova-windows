@@ -17,7 +17,6 @@
     under the License.
 */
 
-var Q = require('q');
 var path = require('path');
 var rewire = require('rewire');
 var binPath = '../../bin';
@@ -28,7 +27,6 @@ var ConfigParser = require('../../template/cordova/lib/ConfigParser');
 var check_reqs = rewire(path.join(binPath, 'lib/check_reqs.js'));
 
 describe('check_reqs module', function () {
-
     describe('has Requirement object', function () {
         var Requirement;
         beforeEach(function () {
@@ -75,9 +73,9 @@ describe('check_reqs module', function () {
 
             checkSpy = jasmine.createSpy('checkSpy');
             fakeCheckFns = [
-                checkSpy.and.returnValue(Q('1.0')),
-                checkSpy.and.returnValue(Q('2.0')),
-                checkSpy.and.returnValue(Q('3.0'))
+                checkSpy.and.returnValue(Promise.resolve('1.0')),
+                checkSpy.and.returnValue(Promise.resolve('2.0')),
+                checkSpy.and.returnValue(Promise.resolve('3.0'))
             ];
             spyOn(xml, 'parseElementtreeSync').and.returnValue(new et.ElementTree(et.XML(TEST_XML)));
             fakeConfig = new ConfigParser('/some/file');
@@ -89,77 +87,58 @@ describe('check_reqs module', function () {
             check_reqs.__set__('config', originalconfig);
         });
 
-        it('Test #002 : that should return a promise, fulfilled with an array of Requirements', function (done) {
+        it('Test #002 : that should return a promise, fulfilled with an array of Requirements', function () {
             check_reqs.__set__('requirements', fakeRequirements);
             check_reqs.__set__('checkFns', fakeCheckFns);
             check_reqs.__set__('config', fakeConfig);
-            var checkResult = check_reqs.check_all();
-            expect(Q.isPromise(checkResult)).toBeTruthy();
-            checkResult.then(function (result) {
+            return check_reqs.check_all().then(function (result) {
                 expect(result instanceof Array).toBeTruthy();
                 expect(result.length).toBe(3);
                 result.forEach(function (resultItem) {
                     expect(resultItem instanceof Requirement).toBeTruthy();
                     expect(resultItem.installed).toBeTruthy();
                 });
-                done();
             });
         });
 
-        it('Test #003 : that should not reject if one of requirements is not installed', function (done) {
+        it('Test #003 : that should not reject if one of requirements is not installed', function () {
             check_reqs.__set__('requirements', fakeRequirements);
-            fakeCheckFns[0] = function () { return Q.reject('Error message'); };
+            fakeCheckFns[0] = function () { return Promise.reject('Error message'); };
             check_reqs.__set__('checkFns', fakeCheckFns);
             check_reqs.__set__('config', fakeConfig);
 
-            check_reqs.check_all()
+            return check_reqs.check_all()
                 .then(function (requirements) {
                     expect(requirements.length).toBe(3);
                     expect(requirements[0].installed).toBeFalsy();
-                    done();
-                })
-                .catch(function (error) {
-                    expect(error).not.toBeDefined();
-                    done();
                 });
         });
 
-        it('Test #004 : that should reject if one of checks has internal erorrs', function (done) {
+        it('Test #004 : that should reject if one of checks has internal erorrs', function () {
             check_reqs.__set__('requirements', fakeRequirements);
             fakeCheckFns[0] = checkSpy.and.throwError('Fatal error');
             check_reqs.__set__('checkFns', fakeCheckFns);
             check_reqs.__set__('config', fakeConfig);
 
-            check_reqs.check_all()
-                .then(function (requirements) {
-                    expect(requirements).not.toBeDefined();
-                    done();
-                })
-                .catch(function (error) {
-                    expect(error).toMatch('Fatal error');
-                    done();
-                });
+            return check_reqs.check_all().then(
+                () => fail('Expected promise to be rejected'),
+                error => expect(error).toMatch('Fatal error')
+            );
         });
 
-        it('Test #005 : that should not run other requirements checks if `fatal` requirement isn\'t installed', function (done) {
+        it('Test #005 : that should not run other requirements checks if `fatal` requirement isn\'t installed', function () {
             check_reqs.__set__('requirements', fakeRequirements);
             // The second requirement is fatal, so we're setting up second check to fail
-            fakeCheckFns[1] = checkSpy.and.returnValue(Q.reject('Error message'));
+            fakeCheckFns[1] = checkSpy.and.returnValue(Promise.reject('Error message'));
             check_reqs.__set__('checkFns', fakeCheckFns);
             check_reqs.__set__('config', fakeConfig);
 
-            check_reqs.check_all()
+            return check_reqs.check_all()
                 .then(function (requirements) {
                     expect(requirements.length).toBe(2);
                     expect(requirements[1].isFatal).toBeTruthy();
                     expect(checkSpy.calls.count()).toBe(2);
-                    done();
-                })
-                .catch(function (error) {
-                    expect(error).not.toBeDefined();
-                    done();
                 });
         });
     });
-
 });

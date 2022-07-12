@@ -17,7 +17,6 @@
        under the License.
 */
 
-var Q = require('q');
 var path = require('path');
 var nopt = require('nopt');
 var shell = require('shelljs');
@@ -48,11 +47,10 @@ var ROOT = path.resolve(__dirname, '../..');
 // builds cordova-windows application with parameters provided.
 // See 'help' function for args list
 module.exports.run = function run (buildOptions) {
-
     ROOT = this.root || ROOT;
 
     if (!utils.isCordovaProject(this.root)) {
-        return Q.reject(new CordovaError('Could not find project at ' + this.root));
+        return Promise.reject(new CordovaError('Could not find project at ' + this.root));
     }
 
     var buildConfig = parseAndValidateArgs(buildOptions);
@@ -62,7 +60,6 @@ module.exports.run = function run (buildOptions) {
 
     return MSBuildTools.getLatestMatchingMSBuild(selectedBuildTargets) // get latest msbuild tools
         .then(function (result) {
-
             var msbuild = result[0];
             var myBuildTargets = result[1];
 
@@ -80,7 +77,7 @@ module.exports.run = function run (buildOptions) {
             events.emit('verbose', ' BUILD OUTPUT: ' + pkg.appx);
             return pkg;
         }).catch(function (error) {
-            return Q.reject(new CordovaError('Build failed', error));
+            return Promise.reject(new CordovaError('Build failed', error));
         });
 };
 
@@ -192,16 +189,16 @@ module.exports.getBuildTargets = getBuildTargets;
 function parseAndValidateArgs (options) {
     // parse and validate args
     var args = nopt({
-        'archs': [String],
-        'appx': String,
-        'phone': Boolean,
-        'win': Boolean,
-        'bundle': Boolean,
-        'packageCertificateKeyFile': String,
-        'packageThumbprint': String,
-        'publisherId': String,
-        'buildConfig': String,
-        'buildFlag': [String, Array]
+        archs: [String],
+        appx: String,
+        phone: Boolean,
+        win: Boolean,
+        bundle: Boolean,
+        packageCertificateKeyFile: String,
+        packageThumbprint: String,
+        publisherId: String,
+        buildConfig: String,
+        buildFlag: [String, Array]
     }, {}, options.argv, 0);
 
     var config = {};
@@ -327,7 +324,6 @@ function updateManifestWithPublisher (config, myBuildTargets) {
 }
 
 function buildTargets (config, myBuildTargets, msbuild) {
-
     var buildConfigs = [];
     var bundleTerms = '';
     var hasAnyCpu = false;
@@ -388,7 +384,7 @@ function buildTargets (config, myBuildTargets, msbuild) {
 
             return msbuild.buildProject(path.join(ROOT, build.target), config.buildType, build.arch, otherProperties);
         });
-    }, Q());
+    }, Promise.resolve());
 
     if (shouldBundle) {
         return buildsCompleted.then(function () {
@@ -456,5 +452,5 @@ module.exports.clean = function () {
         .forEach(function (dir) {
             shell.rm('-rf', path.join(projectPath, dir));
         });
-    return Q.resolve();
+    return Promise.resolve();
 };

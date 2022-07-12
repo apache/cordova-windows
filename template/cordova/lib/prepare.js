@@ -17,7 +17,6 @@
        under the License.
 */
 
-var Q = require('q');
 var fs = require('fs');
 var path = require('path');
 var shell = require('shelljs');
@@ -98,7 +97,7 @@ module.exports.updateBuildConfig = function (buildConfig) {
     certificatePropertyElement.text = packageCertificateKeyFile;
     propertyGroup.append(certificatePropertyElement);
 
-    var certificateItemElement = new et.Element('None', { 'Include': packageCertificateKeyFile });
+    var certificateItemElement = new et.Element('None', { Include: packageCertificateKeyFile });
     itemGroup.append(certificateItemElement);
 
     // packageThumbprint
@@ -114,9 +113,9 @@ module.exports.updateBuildConfig = function (buildConfig) {
     defaultLocaleElement.text = defaultLocale;
     propertyGroup.append(defaultLocaleElement);
 
-    var buildConfigFileName = buildConfig.buildType === 'release' ?
-        path.join(projectRoot, 'CordovaAppRelease.projitems') :
-        path.join(projectRoot, 'CordovaAppDebug.projitems');
+    var buildConfigFileName = buildConfig.buildType === 'release'
+        ? path.join(projectRoot, 'CordovaAppRelease.projitems')
+        : path.join(projectRoot, 'CordovaAppDebug.projitems');
 
     fs.writeFileSync(buildConfigFileName, TEMPLATE + buildConfigXML.write({ indent: 2, xml_declaration: false }), 'utf-8');
 };
@@ -273,7 +272,6 @@ function applyAccessRules (config, manifest) {
  * Allows WinRT access to origins specified by <allow-navigation href="origin" /> elements.
  */
 function applyNavigationWhitelist (config, manifest) {
-
     if (manifest.prefix !== 'uap:') {
         // This never should happen, but to be sure let's check
         throw new Error('AllowNavigation whitelist rules must be applied to Windows 10 appxmanifest only.');
@@ -525,13 +523,12 @@ function getTargetForImage (splash) {
 
 // Updates manifests to match the app splash screen image types (PNG/JPG/JPEG)
 function updateSplashScreenImageExtensions (cordovaProject, locations) {
-
     // Saving all extensions used for targets to verify them later
     var extensionsUsed = {};
 
     function checkThatExtensionsAreNotMixed () {
         for (var target in extensionsUsed) {
-            if (extensionsUsed.hasOwnProperty(target)) {
+            if (Object.prototype.hasOwnProperty.call(extensionsUsed, target)) {
                 var extensionsUsedForTarget = extensionsUsed[target];
 
                 // Check that extensions are not mixed:
@@ -584,7 +581,7 @@ function updateSplashScreenImageExtensions (cordovaProject, locations) {
     manifestSplashScreenMap[MANIFEST_PHONE] = phoneSplashScreen;
 
     for (var manifest in manifestSplashScreenMap) {
-        if (manifestSplashScreenMap.hasOwnProperty(manifest)) {
+        if (Object.prototype.hasOwnProperty.call(manifestSplashScreenMap, manifest)) {
             var splashScreen = manifestSplashScreenMap[manifest];
             if (!splashScreen) {
                 return;
@@ -608,7 +605,7 @@ module.exports.prepare = function (cordovaProject, options) {
     AppxManifest.purgeCache();
 
     // Update own www dir with project's www assets and plugins' assets and js-files
-    return Q.when(updateWww(cordovaProject, this.locations))
+    return Promise.resolve(updateWww(cordovaProject, this.locations))
         .then(function () {
             // update project according to config.xml changes.
             return updateProjectAccordingTo(self._config, self.locations);
@@ -638,13 +635,13 @@ module.exports.clean = function (options) {
     var projectConfigFile = path.join(projectRoot, 'config.xml');
     if ((options && options.noPrepare) || !fs.existsSync(projectConfigFile) ||
             !fs.existsSync(this.locations.configXml)) {
-        return Q();
+        return Promise.resolve();
     }
 
     var projectConfig = new ConfigParser(this.locations.configXml);
 
     var self = this;
-    return Q().then(function () {
+    return Promise.resolve().then(function () {
         cleanWww(projectRoot, self.locations);
         cleanImages(projectRoot, projectConfig, self.locations);
     });

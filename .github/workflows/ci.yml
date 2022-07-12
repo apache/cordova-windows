@@ -1,5 +1,3 @@
-<!--
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -16,22 +14,42 @@
 #  KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
--->
 
-# Contributing to Apache Cordova
+name: Node CI
 
-Anyone can contribute to Cordova. And we need your contributions.
+on: [push, pull_request]
 
-There are multiple ways to contribute: report bugs, improve the docs, and
-contribute code.
-  
-For instructions on this, start with the
-[contribution overview](http://cordova.apache.org/contribute/).
+jobs:
+  test:
+    name: NodeJS ${{ matrix.node-version }} on ${{ matrix.os }}
 
-The details are explained there, but the important items are:
- - Check for Github issues that corresponds to your contribution and link or create them if necessary.
- - Run the tests so your patch doesn't break existing functionality.
+    runs-on: ${{ matrix.os }}
 
-We look forward to your contributions!
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x, 14.x, 16.x]
+        os: [windows-latest]
 
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Environment Information
+        run: |
+          node --version
+          npm --version
+
+      - name: npm install and test
+        run: |
+          npm i
+          npm t
+        env:
+          CI: true
+
+      - uses: codecov/codecov-action@v1
+        with:
+          fail_ci_if_error: true

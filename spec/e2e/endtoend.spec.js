@@ -29,7 +29,6 @@ var Api = require(path.join(templateFolder, 'cordova/Api'));
 var PluginInfo = require('cordova-common').PluginInfo;
 
 describe('Cordova create and build', function () {
-
     var templateDir = path.join(__dirname, '../../template');
     var projectFolder = 'testcreate 応用';
     var workingDirectory = path.join(__dirname, '../../temp');
@@ -79,7 +78,6 @@ describe('Cordova create and build', function () {
     });
 
     describe('Windows 10', function () {
-
         // default
 
         it('spec.2a should build default (win10) project', function () {
@@ -116,7 +114,7 @@ describe('Cordova create and build', function () {
 
         // "InProcessServer extension"
 
-        it('spec.5a should build project containing plugin with InProcessServer extension', function (done) {
+        it('spec.5a should build project containing plugin with InProcessServer extension', function () {
             var extensionsPluginInfo, api;
 
             extensionsPluginInfo = new PluginInfo(extensionsPlugin);
@@ -125,20 +123,10 @@ describe('Cordova create and build', function () {
             api.locations.root = path.join(buildDirectory, projectFolder);
             api.locations.www = path.join(buildDirectory, projectFolder, 'www');
 
-            var fail = jasmine.createSpy('fail')
-                .and.callFake(function (err) {
-                    console.error(err);
-                });
-
-            api.addPlugin(extensionsPluginInfo)
+            return api.addPlugin(extensionsPluginInfo)
                 .then(function () {
                     shell.exec(buildScriptPath, { silent: silent });
                     _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_anycpu_debug_Test', 'CordovaApp.Windows10_1.0.0.0_anycpu_debug.appx');
-                })
-                .catch(fail)
-                .finally(function () {
-                    expect(fail).not.toHaveBeenCalled();
-                    done();
                 });
         });
 
@@ -167,11 +155,9 @@ describe('Cordova create and build', function () {
             _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_x64_Test', 'CordovaApp.Windows10_1.0.0.0_x64.appx');
             _expectSubdirAndFileExist('CordovaApp.Windows10_1.0.0.0_x86_Test', 'CordovaApp.Windows10_1.0.0.0_x86.appx');
         });
-
     });
 
     describe('Windows 8.1', function () {
-
         beforeEach(function () {
             if (process.env.APPVEYOR_BUILD_WORKER_IMAGE === 'Visual Studio 2017' && process.env.MSBUILDDIR !== 'C:\\Program Files (x86)\\MSBuild\\14.0\\bin\\') {
                 pending('Windows 8.1 builds are not supported by Visual Studio 2017: https://docs.microsoft.com/en-us/visualstudio/productinfo/vs2017-compatibility-vs#windows-store-and-windows-phone-apps');
@@ -231,7 +217,7 @@ describe('Cordova create and build', function () {
 
         // "InProcessServer extension"
 
-        it('spec.5b should build project (8.1) containing plugin with InProcessServer extension', function (done) {
+        it('spec.5b should build project (8.1) containing plugin with InProcessServer extension', function () {
             var extensionsPluginInfo, api;
 
             extensionsPluginInfo = new PluginInfo(extensionsPlugin);
@@ -240,21 +226,11 @@ describe('Cordova create and build', function () {
             api.locations.root = path.join(buildDirectory, projectFolder);
             api.locations.www = path.join(buildDirectory, projectFolder, 'www');
 
-            var fail = jasmine.createSpy('fail')
-                .and.callFake(function (err) {
-                    console.error(err);
-                });
-
-            api.addPlugin(extensionsPluginInfo)
+            return api.addPlugin(extensionsPluginInfo)
                 .then(function () {
                     shell.exec(buildScriptPath + ' --appx=8.1', { silent: silent });
                     _expectExist(/.*Windows.*\.appxupload/);
                     _expectExist(/.*Phone.*\.appxupload/);
-                })
-                .catch(fail)
-                .finally(function () {
-                    expect(fail).not.toHaveBeenCalled();
-                    done();
                 });
         });
 
@@ -274,7 +250,5 @@ describe('Cordova create and build', function () {
             _expectSubdirAndFileExist('CordovaApp.Phone_1.0.0.0_arm_Test', 'CordovaApp.Phone_1.0.0.0_arm.appx');
             _expectSubdirAndFileExist('CordovaApp.Phone_1.0.0.0_x86_Test', 'CordovaApp.Phone_1.0.0.0_x86.appx');
         });
-
     });
-
 });

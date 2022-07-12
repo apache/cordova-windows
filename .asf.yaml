@@ -15,24 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
-extends: '@cordova/eslint-config/node'
-
-# FIXME avoid rule exceptions
-rules:
-  prefer-promise-reject-errors: off
-
-overrides:
-  - files: [spec/**/*.js]
-    extends: '@cordova/eslint-config/node-tests'
-
-    # FIXME avoid rule exceptions
-    rules:
-      prefer-promise-reject-errors: off
-
-  - files: [cordova-js-src/**/*.js]
-    extends: '@cordova/eslint-config/browser'
-
-    globals:
-      cordova: readonly
-      WinJS: readonly
-      Windows: readonly
+notifications:
+  commits:              commits@cordova.apache.org
+  issues:               issues@cordova.apache.org
+  pullrequests_status:  issues@cordova.apache.org
+  pullrequests_comment: issues@cordova.apache.org

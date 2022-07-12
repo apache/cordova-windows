@@ -17,7 +17,6 @@
        under the License.
 */
 
-var Q = require('q');
 var path = require('path');
 var fs = require('fs');
 var shell = require('shelljs');
@@ -83,7 +82,7 @@ module.exports.findAllAvailableVersions = function () {
     // MSBUILDDIR = C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin
     // MSBUILDDIR = C:\Program Files (x86)\MSBuild\14.0\bin\
     if (process.env.MSBUILDDIR) {
-        console.log('ENV var MSBUILDDIR is set', process.env.MSBUILDDIR);
+        events.emit('log', 'ENV var MSBUILDDIR is set', process.env.MSBUILDDIR);
         msBuildPath = process.env.MSBUILDDIR;
         return module.exports.getMSBuildToolsAt(msBuildPath)
             .then(function (msBuildTools) {
@@ -96,7 +95,7 @@ module.exports.findAllAvailableVersions = function () {
 
     // CB-11548 use VSINSTALLDIR environment if defined to find MSBuild.
     if (process.env.VSINSTALLDIR) {
-        console.log('ENV var VSINSTALLDIR is set', process.env.VSINSTALLDIR);
+        events.emit('log', 'ENV var VSINSTALLDIR is set', process.env.VSINSTALLDIR);
         msBuildPath = path.join(process.env.VSINSTALLDIR, 'MSBuild/15.0/Bin');
         return module.exports.getMSBuildToolsAt(msBuildPath)
             .then(function (msBuildTools) {
@@ -116,7 +115,7 @@ function findAllAvailableVersionsFallBack () {
     var versions = ['15.9', '15.5', '15.0', '14.0', '12.0', '4.0'];
     events.emit('verbose', 'Searching for available MSBuild versions...');
 
-    return Q.all(versions.map(checkMSBuildVersion)).then(function (unprocessedResults) {
+    return Promise.all(versions.map(checkMSBuildVersion)).then(function (unprocessedResults) {
         return unprocessedResults.filter(function (item) {
             return !!item;
         });
@@ -128,12 +127,12 @@ function findAllAvailableVersionsFallBack () {
 module.exports.findAvailableVersion = function () {
     var versions = ['15.5', '15.0', '14.0', '12.0', '4.0'];
 
-    return Q.all(versions.map(checkMSBuildVersion)).then(function (versions) {
+    return Promise.all(versions.map(checkMSBuildVersion)).then(function (versions) {
         // console.log('findAvailableVersion', versions);
         // select first msbuild version available, and resolve promise with it
         var msbuildTools = versions[0] || versions[1] || versions[2] || versions[3] || versions[4];
 
-        return msbuildTools ? Q.resolve(msbuildTools) : Q.reject('MSBuild tools not found');
+        return msbuildTools ? Promise.resolve(msbuildTools) : Promise.reject('MSBuild tools not found');
     });
 };
 
@@ -227,7 +226,6 @@ module.exports.getLatestMSBuild = function () {
 
     return this.findAllAvailableVersions()
         .then(function (allMsBuildVersions) {
-
             var availableVersions = allMsBuildVersions
                 .filter(function (buildTools) {
                     // Sanitize input - filter out tools w/ invalid versions
@@ -290,7 +288,7 @@ function filterSupportedTargets (targets, msbuild) {
         '12.0': msBuild12TargetsFilter,
         '14.0': msBuild14TargetsFilter,
         '15.x': msBuild15TargetsFilter,
-        '15.5': msBuild155TargetsFilter,
+        '15.5': msBuild155TargetsFilter, // eslint-disable-line quote-props
         get: function (version) {
             // Apart from exact match also try to get filter for version range
             // so we can find for example targets for version '15.1'
@@ -367,7 +365,7 @@ module.exports.getWillowInstallations = function () {
 // returns an array of available UAP Versions
 // prepare.js
 module.exports.getAvailableUAPVersions = function () {
-    var programFilesFolder = process.env['ProgramFiles(x86)'] || process.env['ProgramFiles'];
+    var programFilesFolder = process.env['ProgramFiles(x86)'] || process.env.ProgramFiles;
     // No Program Files folder found, so we won't be able to find UAP SDK
     if (!programFilesFolder) return [];
 

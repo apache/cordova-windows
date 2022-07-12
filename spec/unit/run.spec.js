@@ -17,7 +17,6 @@
     under the License.
 */
 
-var Q = require('q');
 var path = require('path');
 var rewire = require('rewire');
 var platformRoot = '../../template';
@@ -68,75 +67,70 @@ describe('run method', function () {
         run.__set__('ranWithElevatedPermissions', ranWithElevatedPermissionsOriginal);
     });
 
-    it('spec.1 should not run if not launched from project directory', function (done) {
+    it('spec.1 should not run if not launched from project directory', function () {
         var buildRun = jasmine.createSpy();
 
         run.__set__('utils.isCordovaProject', isCordovaProjectFalse);
         run.__set__('build.run', function () {
             buildRun();
-            return Q.reject(); // rejecting to break run chain
+            return Promise.reject(); // rejecting to break run chain
         });
 
-        run.run([ 'node', buildPath ])
-            .finally(function () {
-                expect(buildRun).not.toHaveBeenCalled();
-                done();
-            });
+        return run.run(['node', buildPath]).then(
+            () => fail('Expected promise to be rejected'),
+            () => expect(buildRun).not.toHaveBeenCalled()
+        );
     });
 
-    it('spec.2 should not run if both debug and release args are specified', function (done) {
+    it('spec.2 should not run if both debug and release args are specified', function () {
         var buildRun = jasmine.createSpy();
 
         run.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         run.__set__('build.run', function () {
             buildRun();
-            return Q.reject(); // rejecting to break run chain
+            return Promise.reject(); // rejecting to break run chain
         });
 
-        run.run({ release: true, debug: true })
-            .finally(function () {
-                expect(buildRun).not.toHaveBeenCalled();
-                done();
-            });
+        return run.run({ release: true, debug: true }).then(
+            () => fail('Expected promise to be rejected'),
+            () => expect(buildRun).not.toHaveBeenCalled()
+        );
     });
 
-    it('spec.3 should not run if device and emulator args are combined', function (done) {
+    it('spec.3 should not run if device and emulator args are combined', function () {
         var buildRun = jasmine.createSpy();
 
         run.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         run.__set__('build.run', function () {
             buildRun();
-            return Q.reject(); // rejecting to break run chain
+            return Promise.reject(); // rejecting to break run chain
         });
 
-        run.run({ device: true, emulator: true })
-            .finally(function () {
-                expect(buildRun).not.toHaveBeenCalled();
-                done();
-            });
+        return run.run({ device: true, emulator: true }).then(
+            () => fail('Expected promise to be rejected'),
+            () => expect(buildRun).not.toHaveBeenCalled()
+        );
     });
 
-    it('spec.4 should not run if device and target args are combined', function (done) {
+    it('spec.4 should not run if device and target args are combined', function () {
         var buildRun = jasmine.createSpy();
 
         run.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         run.__set__('build.run', function () {
             buildRun();
-            return Q.reject(); // rejecting to break run chain
+            return Promise.reject(); // rejecting to break run chain
         });
 
-        run.run({ device: true, target: 'sometargethere' })
-            .finally(function () {
-                expect(buildRun).not.toHaveBeenCalled();
-                done();
-            });
+        return run.run({ device: true, target: 'sometargethere' }).then(
+            () => fail('Expected promise to be rejected'),
+            () => expect(buildRun).not.toHaveBeenCalled()
+        );
     });
 
-    it('spec.5 should build and deploy on phone if --phone arg specified', function (done) {
+    it('spec.5 should build and deploy on phone if --phone arg specified', function () {
         var build = jasmine.createSpy();
         var deployToPhone = jasmine.createSpy();
         var deployToDesktop = jasmine.createSpy();
-        var failed = jasmine.createSpy();
 
         run.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         run.__set__('build.run', function () {
@@ -150,35 +144,32 @@ describe('run method', function () {
                 script: 'testfile.ps1',
                 phoneId: 'undefined'
             };
-            return Q(buildResult);
+            return Promise.resolve(buildResult);
         });
         run.__set__('packages.getPackage', function () {
-            return Q({
+            return Promise.resolve({
                 type: 'phone',
                 file: 'testfile'
             });
         });
         run.__set__('packages.deployToPhone', function () {
             deployToPhone();
-            return Q();
+            return Promise.resolve();
         });
         run.__set__('packages.deployToDesktop', function () {
             deployToDesktop();
-            return Q();
+            return Promise.resolve();
         });
 
-        run.run([ 'node', buildPath, '--phone', '--break' ])
-            .catch(failed)
-            .finally(function () {
-                expect(failed).not.toHaveBeenCalled();
+        return run.run(['node', buildPath, '--phone', '--break'])
+            .then(() => {
                 expect(build).toHaveBeenCalled();
                 expect(deployToPhone).toHaveBeenCalled();
                 expect(deployToDesktop).not.toHaveBeenCalled();
-                done();
             });
     });
 
-    it('spec.6 should build and deploy on desktop if --phone arg is not specified', function (done) {
+    it('spec.6 should build and deploy on desktop if --phone arg is not specified', function () {
         var build = jasmine.createSpy();
         var deployToPhone = jasmine.createSpy();
         var deployToDesktop = jasmine.createSpy();
@@ -195,75 +186,67 @@ describe('run method', function () {
                 script: 'testfile.ps1',
                 phoneId: 'undefined'
             };
-            return Q(buildResult);
+            return Promise.resolve(buildResult);
         });
         run.__set__('packages.getPackage', function () {
-            return Q({
+            return Promise.resolve({
                 type: 'windows',
                 file: 'testfile'
             });
         });
         run.__set__('packages.deployToPhone', function () {
             deployToPhone();
-            return Q();
+            return Promise.resolve();
         });
         run.__set__('packages.deployToDesktop', function () {
             deployToDesktop();
-            return Q();
+            return Promise.resolve();
         });
 
-        run.run([ 'node', buildPath ])
+        return run.run(['node', buildPath])
             .finally(function () {
                 expect(build).toHaveBeenCalled();
                 expect(deployToDesktop).toHaveBeenCalled();
                 expect(deployToPhone).not.toHaveBeenCalled();
-                done();
             });
     });
 
-    it('spec. 7 should not call build if --nobuild specified', function (done) {
+    it('spec. 7 should not call build if --nobuild specified', function () {
         var build = jasmine.createSpy();
         var deployToDesktop = jasmine.createSpy();
 
         run.__set__('utils.isCordovaProject', isCordovaProjectTrue);
         run.__set__('build.run', function () {
             build();
-            return Q.reject(); // rejecting to break run chain
+            return Promise.reject(); // rejecting to break run chain
         });
         run.__set__('packages.getPackage', function () {
-            return Q({
+            return Promise.resolve({
                 type: 'windows',
                 file: 'testfile'
             });
         });
         run.__set__('packages.deployToDesktop', function () {
             deployToDesktop();
-            return Q();
+            return Promise.resolve();
         });
 
-        run.run({ nobuild: true })
+        return run.run({ nobuild: true })
             .finally(function () {
                 expect(deployToDesktop).toHaveBeenCalled();
                 expect(build).not.toHaveBeenCalled();
-                done();
             });
     });
 
-    it('spec.8 should accept --archs parameter either as cli or as platform arg', function (done) {
-
+    it('spec.8 should accept --archs parameter either as cli or as platform arg', function () {
         spyOn(utils, 'isCordovaProject').and.returnValue(true);
-        spyOn(packages, 'getPackage').and.returnValue(Q({ arch: 'arm' }));
-        spyOn(packages, 'deployToDesktop').and.returnValue(Q());
+        spyOn(packages, 'getPackage').and.returnValue(Promise.resolve({ arch: 'arm' }));
+        spyOn(packages, 'deployToDesktop').and.returnValue(Promise.resolve());
 
         var anyString = jasmine.any(String);
         var expectedDeployOptions = jasmine.objectContaining({ arch: 'arm' });
 
-        var fail = jasmine.createSpy('fail')
-            .and.callFake(function (err) {
-                console.error(err);
-            });
-
-        run.run({ nobuild: true, argv: ['--archs=arm'] })
+        return run.run({ nobuild: true, argv: ['--archs=arm'] })
             .then(function () {
                 expect(packages.getPackage).toHaveBeenCalledWith(anyString, anyString, 'arm');
                 expect(packages.deployToDesktop).toHaveBeenCalledWith(expectedDeployOptions, anyString, anyString);
@@ -274,34 +257,21 @@ describe('run method', function () {
             .then(function () {
                 expect(packages.getPackage).toHaveBeenCalledWith(anyString, anyString, 'arm');
                 expect(packages.deployToDesktop).toHaveBeenCalledWith(expectedDeployOptions, anyString, anyString);
-            })
-            .catch(fail)
-            .finally(function () {
-                expect(fail).not.toHaveBeenCalled();
-                done();
             });
     });
 
-    it('spec.9 should fall back to anycpu if --archs parameter is not specified', function (done) {
-
+    it('spec.9 should fall back to anycpu if --archs parameter is not specified', function () {
         spyOn(utils, 'isCordovaProject').and.returnValue(true);
-        spyOn(packages, 'getPackage').and.returnValue(Q({ arch: 'anycpu' }));
-        spyOn(packages, 'deployToDesktop').and.returnValue(Q());
+        spyOn(packages, 'getPackage').and.returnValue(Promise.resolve({ arch: 'anycpu' }));
+        spyOn(packages, 'deployToDesktop').and.returnValue(Promise.resolve());
 
         var anyString = jasmine.any(String);
         var expectedDeployOptions = jasmine.objectContaining({ arch: 'anycpu' });
 
-        var fail = jasmine.createSpy('fail');
-
-        run.run({ nobuild: true })
+        return run.run({ nobuild: true })
             .then(function () {
                 expect(packages.getPackage).toHaveBeenCalledWith(anyString, anyString, 'anycpu');
                 expect(packages.deployToDesktop).toHaveBeenCalledWith(expectedDeployOptions, anyString, anyString);
-            })
-            .catch(fail)
-            .finally(function () {
-                expect(fail).not.toHaveBeenCalled();
-                done();
             });
     });
 });

@@ -94,7 +94,7 @@ var handlers = {
             project.removeSDKRef(inc, getTargetConditions(obj));
         }
     },
-    'framework': {
+    framework: {
         install: function (obj, plugin, project, options) {
             events.emit('verbose', 'windows framework install :: ' + plugin.id);
 
@@ -116,7 +116,6 @@ var handlers = {
                 }
                 project.addReference(dest, getTargetConditions(obj), implementPath);
             }
-
         },
         uninstall: function (obj, plugin, project, options) {
             events.emit('verbose', 'windows framework uninstall :: ' + plugin.id);

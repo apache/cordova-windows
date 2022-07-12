@@ -21,10 +21,10 @@
 
 var Api = require('../template/cordova/Api');
 var args = require('nopt')({
-    'help' : Boolean,
-    'silent': Boolean,
-    'verbose': Boolean
-}, { 'd' : '--verbose' });
+    help: Boolean,
+    silent: Boolean,
+    verbose: Boolean
+}, { d: '--verbose' });
 
 if (args.help || args.argv.remain.length === 0) {
     console.log('WARNING : Make sure to back up your project before updating!');
@@ -37,4 +37,7 @@ if (args.help || args.argv.remain.length === 0) {
 
 require('../template/cordova/lib/loggingHelper').adjustLoggerLevel(args);
 
-Api.updatePlatform(args.argv.remain[0]).done();
+Api.updatePlatform(args.argv.remain[0]).catch(err => {
+    console.error(err);
+    process.exit(2);
+});

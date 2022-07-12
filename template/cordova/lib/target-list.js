@@ -35,14 +35,12 @@ function help () {
     console.log('    node target-list.js --started_emulators');
     console.log('    node target-list.js --all');
     console.log('');
-
 }
 
 // Handle help flag
 if (['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(args[0]) > -1) {
     help();
 } else {
-
     var version = '8.1';
     if (args.indexOf('--win10') >= 0) {
         version = '10.0';

@@ -1,53 +1,41 @@
 {
   "name": "cordova-windows",
-  "version": "7.1.0-dev",
+  "version": "8.0.0-dev",
   "description": "cordova-windows release",
   "bin": "bin/create",
   "main": "template/cordova/Api.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/apache/cordova-windows"
-  },
-  "bugs": {
-    "url": "https://github.com/apache/cordova-windows/issues"
-  },
+  "repository": "github:apache/cordova-windows",
+  "bugs": "https://github.com/apache/cordova-windows/issues",
   "keywords": [
     "windows",
     "cordova",
     "apache"
   ],
   "scripts": {
-    "test": "npm run eslint && npm run test-unit && npm run test-e2e",
+    "test": "npm run lint && npm run test-unit && npm run test-e2e",
     "test-unit": "jasmine",
     "test-e2e": "jasmine spec/e2e/endtoend.spec.js",
     "cover": "nyc jasmine",
-    "eslint": "eslint bin && eslint template && eslint spec"
+    "lint": "eslint . \"+(bin|template)/**/!(*.*|gitignore)\""
   },
   "dependencies": {
     "cordova-common": "^3.2.0",
     "elementtree": "^0.1.7",
+    "fs-extra": "^9.0.0",
     "node-uuid": "^1.4.8",
     "nopt": "^4.0.1",
-    "q": "^1.5.1",
     "semver": "^5.5.0",
     "shelljs": "^0.5.3",
     "winjs": "^4.4.3"
   },
   "devDependencies": {
-    "eslint": "^5.12.0",
-    "eslint-config-semistandard": "^13.0.0",
-    "eslint-config-standard": "^12.0.0",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-node": "^8.0.1",
-    "eslint-plugin-promise": "^4.0.1",
-    "eslint-plugin-standard": "^4.0.0",
-    "fs-extra": "^8.1.0",
-    "jasmine": "3.1.0",
-    "nyc": "^14.1.1",
-    "rewire": "^4.0.1"
+    "@cordova/eslint-config": "^3.0.0",
+    "jasmine": "^3.5.0",
+    "nyc": "^15.0.1",
+    "rewire": "^5.0.0"
   },
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=10.0.0"
   },
   "author": "Apache Software Foundation",
   "license": "Apache-2.0",

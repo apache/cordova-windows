@@ -147,7 +147,6 @@ Api.updatePlatform = function (destinationDir, options, events) {
  *   platform's file structure and other properties of platform.
  */
 Api.prototype.getPlatformInfo = function () {
-
     var result = {};
     result.locations = this.locations;
     result.root = this.root;
@@ -199,7 +198,6 @@ Api.prototype.prepare = function (cordovaProject, prepareOptions) {
  *   CordovaError instance.
  */
 Api.prototype.addPlugin = function (plugin, installOptions) {
-
     var self = this;
 
     // We need to use custom PluginInfo to trigger windows-specific processing
@@ -225,7 +223,7 @@ Api.prototype.addPlugin = function (plugin, installOptions) {
         })
         // CB-11022 return non-falsy value to indicate
         // that there is no need to run prepare after
-        .thenResolve(true);
+        .then(() => true);
 };
 
 /**
@@ -262,7 +260,7 @@ Api.prototype.removePlugin = function (plugin, uninstallOptions) {
         })
         // CB-11022 return non-falsy value to indicate
         // that there is no need to run prepare after
-        .thenResolve(true);
+        .then(() => true);
 };
 
 /**

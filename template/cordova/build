@@ -24,7 +24,7 @@ var nopt = require('nopt');
 var path = require('path');
 
 // Support basic help commands
-if(['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(process.argv[2]) >= 0) {
+if (['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(process.argv[2]) >= 0) {
     console.log('');
     console.log('Usage: build [--debug | --release] [--phone | --win] [--bundle]');
     console.log('             [--archs="<list of architectures...>"');
@@ -68,18 +68,21 @@ if(['--help', '/?', '-h', 'help', '-help', '/help'].indexOf(process.argv[2]) >= 
 
 // Do some basic argument parsing
 var buildOpts = nopt({
-    'silent' : Boolean,
-    'verbose' : Boolean,
-    'debug' : Boolean,
-    'release' : Boolean,
-    'nobuild': Boolean,
-    'buildConfig' : path,
-    'buildFlag': [String, Array]
-}, { d : '--verbose', r: '--release' });
+    silent: Boolean,
+    verbose: Boolean,
+    debug: Boolean,
+    release: Boolean,
+    nobuild: Boolean,
+    buildConfig: path,
+    buildFlag: [String, Array]
+}, { d: '--verbose', r: '--release' });
 
 // Make buildOptions compatible with PlatformApi build method spec
 buildOpts.argv = buildOpts.argv.original;
 
 require('./lib/loggingHelper').adjustLoggerLevel(buildOpts);
 
-new Api().build(buildOpts).done();
+new Api().build(buildOpts).catch(err => {
+    console.error(err);
+    process.exit(2);
+});

@@ -38,7 +38,6 @@ describe('Windows ConfigParser', function () {
  **/
 
 describe('getAllMinMaxUAPVersions method', function () {
-
     var mockConfig;
     beforeEach(function () {
         spyOn(xml, 'parseElementtreeSync').and.returnValue(new et.ElementTree(et.XML(TEST_XML)));
@@ -84,7 +83,6 @@ describe('getAllMinMaxUAPVersions method', function () {
         expect(versionSet[0].Name).toBe('Windows.Universal');
         expect(versionSet[0].MinVersion).toBe(verBaseline);
         expect(versionSet[0].MaxVersionTested).toBe(verBaseline);
-
     });
 
     it('should fail with a RangeError if version specified incorrectly', function () {

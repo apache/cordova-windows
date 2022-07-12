@@ -17,7 +17,6 @@
        under the License.
 */
 
-var Q = require('q');
 var fs = require('fs');
 var path = require('path');
 var shell = require('shelljs');
@@ -29,11 +28,11 @@ var pkg = require('../../package');
 
 // Creates cordova-windows project at specified path with specified namespace, app name and GUID
 module.exports.create = function (destinationDir, config, options) {
-    if (!destinationDir) return Q.reject('No destination directory specified.');
+    if (!destinationDir) return Promise.reject('No destination directory specified.');
 
     var projectPath = path.resolve(destinationDir);
     if (fs.existsSync(projectPath)) {
-        return Q.reject(new CordovaError('Project directory already exists:\n\t' + projectPath));
+        return Promise.reject(new CordovaError('Project directory already exists:\n\t' + projectPath));
     }
 
     // Set parameters/defaults for create
@@ -73,7 +72,7 @@ module.exports.create = function (destinationDir, config, options) {
     shell.cp('-rf', path.join(root, 'VERSION'), projectPath);
 
     // copy node_modules to cordova directory
-    let nodeModulesDir = path.join(root, 'node_modules');
+    const nodeModulesDir = path.join(root, 'node_modules');
     if (fs.existsSync(nodeModulesDir)) {
         events.emit('verbose', 'Copying node_modules to ' + projectPath);
         shell.cp('-r', nodeModulesDir, path.join(projectPath, 'cordova'));
@@ -101,8 +100,8 @@ module.exports.create = function (destinationDir, config, options) {
 
     // replace specific values in manifests' templates
     events.emit('verbose', 'Updating manifest files with project configuration.');
-    [ 'package.windows.appxmanifest', 'package.phone.appxmanifest',
-        'package.windows10.appxmanifest' ]
+    ['package.windows.appxmanifest', 'package.phone.appxmanifest',
+        'package.windows10.appxmanifest']
         .forEach(function (item) {
             var manifest = AppxManifest.get(path.join(projectPath, item));
             if (manifest.hasPhoneIdentity) {
@@ -120,7 +119,7 @@ module.exports.create = function (destinationDir, config, options) {
     });
 
     events.emit('log', 'Windows project created with ' + pkg.name + '@' + pkg.version);
-    return Q.resolve();
+    return Promise.resolve();
 };
 
 function recursiveCreateDirectory (targetPath, previousPath) {

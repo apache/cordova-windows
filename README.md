@@ -19,6 +19,17 @@
 #
 -->
 
+📌 **Deprecation Notice**
+
+This repository is deprecated and no more work will be done on this by Apache Cordova. You can continue to use this and it should work as-is but any future issues will not be fixed by the Cordova community.
+
+Feel free to fork this repository and improve your fork. Existing forks are listed in [Network](../../network) and [Forks](../../network/members).
+
+- Learn more: https://github.com/apache/cordova/blob/master/deprecated.md#deprecated-platforms
+---
+
+
+
 # Apache Cordova for Windows
 
 [![Build status](https://ci.appveyor.com/api/projects/status/19h1fq0lyvwtei05/branch/master)](https://ci.appveyor.com/project/Humbedooh/cordova-windows/branch/master)
@@ -33,17 +44,9 @@ This repo contains the code for an [Apache Cordova](http://cordova.apache.org) p
 
 # Requirements
 
-### Windows 10, Windows 8.1, Windows Phone 8.1
+See https://cordova.apache.org/docs/en/dev/guide/platforms/windows/index.html#requirements-and-support
 
-Host OS: Windows 8.1 or Windows 10
-
-Install the tools: [Visual Studio 2015](http://www.visualstudio.com/downloads) or newer
-
-### Windows 8.1,Windows Phone 8.1
-
-Host OS: Windows 8.1
-
-Install the tools: [Visual Studio 2013 Express](http://www.visualstudio.com/downloads/download-visual-studio-vs#d-express-windows-8).
+Note that Visual Studio 2019 is not supported, as discussed in [cordova-windows issue #327](https://github.com/apache/cordova-windows/issues/327).
 
 # Getting started
 
@@ -74,5 +77,5 @@ Report them [right here at GitHub using the "Issues" tab](https://github.com/apa
 
 # Further Reading
 
-- [Windows Platform Guide](http://cordova.apache.org/docs/en/latest/guide/platforms/win8/index.html)
+- [Windows Platform Guide](https://cordova.apache.org/docs/en/latest/guide/platforms/windows/index.html)
 - [Apache Cordova Documentation](http://docs.cordova.io)
