@@ -16,7 +16,6 @@
 # under the License.
 
 name: Node CI
-
 on: [push, pull_request]
 
 jobs:
